@@ -1,1 +1,1 @@
-DB = "zagaran-hsph-scrubs"
+DB = "zagaran-scrubs"
