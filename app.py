@@ -1,7 +1,6 @@
 from flask import Flask, render_template, url_for, redirect, request
 import sys, jinja2, traceback
 from utils.logging import log_error
-from werkzeug.contrib.fixers import ProxyFix
 from frontend import templating, auth
 from utils.security import set_secret_key
 
@@ -22,7 +21,7 @@ app = subdomain("frontend")
 @templating.template('admin_login.html')
 def render_login_page():
     if auth.is_logged_in():
-        return redirect("/main")
+        return redirect("/admin_home")
     return {}
 
 @app.route("/validate_login", methods=["POST"])
@@ -66,8 +65,6 @@ def e500_text(e):
     except Exception as e:
         log_error(e)
     return render_template("500.html")
-
-app.wsgi_app = ProxyFix(app.wsgi_app)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
