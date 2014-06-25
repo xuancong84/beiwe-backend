@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, redirect, request
 import sys, jinja2, traceback
 from utils.logging import log_error
-from frontend import templating, auth
 from utils.security import set_secret_key
+from frontend import templating, auth
+from pages import mobile_api, admin
 
 def subdomain(directory):
     app = Flask(__name__, static_folder=directory + "/static")
@@ -10,48 +11,17 @@ def subdomain(directory):
     loader = [app.jinja_loader, jinja2.FileSystemLoader(directory + "/templates")]
     app.jinja_loader = jinja2.ChoiceLoader(loader)
     return app
+
+#Register pages here
 app = subdomain("frontend")
-
-# @app.route('/')
-# @app.route("/index/")
-# def hello_world():
-#     return 'Hello World!'
-
-@app.route('/', methods=["GET", "POST"])
-@templating.template('admin_login.html')
-def render_login_page():
-    if auth.is_logged_in():
-        return redirect("/admin_home")
-    return {}
-
-@app.route("/validate_login", methods=["POST"])
-def login():
-    username = request.values["username"]
-    password = request.values["password"]
-    if password == "1" and username == "1":
-        auth.login_user()
-        return redirect("/admin_home")
-    return "Username password combination is incorrect. Try again."
-
-@app.route("/logout")
-def logout():
-    auth.del_loggedin_phonenum()
-    return redirect("/")
-
-@app.route('/admin_home', methods=["GET", "POST"])
-@auth.authenticated()
-@templating.template('admin_home.html')
-def render_main():
-    data = {
-            #"sms_cohorts": [c for c in Cohorts()],
-            #"email_cohorts": [ec for ec in EmailCohorts()]
-            }
-    return data
+app.register_blueprint(mobile_api.mobile_api)
+app.register_blueprint(admin.admin)
 
 
 @app.route("/<page>.html")
 def strip_dot_html(page):
-    return redirect("/%s/" % page)
+    #strips away the dot html from pages
+    return redirect("/%s" % page)
 
 @app.errorhandler(404)
 def e404(e):
