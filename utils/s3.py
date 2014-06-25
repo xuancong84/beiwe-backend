@@ -2,7 +2,7 @@ from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.connection import Location
 from boto.s3.key import Key
-from utils.files import decode, encode
+#from utils.files import decode, encode
 
 import mimetypes
 

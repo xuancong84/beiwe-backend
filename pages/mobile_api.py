@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort
 from werkzeug import secure_filename
-from s3 import s3_upload_handler
+from utils.s3 import s3_upload_handler
 
 mobile_api = Blueprint('mobile_api', __name__)
 
