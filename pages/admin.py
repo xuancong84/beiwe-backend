@@ -9,17 +9,18 @@ admin = Blueprint('admin', __name__)
 @templating.template('admin_login.html')
 def render_login_page():
     if auth.is_logged_in():
-        return redirect("/admin_panel")
+        return redirect("/admin_panel/")
     return {}
 
-@admin.route("/validate_login/", methods=["POST"])
+@admin.route("/validate_login/", methods=["GET", "POST"])
 def login():
-    username = request.values["username"]
-    password = request.values["password"]
-    if password == "1" and username == "1":
-        auth.login_user()
-        return redirect("/admin_panel")
-    return "Username password combination is incorrect. Try again."
+    if request.method == 'POST':
+        username = request.values["username"]
+        password = request.values["password"]
+        if password == "1" and username == "1":
+            auth.login_user()
+            return redirect("/admin_panel/")
+        return "Username password combination is incorrect. Try again."
 
 @admin.route("/logout/")
 def logout():
