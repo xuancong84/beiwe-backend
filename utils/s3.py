@@ -22,7 +22,7 @@ def get_bucket(name):
 def s3_upload_handler(key_name, file_obj):
     bucket = get_bucket(DB)
     key = bucket.new_key(key_name)
-    key.set_metadata('Content-Type', mimetypes.guess_type(self.filename)[0])
+    key.set_metadata('Content-Type', mimetypes.guess_type(key_name))
     # seek to the beginning of the file and read it into the key
     file_obj.seek(0)
     key.set_contents_from_file(file_obj)
