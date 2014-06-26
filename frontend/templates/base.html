@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    {% block meta%}{%endblock%}
+    <title>{% block title %} {% endblock %}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    {% block head %}
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 68px;
+            padding-bottom: 40px;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,500' rel='stylesheet' type='text/css'>
+    {% block style %}{% endblock %}
+    {% endblock %}
+    {%block javascript %}{% endblock %}
+</head>
+
+<body>
+     <!--[if lt IE 7]>
+         <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+     <![endif]-->
+     {% block admin %}{% endblock %}
+     {% block content %}{% endblock %}
+    <footer class="section">
+        <div class="container">
+            <h5 style='text-align:center'><strong>Contact:</strong> <a href="mailto:eng@zagaran.com">eng@zagaran.com</a></h5>
+            <p style='text-align:center' class="row center">&copy; 2013 Zagaran Software, Inc.</p>
+        </div>
+    </footer>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+    <script src="/static/javascript/vendor/bootstrap.min.js"></script>
+    <script src="/static/javascript/main.js"></script>
+</body>    
+</html>
