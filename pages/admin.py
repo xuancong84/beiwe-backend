@@ -12,7 +12,7 @@ def render_login_page():
         return redirect("/admin_panel")
     return {}
 
-@admin.route("/validate_login/", methods=["POST"])
+@admin.route("/validate_login/", methods=["GET", "POST"])
 def login():
     username = request.values["username"]
     password = request.values["password"]
