@@ -34,8 +34,8 @@ def upload_powerstate():
         #mongo_instance.save()
         return'200'
 
-@mobile_api.route('/upload_call/', methods=['GET', 'POST'])
-def upload_call():
+@mobile_api.route('/upload_calls/', methods=['GET', 'POST'])
+def upload_calls():
     if request.method == 'POST':
         _upload(request.files['file'])
         #mongo_instance.save()
