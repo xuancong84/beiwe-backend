@@ -5,7 +5,7 @@ from utils.s3 import s3_upload_handler
 mobile_api = Blueprint('mobile_api', __name__)
 
 ALLOWED_EXTENSIONS = set(['csv', 'mp3'])
-w
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
