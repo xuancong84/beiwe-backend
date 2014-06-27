@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort, jsonify
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler
+import json
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -15,8 +16,9 @@ def _upload(file_obj):
 
 @mobile_api.route('/fetch_survey/', methods=['GET', 'POST'])
 def fetch_survey():
-    d = {"a": {"b": 'test'}}
-    return jsonify(d)
+    if request.method == 'POST':
+        if request.values["magic"] == "12345":
+            return json.load("/var/www/scrubs/sample_survey.json")
 
 @mobile_api.route('/upload_gps/', methods=['GET', 'POST'])
 def upload_gps():
