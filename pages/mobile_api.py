@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, jsonify
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler
 
@@ -12,6 +12,11 @@ def allowed_file(filename):
 def _upload(file_obj):
     if file_obj and allowed_file(file_obj.filename):
         s3_upload_handler(secure_filename(file_obj.filename), file_obj)
+
+@mobile_api.route('/fetch_survey/', methods=['GET', 'POST'])
+def fetch_survey():
+    d = {"a": {"b": 'test'}}
+    return jsonify(d)
 
 @mobile_api.route('/upload_gps/', methods=['GET', 'POST'])
 def upload_gps():
