@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, ., redirect, request
 import sys, jinja2, traceback
 from utils.logging import log_error
 from utils.security import set_secret_key
@@ -16,7 +16,7 @@ def subdomain(directory):
 app = subdomain("frontend")
 app.register_blueprint(mobile_api.mobile_api)
 app.register_blueprint(admin.admin)
-
+app.register_blueprint(survey_builder.survey_builder)
 
 @app.route("/<page>.html")
 def strip_dot_html(page):

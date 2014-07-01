@@ -1,7 +1,6 @@
-from flask import Blueprint, request, abort, jsonify
+from flask import Blueprint, request, abort, jsonify, json
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler
-import json
 
 mobile_api = Blueprint('mobile_api', __name__)
 

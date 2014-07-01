@@ -26,3 +26,9 @@ def s3_upload_handler(key_name, file_obj):
     # seek to the beginning of the file and read it into the key
     file_obj.seek(0)
     key.set_contents_from_file(file_obj)
+
+def list_s3_files(prefix):
+    b = get_bucket(DB)
+    results = b.list(prefix=prefix, delimiter="/")
+    return [i.name.strip("/") for i in results]
+
