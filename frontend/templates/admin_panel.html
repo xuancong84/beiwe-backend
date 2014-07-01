@@ -34,6 +34,7 @@
             <h4><a href="/survey/{{c._id}}" class="list-group-item">{{c._id}}</a></h4>
             {% endfor %}
         </div>
+        <a href="/survey_designer/">Design the survey</a>
         <form class="form-inline" method="POST" action="/create_new_survey" name="create_new_survey" accept-charset="utf-8">
             <input type="text" class="input-large" name="cohort_name" type="text" placeholder="Enter new survey name here..."/>
             <button type="submit" class="btn btn-success">Create New Survey</button>
