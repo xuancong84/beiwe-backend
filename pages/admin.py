@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort
 from frontend import templating, auth
 from flask import redirect
+from flask import render_template
 
 admin = Blueprint('admin', __name__)
 
@@ -36,3 +37,8 @@ def render_main():
             #"email_cohorts": [ec for ec in EmailCohorts()]
            }
     return data
+
+@admin.route('/survey_designer/')
+@templating.template('survey_designer.html')
+def survey_designer():
+    return render_template('survey_designer.html')
