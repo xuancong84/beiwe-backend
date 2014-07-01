@@ -45,5 +45,5 @@ def survey_designer():
 
 @admin.route('/question_designer/')
 @templating.template('question_designer.html')
-def survey_designer():
+def question_designer():
     return render_template('question_designer.html')
