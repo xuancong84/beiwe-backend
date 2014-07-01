@@ -42,3 +42,8 @@ def render_main():
 @templating.template('survey_designer.html')
 def survey_designer():
     return render_template('survey_designer.html')
+
+@admin.route('/question_designer/')
+@templating.template('question_designer.html')
+def survey_designer():
+    return render_template('question_designer.html')
