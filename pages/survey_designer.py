@@ -2,18 +2,18 @@ from flask import Blueprint, request, abort, jsonify
 from frontend import templating, auth
 
 
-survey_builder = Blueprint('survey_builder', __name__)
+survey_designer = Blueprint('survey_designer', __name__)
 
 
-@admin.route('/survey_builder/')
+@admin.route('/survey_designer/')
 @auth.authenticated()
-@templating.template('survey_builder.html')
+@templating.template('survey_designer.html')
 def render_survey_builder():
     data = {}
     return data
 
 
-#TODO: eventually, enable the system to 
+#TODO: eventually, enable the system to
 @admin.route('/surveys/')
 @auth.authenticated()
 @templating.template('surveys.html')
