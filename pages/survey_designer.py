@@ -5,7 +5,7 @@ from frontend import templating, auth
 survey_designer = Blueprint('survey_designer', __name__)
 
 
-@admin.route('/survey_designer/')
+@survey_designer.route('/survey_designer/')
 @auth.authenticated()
 @templating.template('survey_designer.html')
 def render_survey_builder():
@@ -14,7 +14,7 @@ def render_survey_builder():
 
 
 #TODO: eventually, enable the system to
-@admin.route('/surveys/')
+@survey_designer.route('/surveys/')
 @auth.authenticated()
 @templating.template('surveys.html')
 def render_surveys():
