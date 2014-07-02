@@ -31,4 +31,3 @@ def list_s3_files(prefix):
     b = get_bucket(DB)
     results = b.list(prefix=prefix, delimiter="/")
     return [i.name.strip("/") for i in results]
-
