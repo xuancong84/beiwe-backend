@@ -16,7 +16,7 @@ def _upload(file_obj):
 @mobile_api.route('/fetch_survey/', methods=['GET', 'POST'])
 def fetch_survey():
     f = open("/var/www/scrubs/sample_survey.json", 'rb')
-    return json.load(f)
+    return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
             return json.load("/var/www/scrubs/sample_survey.json")

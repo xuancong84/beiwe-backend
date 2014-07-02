@@ -31,3 +31,8 @@ def list_s3_files(prefix):
     b = get_bucket(DB)
     results = b.list(prefix=prefix, delimiter="/")
     return [i.name.strip("/") for i in results]
+
+
+def get_surveys():
+    surveys = list_s3_files("survey")
+    return [i.name.strip("survey/").strip(".json") for i in surveys]

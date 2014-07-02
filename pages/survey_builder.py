@@ -12,6 +12,8 @@ def render_survey_builder():
     data = {}
     return data
 
+
+#TODO: eventually, enable the system to 
 @admin.route('/surveys/')
 @auth.authenticated()
 @templating.template('surveys.html')
@@ -21,3 +23,5 @@ def render_surveys():
             #"email_cohorts": [ec for ec in EmailCohorts()]
            }
     return data
+
+
