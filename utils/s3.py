@@ -29,10 +29,9 @@ def s3_upload_handler(key_name, file_obj):
 
 def list_s3_files(prefix):
     b = get_bucket(DB)
-    results = b.list(prefix=prefix, delimiter="/")
+    results = b.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
-
 
 def get_surveys():
     surveys = list_s3_files("survey")
-    return [i.name.strip("survey/").strip(".json") for i in surveys]
+    return [i.strip("survey/").strip(".json") for i in surveys]
