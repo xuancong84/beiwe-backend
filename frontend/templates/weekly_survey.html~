@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title> Zagaran Mobile Data Collection System for HSPH</title>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="../static/javascript/surveys.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
+</head>
+
+<body>
+<div class="container">
+    <div class="span12">
+        <div class="row">
+            <h1>Daily Survey</h1>
+        </div>
+        <div class="row">
+	    {% for c in wquestions %}
+            <h3>{{ c._name }}</h3>
+            <p>Question type: {{ c._type }}</p>
+            <p>Question text: {{ c._text }}</p>
+		{% if c._type is slider %}
+            	<p>Slider range: {{ c._range }}; default: {{ c._default }}</p>
+		{% else if c._type is radio_button OR if c._type is checkbox %}
+		<p>Answers:
+		    {% for x in c._answers %}
+		    {{ x }}
+		    {% endfor %}
+		</p>
+		{% else if c._type is free_response %}
+		<p>Text Field Type: {{ c._text_field_type }}</p>
+		{% endif %}
+            <p>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Edit</button> |
+                <a href="/survey_designer/">Delete</a>
+            </p>
+	    {% endfor %}
+        </div>
+	<br>
+	<div class="row">
+	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal">
+		<span class="glyphicon glyphicon-plus"></span>Add Question
+	    </button>
+	</div>
+	<br>
+	<div class="row">
+	    <button type="button" class="btn btn-default btn-lg">
+		<span class="glyphicon glyphicon-upload"></span>Save & Deploy
+	    </button>
+	</div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
+      </div>
+      <div class="modal-body">
+	<input type="text" id="name"></input>
+	<input type="text" id="text"></input>
+      	<select id="type" onchange="setType()">
+	    <option value="1">Informational Text</option>
+	    <option value="2">Slider</option>
+	    <option value="3">Radio Button</option>
+	    <option value="4">Checkbox</option>
+	    <option value="5">Free Response</option>
+	</select>
+	<input type="number" style="display:none;" id="values" min="2" max="100"></input>
+	<input type="number" style="display:none;" id="default" min="1" max="99"></input>
+	<input type="text" style="display:none;" id="answers"></input>  
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="section">
+    <div class="container">
+        <h5 style='text-align:center'><strong>Contact:</strong> <a href="mailto:sys@zagaran.com">sys@zagaran.com</a></h5>
+        <p style='text-align:center' class="row center">&copy; 2014 Zagaran Software, Inc.</p>
+    </div>
+</footer>
+</body>
+</html>
