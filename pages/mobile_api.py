@@ -25,49 +25,63 @@ def fetch_survey():
 
 @mobile_api.route('/upload_gps/', methods=['GET', 'POST'])
 def upload_gps():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_accel/', methods=['GET', 'POST'])
 def upload_accel():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_powerstate/', methods=['GET', 'POST'])
 def upload_powerstate():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_calls/', methods=['GET', 'POST'])
 def upload_calls():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_texts/', methods=['GET', 'POST'])
 def upload_texts():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_surveyresponse/', methods=['GET', 'POST'])
 def upload_surveyresponse():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
 
 @mobile_api.route('/upload_audio/', methods=['GET', 'POST'])
 def upload_audio():
-    if request.method == 'POST':
+    if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
         #mongo_instance.save()
         return'200'
+    else:
+        abort(404)
