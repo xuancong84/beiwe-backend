@@ -32,3 +32,15 @@ def render_survey_designer():
 @templating.template('question_designer.html')
 def question_designer():
     return render_template('question_designer.html')
+
+@survey_designer.route('/weekly_survey/')
+@auth.authenticated()
+@templating.template('weekly_survey.html')
+def weekly_survey():
+    return render_template('weekly_survey.html')
+
+@survey_designer.route('/daily_survey/')
+@auth.authenticated()
+@templating.template('daily_survey.html')
+def daily_survey():
+    return render_template('daily_survey.html')
