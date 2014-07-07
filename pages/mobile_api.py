@@ -13,7 +13,7 @@ def _upload(file_obj):
     if file_obj and allowed_file(file_obj.filename):
         s3_upload_handler(secure_filename(file_obj.filename), file_obj)
 
-@mobile_api.route('/fetch_survey/', methods=['GET', 'POST'])
+@mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     f = open("/var/www/scrubs/sample_survey.json", 'rb')
     return jsonify(json.load(f))
@@ -23,7 +23,7 @@ def fetch_survey():
     else:
         return
 
-@mobile_api.route('/upload_gps/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_gps', methods=['GET', 'POST'])
 def upload_gps():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -32,7 +32,7 @@ def upload_gps():
     else:
         abort(400)
 
-@mobile_api.route('/upload_accel/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_accel', methods=['GET', 'POST'])
 def upload_accel():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -41,7 +41,7 @@ def upload_accel():
     else:
         abort(400)
 
-@mobile_api.route('/upload_powerstate/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_powerstate', methods=['GET', 'POST'])
 def upload_powerstate():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -50,7 +50,7 @@ def upload_powerstate():
     else:
         abort(400)
 
-@mobile_api.route('/upload_calls/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_calls', methods=['GET', 'POST'])
 def upload_calls():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -59,7 +59,7 @@ def upload_calls():
     else:
         abort(400)
 
-@mobile_api.route('/upload_texts/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_texts', methods=['GET', 'POST'])
 def upload_texts():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -68,7 +68,7 @@ def upload_texts():
     else:
         abort(400)
 
-@mobile_api.route('/upload_surveyresponse/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_surveyresponse', methods=['GET', 'POST'])
 def upload_surveyresponse():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])
@@ -77,7 +77,7 @@ def upload_surveyresponse():
     else:
         abort(400)
 
-@mobile_api.route('/upload_audio/', methods=['GET', 'POST'])
+@mobile_api.route('/upload_audio', methods=['GET', 'POST'])
 def upload_audio():
     if request.method == 'POST' and request.files['file']:
         _upload(request.files['file'])

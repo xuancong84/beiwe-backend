@@ -3,14 +3,14 @@ from frontend import templating, auth
 
 survey_designer = Blueprint('survey_designer', __name__)
 
-@survey_designer.route('/survey_designer/')
+@survey_designer.route('/survey_designer')
 @auth.authenticated()
 @templating.template('survey_designer.html')
 def render_survey_builder():
     data = {}
     return data
 
-@survey_designer.route('/surveys/')
+@survey_designer.route('/surveys')
 @auth.authenticated()
 @templating.template('surveys.html')
 def render_surveys():
@@ -21,25 +21,25 @@ def render_surveys():
     return data
 
 
-@survey_designer.route('/survey_designer/')
+@survey_designer.route('/survey_designer')
 @auth.authenticated()
 @templating.template('survey_designer.html')
 def render_survey_designer():
     return render_template('survey_designer.html')
 
-@survey_designer.route('/question_designer/')
+@survey_designer.route('/question_designer')
 @auth.authenticated()
 @templating.template('question_designer.html')
 def question_designer():
     return render_template('question_designer.html')
 
-@survey_designer.route('/weekly_survey/')
+@survey_designer.route('/weekly_survey')
 @auth.authenticated()
 @templating.template('weekly_survey.html')
 def weekly_survey():
     return render_template('weekly_survey.html')
 
-@survey_designer.route('/daily_survey/')
+@survey_designer.route('/daily_survey')
 @auth.authenticated()
 @templating.template('daily_survey.html')
 def daily_survey():

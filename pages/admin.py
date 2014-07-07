@@ -5,14 +5,14 @@ from flask import redirect
 admin = Blueprint('admin', __name__)
 
 @admin.route('/')
-@admin.route('/admin/')
+@admin.route('/admin')
 @templating.template('admin_login.html')
 def render_login_page():
     if auth.is_logged_in():
         return redirect("/admin_panel/")
     return {}
 
-@admin.route("/validate_login/", methods=["GET", "POST"])
+@admin.route("/validate_login", methods=["GET", "POST"])
 def login():
     if request.method == 'POST':
         username = request.values["username"]
@@ -22,12 +22,12 @@ def login():
             return redirect("/admin_panel/")
         return "Username password combination is incorrect. Try again."
 
-@admin.route("/logout/")
+@admin.route("/logout")
 def logout():
     auth.del_loggedin_phonenum()
     return redirect("/")
 
-@admin.route('/admin_panel/', methods=["GET", "POST"])
+@admin.route('/admin_panel', methods=["GET", "POST"])
 @auth.authenticated()
 @templating.template('admin_panel.html')
 def render_main():
