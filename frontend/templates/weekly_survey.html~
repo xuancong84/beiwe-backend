@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title> Zagaran Mobile Data Collection System for HSPH</title>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="../static/javascript/surveys.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
+</head>
+
+<body>
+<div class="container">
+    <div class="span12">
+        <div class="row">
+            <h1>Weekly Survey</h1>
+        </div>
+	
+	Schedule Deployment Time:
+	<select id="hour">
+	    <option value="1">1:00</option>
+	    <option value="2">2:00</option>
+	    <option value="3">3:00</option>
+	    <option value="4">4:00</option>
+	    <option value="5">5:00</option>
+	    <option value="6">6:00</option>
+	    <option value="7">7:00</option>
+	    <option value="8">8:00</option>
+	    <option value="9">9:00</option>
+	    <option value="10">10:00</option>
+	    <option value="11">11:00</option>
+	    <option value="12">12:00</option>
+	</select>	
+	<select id="ampm">
+	    <option value="am">AM</option>
+	    <option value="pm">PM</option>
+	</select>
+	<select id="day">
+	    <option value="monday">Monday</option>
+	    <option value="tuesday">Tuesday</option>
+	    <option value="wednesday">Wednesday</option>
+	    <option value="thursday">Thursday</option>
+	    <option value="friday">Friday</option>
+	    <option value="saturday">Saturday</option>
+	    <option value="sunday">Sunday</option>
+	</select>
+	<br><br>
+
+        <div class="row">
+	    {% for c in wquestions %}
+            <h3>{{ c._name }}</h3>
+            <p>Question type: {{ c._type }}</p>
+            <p>Question text: {{ c._text }}</p>
+		{% if c._type == "slider" %}
+            	<p>Slider range: {{ c._range }}; default: {{ c._default }}</p>
+		{% elif c._type == "radio_button" or c._type == "checkbox" %}
+		<p>Answers:
+		    {% for x in c._answers %}
+		    {{ x }}
+		    {% endfor %}
+		</p>
+		{% elif c._type == "free_response" %}
+		<p>Text Field Type: {{ c._text_field_type }}</p>
+		{% endif %}
+            <p>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Edit</button> |
+                <a href="/survey_designer/">Delete</a>
+            </p>
+	    {% endfor %}
+        </div>
+	<br>
+	<div class="row">
+	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal()">
+		<span class="glyphicon glyphicon-plus"></span>Add Question
+	    </button>
+	</div>
+	<br>
+	<div class="row">
+	    <button type="button" class="btn btn-default btn-lg">
+		<span class="glyphicon glyphicon-upload"></span>Save & Deploy
+	    </button>
+	</div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
+      </div>
+      <form id="question">
+      <div class="modal-body">
+	Name:<input type="text" id="name"></input><br>
+	Text:<input type="text" id="text"></input><br>
+      	Type:<select id="type" onchange="setType()">
+	    <option value="1">Informational Text</option>
+	    <option value="2">Slider</option>
+	    <option value="3">Radio Button</option>
+	    <option value="4">Checkbox</option>
+	    <option value="5">Free Response</option>
+	</select><br>
+	<div id="values_defaults" style="display:none;">Values:<input type="number" id="valnum" min="2" max="100"></input><br>
+	Default Value:<input type="number" id="defnum" min="1" max="99"></input></div>
+	<div id="answers" style="display:none;">Answers:<input type="text" id="anstxt"></input></div>
+	<div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt"></inut></div>  
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="section">
+    <div class="container">
+        <h5 style='text-align:center'><strong>Contact:</strong> <a href="mailto:sys@zagaran.com">sys@zagaran.com</a></h5>
+        <p style='text-align:center' class="row center">&copy; 2014 Zagaran Software, Inc.</p>
+    </div>
+</footer>
+</body>
+</html>
