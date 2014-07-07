@@ -30,7 +30,7 @@ def upload_gps():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_accel/', methods=['GET', 'POST'])
 def upload_accel():
@@ -39,7 +39,7 @@ def upload_accel():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_powerstate/', methods=['GET', 'POST'])
 def upload_powerstate():
@@ -48,7 +48,7 @@ def upload_powerstate():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_calls/', methods=['GET', 'POST'])
 def upload_calls():
@@ -57,7 +57,7 @@ def upload_calls():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_texts/', methods=['GET', 'POST'])
 def upload_texts():
@@ -66,7 +66,7 @@ def upload_texts():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_surveyresponse/', methods=['GET', 'POST'])
 def upload_surveyresponse():
@@ -75,7 +75,7 @@ def upload_surveyresponse():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
 
 @mobile_api.route('/upload_audio/', methods=['GET', 'POST'])
 def upload_audio():
@@ -84,4 +84,4 @@ def upload_audio():
         #mongo_instance.save()
         return'200'
     else:
-        abort(404)
+        abort(400)
