@@ -2,3 +2,5 @@
 .pydevproject
 *.pyc
 
+# Survey JSON file(s) can be user-generated, so they aren't part of the code
+sample_survey.json
