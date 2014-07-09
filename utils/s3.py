@@ -32,6 +32,6 @@ def list_s3_files(prefix):
     results = b.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
 
-def get_surveys():
-    surveys = list_s3_files("survey")
-    return [i.strip("survey/").strip(".json") for i in surveys]
+def s3_retrieve(key_name):
+    key = Key(key_name)
+    return key.read()

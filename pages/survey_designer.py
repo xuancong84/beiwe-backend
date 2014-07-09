@@ -1,7 +1,39 @@
-from flask import Blueprint, request, abort, jsonify, render_template
+from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
 from frontend import templating, auth
+from utils.s3 import list_s3_files, s3_retrieve, s3_upload_handler
+from datetime import datetime
 
 survey_designer = Blueprint('survey_designer', __name__)
+
+def get_surveys(prefix="survey/"):
+    surveys = list_s3_files(prefix)
+    return [i.strip(prefix).strip(".json") for i in surveys]
+
+def get_latest_weekly():
+    weeklies = get_surveys("survey/weekly/")
+    weeklies = sorted(weeklies, reverse=True)
+    return jsonify(s3_retrieve(weeklies[0]))
+
+def get_latest_daily():
+    dailies = get_surveys("survey/daily/")
+    dailies = sorted(dailies, reverse=True)
+    return jsonify(s3_retrieve(dailies[0]))
+
+@survey_designer.route('/update_weekly')
+@auth.authenticated()
+def save_new_weekly():
+    weeklies = get_surveys("survey/weekly/")
+    key_name = "survey/weekly/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(weeklies) + 1)
+    s3_upload_handler(key_name, json.dumps(request.files["json"]))
+    return redirect("/weekly_survey/")
+
+@survey_designer.route('/update_daily')
+@auth.authenticated()
+def save_new_daily():
+    dailies = get_surveys("survey/daily/")
+    key_name = "survey/daily/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(dailies) + 1)
+    s3_upload_handler(key_name, json.dumps(request.files["json"]))
+    return redirect("/daily_survey/")
 
 @survey_designer.route('/survey_designer')
 @auth.authenticated()
@@ -19,7 +51,6 @@ def render_surveys():
             #"email_cohorts": [ec for ec in EmailCohorts()]
            }
     return data
-
 
 @survey_designer.route('/survey_designer')
 @auth.authenticated()

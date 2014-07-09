@@ -19,7 +19,7 @@ def fetch_survey():
     return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
-            return json.load("/var/www/scrubs/sample_survey.json")
+            return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
     else:
         return
 
