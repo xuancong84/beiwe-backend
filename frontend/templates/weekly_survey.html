@@ -17,8 +17,9 @@
             <h1>Weekly Survey</h1>
         </div>
 	
+	<form>
 	Schedule Deployment Time:
-	<select id="hour">
+	<select id="hour" name="hour">
 	    <option value="1">1:00</option>
 	    <option value="2">2:00</option>
 	    <option value="3">3:00</option>
@@ -32,11 +33,11 @@
 	    <option value="11">11:00</option>
 	    <option value="12">12:00</option>
 	</select>	
-	<select id="ampm">
+	<select id="ampm" name="ampm">
 	    <option value="am">AM</option>
 	    <option value="pm">PM</option>
 	</select>
-	<select id="day">
+	<select id="day" name="day">
 	    <option value="monday">Monday</option>
 	    <option value="tuesday">Tuesday</option>
 	    <option value="wednesday">Wednesday</option>
@@ -47,28 +48,33 @@
 	</select>
 	<br>
 
-        <div class="row">
-	    {% for c in wquestions %}
-            <h3>{{ c._name }}</h3>
-            <p>Question type: {{ c._type }}</p>
-            <p>Question text: {{ c._text }}</p>
+	{% for c in wquestions %}
+        <div id="{{ c._name }}" class="row">
+            <h3 id="{{ c._name }}name">{{ c._name }}</h3>
+            <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
+            <p>Question text: <div id="{{ c._name }}text">{{ c._text }}</div></p>
 		{% if c._type == "slider" %}
-            	<p>Slider range: {{ c._range }}; default: {{ c._default }}</p>
+            	<p>Slider range: <div id="{{ c._name }}range">{{ c._range }}</div>; default: <div id="{{ c._name }}default">{{ c._default }}</div></p>
 		{% elif c._type == "radio_button" or c._type == "checkbox" %}
 		<p>Answers:
+		    <div id="{{ c._name }}answers">
 		    {% for x in c._answers %}
 		    {{ x }}
 		    {% endfor %}
+		    </div>
 		</p>
 		{% elif c._type == "free_response" %}
-		<p>Text Field Type: {{ c._text_field_type }}</p>
+		<p>Text Field Type: <div id="{{ c._name }}tft">{{ c._text_field_type }}</div></p>
 		{% endif %}
             <p>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Edit</button> |
-                <a href="/survey_designer/">Delete</a>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}')">Edit</button>
+                <button class="btn btn-primary" onclick="deleteQuestion('{{ c._name }}')">Delete</button>
             </p>
-	    {% endfor %}
         </div>
+	{% endfor %}
+	<br>
+	<div id="newQuestions">
+	</div>
 	<br>
 	<div class="row">
 	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal()">
@@ -81,6 +87,7 @@
 		<span class="glyphicon glyphicon-upload"></span>Save & Deploy
 	    </button>
 	</div>
+	</form>
     </div>
 </div>
 
@@ -92,25 +99,26 @@
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
         <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
       </div>
-      <form id="question">
+      <form id="question" name="question">
       <div class="modal-body">
-	Name:<input type="text" id="name"></input><br>
-	Text:<input type="text" id="text"></input><br>
-      	Type:<select id="type" onchange="setType()">
+	Name:<input type="text" id="name" name="name"></input><br>
+	Text:<input type="text" id="text" name="text"></input><br>
+      	Type:<select id="type" name="type" onchange="setType()">
 	    <option value="1">Informational Text</option>
 	    <option value="2">Slider</option>
 	    <option value="3">Radio Button</option>
 	    <option value="4">Checkbox</option>
 	    <option value="5">Free Response</option>
 	</select><br>
-	<div id="values_defaults" style="display:none;">Values:<input type="number" id="valnum" min="2" max="100"></input><br>
-	Default Value:<input type="number" id="defnum" min="1" max="99"></input></div>
-	<div id="answers" style="display:none;">Answers:<input type="text" id="anstxt"></input></div>
-	<div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt"></inut></div>  
+	<div id="values_defaults" style="display:none;">Values:<input type="number" id="valnum" name="valnum" min="2" max="100"></input><br>
+	Default Value:<input type="number" id="defnum" name="defnum" min="1" max="99"></input></div>
+	<div id="answers" style="display:none;">Answers: <input type="text" id="anstxt" name="anstxt"></input></div>
+	<div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt" name="tfttxt"></inut></div>  
+	<input style="display:none;" id="oldName" name="oldName"></input>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
       </div>
       </form>
     </div>
