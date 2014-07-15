@@ -16,8 +16,8 @@
         <div class="row">
             <h1>Weekly Survey</h1>
         </div>
-	
-	<form>
+
+	<form name="survey" action="/save_weekly">
 	Schedule Deployment Time:
 	<select id="hour" name="hour">
 	    <option value="1">1:00</option>
@@ -32,7 +32,7 @@
 	    <option value="10">10:00</option>
 	    <option value="11">11:00</option>
 	    <option value="12">12:00</option>
-	</select>	
+	</select>
 	<select id="ampm" name="ampm">
 	    <option value="am">AM</option>
 	    <option value="pm">PM</option>
@@ -50,25 +50,28 @@
 
 	{% for c in wquestions %}
         <div id="{{ c._name }}" class="row">
-            <h3 id="{{ c._name }}name">{{ c._name }}</h3>
+            <h3 id="{{ c._name }}name">{{ c._name }}</h3>	    
             <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
             <p>Question text: <div id="{{ c._name }}text">{{ c._text }}</div></p>
+	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._name }}"></input>
+	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._type }}"></input>
+	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text }}"></input>
 		{% if c._type == "slider" %}
             	<p>Slider range: <div id="{{ c._name }}range">{{ c._range }}</div>; default: <div id="{{ c._name }}default">{{ c._default }}</div></p>
+		<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._range }}"></input>
+	 	<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._default }}"></input>
 		{% elif c._type == "radio_button" or c._type == "checkbox" %}
 		<p>Answers:
-		    <div id="{{ c._name }}answers">
-		    {% for x in c._answers %}
-		    {{ x }}
-		    {% endfor %}
-		    </div>
+		    <div id="{{ c._name }}answers">{{ c._answers }}</div>
+		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._answers }}"></input>
 		</p>
 		{% elif c._type == "free_response" %}
 		<p>Text Field Type: <div id="{{ c._name }}tft">{{ c._text_field_type }}</div></p>
+		<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text_field_type }}"></input>
 		{% endif %}
             <p>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}')">Edit</button> |
-                <button class="btn btn-primary" onclick="deleteQuestion('{{ c._name }}')">Delete</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}'); return false;">Edit</button>
+                <button type="button" class="btn btn-primary" onclick="deleteQuestion('{{ c._name }}'); return false;">Delete</button>
             </p>
         </div>
 	{% endfor %}
@@ -77,13 +80,13 @@
 	</div>
 	<br>
 	<div class="row">
-	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal()">
+	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal(); return false;">
 		<span class="glyphicon glyphicon-plus"></span>Add Question
 	    </button>
 	</div>
 	<br>
 	<div class="row">
-	    <button type="button" class="btn btn-default btn-lg">
+	    <button type="submit" class="btn btn-default btn-lg">
 		<span class="glyphicon glyphicon-upload"></span>Save & Deploy
 	    </button>
 	</div>
@@ -113,12 +116,12 @@
 	<div id="values_defaults" style="display:none;">Values:<input type="number" id="valnum" name="valnum" min="2" max="100"></input><br>
 	Default Value:<input type="number" id="defnum" name="defnum" min="1" max="99"></input></div>
 	<div id="answers" style="display:none;">Answers: <input type="text" id="anstxt" name="anstxt"></input></div>
-	<div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt" name="tfttxt"></inut></div>  
+	<div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt" name="tfttxt"></inut></div>
 	<input style="display:none;" id="oldName" name="oldName"></input>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
       </div>
       </form>
     </div>
