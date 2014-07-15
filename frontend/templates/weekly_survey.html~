@@ -17,6 +17,7 @@
             <h1>Weekly Survey</h1>
         </div>
 
+    <!--Select date and time for survey deployment-->
 	<form name="survey" action="/update_weekly" method="POST">
 	Schedule Deployment Time:
 	<select id="hour" name="hour">
@@ -48,6 +49,7 @@
 	</select>
 	<br>
 
+    <!--Display existing questions-->
 	{% for c in wquestions %}
         <div id="{{ c._name }}" class="row">
             <h3 id="{{ c._name }}name">{{ c._name }}</h3>	    
@@ -58,16 +60,16 @@
 	        <input type="text" style="display:none;" name="{{ c._name }}text" value="{{ c._text }}"></input>
 		    {% if c._type == "slider" %}
             	<p>Slider range: <div id="{{ c._name }}range">{{ c._range }}</div>; default: <div id="{{ c._name }}default">{{ c._default }}</div></p>
-		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._range }}"></input>
-	 	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._default }}"></input>
+		    <input type="text" style="display:none;" name="{{ c._name }}range" value="{{ c._range }}"></input>
+	 	    <input type="text" style="display:none;" name="{{ c._name }}default" value="{{ c._default }}"></input>
 		    {% elif c._type == "radio_button" or c._type == "checkbox" %}
 		    <p>Answers:
 		    <div id="{{ c._name }}answers">{{ c._answers }}</div>
-		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._answers }}"></input>
+		    <input type="text" style="display:none;" name="{{ c._name }}answers" value="{{ c._answers }}"></input>
 		    </p>
 		    {% elif c._type == "free_response" %}
 		    <p>Text Field Type: <div id="{{ c._name }}tft">{{ c._text_field_type }}</div></p>
-		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text_field_type }}"></input>
+		    <input type="text" style="display:none;" name="{{ c._name }}tft" value="{{ c._text_field_type }}"></input>
 		    {% endif %}
             <p>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}'); return false;">Edit</button>
@@ -76,15 +78,21 @@
         </div>
 	{% endfor %}
 	<br>
+    
+    <!--New questions get added here-->
 	<div id="newQuestions">
 	</div>
 	<br>
+    
+    <!--This button adds questions-->
 	<div class="row">
 	    <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal(); return false;">
 		<span class="glyphicon glyphicon-plus"></span>Add Question
 	    </button>
 	</div>
 	<br>
+
+    <!--This button submits the form-->
 	<div class="row">
 	    <button type="submit" class="btn btn-default btn-lg">
 		<span class="glyphicon glyphicon-upload"></span>Save & Deploy
@@ -94,7 +102,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal for question addition/alteration-->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
