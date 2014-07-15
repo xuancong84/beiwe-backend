@@ -17,7 +17,7 @@
             <h1>Weekly Survey</h1>
         </div>
 
-	<form name="survey" action="/save_weekly">
+	<form name="survey" action="/update_weekly" method="POST">
 	Schedule Deployment Time:
 	<select id="hour" name="hour">
 	    <option value="1">1:00</option>
@@ -53,22 +53,22 @@
             <h3 id="{{ c._name }}name">{{ c._name }}</h3>	    
             <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
             <p>Question text: <div id="{{ c._name }}text">{{ c._text }}</div></p>
-	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._name }}"></input>
-	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._type }}"></input>
-	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text }}"></input>
-		{% if c._type == "slider" %}
+	        <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._name }}"></input>
+	        <input type="text" style="display:none;" name="{{ c._name }}type" value="{{ c._type }}"></input>
+	        <input type="text" style="display:none;" name="{{ c._name }}text" value="{{ c._text }}"></input>
+		    {% if c._type == "slider" %}
             	<p>Slider range: <div id="{{ c._name }}range">{{ c._range }}</div>; default: <div id="{{ c._name }}default">{{ c._default }}</div></p>
-		<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._range }}"></input>
-	 	<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._default }}"></input>
-		{% elif c._type == "radio_button" or c._type == "checkbox" %}
-		<p>Answers:
+		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._range }}"></input>
+	 	    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._default }}"></input>
+		    {% elif c._type == "radio_button" or c._type == "checkbox" %}
+		    <p>Answers:
 		    <div id="{{ c._name }}answers">{{ c._answers }}</div>
 		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._answers }}"></input>
-		</p>
-		{% elif c._type == "free_response" %}
-		<p>Text Field Type: <div id="{{ c._name }}tft">{{ c._text_field_type }}</div></p>
-		<input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text_field_type }}"></input>
-		{% endif %}
+		    </p>
+		    {% elif c._type == "free_response" %}
+		    <p>Text Field Type: <div id="{{ c._name }}tft">{{ c._text_field_type }}</div></p>
+		    <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._text_field_type }}"></input>
+		    {% endif %}
             <p>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}'); return false;">Edit</button>
                 <button type="button" class="btn btn-primary" onclick="deleteQuestion('{{ c._name }}'); return false;">Delete</button>

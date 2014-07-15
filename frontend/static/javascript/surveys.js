@@ -110,40 +110,40 @@ function createQuestion() {
             	html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
 		html += '<p>Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>;';
 		html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div></p>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="slider"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.text.value + '"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.valnum.value + '"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.defnum.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'type" value="slider"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'range" value="' + document.question.valnum.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'default" value="' + document.question.defnum.value + '"></input>';
 	} else if (document.getElementById("type").value == '3') {
 		html += '<p>Question type: <div id="' + name + 'type">radio_button</div></p>';
             	html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
 	 	html += '<p>Answers:';
 		html += '<div id="' + name + 'answers">';
 		html += document.getElementById('anstxt').value + '</div></p>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="radio_button"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.text.value + '"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.anstxt.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'type" value="radio_button"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
 	} else if (document.getElementById("type").value == '4') {
 		html += '<p>Question type: <div id="' + name + 'type">checkbox</div></p>';
             	html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
 		html += '<p>Answers:';
 		html += '<div id="' + name + 'answers">';
 		html += document.question.anstxt.value + '</div></p>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="checkbox"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.text.value + '"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.anstxt.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'type" value="checkbox"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
 	} else if (document.getElementById("type").value == '5') {
 		html += '<p>Question type: <div id="' + name + 'type">free_response</div></p>';
             	html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
 		html += '<p>Text Field Type: <div id="' + name + 'tft">' + document.question.tfttxt.value + '</div></p>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="free_response"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.text.value + '"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.tfttxt.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'type" value="free_response"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'tft" value="' + document.question.tfttxt.value + '"></input>';
 	} else {
 		html += '<p>Question type: <div id="' + name + 'type">informational_text</div></p>';
             	html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="informational_text"></input>';
-		html += '<input type="text" style="display:none;" name="' + name + '" value="' + document.question.text.value + '"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'type" value="informational_text"></input>';
+		html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
 	}
 	html += '<p><button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>' 
 	html += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + name + '\'); return false;">Delete</button>'
