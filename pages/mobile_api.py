@@ -13,6 +13,25 @@ def _upload(file_obj):
     if file_obj and allowed_file(file_obj.filename):
         s3_upload_handler(secure_filename(file_obj.filename), file_obj)
 
+def fetch_user_responses(user_id):
+    pass
+
+@mobile_api.route('/login_user', methods=['GET', 'POST'])
+def login_or_register_user():
+    user_id = request.values["username"]
+    password = request.values["password"]
+    #TODO:
+    # 1. check if user with user_id already exists
+    # 2. if not, create user to store user password
+    # 3. if yes, check if password matches
+    # 4. if match, authenticate user
+    # 5. if not match, return error message
+    if password == "test": #example hardcoded password
+        responses = fetch_user_responses(user_id)
+        return jsonify(responses)
+    else:
+        return "User Password combination not found"
+
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     f = open("/var/www/scrubs/sample_survey.json", 'rb')
