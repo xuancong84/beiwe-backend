@@ -22,7 +22,9 @@ def get_latest_daily():
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated()
 def save_new_weekly():
-    return jsonify(request.args)
+    print request.values
+    print request.form
+    print request
     weeklies = get_surveys("survey/weekly/")
     key_name = "survey/weekly/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(weeklies) + 1)
     s3_upload_handler(key_name, json.dumps(request.files["json"]))
@@ -31,7 +33,9 @@ def save_new_weekly():
 @survey_designer.route('/update_daily')
 @auth.authenticated()
 def save_new_daily():
-    return jsonify(request.args)
+    print request.values
+    print request.form
+    print request
     dailies = get_surveys("survey/daily/")
     key_name = "survey/daily/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(dailies) + 1)
     s3_upload_handler(key_name, json.dumps(request.files["json"]))

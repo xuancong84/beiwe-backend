@@ -18,7 +18,7 @@
         </div>
 
     <!--Select date and time for survey deployment-->
-    <form name="survey" action="/update_weekly" method="POST">
+    <form id="survey" name="survey" action="/update_weekly" method="POST">
     Schedule Deployment Time:
     <select id="hour" name="hour">
         <option value="1">1:00</option>
@@ -52,7 +52,7 @@
     <!--Display existing questions-->
     {% for c in wquestions %}
         <div id="{{ c._name }}" class="row">
-            <h3 id="{{ c._name }}name">{{ c._name }}</h3>        
+            <h3 id="{{ c._name }}name">{{ c._name }}</h3>
             <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
             <p>Question text: <div id="{{ c._name }}text">{{ c._text }}</div></p>
             <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._name }}"></input>
@@ -94,7 +94,7 @@
 
     <!--This button submits the form-->
     <div class="row">
-        <button type="submit" class="btn btn-default btn-lg">
+        <button type="button" class="btn btn-default btn-lg" onclick="end(); return false;">
         <span class="glyphicon glyphicon-upload"></span>Save & Deploy
         </button>
     </div>
@@ -114,7 +114,7 @@
       <div class="modal-body">
     Name:<input type="text" id="name" name="name"></input><br>
     Text:<input type="text" id="text" name="text"></input><br>
-          Type:<select id="type" name="type" onchange="setType()">
+        Type:<select id="type" name="type" onchange="setType()">
         <option value="1">Informational Text</option>
         <option value="2">Slider</option>
         <option value="3">Radio Button</option>
