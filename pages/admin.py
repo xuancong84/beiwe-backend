@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, send_file
 from frontend import templating, auth
 from flask import redirect
 
@@ -28,6 +28,10 @@ def login():
 def logout():
     auth.del_loggedin_phonenum()
     return redirect("/")
+
+@admin.route("/download")
+def download():
+    send_file("Beiwe.apk", as_attachment=True)
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @auth.authenticated()
