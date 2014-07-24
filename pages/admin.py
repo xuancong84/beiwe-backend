@@ -31,7 +31,7 @@ def logout():
 
 @admin.route("/download")
 def download():
-    send_file("Beiwe.apk", as_attachment=True)
+    return send_file("Beiwe.apk", as_attachment=True)
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @auth.authenticated()
