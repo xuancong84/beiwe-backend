@@ -33,5 +33,5 @@ def list_s3_files(prefix):
     return [i.name.strip("/") for i in results]
 
 def s3_retrieve(key_name):
-    key = Key(key_name)
+    key = Key(get_bucket(DB), key_name)
     return key.read()
