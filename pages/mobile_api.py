@@ -71,7 +71,6 @@ def s3_prep_filename(filename):
         filename = filename.replace(k,v )
     return filename
 
-
 def allowed_extension(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
@@ -82,7 +81,7 @@ def upload():
     """
     uploaded_file = request.files['file']
     #Method werkzeug.secure_filename may return empty if unsecure
-    file_name = secure_filename(upload.filename)
+    file_name = secure_filename(uploaded_file.filename)
     if uploaded_file and file_name and allowed_extension(file_name):
         s3_upload_handler(s3_prep_filename(file_name), uploaded_file)
 #         user_id, file_type, timestamp  = parse_filetype(file_name)
