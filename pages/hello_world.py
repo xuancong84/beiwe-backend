@@ -9,7 +9,6 @@ from flask import redirect
 
 hello_world = Blueprint('hello_world', __name__)
 
-@hello_world.route('/')
 @hello_world.route('/hello_world')
 @templating.template('hello_world.html')
 def render_main():

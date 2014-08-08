@@ -4,7 +4,7 @@ from flask import redirect
 
 admin = Blueprint('admin', __name__)
 
-# @admin.route('/')
+@admin.route('/')
 @admin.route('/admin')
 @templating.template('admin_login.html')
 def render_login_page():
