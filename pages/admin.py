@@ -14,6 +14,7 @@ def render_login_page():
 
 @admin.route("/validate_login", methods=["GET", "POST"])
 def login():
+    """ Method responsible to authenticate researcher administrators.""
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
@@ -31,12 +32,14 @@ def logout():
 
 @admin.route("/download")
 def download():
+    """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @auth.authenticated()
 @templating.template('admin_panel.html')
 def render_main():
+    """ Method responsible rendering admin template"""
     data = {
             #"sms_cohorts": [c for c in Cohorts()],
             #"email_cohorts": [ec for ec in EmailCohorts()]

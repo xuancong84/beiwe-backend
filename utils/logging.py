@@ -1,6 +1,7 @@
 import traceback
 
 def log_error(e, message=None):
+    """ Prints in the server logs (defaults to Apache if not specified) """
     try:
         print("-------------------")
         if message is not None: print(message)

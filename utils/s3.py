@@ -12,7 +12,7 @@ CONN = connect_s3()
 from constants import DB
 
 def get_bucket(name):
-    """ Tries to get bucket; else returns None if bucket doesn't exist """
+    """ Method tries to get bucket; else returns None if bucket doesn't exist """
     try:
         bucket = CONN.get_bucket(name)
         return bucket
@@ -20,6 +20,7 @@ def get_bucket(name):
         return None
 
 def s3_upload_handler(key_name, file_obj):
+    """ Method uploads file object to bucket with key_name"""
     bucket = get_bucket(DB)
     key = bucket.new_key(key_name)
     key.set_metadata('Content-Type', mimetypes.guess_type(key_name))
@@ -28,10 +29,12 @@ def s3_upload_handler(key_name, file_obj):
     key.set_contents_from_file(file_obj)
 
 def list_s3_files(prefix):
+    """ Method fetches a list of filenames with prefix"""
     b = get_bucket(DB)
     results = b.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
 
 def s3_retrieve(key_name):
+    """ Method returns file contents with specified S3 key path"""
     key = Key(get_bucket(DB), key_name)
     return key.read()
