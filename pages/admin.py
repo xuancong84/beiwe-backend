@@ -14,7 +14,7 @@ def render_login_page():
 
 @admin.route("/validate_login", methods=["GET", "POST"])
 def login():
-    """ Method responsible to authenticate researcher administrators.""
+    # Method responsible to authenticate researcher administrators.
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
