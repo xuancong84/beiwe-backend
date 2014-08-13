@@ -17,6 +17,7 @@ app = subdomain("frontend")
 app.register_blueprint(mobile_api.mobile_api)
 app.register_blueprint(admin.admin)
 app.register_blueprint(survey_designer.survey_designer)
+# app.register_blueprint(hello_world.hello_world)
 
 @app.route("/<page>.html")
 def strip_dot_html(page):
