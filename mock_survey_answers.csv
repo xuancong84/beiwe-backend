@@ -1,14 +1,14 @@
-question number,question type,question text,answer
-1,Slider Question,Little interest or pleasure in doing things,3
-2,Slider Question,Feeling down; depressed; or hopeless,2
-3,Slider Question,Trouble falling or staying asleep; or sleeping too much,NO ANSWER SELECTED
-4,Slider Question,Feeling tired or having little energy,2
-5,Slider Question,Poor appetite or overeating,0
-6,Slider Question,Feeling bad about yourself- or that you are a failure or have let yourself or your family down,0
-7,Slider Question,Trouble concentrating on things; such as reading the newspaper or watching television,1
-8,Slider Question,Moving or speaking so slowly that other people could have noticed. Or the opposite- being so fidgety or restless that you have been moving around a lot more than usual,NO ANSWER SELECTED
-9,Radio Button Question,If you checked off any problems; how difficult have these problems made it for you to do your work; take care of things at home; or get along with other people?,Extremely difficult
-10,Checkbox Question,Which of the following surveys have you previously taken?,[PHQ-8]
-11,Open Response Question,How many meals have you eaten since waking up this morning? (Numeric answer),9.9
-12,Open Response Question,Please choose 3 adjectives to describe your mood this week. (Single-line text answer),No
-13,Open Response Question,Please enter any suggestions you have about this survey. (Multi-line text answer),
+question id,question type,question text,question answer options,answer
+A102,Slider Question,Little interest or pleasure in doing things,From 0 to 4; default 0,2
+A103,Slider Question,Feeling down; depressed; or hopeless,From 0 to 4; default 0,3
+A104,Slider Question,Trouble falling or staying asleep; or sleeping too much,From 0 to 4; default 0,NO ANSWER SELECTED
+A105,Slider Question,Feeling tired or having little energy,From 0 to 4; default 0,0
+A106,Slider Question,Poor appetite or overeating,From 0 to 4; default 0,1
+A107,Slider Question,Feeling bad about yourself- or that you are a failure or have let yourself or your family down,From 0 to 4; default 0,0
+A108,Slider Question,Trouble concentrating on things; such as reading the newspaper or watching television,From 0 to 4; default 0,0
+A109,Slider Question,Moving or speaking so slowly that other people could have noticed. Or the opposite- being so fidgety or restless that you have been moving around a lot more than usual,From 0 to 4; default 0,0
+A110,Radio Button Question,If you checked off any problems; how difficult have these problems made it for you to do your work; take care of things at home; or get along with other people?,[Not difficult at all; Somewhat difficult; Very difficult; Extremely difficult],Not difficult at all
+A112,Checkbox Question,Which of the following surveys have you previously taken?,[PHQ-8; PHQ-9; SF-12; SF-36; Other surveys],[PHQ-9; Other surveys]
+A113,Open Response Question,How many meals have you eaten since waking up this morning? (Numeric answer),Text-field input type = NUMERIC,90.9
+A114,Open Response Question,Please choose 3 adjectives to describe your mood this week. (Single-line text answer),Text-field input type = SINGLE_LINE_TEXT,Hella wicked pissah
+A115,Open Response Question,Please enter any suggestions you have about this survey. (Multi-line text answer),Text-field input type = MULTI_LINE_TEXT,No  I have none
