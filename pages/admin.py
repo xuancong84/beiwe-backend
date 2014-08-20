@@ -46,7 +46,7 @@ def download():
     return send_file("Beiwe.apk", as_attachment=True)
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-@auth.authenticated()
+@auth.authenticated
 @templating.template('admin_panel.html')
 def render_main():
     """ Method responsible rendering admin template"""
