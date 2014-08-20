@@ -12,11 +12,10 @@ def logout_loggedin_admin():
     if "expiry" in session: del session['expiry']
 
 def login_admin():
-    #TODO: we probably don't need an admin uuid... we might?
-    session['admin_uuid'] = "1234567890"
+    #TODO: Currently only 1 admin user. Allow more than one admin user.
+    session['admin_uuid'] = "12345678987654321" #111111111^2
     session['expiry'] = datetime.now() + timedelta(hours=6)
 
-#
 def authenticated(f):
     """Decorator for functions (pages) that require a login.
        Redirects to index if not authenticated"""
