@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, redirect, request
 import sys, jinja2, traceback
 from utils.logging import log_error
 from utils.security import set_secret_key
-from frontend import templating, auth
+from utils import auth
 from pages import mobile_api, admin, survey_designer
 
 def subdomain(directory):

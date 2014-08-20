@@ -3,10 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title> Zagaran Mobile Data Collection System for HSPH</title>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="../static/javascript/surveys.js"></script>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
 </head>
 
@@ -32,7 +29,7 @@
         <option value="10">10:00</option>
         <option value="11">11:00</option>
         <option value="12">12:00</option>
-    </select>    
+    </select>
     <select id="ampm">
         <option value="am">AM</option>
         <option value="pm">PM</option>
@@ -41,7 +38,7 @@
     
     {% for c in wquestions %}
         <div id="{{ c._name }}" class="row">
-            <h3 id="{{ c._name }}name">{{ c._name }}</h3>        
+            <h3 id="{{ c._name }}name">{{ c._name }}</h3>
             <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
             <p>Question text: <div id="{{ c._name }}text">{{ c._text }}</div></p>
             <input type="text" style="display:none;" name="{{ c._name }}" value="{{ c._name }}"></input>
@@ -108,7 +105,7 @@
     Default Value:<input type="number" id="defnum" name="defnum" min="1" max="99"></input></div>
     <div id="answers" style="display:none;">Answers: <input type="text" id="anstxt" name="anstxt"></input></div>
     <div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt" name="tfttxt"></inut></div>
-    <input style="display:none;" id="oldName" name="oldName"></input>  
+    <input style="display:none;" id="oldName" name="oldName"></input>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

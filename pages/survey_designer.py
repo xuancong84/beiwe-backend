@@ -1,5 +1,5 @@
 from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
-from frontend import templating, auth
+from utils import auth
 from utils.s3 import list_s3_files, s3_retrieve, s3_upload_handler
 from datetime import datetime
 
@@ -55,41 +55,35 @@ def save_new_daily():
 
 @survey_designer.route('/survey_designer')
 @auth.authenticated
-@templating.template('survey_designer.html')
 def render_survey_builder():
     data = {}
-    return data
+    return render_template('survey_designer.html', data)
 
 @survey_designer.route('/surveys')
 @auth.authenticated
-@templating.template('surveys.html')
 def render_surveys():
     data = {
             #"sms_cohorts": [c for c in Cohorts()],
             #"email_cohorts": [ec for ec in EmailCohorts()]
            }
-    return data
+    return render_template('surveys.html', data)
 
 @survey_designer.route('/survey_designer')
 @auth.authenticated
-@templating.template('survey_designer.html')
 def render_survey_designer():
     return render_template('survey_designer.html')
 
 @survey_designer.route('/question_designer')
 @auth.authenticated
-@templating.template('question_designer.html')
 def question_designer():
     return render_template('question_designer.html')
 
 @survey_designer.route('/weekly_survey')
 @auth.authenticated
-@templating.template('weekly_survey.html')
 def weekly_survey():
     return render_template('weekly_survey.html')
 
 @survey_designer.route('/daily_survey')
 @auth.authenticated
-@templating.template('daily_survey.html')
 def daily_survey():
     return render_template('daily_survey.html')
