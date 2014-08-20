@@ -26,7 +26,7 @@ def get_latest_daily():
     return jsonify(s3_retrieve(dailies[0]))
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
-@auth.authenticated()
+@auth.authenticated
 def save_new_weekly():
     """
     Method responsible for saving newly created weekly survey (frequency 1)
@@ -40,7 +40,7 @@ def save_new_weekly():
     return redirect("/weekly_survey/")
 
 @survey_designer.route('/update_daily')
-@auth.authenticated()
+@auth.authenticated
 def save_new_daily():
     """
     Method responsible for saving newly created daily survey (frequency 1)
@@ -54,14 +54,14 @@ def save_new_daily():
     return redirect("/daily_survey/")
 
 @survey_designer.route('/survey_designer')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('survey_designer.html')
 def render_survey_builder():
     data = {}
     return data
 
 @survey_designer.route('/surveys')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('surveys.html')
 def render_surveys():
     data = {
@@ -71,25 +71,25 @@ def render_surveys():
     return data
 
 @survey_designer.route('/survey_designer')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('survey_designer.html')
 def render_survey_designer():
     return render_template('survey_designer.html')
 
 @survey_designer.route('/question_designer')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('question_designer.html')
 def question_designer():
     return render_template('question_designer.html')
 
 @survey_designer.route('/weekly_survey')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('weekly_survey.html')
 def weekly_survey():
     return render_template('weekly_survey.html')
 
 @survey_designer.route('/daily_survey')
-@auth.authenticated()
+@auth.authenticated
 @templating.template('daily_survey.html')
 def daily_survey():
     return render_template('daily_survey.html')

@@ -5,7 +5,7 @@ from utils.s3 import s3_upload_handler, list_s3_files, s3_retrieve
 mobile_api = Blueprint('mobile_api', __name__)
 
 ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
-FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callsLog', 'textsLog', \
+FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog', \
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
 
@@ -40,7 +40,7 @@ def fetch_user_responses(user_id):
     return all_responses
 
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
-#@auth.authenticated() TODO to make authenticated on user level
+#@auth.authenticated #TODO to make authenticated on user level
 def render_user_panel(user_id):
     """
     Method displays user information.
