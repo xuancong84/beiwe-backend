@@ -41,7 +41,7 @@ def save_new_weekly():
 #     breaks here
     from pprint import pprint
     import pickle
-    pickle.dump(request.values, open('thing2.pickle', 'w'))
+    pickle.dump(request.values, open('thingX.pickle', 'w'))
     pprint (request.values)
     print "\n\n", request.files["json"] , "\n\n"
     

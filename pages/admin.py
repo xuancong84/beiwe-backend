@@ -1,9 +1,10 @@
+# We use admin to refer to parts of the site that study administrators use.
+
 from flask import Blueprint, request, abort, send_file, render_template
 from utils import auth
 from flask import redirect
 
 
-# here we use admin to refer to parts of the site that ... administrators use.
 admin = Blueprint('admin', __name__)
 
 @admin.route('/')
