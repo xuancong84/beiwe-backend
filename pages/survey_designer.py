@@ -39,17 +39,17 @@ def save_new_weekly():
     key_name = "survey/weekly/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(weeklies) + 1)
 #     print "key name done"
 #     breaks here
-    from pprint import pprint
-    import pickle
-    pickle.dump(request.values, open('thingX.pickle', 'w'))
-    pprint (request.values)
-    print "\n\n", request.files["json"] , "\n\n"
-    
-    try:
-        s3_upload_handler(key_name, json.dumps(request.files["json"]))
-    except Exception as e:
-        print "\n", e
-        raise e
+#     from pprint import pprint
+#     import pickle
+#     pickle.dump(request.values, open('thingX.pickle', 'w'))
+#     pprint (request.values)
+#     print "\n\n", request.files["json"] , "\n\n"
+#
+#     try:
+#         s3_upload_handler(key_name, json.dumps(request.files["json"]))
+#     except Exception as e:
+#         print "\n", e
+#         raise e
 #     print "upload done"
     return redirect("/weekly_survey/")
 
