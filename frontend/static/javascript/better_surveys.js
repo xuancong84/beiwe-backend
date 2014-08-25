@@ -10,7 +10,6 @@ function set_type() {
     else { document.getElementById("answers").style.display="inline"; }
 }
 
-
 function create_question() {
     //replaces createQuestion()
     // grabs the question type, runs the correct logic to make a question.
@@ -22,21 +21,17 @@ function create_question() {
     else if (type == '5') { create_question_freeresponse(); }
 }
 
-
 function clear_modal() {
     //this method replaces function clearModal()
     /* Sets all attributes of the modal dialogue to empty/default values. */
     var attrs = ["name","text","valnum","defnum","anstxt","tfttxt"];
     for (var i = 0; i < attrs.length; i++) {
-        document.getElementById(attrs[i]).value = "";
-    }
+        document.getElementById(attrs[i]).value = ""; }
     var attrs2 = ["values_defaults", "answers", "text_field_type"];
     for (i = 0; i < attrs2.length; i++) {
-        document.getElementById(attrs2[i]).value = "none";
-    }
+        document.getElementById(attrs2[i]).value = "none"; }
     document.getElementById("type").value="1";
 }
-
 
 function set_modal(x) {
     document.getElementById("saveQuestion").onclick=changeQuestion;
@@ -46,21 +41,21 @@ function set_modal(x) {
     var rangeid = x + 'range';
     var defaultid = x + 'default';
     var answersid = x + 'answers';
-    var text_field_type = x + 'tft';  //what the hell is this variable.
+    var text_field_type = x + 'tft';
 
-    var text_content = document.getElementById(typeid).textContent;
+    var type = document.getElementById(typeid).textContent;
 
-    if (text_content == "slider") {
+    if (type == "slider") {
         document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
         document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
         set_element_type(2); }
-    else if (text_content == "radio_button") {
+    else if (type == "radio_button") {
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
         set_element_type(3); }
-    else if (text_content == "checkbox") {
+    else if (type == "checkbox") {
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
         set_element_type(4); }
-    else if (text_content == "free_response") {
+    else if (type == "free_response") {
         document.getElementById("tfttxt").value = document.getElementById(text_field_type).textContent;
         set_element_type(5); }
     else { set_element_type(1); }
@@ -68,7 +63,6 @@ function set_modal(x) {
     document.getElementById("name").value = document.getElementById(nameid).textContent;
     document.getElementById("oldName").value = x;
     document.getElementById("text").value = document.getElementById(textid).textContent;
-
 }
 
 //Function unchanged from original
@@ -107,8 +101,7 @@ function add_Q_footer() {
     add_to_survey(footer);
 }
 
-/*
-// This is an example template for the functions below.
+/* This is an example template for the functions below.
 function sample_create_question_type() {
     add_Q_header();
     //Here add logic to create HTML tags/inputs with appropriate attributes
@@ -118,10 +111,8 @@ function sample_create_question_type() {
     i.id = "???";
     i.style="display:none;";
     add_Q_footer();
-    add_to_survey(i);
-}
+    add_to_survey(i); }
 */
-
 
 
 // question type 1 is not a question, it is a blob of text
