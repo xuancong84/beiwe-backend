@@ -33,18 +33,18 @@ function clearModal() {
 }
 
 function setModal(x) {
-    console.log("set");
+//     console.log("set");
     document.getElementById("saveQuestion").onclick=changeQuestion;
-    nameid = x + 'name';
-    typeid = x + 'type';
-    textid = x + 'text';
-    rangeid = x + 'range';
-    defaultid = x + 'default';
-    answersid = x + 'answers';
-    tftid = x + 'tft';
+    var nameid = x + 'name';
+    var typeid = x + 'type';
+    var textid = x + 'text';
+    var rangeid = x + 'range';
+    var defaultid = x + 'default';
+    var answersid = x + 'answers';
+    var tftid = x + 'tft';
     document.getElementById("name").value = document.getElementById(nameid).textContent;
     document.getElementById("oldName").value = x;
-    document.getElementById("text").value = document.getElementById(textid).textContent;    
+    document.getElementById("text").value = document.getElementById(textid).textContent;
     if (document.getElementById(typeid).textContent == "slider") {
         console.log("slider");
         document.getElementById("type").value = "2";
@@ -102,7 +102,7 @@ function changeQuestion() {
 
 function createQuestion() {
     name = document.question.name.value;
-    html = '<div id="' + name + '" class="row">';
+    var html = '<div id="' + name + '" class="row">';
     html += '<h3 id="' + name + 'name">' + name + '</h3>';
     html += '<input type="text" style="display:none;" name="' + name + '" value="' + name + '"></input>';
     if (document.getElementById("type").value == '2') {
@@ -145,14 +145,14 @@ function createQuestion() {
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="informational_text"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
     }
-    html += '<p><button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>' 
-    html += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + name + '\'); return false;">Delete</button>'
+    html += '<p><button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>';
+    html += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + name + '\'); return false;">Delete</button>';
     addHTML(html);
 }
 
 function deleteQuestion(x) {
     console.log("delete");
-    old = document.getElementById(x);
+    var old = document.getElementById(x);
     old.parentNode.removeChild(old);
 }
 
@@ -177,7 +177,7 @@ function addHTML(html) {
 }
 
 function end() {
-    var payload = JSON.stringify($('#survey').serializeArray())
+    var payload = JSON.stringify($('#survey').serializeArray());
     console.log(payload);
     $.post("/update_weekly", payload);
 }
