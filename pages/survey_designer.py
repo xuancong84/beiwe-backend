@@ -46,7 +46,7 @@ def save_new_weekly():
 #     print "\n\n", request.files["json"] , "\n\n"
 #
 #     try:
-#         s3_upload_handler(key_name, json.dumps(request.files["json"]))
+    s3_upload_handler(key_name, json.dumps(request.files["json"]))
 #     except Exception as e:
 #         print "\n", e
 #         raise e
