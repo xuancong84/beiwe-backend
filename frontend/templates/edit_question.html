@@ -1,0 +1,33 @@
+<!-- Modal for question addition/alteration-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
+      </div>
+      <form id="question" name="question">
+      <div class="modal-body">
+    Name:<input type="text" id="name" name="name"></input><br>
+    Text:<input type="text" id="text" name="text"></input><br>
+        Type:<select id="type" name="type" onchange="setType()">
+        <option value="1">Informational Text</option>
+        <option value="2">Slider</option>
+        <option value="3">Radio Button</option>
+        <option value="4">Checkbox</option>
+        <option value="5">Free Response</option>
+    </select><br>
+    <div id="values_defaults" style="display:none;">Values:<input type="number" id="valnum" name="valnum" min="2" max="100"></input><br>
+    Default Value:<input type="number" id="defnum" name="defnum" min="1" max="99"></input></div>
+    <div id="answers" style="display:none;">Answers: <input type="text" id="anstxt" name="anstxt"></input></div>
+    <div id="text_field_type" style="display:none;">Text Field Type:<input type="text" id="tfttxt" name="tfttxt"></inut></div>
+    <input style="display:none;" id="oldName" name="oldName"></input>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
