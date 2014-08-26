@@ -119,9 +119,9 @@ function createQuestion() {
     html += '<input type="text" style="display:none;" name="' + name + '" value="' + name + '"></input>';
     if (document.getElementById("type").value == '2') {
         html += 'Question type: <div id="' + name + 'type">slider</div></p>';
-        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>';
-        html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div></p>';
+        html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div>>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="slider"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'range" value="' + document.question.valnum.value + '"></input>';
