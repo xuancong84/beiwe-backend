@@ -51,16 +51,16 @@ function clearModal() {
 function setModal(question_name) {
     console.log("set");
     document.getElementById("saveQuestion").onclick=changeQuestion;
-    nameid = question_name + 'name';
-    typeid = question_name + 'type';
-    textid = question_name + 'text';
-    rangeid = question_name + 'range';
-    defaultid = question_name + 'default';
-    answersid = question_name + 'answers';
-    tftid = question_name + 'tft';
+    var nameid = question_name + 'name';
+    var typeid = question_name + 'type';
+    var textid = question_name + 'text';
+    var rangeid = question_name + 'range';
+    var defaultid = question_name + 'default';
+    var answersid = question_name + 'answers';
+    var tftid = question_name + 'tft';
     document.getElementById("name").value = document.getElementById(nameid).textContent;
-    document.getElementById("oldName").value = x;
-    document.getElementById("text").value = document.getElementById(textid).textContent;    
+    document.getElementById("oldName").value = question_name;
+    document.getElementById("text").value = document.getElementById(textid).textContent;
     if (document.getElementById(typeid).textContent == "slider") {
         console.log("slider");
         document.getElementById("type").value = "2";
