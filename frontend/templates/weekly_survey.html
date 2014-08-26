@@ -18,18 +18,9 @@
     <form id="survey" name="survey" action="/update_weekly" method="POST">
     Schedule Deployment Time:
     <select id="hour" name="hour">
-        <option value="1">1:00</option>
-        <option value="2">2:00</option>
-        <option value="3">3:00</option>
-        <option value="4">4:00</option>
-        <option value="5">5:00</option>
-        <option value="6">6:00</option>
-        <option value="7">7:00</option>
-        <option value="8">8:00</option>
-        <option value="9">9:00</option>
-        <option value="10">10:00</option>
-        <option value="11">11:00</option>
-        <option value="12">12:00</option>
+    {% for i in range(1, 13) %}
+        <option value="{{ i }}">{{ i }}:00</option>
+    {% endfor %}
     </select>
     <select id="ampm" name="ampm">
         <option value="am">AM</option>
