@@ -49,48 +49,39 @@ function clearModal() {
 }
 
 function setModal(question_name) {
-    // Sets the values in the modal to match those of an existing question,
-    // so that you can edit that question.
-    /* question_name is a string of the name of the object (a surveyquestion) we are editting. */
-    console.log("question set.");
-    
-    //saveQuestion is the name of the button.
-    //TODO: change saveQuestion to something like saveQuestionButton
+    console.log("set");
     document.getElementById("saveQuestion").onclick=changeQuestion;
-    var type = document.getElementById("type")
-    
-    var rangeid = question_name + 'range';
-    var defaultid = question_name + 'default';
-    var answersid = question_name + 'answers';
-    var tftid = question_name + 'tft'; //text field type
-    
-    if (type.textContent == "slider") {
+    nameid = question_name + 'name';
+    typeid = question_name + 'type';
+    textid = question_name + 'text';
+    rangeid = question_name + 'range';
+    defaultid = question_name + 'default';
+    answersid = question_name + 'answers';
+    tftid = question_name + 'tft';
+    document.getElementById("name").value = document.getElementById(nameid).textContent;
+    document.getElementById("oldName").value = x;
+    document.getElementById("text").value = document.getElementById(textid).textContent;    
+    if (document.getElementById(typeid).textContent == "slider") {
         console.log("slider");
-        type.value = "2";
+        document.getElementById("type").value = "2";
         document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
         document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
-    } else if (type.textContent == "radio_button") {
+    } else if (document.getElementById(typeid).textContent == "radio_button") {
         console.log("radio");
-        type.value = "3";
+         document.getElementById("type").value = "3";
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-    } else if (type.textContent == "checkbox") {
+    } else if (document.getElementById(typeid).textContent == "checkbox") {
         console.log("checkbox");
-        type.value = "4";
+        document.getElementById("type").value = "4";
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-    } else if (type.textContent == "free_response") {
+    } else if (document.getElementById(typeid).textContent == "free_response") {
         console.log("free");
-        type.value = "5";
+        document.getElementById("type").value = "5";
         document.getElementById("tfttxt").value = document.getElementById(tftid).textContent;
     } else {
         console.log("info");
-        type.value = "1";
+        document.getElementById("type").value = "1";
     }
-    
-    var nameid = question_name + 'name';
-    var textid = question_name + 'text';
-    document.getElementById("name").value = document.getElementById(nameid).textContent;
-    document.getElementById("oldName").value = question_name;
-    document.getElementById("text").value = document.getElementById(textid).textContent;
 }
 
 function changeQuestion() {
