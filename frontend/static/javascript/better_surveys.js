@@ -10,63 +10,53 @@ function set_type() {
     else { document.getElementById("answers").style.display="inline"; }
 }
 
-function create_question() {
-    //replaces createQuestion()
-    // grabs the question type, runs the correct logic to make a question.
-    var type = document.getElementById("type").value;
-    if (type == '1') { create_question_informational_text(); }
-    else if (type == '2') { create_question_slider(); }
-    else if (type == '3') { create_question_radio_button(); }
-    else if (type == '4') { create_question_checkbox(); }
-    else if (type == '5') { create_question_freeresponse(); }
-}
-
-function clear_modal() {
+function clearModal() {
     //this method replaces function clearModal()
-    /* Sets all attributes of the modal dialogue to empty/default values. */
-    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt"];
+    /*loop sets all attributes of the modal dialogue to empty/default values.*/
+    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","values_defaults", "answers", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
-        document.getElementById(attrs[i]).value = ""; }
-    var attrs2 = ["values_defaults", "answers", "text_field_type"];
-    for (i = 0; i < attrs2.length; i++) {
-        document.getElementById(attrs2[i]).value = "none"; }
+        if (i<=5) { document.getElementById(attrs[i]).value = ""; }
+        if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
+    }
     document.getElementById("type").value="1";
+    document.getElementById("saveQuestion").onclick=createQuestion;
 }
 
-function set_modal(x) {
+
+//TODO: setModal is generated in the HTML generation in surveys...
+function setModal(x) {
     document.getElementById("saveQuestion").onclick=changeQuestion;
-    var nameid = x + 'name';
-    var typeid = x + 'type';
-    var textid = x + 'text';
-    var rangeid = x + 'range';
-    var defaultid = x + 'default';
+    var type = document.getElementById(x + 'type').textContent;
+    
     var answersid = x + 'answers';
+    var defaultid = x + 'default';
+    var rangeid = x + 'range';
     var text_field_type = x + 'tft';
-
-    var type = document.getElementById(typeid).textContent;
-
+    
     if (type == "slider") {
         document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
         document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
-        set_element_type(2); }
-    else if (type == "radio_button") {
+        set_element_type(2);
+    } else if (type == "radio_button") {
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-        set_element_type(3); }
-    else if (type == "checkbox") {
+        set_element_type(3);
+    } else if (type == "checkbox") {
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-        set_element_type(4); }
-    else if (type == "free_response") {
+        set_element_type(4);
+    } else if (type == "free_response") {
         document.getElementById("tfttxt").value = document.getElementById(text_field_type).textContent;
-        set_element_type(5); }
-    else { set_element_type(1); }
+        set_element_type(5);
+    } else { set_element_type(1); }
     
+    var textid = x + 'text';
+    var nameid = x + 'name';
     document.getElementById("name").value = document.getElementById(nameid).textContent;
     document.getElementById("oldName").value = x;
     document.getElementById("text").value = document.getElementById(textid).textContent;
 }
 
-//Function unchanged from original
 function changeQuestion() {
+    //Function unchanged from original
     create_question();
     delete_question( document.question.oldName.value );
 }
@@ -86,6 +76,21 @@ function create_weekly_form() {
     form.setAttribute('action',"/update_weekly");
 }
 
+function create_question() {
+    //replaces createQuestion()
+    /* creates new question, adds header and footer, */
+    add_Q_header();
+    var type = document.getElementById("type").value;
+    if (type == '1') { create_question_informational_text(); }
+    else if (type == '2') { create_question_slider(); }
+    else if (type == '3') { create_question_radio_button(); }
+    else if (type == '4') { create_question_checkbox(); }
+    else if (type == '5') { create_question_freeresponse(); }
+    add_Q_footer();
+}
+
+
+//blah, these are not going to be for production.
 function add_Q_header() {
     var name = document.question.name.value;
     var header = '<div id="' + name + '" class="row">';
@@ -113,7 +118,6 @@ function sample_create_question_type() {
     add_Q_footer();
     add_to_survey(i); }
 */
-
 
 // question type 1 is not a question, it is a blob of text
 function create_question_informational_text() {
@@ -157,7 +161,11 @@ function add_to_survey(q) {
     $("survey").append(q);
 }
 
+
+
+
 function submit() {
+    // replaces end()
     var payload = JSON.stringify($('#survey').serializeArray());
     console.log(payload);
     $.post("/update_weekly", payload);
