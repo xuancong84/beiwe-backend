@@ -55,6 +55,15 @@ function setModal(x) {
     document.getElementById("text").value = document.getElementById(textid).textContent;
 }
 
+
+function create_form(){
+    var form = document.createElement("form");
+    form.setAttribute('method',"post");
+    form.setAttribute('action',"submit.php");
+}
+
+
+
 function changeQuestion() {
     //Function unchanged from original
     create_question();
