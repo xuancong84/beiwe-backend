@@ -1,4 +1,5 @@
 function setType() {
+    //Sets the type of question, sets view elements of the modal dialogue.
     if (document.getElementById("type").value == "1") {
         document.getElementById("values_defaults").style.display="none";
         document.getElementById("answers").style.display="none";
@@ -18,17 +19,28 @@ function setType() {
     }
 }
 
-function clearModal() {
-    document.getElementById("values_defaults").style.display="none";
+// not currently used, *seems* to work when swapped in, probably not easy to debug.
+function more_compact_setType() {
+    //this method replaces function setType()
+    //sets up fields? for form question submission?
     document.getElementById("answers").style.display="none";
+    document.getElementById("values_defaults").style.display="none";
     document.getElementById("text_field_type").style.display="none";
-    document.getElementById("name").value="";
-    document.getElementById("text").value="";
+    var type = document.getElementById("type").value;
+    if (type == "2") { document.getElementById("values_defaults").style.display="inline"; }
+    else if (type == "5") { document.getElementById("text_field_type").style.display="inline"; }
+    else { document.getElementById("answers").style.display="inline"; }
+}
+
+function clearModal() {
+    //this method replaces function clearModal()
+    /*loop sets all attributes of the modal dialogue to empty/default values.*/
+    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","values_defaults", "answers", "text_field_type"];
+    for (var i = 0; i < attrs.length; i++) {
+        if (i<=5) { document.getElementById(attrs[i]).value = ""; }
+        if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
+    }
     document.getElementById("type").value="1";
-    document.getElementById("valnum").value="";
-    document.getElementById("defnum").value="";
-    document.getElementById("anstxt").value="";
-    document.getElementById("tfttxt").value="";
     document.getElementById("saveQuestion").onclick=createQuestion;
 }
 
@@ -96,7 +108,7 @@ function changeQuestion() {
         document.getElementById(typeid).textContent = "free_response";
         document.getElementById(tftid).textContent = document.getElementById("tfttxt").value;
     } else {
-        document.getElementById(typeid).value = "informational_text";
+        document.getElementById(typeid).value = "informational_text";h
     }*/
 }
 
@@ -106,9 +118,9 @@ function createQuestion() {
     html += '<h3 id="' + name + 'name">' + name + '</h3>';
     html += '<input type="text" style="display:none;" name="' + name + '" value="' + name + '"></input>';
     if (document.getElementById("type").value == '2') {
-        html += '<p>Question type: <div id="' + name + 'type">slider</div></p>';
-        html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
-        html += '<p>Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>';
+        html += 'Question type: <div id="' + name + 'type">slider</div></p>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
+        html += 'Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>';
         html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div></p>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="slider"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
@@ -157,23 +169,23 @@ function deleteQuestion(x) {
 }
 
 function addHTML(html) {
-  if (document.all)
-    document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
-  else if (document.createRange) {
-    var range = document.createRange();
-    range.setStartAfter(document.body.lastChild);
-    var cFrag = range.createContextualFragment(html);
-    document.getElementById("newQuestions").appendChild(cFrag);
-  }
-  else if (document.layers) {
-    var X = new Layer(window.innerWidth);
-    X.document.open();
-    X.document.write(html);
-    X.document.close();
-    X.top = document.height;
-    document.height += X.document.height;
-    X.visibility = 'show';
-  }
+    if (document.all)
+        document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
+    else if (document.createRange) {
+        var range = document.createRange();
+        range.setStartAfter(document.body.lastChild);
+        var cFrag = range.createContextualFragment(html);
+        document.getElementById("newQuestions").appendChild(cFrag);
+    }
+    else if (document.layers) {
+        var X = new Layer(window.innerWidth);
+        X.document.open();
+        X.document.write(html);
+        X.document.close();
+        X.top = document.height;
+        document.height += X.document.height;
+        X.visibility = 'show';
+    }
 }
 
 function end() {
