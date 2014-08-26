@@ -1,5 +1,8 @@
 function setType() {
-    //Sets the type of question, sets view elements of the modal dialogue.
+    console.log("set type");
+
+    //Sets the type of question, sets up view elements for the modal dialogue.
+    //This setup is carried through into the questions created for the survey.
     if (document.getElementById("type").value == "1") {
         document.getElementById("values_defaults").style.display="none";
         document.getElementById("answers").style.display="none";
@@ -21,8 +24,7 @@ function setType() {
 
 // not currently used, *seems* to work when swapped in, probably not easy to debug.
 function more_compact_setType() {
-    //this method replaces function setType()
-    //sets up fields? for form question submission?
+    console.log();
     document.getElementById("answers").style.display="none";
     document.getElementById("values_defaults").style.display="none";
     document.getElementById("text_field_type").style.display="none";
@@ -32,8 +34,10 @@ function more_compact_setType() {
     else { document.getElementById("answers").style.display="inline"; }
 }
 
+
 function clearModal() {
-    //this method replaces function clearModal()
+    console.log("clear modal");
+    //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
     var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","values_defaults", "answers", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
@@ -44,76 +48,68 @@ function clearModal() {
     document.getElementById("saveQuestion").onclick=createQuestion;
 }
 
-function setModal(x) {
-//     console.log("set");
+function setModal(question_name) {
+    // Sets the values in the modal to match those of an existing question,
+    // so that you can edit that question.
+    /* question_name is a string of the name of the object (a surveyquestion) we are editting. */
+    console.log("question set.");
+    
+    //saveQuestion is the name of the button.
+    //TODO: change saveQuestion to something like saveQuestionButton
     document.getElementById("saveQuestion").onclick=changeQuestion;
-    var nameid = x + 'name';
-    var typeid = x + 'type';
-    var textid = x + 'text';
-    var rangeid = x + 'range';
-    var defaultid = x + 'default';
-    var answersid = x + 'answers';
-    var tftid = x + 'tft';
-    document.getElementById("name").value = document.getElementById(nameid).textContent;
-    document.getElementById("oldName").value = x;
-    document.getElementById("text").value = document.getElementById(textid).textContent;
-    if (document.getElementById(typeid).textContent == "slider") {
+    var type = document.getElementById("type")
+    
+    var rangeid = question_name + 'range';
+    var defaultid = question_name + 'default';
+    var answersid = question_name + 'answers';
+    var tftid = question_name + 'tft'; //text field type
+    
+    if (type.textContent == "slider") {
         console.log("slider");
-        document.getElementById("type").value = "2";
+        type.value = "2";
         document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
         document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
-    } else if (document.getElementById(typeid).textContent == "radio_button") {
+    } else if (type.textContent == "radio_button") {
         console.log("radio");
-         document.getElementById("type").value = "3";
+        type.value = "3";
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-    } else if (document.getElementById(typeid).textContent == "checkbox") {
+    } else if (type.textContent == "checkbox") {
         console.log("checkbox");
-        document.getElementById("type").value = "4";
+        type.value = "4";
         document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-    } else if (document.getElementById(typeid).textContent == "free_response") {
+    } else if (type.textContent == "free_response") {
         console.log("free");
-        document.getElementById("type").value = "5";
+        type.value = "5";
         document.getElementById("tfttxt").value = document.getElementById(tftid).textContent;
     } else {
         console.log("info");
-        document.getElementById("type").value = "1";
+        type.value = "1";
     }
+    
+    var nameid = question_name + 'name';
+    var textid = question_name + 'text';
+    document.getElementById("name").value = document.getElementById(nameid).textContent;
+    document.getElementById("oldName").value = question_name;
+    document.getElementById("text").value = document.getElementById(textid).textContent;
 }
 
 function changeQuestion() {
+    // Replaces the saved question with the contents of the working question.
     console.log("change");
     createQuestion();
-    x = document.question.oldName.value;
+    var x = document.question.oldName.value;
     deleteQuestion(x);
-    /*nameid = x + 'name';
-    typeid = x + 'type';
-    textid = x + 'text';
-    rangeid = x + 'range';
-    defaultid = x + 'default';
-    answersid = x + 'answers';
-    tftid = x + 'tft';
-    document.getElementById(nameid).textContent =  document.getElementById("name").value;
-    document.getElementById(textid).textContent = document.getElementById("text").value;
-    if (document.getElementById("type").value == "2") {
-        document.getElementById(typeid).textContent = "slider";
-        document.getElementById(rangeid).textContent = document.getElementById("valnum").value;
-        document.getElementById(defaultid).textContent = document.getElementById("defnum").value;
-    } else if (document.getElementById("type").value == "3") {
-         document.getElementById(typeid).textContent = "radio_button";
-        document.getElementById(answerid).textContent = document.getElementById("anstxt").value;
-    } else if (document.getElementById("type").value == "4") {
-        document.getElementById(typeid).textContent = "checkbox";
-        document.getElementById(answerid).textContent = document.getElementById("anstxt").value;
-    } else if (document.getElementById("type").value == "5") {
-        document.getElementById(typeid).textContent = "free_response";
-        document.getElementById(tftid).textContent = document.getElementById("tfttxt").value;
-    } else {
-        document.getElementById(typeid).value = "informational_text";h
-    }*/
+}
+
+function deleteQuestion(x) {
+    // deletes a question.
+    console.log("delete");
+    var old = document.getElementById(x);
+    old.parentNode.removeChild(old);
 }
 
 function createQuestion() {
-    name = document.question.name.value;
+    var name = document.question.name.value;
     var html = '<div id="' + name + '" class="row">';
     html += '<h3 id="' + name + 'name">' + name + '</h3>';
     html += '<input type="text" style="display:none;" name="' + name + '" value="' + name + '"></input>';
@@ -162,30 +158,31 @@ function createQuestion() {
     addHTML(html);
 }
 
-function deleteQuestion(x) {
-    console.log("delete");
-    var old = document.getElementById(x);
-    old.parentNode.removeChild(old);
-}
+
+//Accourding to Mike, we are probably good as long as they are running something newer than i.e. 7
+//TODO: put in a check somewhere about browser version.
 
 function addHTML(html) {
-    if (document.all)
-        document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
-    else if (document.createRange) {
-        var range = document.createRange();
-        range.setStartAfter(document.body.lastChild);
-        var cFrag = range.createContextualFragment(html);
-        document.getElementById("newQuestions").appendChild(cFrag);
-    }
-    else if (document.layers) {
-        var X = new Layer(window.innerWidth);
-        X.document.open();
-        X.document.write(html);
-        X.document.close();
-        X.top = document.height;
-        document.height += X.document.height;
-        X.visibility = 'show';
-    }
+    document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
+    //from following the code flow, the first one (document.all) must be the one that passes on modern browsers, and then the document
+//     if (document.all) { //document.all is a MS proprietary command, I believe this is code to handle IE.
+//         document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
+//     }
+//     else if (document.createRange) { //handles another case, only works in ie and Opera (but works on chris's firefox
+//         var range = document.createRange();
+//         range.setStartAfter(document.body.lastChild);
+//         var cFrag = range.createContextualFragment(html);
+//         document.getElementById("newQuestions").appendChild(cFrag);
+//     }
+//     else if (document.layers) { //and this is some old Netscape compatible javascript
+//         var X = new Layer(window.innerWidth);
+//         X.document.open();
+//         X.document.write(html);
+//         X.document.close();
+//         X.top = document.height;
+//         document.height += X.document.height;
+//         X.visibility = 'show';
+//     }
 }
 
 function end() {
