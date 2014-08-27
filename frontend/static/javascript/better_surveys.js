@@ -27,12 +27,12 @@ function clearModal() {
 function setModal(x) {
     document.getElementById("saveQuestion").onclick=changeQuestion;
     var type = document.getElementById(x + 'type').textContent;
-    
+
     var answersid = x + 'answers';
     var defaultid = x + 'default';
     var rangeid = x + 'range';
     var text_field_type = x + 'tft';
-    
+
     if (type == "slider") {
         document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
         document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
@@ -47,7 +47,7 @@ function setModal(x) {
         document.getElementById("tfttxt").value = document.getElementById(text_field_type).textContent;
         set_element_type(5);
     } else { set_element_type(1); }
-    
+
     var textid = x + 'text';
     var nameid = x + 'name';
     document.getElementById("name").value = document.getElementById(nameid).textContent;
@@ -237,4 +237,27 @@ function submit() {
     var payload = JSON.stringify($('#survey').serializeArray());
     console.log(payload);
     $.post("/update_weekly", payload);
+}
+
+
+
+
+
+/* JOSH EXPERIMENTAL CODE FOR RADIO BUTTON AND CHECKBOX QUESTIONS
+3 LINES OF NECESSARY HTML:
+<div id="fieldsDiv">
+</div>
+<button type="button" onclick="addField()">Add new field</button>
+*/
+function addField() {
+    /* TODO: give the input fields unique IDs! */
+    var fieldsDiv = document.getElementById('fieldsDiv');
+    var newField = document.createElement("div");
+    newField.innerHTML = '<input type="text" name="option' + 2 + '"></input><button type="button" onclick="deleteField(this)">Delete</button><br><br>';
+    /*alert(newField.innerHTML);*/
+    fieldsDiv.appendChild(newField);
+}
+
+function deleteField(elem) {
+    elem.parentNode.remove();
 }
