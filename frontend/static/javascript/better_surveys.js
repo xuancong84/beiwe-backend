@@ -161,10 +161,9 @@ function create_div(question_id, input_field_label, inner_text) {
     return div;
 }
 
-function create_text_field_div(question_id, inner_text){ return create_div(question_id, "Text Field Type: ", inner_text); }
 function create_question_type_div(question_id, inner_text){ return create_div(question_id, "Question Type: ", inner_text); }
 function create_question_text_div(question_id, inner_text){ return create_div(question_id, "Question Text: ", inner_text); }
-
+function create_text_field_div(question_id, inner_text){ return create_div(question_id, "Text Field Type: ", inner_text); }
 
 /*###########################################################################
 ####################################  Questions  ############################
@@ -172,41 +171,51 @@ function create_question_text_div(question_id, inner_text){ return create_div(qu
 
 
 function create_question_informational_text( question_id ) {
-    console.log( div = create_question_type_div(question_id, "text") );
-    console.log( div = create_question_text_div(question_id, "type") );
-    console.log( input1 = setup_input_field(question_id, "informational_text", "text", "data") );
-    console.log( input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value ) );
+    var div1 = create_question_type_div(question_id, "text");
+    var div2 = create_question_text_div(question_id, "type");
+    var input1 = setup_input_field(question_id, "informational_text", "text", "data");
+    var input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value );
     // add_to_survey(i);
 }
 
 
 // question type 2 is a slider
-function create_question_slider() {
-    var i = document.createElement("input");
-    i.type = "text";
-    i.question_id = document.question.name.value;
-    add_to_survey(i);
+function create_question_slider( question_id ) {
+    var div1 = create_question_type_div(question_id, "text");
+    var div2 = create_question_text_div(question_id, "type");
+    var div3 = create_div(question_id, "Values: ", "range");
+    var div4 = create_div(question_id, "Default: ", "default");
+    var input1 = setup_input_field(question_id, "slider", "text", "data");
+    var input2 = setup_input_field(question_id, "slider", "type", document.question.text.value );
+    var input3 = setup_input_field(question_id, "slider", "range", document.question.valnum.value );
+    var input4 = setup_input_field(question_id, "slider", "default", document.question.defnum.value );
 }
 // question type 3 is a radio button
 function create_question_radio_button() {
-    var i = document.createElement("input");
-    i.type = "text";
-    i.question_id = document.question.name.value;
-    add_to_survey(i);
+    var div1 = create_question_type_div(question_id, "text");
+    var div2 = create_question_text_div(question_id, "type");
+    var div3 = create_div(question_id, "Answers: ", inner_text);
+    var input1 = setup_input_field(question_id, "informational_text", "text", "data");
+    var input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value );
+    var input3 = setup_input_field(question_id, "informational_text", "type", document.question.anstxt.value );
 }
 // question type 4 is a checkbox
 function create_question_checkbox() {
-    var i = document.createElement("input");
-    i.type = "checkbox";
-    i.question_id = document.question.name.value;
-    add_to_survey(i);
+    var div1 = create_question_type_div(question_id, "text");
+    var div2 = create_question_text_div(question_id, "type");
+    var div3 = create_div(question_id, "Answers: ", inner_text);
+    var input1 = setup_input_field(question_id, "informational_text", "text", "data");
+    var input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value );
+    var input3 = setup_input_field(question_id, "informational_text", "type", document.question.anstxt.value );
 }
 // question type 5 is a free response
 function create_question_freeresponse() {
-    var i = document.createElement("input");
-    i.type = "text";
-    i.question_id = document.question.name.value;
-    add_to_survey(i);
+    var div1 = create_question_type_div(question_id, "text");
+    var div2 = create_question_text_div(question_id, "type");
+    var div3 = create_text_field_div(question_id, "tft");
+    var input1 = setup_input_field(question_id, "informational_text", "text", "data");
+    var input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value );
+    var input3 = setup_input_field(question_id, "informational_text", "type", document.question.tfttxt.value );
 }
 
 
