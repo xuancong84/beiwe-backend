@@ -123,7 +123,7 @@ function createQuestion() {
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '4') {
-        html += 'Question type: <div id="' + name + 'type">checkbox</div>';
+        html += ' <div id="' + name + 'type">Question type:checkbox</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Answers:';
         html += '<div id="' + name + 'answers">';
