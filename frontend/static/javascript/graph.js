@@ -22,10 +22,11 @@ function steve (){
         // options for each axis are specified in seperate option objects.
         xaxis: {
           show: false,
-          label: "X Axis"
+          label: "X Axis",
           // Turn off "padding".  This will allow data point to lie on the
           // edges of the grid.  Default padding is 1.2 and will keep all
           // points inside the bounds of the grid.
+          pad: 0.5
         },
         yaxis: {
             // showTicks : false,
