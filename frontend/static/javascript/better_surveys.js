@@ -134,7 +134,7 @@ function create_question() {
     //replaces createQuestion()
     //this is actually a... quesion identifier of some form?
     /* creates new question, adds header and footer, */
-    question_id = document.question.value
+    var question_id = document.question.value;
     add_Q_header(question_id);
     var type = document.getElementById("type").value;
     if (type == '1') { create_question_informational_text( question_id ); }
@@ -159,15 +159,23 @@ function setup_input_field(question_id, input_field_label, info_type, value) {
 }
 
 //type is unused
-function create_div(question_id, input_field_label, type) {
-    // create_div("abcdefg", "12345") results in...
-    // <div id=​"abcdefg" our_type=​"a_type">​12345​</div>​
+function create_div(question_id, input_field_label, inner_text) {
+    // create_div("abcdefg", 'x', 'y') results in...
+    //     <div id=​"abcdefg">​
+    //         "x"
+    //         "y"
+    //     </div>​
     var div = document.createElement( "div" );
     div.setAttribute("id", question_id );
-    div.setAttribute( "our_type", type );
     div.appendChild( document.createTextNode( input_field_label ) );
+    div.appendChild( document.createTextNode( inner_text ) );
+    //we don't know exactly the da
     return div;
 }
+
+function create_text_field_div(question_id, inner_text){ return create_div(question_id, "Text Field Type: ", inner_text); }
+function create_question_type_div(question_id, inner_text){ return create_div(question_id, "Question Type: ", inner_text); }
+function create_question_text_div(question_id, inner_text){ return create_div(question_id, "Question Text: ", inner_text); }
 
 
 /*###########################################################################
@@ -175,30 +183,14 @@ function create_div(question_id, input_field_label, type) {
 ###########################################################################*/
 
 
-// not sure if this output is correct, test by shoving it into existing HTML += things.
-// html += '<div id=​"1234567890" our_type=​"text">​informational text​</div>​'
-// html += '<div id=​"1234567890" our_type=​"type">​informational text​</div>​'
-// html += '<input type=​"text" style=​"display:​none;​" question_id=​"1234567890" input_field_label=​"informational_text" value=​"data">​'
-// html += '<input type=​"type" style=​"display:​none;​" question_id=​"1234567890" input_field_label=​"informational_text" value=document.question.text.value>​'
-
-
-// question type 1 is not a question, it is a blob of text
 function create_question_informational_text( question_id ) {
-    var div1 = create_div(1234567890, "informational text", "text");
-    var div2 = create_div(1234567890, "informational text", "type");
-    var input1 = setup_input_field(1234567890, "informational_text", "text", "data");
-    var input2 = setup_input_field(1234567890, "informational_text", "type", document.question.text.value );
+    console.log( div = create_question_type_div(question_id, "text") );
+    console.log( div = create_question_text_div(question_id, "type") );
+    console.log( input1 = setup_input_field(question_id, "informational_text", "text", "data") );
+    console.log( input2 = setup_input_field(question_id, "informational_text", "type", document.question.text.value ) );
     // add_to_survey(i);
 }
 
-// question type 1 is not a question, it is a blob of text
-// function create_question_informational_text( question_id ) {
-//     console.log( div = create_div(1234567890, "informational text", "text") );
-//     console.log( div = create_div(1234567890, "informational text", "type") );
-//     console.log( input1 = setup_input_field(1234567890, "informational_text", "text", "data") );
-//     console.log( input2 = setup_input_field(1234567890, "informational_text", "type", document.question.text.value ) );
-//     // add_to_survey(i);
-// }
 
 // question type 2 is a slider
 function create_question_slider() {
@@ -238,8 +230,6 @@ function submit() {
     console.log(payload);
     $.post("/update_weekly", payload);
 }
-
-
 
 
 
