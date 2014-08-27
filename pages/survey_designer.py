@@ -31,9 +31,9 @@ def save_new_weekly():
     """
     Method responsible for saving newly created weekly survey (frequency 1)
     """
-#     print request.values
-#     print request.form
-#     print request
+    print request.values, "\n-\n"
+    print request.form, "\n-\n"
+    print request
     weeklies = get_surveys("survey/weekly/")
 #     print "weeklies done"
     key_name = "survey/weekly/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(weeklies) + 1)

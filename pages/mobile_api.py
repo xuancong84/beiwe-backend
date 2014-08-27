@@ -1,6 +1,8 @@
 from flask import Blueprint, request, abort, jsonify, json
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler, list_s3_files, s3_retrieve
+from flask import request, render_template
+
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -104,3 +106,11 @@ def upload():
         return'200'
     else:
         abort(400)
+
+
+
+
+@mobile_api.route('/graph')
+def fetch_graph():
+    return render_template("phone_graphs.html")
+
