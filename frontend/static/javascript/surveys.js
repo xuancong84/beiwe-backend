@@ -105,46 +105,46 @@ function createQuestion() {
     html += '<h3 id="' + name + 'name">' + name + '</h3>';
     html += '<input type="text" style="display:none;" name="' + name + '" value="' + name + '"></input>';
     if (document.getElementById("type").value == '2') {
-        html += 'Question type: <div id="' + name + 'type">slider</div></p>';
+        html += 'Question type: <div id="' + name + 'type">slider</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>';
-        html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div>>';
+        html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="slider"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'range" value="' + document.question.valnum.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'default" value="' + document.question.defnum.value + '"></input>';
     } else if (document.getElementById("type").value == '3') {
-        html += '<p>Question type: <div id="' + name + 'type">radio_button</div></p>';
-        html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
-        html += '<p>Answers:';
+        html += 'Question type: <div id="' + name + 'type">radio_button</div>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
+        html += 'Answers:';
         html += '<div id="' + name + 'answers">';
-        html += document.getElementById('anstxt').value + '</div></p>';
+        html += document.getElementById('anstxt').value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="radio_button"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '4') {
-        html += '<p>Question type: <div id="' + name + 'type">checkbox</div></p>';
-        html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
-        html += '<p>Answers:';
+        html += 'Question type: <div id="' + name + 'type">checkbox</div>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
+        html += 'Answers:';
         html += '<div id="' + name + 'answers">';
-        html += document.question.anstxt.value + '</div></p>';
+        html += document.question.anstxt.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="checkbox"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '5') {
-        html += '<p>Question type: <div id="' + name + 'type">free_response</div></p>';
-        html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
-        html += '<p>Text Field Type: <div id="' + name + 'tft">' + document.question.tfttxt.value + '</div></p>';
+        html += 'Question type: <div id="' + name + 'type">free_response</div>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
+        html += 'Text Field Type: <div id="' + name + 'tft">' + document.question.tfttxt.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="free_response"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'tft" value="' + document.question.tfttxt.value + '"></input>';
     } else {
-        html += '<p>Question type: <div id="' + name + 'type">informational_text</div></p>';
-        html += '<p>Question text: <div id="' + name + 'text">' + document.question.text.value + '</div></p>';
+        html += 'Question type: <div id="' + name + 'type">informational_text</div>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="informational_text"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
     }
-    html += '<p><button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>';
+    html += '<button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>';
     html += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + name + '\'); return false;">Delete</button>';
     addHTML(html);
 }
@@ -152,10 +152,9 @@ function createQuestion() {
 
 //Accourding to Mike, we are probably good as long as they are running something newer than i.e. 7
 //TODO: put in a check somewhere about browser version.
-
 function addHTML(html) {
     document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
-    //from following the code flow, the first one (document.all) must be the one that passes on modern browsers, and then the document
+//from following the code flow, the first one (document.all) must be the one that passes on modern browsers, and then the document
 //     if (document.all) { //document.all is a MS proprietary command, I believe this is code to handle IE.
 //         document.getElementById("newQuestions").insertAdjacentHTML('beforeEnd', html);
 //     }
@@ -177,7 +176,17 @@ function addHTML(html) {
 }
 
 function end() {
-    var payload = JSON.stringify($('#survey').serializeArray());
+//     var payload = JSON.stringify($('#survey').serializeArray());
+    //this works
+    var payload = JSON.stringify($( document.getElementsByName("survey") ).serializeArray());
     console.log(payload);
     $.post("/update_weekly", payload);
 }
+
+
+
+function get_survey(){
+    return document.getElementByName("survey");
+    
+}
+
