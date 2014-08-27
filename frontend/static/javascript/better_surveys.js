@@ -1,15 +1,3 @@
-function set_type() {
-    //this method replaces function setType()
-    //sets up fields? for form question submission?
-    document.getElementById("answers").style.display="none";
-    document.getElementById("values_defaults").style.display="none";
-    document.getElementById("text_field_type").style.display="none";
-    var type = document.getElementById("type").value;
-    if (type == "2") { document.getElementById("values_defaults").style.display="inline"; }
-    else if (type == "5") { document.getElementById("text_field_type").style.display="inline"; }
-    else { document.getElementById("answers").style.display="inline"; }
-}
-
 function clearModal() {
     //this method replaces function clearModal()
     /*loop sets all attributes of the modal dialogue to empty/default values.*/

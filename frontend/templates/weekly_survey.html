@@ -38,7 +38,7 @@
     <br>
 
     <!--Display existing questions-->
-    {% for c in wquestions %}
+    {% for c in questions %}
         <div id="{{ c._name }}" class="row">
             <h3 id="{{ c._name }}name">{{ c._name }}</h3>
             <p>Question type: <div id="{{ c._name }}type">{{ c._type }}</div></p>
