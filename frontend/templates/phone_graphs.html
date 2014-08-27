@@ -1,21 +1,22 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Example</title>
-<link rel="stylesheet" href="C:\Users\user\Desktop\Projects\HTML\dist\jquery.jqplot.css">
-<script type="text/javascript" src="C:\Users\user\Desktop\Projects\HTML\dist\jquery.min.js"></script>
-<script type="text/javascript" src="C:\Users\user\Desktop\Projects\HTML\dist\jquery.jqplot.min.js"></script>
-<script type="text/javascript" src="C:\Users\user\Desktop\Projects\HTML\dist\plugins\jqplot.canvasAxisLabelRenderer.min.js"></script>
-<script type="text/javascript" src="C:\Users\user\Desktop\Projects\HTML\dist\plugins\jqplot.canvasTextRenderer.min.js"></script>
+<link rel="stylesheet" href="../static/css/phone-jqplot.css">
+<script type="text/javascript" src="../static/javascript/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../static/javascript/jqplot/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="../static/javascript/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+<script type="text/javascript" src="../static/javascript/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
 <script>
 $(document).ready(function(){
   var plot1 = $.jqplot ('chart1', [[3,7,9,1,4,6,8,2,5]], {
 // Give the plot a title.
       title: 'Graph Of a question',
-      animate: true,	
+      animate: true,
       series:[{
             // Don't show a line, just show markers.
             // Make the markers 7 pixels with an 'x' style
-            // showLine:false, 
+            // showLine:false,
             markerOptions: { size: 7, style:"x" },
           }],
       // You can specify options for all axes on the plot at once with
@@ -44,7 +45,7 @@ $(document).ready(function(){
         labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
 		tickRenderer:$.jqplot.CanvasAxisTickRenderer
       },
-      seriesColors: ["#7BB661", "#E03C31"]  
+      seriesColors: ["#7BB661", "#E03C31"]
     });
 });
 </script>
