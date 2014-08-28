@@ -1,6 +1,6 @@
 function setType() {
     console.log("set type");
-
+    //TODO: compactify this code (set things to none at the beginning, then change things.)
     //Sets the type of question, sets up view elements for the modal dialogue.
     //This setup is carried through into the questions created for the survey.
     if (document.getElementById("type").value == "1") {
@@ -22,19 +22,6 @@ function setType() {
     }
 }
 
-// not currently used, *seems* to work when swapped in, probably not easy to debug.
-function more_compact_setType() {
-    console.log();
-    document.getElementById("answers").style.display="none";
-    document.getElementById("values_defaults").style.display="none";
-    document.getElementById("text_field_type").style.display="none";
-    var type = document.getElementById("type").value;
-    if (type == "2") { document.getElementById("values_defaults").style.display="inline"; }
-    else if (type == "5") { document.getElementById("text_field_type").style.display="inline"; }
-    else { document.getElementById("answers").style.display="inline"; }
-}
-
-
 function clearModal() {
     console.log("clear modal");
     //resets the modal dialogue values to empty, used when creating a new question.
@@ -49,18 +36,22 @@ function clearModal() {
 }
 
 function setModal(question_name) {
-    console.log("set");
+    //TODO: only answerID is used more than once in the logic.
+    //TODO: typeid is only ever used as part of document.getElementById(typeid).textContent
+    console.log("setModal");
     document.getElementById("saveQuestion").onclick=changeQuestion;
     var nameid = question_name + 'name';
-    var typeid = question_name + 'type';
-    var textid = question_name + 'text';
-    var rangeid = question_name + 'range';
-    var defaultid = question_name + 'default';
-    var answersid = question_name + 'answers';
-    var tftid = question_name + 'tft';
     document.getElementById("name").value = document.getElementById(nameid).textContent;
-    document.getElementById("oldName").value = question_name;
+    var textid = question_name + 'text';
     document.getElementById("text").value = document.getElementById(textid).textContent;
+    
+    var rangeid = question_name + 'range';
+    var typeid = question_name + 'type';
+    var defaultid = question_name + 'default';
+    var tftid = question_name + 'tft';
+    var answersid = question_name + 'answers';
+
+    document.getElementById("oldName").value = question_name;
     if (document.getElementById(typeid).textContent == "slider") {
         console.log("slider");
         document.getElementById("type").value = "2";
@@ -93,12 +84,14 @@ function changeQuestion() {
 }
 
 function deleteQuestion(x) {
+    //TODO: track down exactly what x is, rename variable accordingly.
     // deletes a question.
     console.log("delete");
     var old = document.getElementById(x);
     old.parentNode.removeChild(old);
 }
 
+// shall henceforth be referred to as "The Monster"
 function createQuestion() {
     var name = document.question.name.value;
     var html = '<div id="' + name + '" class="row">';
@@ -175,8 +168,12 @@ function addHTML(html) {
 //     }
 }
 
+
 function end() {
-//     var payload = JSON.stringify($('#survey').serializeArray());
+    //TODO: work out the python command to pull this of the form submission,
+    // I think json.dumps(request.files["survey"])).
+    //old: var payload = JSON.stringify($('#survey').serializeArray());
+
     //this works
     var payload = JSON.stringify($( document.getElementsByName("survey") ).serializeArray());
     console.log(payload);

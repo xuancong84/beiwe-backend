@@ -9,6 +9,7 @@ def get_surveys(prefix="survey/"):
     surveys = list_s3_files(prefix)
     return [i.strip(prefix).strip(".json") for i in surveys]
 
+
 def get_latest_weekly():
     """
     Method responsible for fetching latest created weekly survey (frequency 1)
@@ -17,6 +18,7 @@ def get_latest_weekly():
     weeklies = sorted(weeklies, reverse=True)
     return jsonify(s3_retrieve(weeklies[0]))
 
+
 def get_latest_daily():
     """
     Method responsible for fetching latest created daily survey (frequency 1)
@@ -24,6 +26,7 @@ def get_latest_daily():
     dailies = get_surveys("survey/daily/")
     dailies = sorted(dailies, reverse=True)
     return jsonify(s3_retrieve(dailies[0]))
+
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated
@@ -53,6 +56,7 @@ def save_new_weekly():
 #     print "upload done"
     return redirect("/weekly_survey/")
 
+
 @survey_designer.route('/update_daily')
 @auth.authenticated
 def save_new_daily():
@@ -67,11 +71,14 @@ def save_new_daily():
     s3_upload_handler(key_name, json.dumps(request.files["json"]))
     return redirect("/daily_survey/")
 
+
+
 @survey_designer.route('/survey_designer')
 @auth.authenticated
 def render_survey_builder():
     data = {}
     return render_template('survey_designer.html', data)
+
 
 @survey_designer.route('/surveys')
 @auth.authenticated
@@ -82,20 +89,24 @@ def render_surveys():
            }
     return render_template('surveys.html', data)
 
+
 @survey_designer.route('/survey_designer')
 @auth.authenticated
 def render_survey_designer():
     return render_template('survey_designer.html')
+
 
 @survey_designer.route('/question_designer')
 @auth.authenticated
 def question_designer():
     return render_template('question_designer.html')
 
+
 @survey_designer.route('/weekly_survey')
 @auth.authenticated
 def weekly_survey():
     return render_template('weekly_survey.html')
+
 
 @survey_designer.route('/daily_survey')
 @auth.authenticated

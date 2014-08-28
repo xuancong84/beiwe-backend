@@ -11,39 +11,6 @@ function clearModal() {
 }
 
 
-//TODO: setModal is generated in the HTML generation in surveys...
-function setModal(x) {
-    document.getElementById("saveQuestion").onclick=changeQuestion;
-    var type = document.getElementById(x + 'type').textContent;
-
-    var answersid = x + 'answers';
-    var defaultid = x + 'default';
-    var rangeid = x + 'range';
-    var text_field_type = x + 'tft';
-
-    if (type == "slider") {
-        document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
-        document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
-        set_element_type(2);
-    } else if (type == "radio_button") {
-        document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-        set_element_type(3);
-    } else if (type == "checkbox") {
-        document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
-        set_element_type(4);
-    } else if (type == "free_response") {
-        document.getElementById("tfttxt").value = document.getElementById(text_field_type).textContent;
-        set_element_type(5);
-    } else { set_element_type(1); }
-
-    var textid = x + 'text';
-    var nameid = x + 'name';
-    document.getElementById("name").value = document.getElementById(nameid).textContent;
-    document.getElementById("oldName").value = x;
-    document.getElementById("text").value = document.getElementById(textid).textContent;
-}
-
-
 function create_form(){
     //this is an example, we are not using php
     var form = document.createElement("form");
