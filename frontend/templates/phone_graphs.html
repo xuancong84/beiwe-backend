@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Example</title>
+<title>Rendered graph for user</title>
 <link rel="stylesheet" href="/static/css/phone-jqplot.css">
 <script type="text/javascript" src="/static/javascript/jquery-1.11.1.js"></script>
 <script type="text/javascript" src="/static/javascript/jqplot/jquery.jqplot.min.js"></script>
 <script type="text/javascript" src="/static/javascript/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
 <script type="text/javascript" src="/static/javascript/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="/static/javascript/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script type="text/javascript" src="/static/javascript/jqplot/plugins/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="/static/javascript/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
 <script type="text/javascript" src="/static/javascript/graph.js"></script>
 </head>
-<body onload="steve()">
+
+<body>
 <div id="chart1" style="margin-top:20px; margin-left:20px; width:400px; height:300px;"></div>
 <br>
-<div style="margin-top:20px; margin-left:20px; width:400px; height:300px;">
-<h3> This is where the buttons for other questions go! </h3>
-
+<div style="margin-top:20px; margin-left:20px; width:400px; height:300px; text-align:center">
+    <h3> Choose a question to view its past results </h3>
+    <button type="button" onclick="replot_user_results(1)">Question 1</button>
+    <button type="button" onclick="alert('Hello world!')">Question 2</button>
+    <button type="button" onclick="alert('Hello world!')">Question 3</button><br>
+    <button type="button" onclick="alert('Hello world!')">Question 4</button>
+    <button type="button" onclick="alert('Hello world!')">Question 5</button>
+    <button type="button" onclick="alert('Hello world!')">Question 6</button><br>
+    <button type="button" onclick="alert('Hello world!')">Question 7</button>
+    <button type="button" onclick="alert('Hello world!')">Question 8</button>
+    <button type="button" onclick="alert('Hello world!')">Question 9</button>
 </div>
+
 </body>
 </html>
