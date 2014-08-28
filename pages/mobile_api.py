@@ -110,5 +110,5 @@ def upload():
 
 @mobile_api.route('/graph')
 def fetch_graph():
-    return render_template("phone_graphs.html", json_blob)
+    return render_template("phone_graphs.html")
 
