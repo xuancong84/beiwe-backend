@@ -13,11 +13,9 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
 def login_or_register_user():
-    """
-    TODO: Spec: Web app on server is responsible for relaying and storing password information, as well as checking
+    """ TODO: Spec: Web app on server is responsible for relaying and storing password information, as well as checking
     password match upon future login attempts, and given a successful match, redirects to another web page which a user
-    see's a list and graph of past survey responses.
-    """
+    see's a list and graph of past survey responses. """
     user_id = request.values["username"]
     password = request.values["password"]
     #TODO:
@@ -31,22 +29,20 @@ def login_or_register_user():
     else:
         return "User Password combination not found"
 
+
 def fetch_user_responses(user_id):
-    """
-    Method fetches a user's survey responses. TODO: untested
-    """
+    """ Method fetches a user's survey responses. TODO: untested """
     all_responses = {}
     list_of_s3names = list_s3_files(user_id + 'surveyResponses')
     for l in list_of_s3names:
         all_responses["l"] = s3_retrieve(l)
     return all_responses
 
+
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
 #@auth.authenticated #TODO to make authenticated on user level
 def render_user_panel(user_id):
-    """
-    Method displays user information.
-    """
+    """ Method displays user information. """
     responses = fetch_user_responses(user_id)
     return jsonify(responses)
     #TODO:
@@ -54,11 +50,10 @@ def render_user_panel(user_id):
     # 2. Render list of contents
     # 3. Render graph if applicable
 
+
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
-    """
-    Method responsible for serving the latest survey JSON.
-    """
+    """ Method responsible for serving the latest survey JSON. """
     f = open("/var/www/scrubs/sample_survey.json", 'rb')
     return jsonify(json.load(f))
     if request.method == 'POST':
@@ -67,34 +62,30 @@ def fetch_survey():
     else:
         return
 
+
 def parse_filetype(filename):
-    """
-    Splits filename into user-id, file-type, unix-timestamp
-    """
+    """ Splits filename into user-id, file-type, unix-timestamp """
     l = filename.split("_")
     if len(l) == 3:
         return l[0], l[1], l[2]
 
+
 def s3_prep_filename(filename):
-    """
-    Preps a filename to become a S3 file path for prefix organization.
-    """
+    """ Preps a filename to become a S3 file path for prefix organization. """
     replacemnts = {"_": "/"}
     for k,v in replacemnts.iteritems():
         filename = filename.replace(k,v )
     return filename
 
+
 def allowed_extension(filename):
-    """
-    Method checks to see if uploaded file has filename that ends in an allowed extension. Does not verify content.
-    """
+    """ Method checks to see if uploaded file has filename that ends in an allowed extension. Does not verify content. """
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @mobile_api.route('/upload', methods=['POST'])
 def upload():
-    """
-    Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log, and Survey Response files.
-    """
+    """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log, and Survey Response files. """
     uploaded_file = request.files['file']
     #Method werkzeug.secure_filename may return empty if unsecure
     file_name = secure_filename(uploaded_file.filename)
@@ -106,6 +97,8 @@ def upload():
         return'200'
     else:
         abort(400)
+
+
 
 
 @mobile_api.route('/graph')

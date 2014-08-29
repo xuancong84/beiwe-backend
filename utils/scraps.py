@@ -9,10 +9,10 @@ def read_csv_other(csv_string):
     #grab a list of every line in the file, strips off trailing whitespace.
     #
     lines = [ line for line in csv_string.splitlines() ]
-
+    
     header_list = lines[0].split(',')
     list_of_entries = []
-
+    
     for line in lines[1:]:
         data = line.split(',')
         #creates a dict of {column name: data point, ...}
