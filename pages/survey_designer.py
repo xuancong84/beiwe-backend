@@ -11,18 +11,15 @@ def get_surveys(prefix="survey/"):
 
 
 def get_latest_weekly():
-    """
-    Method responsible for fetching latest created weekly survey (frequency 1)
-    """
+    """ Method responsible for fetching latest created weekly survey
+        (frequency 1) """
     weeklies = get_surveys("survey/weekly/")
     weeklies = sorted(weeklies, reverse=True)
     return jsonify(s3_retrieve(weeklies[0]))
 
 
 def get_latest_daily():
-    """
-    Method responsible for fetching latest created daily survey (frequency 1)
-    """
+    """ Method responsible for fetching latest created daily survey (frequency 1) """
     dailies = get_surveys("survey/daily/")
     dailies = sorted(dailies, reverse=True)
     return jsonify(s3_retrieve(dailies[0]))
@@ -31,9 +28,7 @@ def get_latest_daily():
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated
 def save_new_weekly():
-    """
-    Method responsible for saving newly created weekly survey (frequency 1)
-    """
+    """ Method responsible for saving newly created weekly survey (frequency 1) """
     print request.values, "\n-\n"
     print request.form, "\n-\n"
     print request
@@ -60,17 +55,11 @@ def save_new_weekly():
 @survey_designer.route('/update_daily')
 @auth.authenticated
 def save_new_daily():
-    """
-    Method responsible for saving newly created daily survey (frequency 1)
-    """
-#     print request.values
-#     print request.form
-#     print request
+    """ Method responsible for saving newly created daily survey (frequency 1) """
     dailies = get_surveys("survey/daily/")
     key_name = "survey/daily/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(dailies) + 1)
     s3_upload_handler(key_name, json.dumps(request.files["json"]))
     return redirect("/daily_survey/")
-
 
 
 @survey_designer.route('/survey_designer')
