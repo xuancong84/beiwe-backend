@@ -16,18 +16,15 @@
 <body>
 <div id="chart1" style="margin-top:20px; margin-left:20px; width:400px; height:400;"></div>
 <br>
-<div style="margin-top:20px; margin-left:20px; width:400px; height:300px; text-align:center">
+<div style="margin-top:20px; margin-left:20px; width:400px; height:200px; text-align:center">
     <h3> Choose a question to view its past results </h3>
     <!-- There actually is a way to make this section better. For now, keep like this.. -->
-    <button type="button" onclick="replot_user_results(1)">Question 1</button>
-    <button type="button" onclick="alert('Hello world!')">Question 2</button>
-    <button type="button" onclick="alert('Hello world!')">Question 3</button><br>
-    <button type="button" onclick="alert('Hello world!')">Question 4</button>
-    <button type="button" onclick="alert('Hello world!')">Question 5</button>
-    <button type="button" onclick="alert('Hello world!')">Question 6</button><br>
-    <button type="button" onclick="alert('Hello world!')">Question 7</button>
-    <button type="button" onclick="alert('Hello world!')">Question 8</button>
-    <button type="button" onclick="alert('Hello world!')">Question 9</button>
+    {% for i in range (1, 10) %}
+        <button type="button" onClick="alert({{i}})">Question {{i}}</button>
+        {% if (i is divisibleby 3) %}
+            <br>
+        {% endif %}
+    {% endfor %}
 </div>
 </body>
 </html>
