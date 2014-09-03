@@ -98,6 +98,20 @@ def upload():
     else:
         abort(400)
 
+#TODO:
+# # this should be a dynamic page, probably looking like "uuid/graph"
+# # google dynamic URL in flask?
+# @mobile_api.route('/users/<int:userid>/')
+# def graph(userid):
+#
+
+# def graph(user_id)
+# 1) check against user credentials (stored in s3) to authenticate
+# - what does the credentials file look like in s3? well, it can be as simple as "user_identifier_credentials.pem" with the contents being the hashed username-device-identier/password
+# 2) once you've determined they are authenticated, you need pull the last two weeks of relevant csv files. There S3 functions to do that, namely, something like "mobile_api.fetch_user_responses"
+# 3)  once you pulled and aggregated that data, you need to transform that data into the appropriate format for Dori's graphing component
+# 4) you need to render a template with the appropriate graph
+
 
 
 
