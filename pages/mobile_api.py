@@ -119,3 +119,16 @@ def upload():
 def fetch_graph():
     return render_template("phone_graphs.html")
 
+
+
+@mobile_api.route('/fetch_key', methods=['GET', 'POST'])
+def fetch_key():
+    """ Method responsible for serving the latest survey JSON. """
+    f = open("/var/www/scrubs/keyFile", 'rb')
+    return f.read()
+#     return jsonify(json.load(f))
+#     if request.method == 'POST':
+#         if request.values["magic"] == "12345":
+#             return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
+#     else:
+#         return
