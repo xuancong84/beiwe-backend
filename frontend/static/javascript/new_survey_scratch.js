@@ -158,7 +158,7 @@ function create_question_slider( question_id ) {
     var input4 = setup_input_field(question_id, "slider", "default", document.question.defnum.value );
 }
 // question type 3 is a radio button
-function create_question_radio_button() {
+function create_question_radio_button( question_id ) {
     var div1 = create_question_type_div(question_id, "text");
     var div2 = create_question_text_div(question_id, "type");
     var div3 = create_div(question_id, "Answers: ", inner_text);
@@ -167,7 +167,7 @@ function create_question_radio_button() {
     var input3 = setup_input_field(question_id, "informational_text", "type", document.question.anstxt.value );
 }
 // question type 4 is a checkbox
-function create_question_checkbox() {
+function create_question_checkbox( question_id ) {
     var div1 = create_question_type_div(question_id, "text");
     var div2 = create_question_text_div(question_id, "type");
     var div3 = create_div(question_id, "Answers: ", inner_text);
@@ -176,7 +176,7 @@ function create_question_checkbox() {
     var input3 = setup_input_field(question_id, "informational_text", "type", document.question.anstxt.value );
 }
 // question type 5 is a free response
-function create_question_freeresponse() {
+function create_question_freeresponse( question_id ) {
     var div1 = create_question_type_div(question_id, "text");
     var div2 = create_question_text_div(question_id, "type");
     var div3 = create_text_field_div(question_id, "tft");
