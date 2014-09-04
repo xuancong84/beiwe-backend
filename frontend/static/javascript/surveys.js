@@ -44,7 +44,7 @@ function setModal(question_name) {
     document.getElementById("name").value = document.getElementById(nameid).textContent;
     var textid = question_name + 'text';
     document.getElementById("text").value = document.getElementById(textid).textContent;
-    
+
     var rangeid = question_name + 'range';
     var typeid = question_name + 'type';
     var defaultid = question_name + 'default';
@@ -116,8 +116,8 @@ function createQuestion() {
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '4') {
-        html += ' <div id="' + name + 'type">Question type: checkbox</div>';
-        html += <div id="' + name + 'text">''Question text:  + document.question.text.value + '</div>';
+        html += ' <div id="' + name + 'type">Question type:checkbox</div>';
+        html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Answers:';
         html += '<div id="' + name + 'answers">';
         html += document.question.anstxt.value + '</div>';
@@ -184,6 +184,6 @@ function end() {
 
 function get_survey(){
     return document.getElementByName("survey");
-    
+
 }
 
