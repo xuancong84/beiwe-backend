@@ -6,20 +6,33 @@ function setType() {
     if (document.getElementById("type").value == "1") {
         document.getElementById("values_defaults").style.display="none";
         document.getElementById("answers").style.display="none";
+        document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "2") {
         document.getElementById("values_defaults").style.display="inline";
         document.getElementById("answers").style.display="none";
+        document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "5") {
         document.getElementById("values_defaults").style.display="none";
         document.getElementById("answers").style.display="none";
+        document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="inline";
     } else {
         document.getElementById("values_defaults").style.display="none";
         document.getElementById("answers").style.display="inline";
+        document.getElementById("fields_div").style.display="inline";
         document.getElementById("text_field_type").style.display="none";
     }
+}
+
+function addField() {
+    /* TODO: give the input fields unique IDs! */
+    var fieldsDiv = document.getElementById('fieldsDiv');
+    var newField = document.createElement("div");
+    newField.innerHTML = '<input type="text" name="option' + 2 + '"></input><button type="button" onclick="deleteField(this)">Delete</button><br><br>';
+    /*alert(newField.innerHTML);*/
+    fieldsDiv.appendChild(newField);
 }
 
 function clearModal() {

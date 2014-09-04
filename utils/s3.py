@@ -40,6 +40,5 @@ def s3_retrieve( key_name ):
     key = Key(_get_bucket(DB), key_name)
     return key.read()
 
-
 def s3_retreive_two_weeks( prefix ): pass
     #TODO: using a user ID retrieve two weeks (14 points??) of data
