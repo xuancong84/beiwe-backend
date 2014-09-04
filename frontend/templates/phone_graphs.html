@@ -20,7 +20,7 @@
     <h3> Choose a question to view its past results </h3>
     <!-- There actually is a way to make this section better. For now, keep like this.. -->
     {% for i in range (1, 10) %}
-        <button type="button" onClick="alert({{i}})">Question {{i}}</button>
+        <button type="button" onClick="replot_user_results({{i}})">Question {{i}}</button>
         {% if (i is divisibleby 3) %}
             <br>
         {% endif %}

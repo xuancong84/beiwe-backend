@@ -9,7 +9,7 @@ plot1 = $.jqplot ('chart1', [input], {
             // showLine:false,
             markerOptions: { size: 10, style:"filledCircle" },
             pointLabels: {show: true},
-            rendererOptions: {animation:{speed: 3000}},
+            rendererOptions: {animation:{speed: 2000}},
             showLine: false
           }],
       // You can specify options for all axes on the plot at once with
@@ -19,7 +19,8 @@ plot1 = $.jqplot ('chart1', [input], {
         tickRenderer: $.jqplot.CanvasAxisTickRenderer,
         labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
         tickOptions: {
-          angle: -20
+          angle: -20,
+
         },
         labelOptions: {
             angle: -45
@@ -36,15 +37,12 @@ plot1 = $.jqplot ('chart1', [input], {
           // Turn off "padding".  This will allow data point to lie on the
           // edges of the grid.  Default padding is 1.2 and will keep all
           // points inside the bounds of the grid.
-          pad: 0,
-          renderer:$.jqplot.DateAxisRenderer
+          pad: 0
         },
         yaxis: {
             // showTicks : false,
             label: "Y Axis",
         },
-        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-        tickRenderer:$.jqplot.CanvasAxisTickRenderer
       },
       seriesColors: ["#7BB661", "#E03C31"],
       highlighter: {
@@ -62,10 +60,10 @@ function replot_user_results(question_number) {
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
-    var new_data =  [['2008-08-12 4:00PM',10], ['2008-09-12 4:00PM',6.5], ['2008-10-12 4:00PM',5.7], ['2008-11-12 4:00PM',9], ['2008-12-12 4:00PM',8.2]];
+    var new_data =  [10 ,6.5 ,5.7 ,9 ,8.2];
     graph(new_data);
 }
 
-$(document).ready(function() {
-graph([['2008-08-12 4:00PM',4], ['2008-09-12 4:00PM',6.5], ['2008-10-12 4:00PM',5.7], ['2008-11-12 4:00PM',9], ['2008-12-12 4:00PM',8.2]]);
-});
+// $(document).ready(function() {
+// graph([4, 6.5, 5.7 ,9 ,8.2]);
+// });

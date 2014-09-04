@@ -1,18 +1,21 @@
+from utils.s3 import list_s3_files, s3_retrieve
 
-def read_file(file_path):
-    """reads in a file, returns a string of the entire file."""
-    with open(file_path, 'r') as f:
-        return f.read()
+# TODO: DEPRECATE!!
+#
+# def read_file(file_path):
+#     """reads in a file, returns a string of the entire file."""
+#     with open(file_path, 'r') as f:
+#         return f.read()
 
 
 def read_csv_other(csv_string):
     #grab a list of every line in the file, strips off trailing whitespace.
     #
     lines = [ line for line in csv_string.splitlines() ]
-    
+
     header_list = lines[0].split(',')
     list_of_entries = []
-    
+
     for line in lines[1:]:
         data = line.split(',')
         #creates a dict of {column name: data point, ...}
@@ -30,3 +33,8 @@ def manipulate_csv(readed_file):
         dictionary = {header : listed_values[header_index] for (header_index, header) in enumerate(headers)}
         result.append(dictionary)
     return result
+
+def csv_to_dict(file_path):
+    return read_csv_other( s3_retrieve( file_path ) )
+
+def get_weekly_results():
