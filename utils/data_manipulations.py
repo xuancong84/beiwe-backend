@@ -38,6 +38,8 @@ def csv_to_dict(file_path):
     return read_csv_other( s3_retrieve( file_path ) )
 
 def grab_weekly_files(all_files):
+
+    # Added to avoid index out of bounds
     if (len(all_files) <= 7):
         return all_files
     else:
@@ -46,10 +48,16 @@ def grab_weekly_files(all_files):
 def get_weekly_results(username="ABCDEF12", question_id='A113'):
     answer_list = []
     weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers/'))
+
+    # Convert each item to a readable data list
     for item in weekly_files:
         data = csv_to_dict(item)
+
+        # If the dictionary is empty, append a string
         if (len(data) == 0):
             answer_list.append('None')
+
+        # Grab the right question, and its right answer
         else:
             for question in data:
                 if (question['question id'] == question_id):
@@ -57,6 +65,9 @@ def get_weekly_results(username="ABCDEF12", question_id='A113'):
                 else:
                     continue
     result_list = []
+
+    # If the answer is a string, it's not graphable, so place is as None
+    # Otherwise, place it as a floating point number
     for answer in answer_list:
         try:
             temp = float(answer)
