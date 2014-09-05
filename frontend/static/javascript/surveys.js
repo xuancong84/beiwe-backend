@@ -43,7 +43,7 @@ function clearModal() {
     console.log("clear modal");
     //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "text_field_type"];
+    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
