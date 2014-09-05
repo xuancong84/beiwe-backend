@@ -45,7 +45,7 @@ def grab_weekly_files(all_files):
     else:
         return all_files[len(all_files) - 7:]
 
-def get_weekly_results(username="ABCDEF12", question_id='A113'):
+def get_weekly_results(username="ABCDEF12", question_id='105'):
     answer_list = []
     weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers42/'))
 
