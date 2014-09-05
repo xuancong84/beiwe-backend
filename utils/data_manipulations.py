@@ -38,7 +38,10 @@ def csv_to_dict(file_path):
     return read_csv_other( s3_retrieve( file_path ) )
 
 def grab_weekly_files(all_files):
-    return all_files[len(all_files) - 7:]
+    if (len(all_files) <= 7):
+        return all_files
+    else:
+        return all_files[len(all_files) - 7:]
 
 def get_weekly_results(username="ABCDEF12", question_id='A113'):
     answer_list = []
