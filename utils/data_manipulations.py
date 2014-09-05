@@ -37,4 +37,28 @@ def manipulate_csv(readed_file):
 def csv_to_dict(file_path):
     return read_csv_other( s3_retrieve( file_path ) )
 
-def get_weekly_results():
+def grab_weekly_files(all_files):
+    return all_files[len(all_files) - 7:]
+
+def get_weekly_results(username="ABCDEF12", question_id='A113'):
+    answer_list = []
+    weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers/'))
+    for item in weekly_files:
+        data = csv_to_dict(item)
+        if (len(data) == 0):
+            answer_list.append('None')
+        else:
+            for question in data:
+                if (question['question id'] == question_id):
+                    answer_list.append(question['answer'])
+                else:
+                    continue
+    result_list = []
+    for answer in answer_list:
+        try:
+            temp = float(answer)
+            result_list.append(temp)
+        except ValueError:
+            temp = None
+            result_list.append(temp)
+    return result_list

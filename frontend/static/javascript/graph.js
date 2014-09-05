@@ -12,6 +12,9 @@ plot1 = $.jqplot ('chart1', [input], {
             rendererOptions: {animation:{speed: 2000}},
             showLine: false
           }],
+      seriesDefaults: {
+        breakOnNull: true,
+      },
       // You can specify options for all axes on the plot at once with
       // the axesDefaults object.  Here, we're using a canvas renderer
       // to draw the axis label which allows rotated text.
@@ -60,10 +63,10 @@ function replot_user_results(question_number) {
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
-    var new_data =  [10 ,6.5 ,5.7 ,9 ,8.2];
+    var new_data =  [10 ,6.5 ,5.7 ,null ,8.2];
     graph(new_data);
 }
 
 // $(document).ready(function() {
-// graph([4, 6.5, 5.7 ,9 ,8.2]);
+// graph([4, 6.5, null ,9 ,8.2]);
 // });
