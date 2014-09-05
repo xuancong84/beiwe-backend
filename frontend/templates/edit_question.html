@@ -45,11 +45,13 @@
             <td>Text Field Type:</td>
             <td><input type="text" id="tfttxt" name="tfttxt"></input></td>
           </tr>
-          <tr id="fields_div" style="display:none;">
-            <td>Fields:</td>
-            <td id="fieldsDiv"><button type="button" onclick="addField()">Add new field</button></td>
-            <!--<div><div id="fieldsDiv"></div><button type="button" onclick="addField()">Add new field</button></div>-->
-          </tr>
+          <tbody id="fields_div" style="display:none;">
+            <tr>
+              <td>Fields:</td>
+              <td id="fieldsDiv"><button type="button" onclick="addField()">Add new field</button></td>
+              <!--<div><div id="fieldsDiv"></div><button type="button" onclick="addField()">Add new field</button></div>-->
+            </tr>
+          </tbody>
         </table>
 
         <input style="display:none;" id="oldName" name="oldName"></input>

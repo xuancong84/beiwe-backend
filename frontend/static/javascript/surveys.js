@@ -25,18 +25,21 @@ function setType() {
         document.getElementById("min_value").style.display="none";
         document.getElementById("max_value").style.display="none";
         document.getElementById("answers").style.display="table-row";
-        document.getElementById("fields_div").style.display="table-row";
+        document.getElementById("fields_div").style.display="table-row-group";
         document.getElementById("text_field_type").style.display="none";
     }
 }
 
 function addField() {
     /* TODO: give the input fields unique IDs! */
-    var fieldsDiv = document.getElementById('fieldsDiv');
-    var newField = document.createElement("div");
-    newField.innerHTML = '<input type="text" name="option' + 2 + '"></input><button type="button" onclick="deleteField(this)">Delete</button><br><br>';
-    /*alert(newField.innerHTML);*/
-    fieldsDiv.appendChild(newField);
+    var fieldsRow = document.getElementById('fields_div');
+    var newFieldRow = document.createElement("tr");
+    newFieldRow.innerHTML = '<td></td><td><input type="text" name="option' + 2 + '"></input></td><td><button type="button" onclick="deleteField(this)">Delete</button></td>';
+    fieldsRow.appendChild(newFieldRow);
+}
+
+function deleteField(elem) {
+    elem.parentNode.parentNode.remove();
 }
 
 function clearModal() {
