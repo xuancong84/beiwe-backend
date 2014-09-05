@@ -47,7 +47,7 @@ def grab_weekly_files(all_files):
 
 def get_weekly_results(username="ABCDEF12", question_id='A113'):
     answer_list = []
-    weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers/'))
+    weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers42/'))
 
     # Convert each item to a readable data list
     for item in weekly_files:
