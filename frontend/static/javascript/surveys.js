@@ -4,24 +4,28 @@ function setType() {
     //Sets the type of question, sets up view elements for the modal dialogue.
     //This setup is carried through into the questions created for the survey.
     if (document.getElementById("type").value == "1") {
-        document.getElementById("values_defaults").style.display="none";
+        document.getElementById("min_value").style.display="none";
+        document.getElementById("max_value").style.display="none";
         document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "2") {
-        document.getElementById("values_defaults").style.display="inline";
+        document.getElementById("min_value").style.display="table-row";
+        document.getElementById("max_value").style.display="table-row";
         document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "5") {
-        document.getElementById("values_defaults").style.display="none";
+        document.getElementById("min_value").style.display="none";
+        document.getElementById("max_value").style.display="none";
         document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
-        document.getElementById("text_field_type").style.display="inline";
+        document.getElementById("text_field_type").style.display="table-row";
     } else {
-        document.getElementById("values_defaults").style.display="none";
-        document.getElementById("answers").style.display="inline";
-        document.getElementById("fields_div").style.display="inline";
+        document.getElementById("min_value").style.display="none";
+        document.getElementById("max_value").style.display="none";
+        document.getElementById("answers").style.display="table-row";
+        document.getElementById("fields_div").style.display="table-row";
         document.getElementById("text_field_type").style.display="none";
     }
 }
@@ -39,7 +43,7 @@ function clearModal() {
     console.log("clear modal");
     //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","values_defaults", "answers", "text_field_type"];
+    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
