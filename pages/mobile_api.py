@@ -118,7 +118,7 @@ def upload():
 
 @mobile_api.route('/graph')
 def fetch_graph():
-    return render_template("phone_graphs.html", data=json.dumps(get_weekly_results(username='sur')))
+    return render_template("phone_graphs.html", data=json.dumps(get_weekly_results(username='sur', question_id='A105')))
 
 
 
