@@ -1,3 +1,78 @@
+function submitQuestion() {
+    console.log("JSONified question = " + JSON.stringify(getQuestionObject()));
+}
+
+// Return an object that is a question and can be JSON-ified
+function getQuestionObject() {
+    // TODO: somehow generate a question ID number/string
+
+    // Create a question object, and add to it the question_type attribute
+    var questionObject = {
+        question_type: getQuestionType()
+    };
+
+    // Loop through all the visible inputs in the editQuestion pop-up/modal form
+    var form = document.getElementById("questionForm");
+    var inputs = form.getElementsByTagName("input");
+    for (var index = 0; index < inputs.length; index++) {
+        var input = inputs[index];
+        if (input.offsetParent !== null) {  // If the <input> element is not hidden
+            /* Add a key-value pair to the questionObject, using the <input> element's "name"
+            attribute as the key, and the <input>'s value as it's value */
+            questionObject[input.name] = input.value;
+        }
+    };
+
+    if (getTextFieldType()) {
+        questionObject["text_field_type"] = getTextFieldType();
+    };
+
+    return questionObject;
+}
+
+// Return a string that is the question's type
+function getQuestionType() {
+    var typeDropDown = document.getElementById("type");
+    var typeNumber = typeDropDown.options[typeDropDown.selectedIndex].value;
+    return getQuestionTypeString(parseInt(typeNumber));
+}
+
+// Given an integer, return a string for the question's type
+function getQuestionTypeString(questionTypeNumber) {
+    switch (questionTypeNumber) {
+        case 1: return "info_text_box";
+        case 2: return "slider";
+        case 3: return "radio_button";
+        case 4: return "checkbox";
+        case 5: return "free_response";
+        default: return "switch/case statement failed";
+    }
+}
+
+// Return FALSE if the text_field_type drop-down/<select> is invisible; otherwise return a string
+function getTextFieldType() {
+    var typeDropDown = document.getElementById("tfttxt");
+    if (typeDropDown.offsetParent === null) { // If the <select> element is hidden
+        return false;
+    }
+    else { // If the <select> element is not hidden
+        var typeNumber = typeDropDown.options[typeDropDown.selectedIndex].value;
+        return getTextFieldTypeString(parseInt(typeNumber));
+    }
+}
+
+// Given an integer, return a string for the Text Field's type
+function getTextFieldTypeString(textFieldTypeNumber) {
+    switch (textFieldTypeNumber) {
+        case 1: return "NUMERIC";
+        case 2: return "SINGLE_LINE_TEXT";
+        case 3: return "MULTI_LINE_TEXT";
+        default: return "SINGLE_LINE_TEXT";
+    }
+}
+
+
+
 function setType() {
     console.log("set type");
     //TODO: compactify this code (set things to none at the beginning, then change things.)
@@ -46,13 +121,14 @@ function clearModal() {
     console.log("clear modal");
     //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
+    var attrs = ["text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
     }
     document.getElementById("type").value="1";
-    document.getElementById("saveQuestion").onclick=createQuestion;
+    //document.getElementById("saveQuestion").onclick=createQuestion;
+    document.getElementById("saveQuestion").onclick=submitQuestion;
 }
 
 function setModal(question_name) {
