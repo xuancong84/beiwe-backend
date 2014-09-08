@@ -36,13 +36,13 @@ plot1 = $.jqplot ('chart1', [input], {
           // Turn off "padding".  This will allow data point to lie on the
           // edges of the grid.  Default padding is 1.2 and will keep all
           // points inside the bounds of the grid.
-          tickOptions: {formatString: "%d"}
+          tickOptions: {formatString: "%#.0f"}
         },
         yaxis: {
             // showTicks : false,
             label: "Answer",
             labelOptions: {angle: 0},
-            tickOptions: {formatString: "%d"}
+            tickOptions: {formatString: "%#.0f"}
         },
       },
       seriesColors: ["#7BB661", "#E03C31"],
