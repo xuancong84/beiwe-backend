@@ -36,7 +36,6 @@ plot1 = $.jqplot ('chart1', [input], {
           // Turn off "padding".  This will allow data point to lie on the
           // edges of the grid.  Default padding is 1.2 and will keep all
           // points inside the bounds of the grid.
-          pad: 0
         },
         yaxis: {
             // showTicks : false,
@@ -60,7 +59,6 @@ function replot_user_results(data) {
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
-    alert(data)
     graph(data);
 }
 
