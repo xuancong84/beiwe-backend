@@ -45,6 +45,7 @@ plot1 = $.jqplot ('chart1', [input], {
             tickOptions: {formatString: "%#.0f"},
             min:0,
         },
+        tickInterval: 1
       },
       seriesColors: ["#7BB661", "#E03C31"],
       highlighter: {
