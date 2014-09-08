@@ -36,13 +36,19 @@ plot1 = $.jqplot ('chart1', [input], {
           // Turn off "padding".  This will allow data point to lie on the
           // edges of the grid.  Default padding is 1.2 and will keep all
           // points inside the bounds of the grid.
-          tickOptions: {formatString: "%#.0f"}
+          pad:2,
+          min:0,
+          max: input.length + 1,
+          tickInterval:1
         },
         yaxis: {
             // showTicks : false,
             label: "Answer",
             labelOptions: {angle: 0},
-            tickOptions: {formatString: "%#.0f"}
+            min:0,
+            max:input.max() + 1,
+            tickInterval: 1,
+            pad:2
         },
       },
       seriesColors: ["#7BB661", "#E03C31"],
@@ -51,7 +57,7 @@ plot1 = $.jqplot ('chart1', [input], {
             showLabel: true,
             yvalues: 3,
             tooltipAxes: 'y',
-            formatString: "%#.2f",
+            formatString: "%d",
             sizeAdjust: 7.5 , tooltipLocation : 'ne'
         }
     });
@@ -59,6 +65,7 @@ plot1 = $.jqplot ('chart1', [input], {
 
 function replot_user_results(data) {
     $('#chart1').empty();
+    alert(data.max())
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
     graph(data);
@@ -67,3 +74,11 @@ function replot_user_results(data) {
 // $(document).ready(function() {
 // graph([4, 6.5, null ,9 ,8.2]);
 // });
+
+// Used in this JS to make the graph look better..
+Array.prototype.max = function() {
+  var max = this[0];
+  var len = this.length;
+  for (var i = 1; i < len; i++) if (this[i] > max) max = this[i];
+  return max;
+}
