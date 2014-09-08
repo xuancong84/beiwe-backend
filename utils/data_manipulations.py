@@ -70,7 +70,7 @@ def get_weekly_results(username="ABCDEF12", question_id='A105'):
     # Otherwise, place it as a floating point number
     for answer in answer_list:
         try:
-            temp = int(answer)
+            temp = float(answer)
             result_list.append(temp)
         except ValueError:
             temp = None
