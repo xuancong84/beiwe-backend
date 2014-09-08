@@ -116,9 +116,8 @@ def upload():
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 def fetch_graph():
-    if (request.method == 'POST'):
-        userID = request.values['patientID']
-        password = request.values['pwd']
+    userID = request.values['patientID']
+    password = request.values['pwd']
     return render_template("phone_graphs.html", data=json.dumps(get_weekly_results(username=userID)))
 
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
