@@ -19,7 +19,6 @@ plot1 = $.jqplot ('chart1', [input], {
       // the axesDefaults object.  Here, we're using a canvas renderer
       // to draw the axis label which allows rotated text.
       axesDefaults: {
-        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
         labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
         tickOptions: {
           angle: -20,
