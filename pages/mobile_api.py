@@ -114,12 +114,12 @@ def upload():
 # 4) you need to render a template with the appropriate graph
 
 
-
-
-@mobile_api.route('/graph')
+@mobile_api.route('/graph', methods=['GET', 'POST'])
 def fetch_graph():
-    return render_template("phone_graphs.html", data=json.dumps(get_weekly_results(username='sur')))
-
+    if (request.method == 'POST'):
+        userID = request.values['patientID']
+        password = request.values['pwd']
+    return render_template("phone_graphs.html", data=json.dumps(get_weekly_results(username='userID')))
 
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
