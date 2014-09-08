@@ -41,7 +41,8 @@ plot1 = $.jqplot ('chart1', [input], {
         yaxis: {
             // showTicks : false,
             label: "Answer",
-            labelOptions: {angle: 0}
+            labelOptions: {angle: 0},
+            tickOptions: {formatString: "%d"}
         },
       },
       seriesColors: ["#7BB661", "#E03C31"],
