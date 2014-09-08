@@ -1,3 +1,50 @@
+function submitQuestion() {
+    console.log("JSONified question = " + JSON.stringify(getQuestionObject()));
+}
+
+// Return an object that is a question and can be JSON-ified
+function getQuestionObject() {
+    // Create a question object, and add to it the question_type attribute
+    var questionObject = {
+        question_type: getQuestionType()
+    };
+
+    // Loop through all the visible inputs in the editQuestion pop-up/modal form
+    var form = document.getElementById("questionForm");
+    var inputs = form.getElementsByTagName("input");
+    for (var index = 0; index < inputs.length; index++) {
+        var input = inputs[index];
+        if (input.offsetParent !== null) {  // If the <input> element is not hidden
+            /* Add a key-value pair to the questionObject, using the <input> element's "name"
+            attribute as the key, and the <input>'s value as it's value */
+            questionObject[input.name] = input.value;
+        }
+    };
+
+    return questionObject;
+}
+
+// Return a string that is the question's type
+function getQuestionType() {
+    var typeDropDown = document.getElementById("type");
+    var typeNumber = typeDropDown.options[typeDropDown.selectedIndex].value;
+    return getQuestionTypeString(parseInt(typeNumber));
+}
+
+// Given an integer, return a string for the question's type
+function getQuestionTypeString(questionTypeNumber) {
+    switch (questionTypeNumber) {
+        case 1: return "info_text_box";
+        case 2: return "slider";
+        case 3: return "radio_button";
+        case 4: return "checkbox";
+        case 5: return "free_response";
+        default: return "switch/case statement failed";
+    }
+}
+
+
+
 function setType() {
     console.log("set type");
     //TODO: compactify this code (set things to none at the beginning, then change things.)
@@ -52,7 +99,8 @@ function clearModal() {
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
     }
     document.getElementById("type").value="1";
-    document.getElementById("saveQuestion").onclick=createQuestion;
+    //document.getElementById("saveQuestion").onclick=createQuestion;
+    document.getElementById("saveQuestion").onclick=submitQuestion;
 }
 
 function setModal(question_name) {

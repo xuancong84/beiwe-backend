@@ -6,7 +6,7 @@
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
         <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
       </div>
-      <form id="question" name="question">
+      <form id="questionForm" name="question">
       <div class="modal-body">
 
         <table>
@@ -16,7 +16,7 @@
           </tr>
           <tr>
             <td>Question Text:</td>
-            <td><input type="text" id="text" name="text"></input></td>
+            <td><input type="text" id="text" name="question_text"></input></td>
           </tr>
           <tr>
             <td>Question Type:</td>
@@ -31,11 +31,11 @@
           </tr>
           <tr id="min_value" style="display:none;">
             <td>Minimum Value:</td>
-            <td><input type="number" id="valnum" name="valnum" min="0" max="100"></input></td>
+            <td><input type="number" id="valnum" name="min" min="0" max="100"></input></td>
           </tr>
           <tr id="max_value" style="display:none;">
             <td>Maximum Value:</td>
-            <td><input type="number" id="defnum" name="defnum" min="1" max="100"></input></td>
+            <td><input type="number" id="defnum" name="max" min="1" max="100"></input></td>
           </tr>
           <tr id="answers" style="display:none;">
             <td>Answers:</td>
