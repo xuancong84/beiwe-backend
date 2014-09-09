@@ -46,7 +46,7 @@ def grab_weekly_file_names(all_files):
     else:
         return sorted(all_files[len(all_files) - 7:])
 
-def get_weekly_results(username="ABCDEF12"):
+def get_weekly_results(username="sur"):
     weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers42/'))
     # Convert each csv_file to a readable data list
     weekly_surveys = [csv_to_dict(file_name) for file_name in weekly_files]
@@ -60,34 +60,13 @@ def get_weekly_results(username="ABCDEF12"):
         all_answers.append([])
     list_ordered_question_ids = [question_id for question_id in ordered_question_ids]
 
-    # Adds all answers to it
+    # Adds all answers to it in a formatted way
     for survey in weekly_surveys:
             for question in survey:
                 current_id = question['question id']
                 answer = question['answer']
-                all_answers[list_ordered_question_ids.index(current_id)].append(answer)
+                try:
+                    all_answers[list_ordered_question_ids.index(current_id)].append(int(answer))
+                except ValueError:
+                    all_answers[list_ordered_question_ids.index(current_id)].append(None)
     return all_answers
-
-        # If the dictionary is empty, append a string
-        if (len(data) == 0):
-            answer_list.append('None')
-
-        # Grab the right question, and its right answer
-        else:
-            for question in data:
-                if (question['question id'] == question_id):
-                    answer_list.append(question['answer'])
-                else:
-                    continue
-    result_list = []
-
-    # If the answer is a string, it's not graphable, so place is as None
-    # Otherwise, place it as a floating point number
-    for answer in answer_list:
-        try:
-            temp = float(answer)
-            result_list.append(temp)
-        except ValueError:
-            temp = None
-            result_list.append(temp)
-    return result_list
