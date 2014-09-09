@@ -95,25 +95,21 @@ function setType() {
     if (document.getElementById("type").value == "1") {
         document.getElementById("min_value").style.display="none";
         document.getElementById("max_value").style.display="none";
-        document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "2") {
         document.getElementById("min_value").style.display="table-row";
         document.getElementById("max_value").style.display="table-row";
-        document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="none";
     } else if (document.getElementById("type").value == "5") {
         document.getElementById("min_value").style.display="none";
         document.getElementById("max_value").style.display="none";
-        document.getElementById("answers").style.display="none";
         document.getElementById("fields_div").style.display="none";
         document.getElementById("text_field_type").style.display="table-row";
     } else {
         document.getElementById("min_value").style.display="none";
         document.getElementById("max_value").style.display="none";
-        document.getElementById("answers").style.display="table-row";
         document.getElementById("fields_div").style.display="table-row-group";
         document.getElementById("text_field_type").style.display="none";
     }
@@ -135,7 +131,7 @@ function clearModal() {
     console.log("clear modal");
     //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
+    var attrs = ["text","valnum","defnum","tfttxt","min_value", "max_value", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
@@ -152,7 +148,6 @@ function clearInputFields() {
     var form = document.getElementById("questionForm");
     var inputs = form.getElementsByTagName("input");
     for (var index = 0; index < inputs.length; index++) {
-        console.log("inputs[index] = " + inputs[index]);
         inputs[index].value = "";
     };
 }
@@ -182,11 +177,9 @@ function setModal(question_name) {
     } else if (document.getElementById(typeid).textContent == "radio_button") {
         console.log("radio");
          document.getElementById("type").value = "3";
-        document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
     } else if (document.getElementById(typeid).textContent == "checkbox") {
         console.log("checkbox");
         document.getElementById("type").value = "4";
-        document.getElementById("anstxt").value = document.getElementById(answersid).textContent;
     } else if (document.getElementById(typeid).textContent == "free_response") {
         console.log("free");
         document.getElementById("type").value = "5";
@@ -233,19 +226,15 @@ function createQuestion() {
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Answers:';
         html += '<div id="' + name + 'answers">';
-        html += document.getElementById('anstxt').value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="radio_button"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
-        html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '4') {
         html += ' <div id="' + name + 'type">Question type:checkbox</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
         html += 'Answers:';
         html += '<div id="' + name + 'answers">';
-        html += document.question.anstxt.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="checkbox"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
-        html += '<input type="text" style="display:none;" name="' + name + 'answers" value="' + document.question.anstxt.value + '"></input>';
     } else if (document.getElementById("type").value == '5') {
         html += 'Question type: <div id="' + name + 'type">free_response</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
