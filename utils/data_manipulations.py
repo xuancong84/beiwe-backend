@@ -37,21 +37,22 @@ def manipulate_csv(readed_file):
 def csv_to_dict(file_path):
     return read_csv_other( s3_retrieve( file_path ) )
 
-def grab_weekly_files(all_files):
+def grab_weekly_file_names(all_files):
 
-    # Added to avoid index out of bounds
+    # Added an if statement to avoid index out of bounds
+    # Returns a sorted list of all files
     if (len(all_files) <= 7):
-        return all_files
+        return sorted(all_files)
     else:
-        return all_files[len(all_files) - 7:]
+        return sorted(all_files[len(all_files) - 7:])
 
 def get_weekly_results(username="ABCDEF12", question_id='A105'):
     answer_list = []
-    weekly_files = grab_weekly_files(list_s3_files(username + '/surveyAnswers42/'))
+    weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers42/'))
 
-    # Convert each item to a readable data list
-    for item in weekly_files:
-        data = csv_to_dict(item)
+    # Convert each csv_file to a readable data list
+    for csv_file in weekly_files:
+        data = csv_to_dict(csv_file)
 
         # If the dictionary is empty, append a string
         if (len(data) == 0):
