@@ -46,8 +46,24 @@ def grab_weekly_file_names(all_files):
     else:
         return sorted(all_files[len(all_files) - 7:])
 
+def get_most_recent_id(file_path):
+    all_files = list_s3_files(file_path)
+    id_set = set()
+    for filename in all_files:
+        # This assumes that the 3rd entry is always an integer
+        organizing_list = filename.split('/')
+        survey_id = int(organizing_list[2])
+        id_set.add(survey_id)
+    result_list = set_to_list(id_set)
+    return result_list[len(result_list) - 1]
+
+def set_to_list(set_of_ids):
+    return sorted([item for item in set_of_ids])
+
 def get_weekly_results(username="sur"):
-    weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers42/'))
+    file_path = username + '/surveyAnswers/'
+    survey_id = get_most_recent_id(file_path)
+    weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers/' + str(survey_id) + '/'))
     # Convert each csv_file to a readable data list
     weekly_surveys = [csv_to_dict(file_name) for file_name in weekly_files]
 
@@ -58,13 +74,15 @@ def get_weekly_results(username="sur"):
     for question in weekly_surveys[0]:
         ordered_question_ids.add(question['question id'])
         all_answers.append([])
-    list_ordered_question_ids = [question_id for question_id in ordered_question_ids]
+    list_ordered_question_ids = set_to_list(ordered_question_ids)
 
     # Adds all answers to it in a formatted way
     for survey in weekly_surveys:
             for question in survey:
                 current_id = question['question id']
                 answer = question['answer']
+
+                # TODO: This will change. For now, the graph can't deal with string answers..
                 try:
                     all_answers[list_ordered_question_ids.index(current_id)].append(int(answer))
                 except ValueError:
