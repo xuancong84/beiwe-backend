@@ -10,7 +10,9 @@ mobile_api = Blueprint('mobile_api', __name__)
 ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog', \
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-SURVEY_TAG = 'surveyAnswers'
+
+ANSWERS_TAG = 'surveyAnswers'
+TIMINGS_TAG = 'surveyTimings'
 
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
 def login_or_register_user():
@@ -64,12 +66,16 @@ def fetch_survey():
         return
 
 
-def parse_filetype(filename):
+def parse_filename(filename):
     """ Splits filename into user-id, file-type, unix-timestamp """
     l = filename.split("_")
     if len(l) == 3:
         return l[0], l[1], l[2]
 
+def parse_filetype(file_type):
+    parsed_id = filter(str.isdigit, file_type)
+    ftype = filter(str.isalpha, file_type)
+    return ftype, parsed_id
 
 def s3_prep_filename(filename):
     """ Preps a filename to become a S3 file path for prefix organization. """
@@ -83,7 +89,6 @@ def allowed_extension(filename):
     """ Method checks to see if uploaded file has filename that ends in an allowed extension. Does not verify content. """
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-
 @mobile_api.route('/upload', methods=['POST'])
 def upload():
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log, and Survey Response files. """
@@ -91,13 +96,14 @@ def upload():
     #Method werkzeug.secure_filename may return empty if unsecure
     file_name = secure_filename(uploaded_file.filename)
     if uploaded_file and file_name and allowed_extension(file_name):
-        new_filename = s3_prep_filename(file_name)
-        user_id, file_type, timestamp  = parse_filetype(file_name)
-        if
-        s3_upload_handler(s3_prep_filename(file_name), uploaded_file)
-#         user_id, file_type, timestamp  = parse_filetype(file_name)
-#         if "surveyAnswers" in filetype or "surveyTimings" in filetype:
-#             mongo_survey_response_instance.save(user_id, timestamp, uploaded_file.read())
+        user_id, file_type, timestamp  = parse_filename(file_name)
+        if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
+            ftype, parsed_id = parse_filetype(file_type)
+            s3_prepped_filename = "%s/%s/%s/%s" % (user_id, ftype, parsed_id, timestamp)
+            s3_upload_handler(s3_prepped_filename, uploaded_file)
+            #mongo_survey_response_instance.save(user_id, timestamp, uploaded_file.read())
+        else:
+            s3_upload_handler(s3_prep_filename(file_name), uploaded_file)
         return'200'
     else:
         abort(400)
