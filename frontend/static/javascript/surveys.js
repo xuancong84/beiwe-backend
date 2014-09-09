@@ -11,6 +11,9 @@ function getQuestionObject() {
         question_type: getQuestionType()
     };
 
+    // Create an empty Answer Options array, if it's a Radio Button or Free Response question
+    var optionsArray = [];
+
     // Loop through all the visible inputs in the editQuestion pop-up/modal form
     var form = document.getElementById("questionForm");
     var inputs = form.getElementsByTagName("input");
@@ -19,10 +22,21 @@ function getQuestionObject() {
         if (input.offsetParent !== null) {  // If the <input> element is not hidden
             /* Add a key-value pair to the questionObject, using the <input> element's "name"
             attribute as the key, and the <input>'s value as it's value */
-            questionObject[input.name] = input.value;
+            if (input.name.localeCompare("option") == 0) {
+                optionsArray.push({"text": input.value});
+            }
+            else {
+                questionObject[input.name] = input.value;
+            };
         }
     };
 
+    // If it's a Radio Button or Checkbox question, there should be an array of answer options
+    if (optionsArray.length > 0) {
+        questionObject["answers"] = optionsArray;
+    };
+
+    // If it's a Free Response question, set the variable text_field_type from the drop-down menu
     if (getTextFieldType()) {
         questionObject["text_field_type"] = getTextFieldType();
     };
@@ -71,6 +85,7 @@ function getTextFieldTypeString(textFieldTypeNumber) {
     }
 }
 
+// TODO: when you re-open the edit question popup, clear the old options input boxes
 
 
 function setType() {
@@ -109,7 +124,7 @@ function addField() {
     /* TODO: give the input fields unique IDs! */
     var fieldsRow = document.getElementById('fields_div');
     var newFieldRow = document.createElement("tr");
-    newFieldRow.innerHTML = '<td></td><td><input type="text" name="option' + 2 + '"></input></td><td><button type="button" onclick="deleteField(this)">Delete</button></td>';
+    newFieldRow.innerHTML = '<td></td><td><input type="text" name="option"></input></td><td><button type="button" onclick="deleteField(this)">Delete</button></td>';
     fieldsRow.appendChild(newFieldRow);
 }
 
