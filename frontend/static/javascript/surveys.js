@@ -85,7 +85,6 @@ function getTextFieldTypeString(textFieldTypeNumber) {
     }
 }
 
-// TODO: when you re-open the edit question popup, clear the old options input boxes
 
 
 function setType() {
@@ -144,6 +143,18 @@ function clearModal() {
     document.getElementById("type").value="1";
     //document.getElementById("saveQuestion").onclick=createQuestion;
     document.getElementById("saveQuestion").onclick=submitQuestion;
+
+    clearInputFields();
+}
+
+// Loop through the <input> fields and set each one to an empty string
+function clearInputFields() {
+    var form = document.getElementById("questionForm");
+    var inputs = form.getElementsByTagName("input");
+    for (var index = 0; index < inputs.length; index++) {
+        console.log("inputs[index] = " + inputs[index]);
+        inputs[index].value = "";
+    };
 }
 
 function setModal(question_name) {
