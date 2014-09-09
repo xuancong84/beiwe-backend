@@ -1,5 +1,133 @@
-function submitQuestion() {
-    console.log("JSONified question = " + JSON.stringify(getQuestionObject()));
+var questions = [];
+
+window.onload = function setupEverything() {
+}
+
+// When the page loads, get the current JSON survey and load the questions[] array from it
+$.getJSON("http://beiwe.org/fetch_survey", function(data) {
+    questions = data["questions"];
+    renderQuestionsList();
+})
+
+function exportSurvey() {
+    var surveyObject = {
+        questions:questions,
+        survey_id:"42" // TODO: create a sequential survey ID (maybe a UNIX timestamp)
+    }
+
+    console.log(JSON.stringify(surveyObject));
+}
+
+
+/*###########################################################################
+###################   Question-rendering functionality  #####################
+###########################################################################*/
+
+// Render a list of the current questions
+function renderQuestionsList() {
+    // Get the question template, and compile it using Handlebars.js
+    var source = $("#question-template").html();
+    var template = Handlebars.compile(source);
+
+    // Use the list of questions as the data list to populate the template
+    var dataList = { questions: questions };
+    var htmlQuestion = template(dataList);
+
+    // Insert the template into the page's HTML
+    $("#listOfCurrentQuestions").html(htmlQuestion);
+}
+
+function editQuestion(index) {
+    clearModal();
+    populateEditQuestionModal(questions[index]);
+    document.getElementById("saveQuestion").onclick = function() { replaceQuestion(index); };
+}
+
+// Remove the selected question from the questions array, and re-render the HTML list of questions
+function deleteQuestion(index) {
+    questions.splice(index, 1);
+    renderQuestionsList();
+}
+
+// Swap the question with the one before it, as long as it's not the first in the list
+function moveQuestionUp(index) {
+    if (index > 0) {
+        questions.splice(index - 1, 2, questions[index], questions[index - 1]);
+        renderQuestionsList();
+    };
+}
+
+// Swap the question with the one after it, as long as it's not the last in the list
+function moveQuestionDown(index) {
+    if (index < questions.length - 1) {
+        questions.splice(index, 2, questions[index + 1], questions[index]);
+        renderQuestionsList();
+    };
+}
+
+// Return a human-readable string instead of a variable name
+Handlebars.registerHelper("questionTypeTextString", function(inString) {
+    switch (inString) {
+        case "info_text_box": return "Info Text Box";
+        case "slider": return "Slider";
+        case "radio_button": return "Radio Button";
+        case "checkbox": return "Checkbox";
+        case "free_response": return "Free Response";
+        default: return "Question type error";
+    }
+});
+
+// Return the list of answer options (for Radio Button/ Checkbox questions) as a single string
+Handlebars.registerHelper("optionsArrayToString", function(optionsArray) {
+    var optionsString = "";
+    for (var i = 0; i < optionsArray.length; i++) {
+        optionsString += optionsArray[i]["text"] + ", ";
+    };
+    return optionsString;
+});
+
+
+/*###########################################################################
+#########   Edit Question pop-up-to-JSON functionality  #####################
+###########################################################################*/
+
+// Get the question object from the Edit Question modal, and append it to the questions array
+function addNewQuestion() {
+    var questionObject = getQuestionObject();
+    questions.push(questionObject);
+    renderQuestionsList();
+}
+
+// Get the question object from the Edit Question modal, and replace questions[index] with it
+function replaceQuestion(index) {
+    var questionObject = getQuestionObject();
+    questions.splice(index, 1, questionObject);
+    renderQuestionsList();
+}
+
+// When editing a question, populate the fields with that question's current attributes
+function populateEditQuestionModal(question) {
+    document.getElementById("text").value = question["question_text"];
+    document.getElementById("type").value = question["question_type"];
+
+    // Now that the question_type is selected, display the relevant fields
+    removeAllAnswerOptionsRows();
+    setType();
+
+    // If it's a Radio Button or Checkbox question, render and populate the answer option fields
+    var optionsArray = question["answers"];
+    if (!(typeof optionsArray === 'undefined')) {
+        for (var i = 0; i < optionsArray.length; i++) {
+            addField();
+            var optionsFields = document.getElementsByName("option");
+            optionsFields[optionsFields.length - 1].value = optionsArray[i]["text"];
+        };
+    };
+
+    // Show the other fields if they have values (min and max for Slider questions; etc.)
+    document.getElementById("min").value = question["min"];
+    document.getElementById("max").value = question["max"];
+    document.getElementById("tfttxt").value = question["text_field_type"];
 }
 
 // Return an object that is a question and can be JSON-ified
@@ -41,26 +169,16 @@ function getQuestionObject() {
         questionObject["text_field_type"] = getTextFieldType();
     };
 
+    // Add a question ID string
+    questionObject["question_id"] = generateUUID();
+
     return questionObject;
 }
 
 // Return a string that is the question's type
 function getQuestionType() {
     var typeDropDown = document.getElementById("type");
-    var typeNumber = typeDropDown.options[typeDropDown.selectedIndex].value;
-    return getQuestionTypeString(parseInt(typeNumber));
-}
-
-// Given an integer, return a string for the question's type
-function getQuestionTypeString(questionTypeNumber) {
-    switch (questionTypeNumber) {
-        case 1: return "info_text_box";
-        case 2: return "slider";
-        case 3: return "radio_button";
-        case 4: return "checkbox";
-        case 5: return "free_response";
-        default: return "switch/case statement failed";
-    }
+    return typeDropDown.options[typeDropDown.selectedIndex].value;
 }
 
 // Return FALSE if the text_field_type drop-down/<select> is invisible; otherwise return a string
@@ -70,55 +188,70 @@ function getTextFieldType() {
         return false;
     }
     else { // If the <select> element is not hidden
-        var typeNumber = typeDropDown.options[typeDropDown.selectedIndex].value;
-        return getTextFieldTypeString(parseInt(typeNumber));
+        return typeDropDown.options[typeDropDown.selectedIndex].value;
     }
 }
 
-// Given an integer, return a string for the Text Field's type
-function getTextFieldTypeString(textFieldTypeNumber) {
-    switch (textFieldTypeNumber) {
-        case 1: return "NUMERIC";
-        case 2: return "SINGLE_LINE_TEXT";
-        case 3: return "MULTI_LINE_TEXT";
-        default: return "SINGLE_LINE_TEXT";
-    }
-}
+// Generate a UUID; taken from Briguy37's post: http://stackoverflow.com/a/8809472
+function generateUUID(){
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+};
 
+/*###########################################################################
+################################   Other functionality  #####################
+###########################################################################*/
 
-
+// Makes correct fields display in Edit Question modal, depending on the Question Type selected
 function setType() {
-    console.log("set type");
-    //TODO: compactify this code (set things to none at the beginning, then change things.)
-    //Sets the type of question, sets up view elements for the modal dialogue.
-    //This setup is carried through into the questions created for the survey.
-    if (document.getElementById("type").value == "1") {
-        document.getElementById("min_value").style.display="none";
-        document.getElementById("max_value").style.display="none";
-        document.getElementById("fields_div").style.display="none";
-        document.getElementById("text_field_type").style.display="none";
-    } else if (document.getElementById("type").value == "2") {
-        document.getElementById("min_value").style.display="table-row";
-        document.getElementById("max_value").style.display="table-row";
-        document.getElementById("fields_div").style.display="none";
-        document.getElementById("text_field_type").style.display="none";
-    } else if (document.getElementById("type").value == "5") {
-        document.getElementById("min_value").style.display="none";
-        document.getElementById("max_value").style.display="none";
-        document.getElementById("fields_div").style.display="none";
-        document.getElementById("text_field_type").style.display="table-row";
-    } else {
-        document.getElementById("min_value").style.display="none";
-        document.getElementById("max_value").style.display="none";
-        document.getElementById("fields_div").style.display="table-row-group";
-        document.getElementById("text_field_type").style.display="none";
+    var questionType = document.getElementById("type").value;
+
+    // Set everything to invisible
+    document.getElementById("min_value").style.display = "none";
+    document.getElementById("max_value").style.display = "none";
+    document.getElementById("fields_div").style.display = "none";
+    document.getElementById("text_field_type").style.display = "none";
+
+    // Make certain fields visible based on which questionType is selected
+    switch(questionType) {
+        case "info_text_box":
+            break;
+        case "slider":
+            document.getElementById("min_value").style.display = "table-row";
+            document.getElementById("max_value").style.display = "table-row";
+            break;
+        case "radio_button":
+            document.getElementById("fields_div").style.display = "table-row-group";
+            break;
+        case "checkbox":
+            document.getElementById("fields_div").style.display = "table-row-group";
+            break;
+        case "free_response":
+            document.getElementById("text_field_type").style.display = "table-row";
+            document.getElementById("tfttxt").value = "NUMERIC"; // Set it to a default value
+            break;
     }
+}
+
+function removeAllAnswerOptionsRows() {
+    var optionsRows = document.getElementsByName("optionsRow");
+    optionsRowsCount = optionsRows.length
+    for (var i = 0; i < optionsRowsCount; i++) {
+        /* For every iteration, optionsRows gets recreated as a 1-smaller
+        array, so keep deleting the first element */
+        optionsRows[0].parentNode.removeChild(optionsRows[0]);
+    };
 }
 
 function addField() {
-    /* TODO: give the input fields unique IDs! */
     var fieldsRow = document.getElementById('fields_div');
     var newFieldRow = document.createElement("tr");
+    newFieldRow.setAttribute('name', 'optionsRow');
     newFieldRow.innerHTML = '<td></td><td><input type="text" name="option"></input></td><td><button type="button" onclick="deleteField(this)">Delete</button></td>';
     fieldsRow.appendChild(newFieldRow);
 }
@@ -128,19 +261,19 @@ function deleteField(elem) {
 }
 
 function clearModal() {
-    console.log("clear modal");
+    console.log("clearModal() just got called");
     //resets the modal dialogue values to empty, used when creating a new question.
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["text","valnum","defnum","tfttxt","min_value", "max_value", "fields_div", "text_field_type"];
+    var attrs = ["text","min","max","tfttxt","min_value", "max_value", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
     }
-    document.getElementById("type").value="1";
-    //document.getElementById("saveQuestion").onclick=createQuestion;
-    document.getElementById("saveQuestion").onclick=submitQuestion;
+    document.getElementById("type").value="info_text_box";
+    document.getElementById("saveQuestion").onclick=addNewQuestion;
 
     clearInputFields();
+    removeAllAnswerOptionsRows();
 }
 
 // Loop through the <input> fields and set each one to an empty string
@@ -172,8 +305,8 @@ function setModal(question_name) {
     if (document.getElementById(typeid).textContent == "slider") {
         console.log("slider");
         document.getElementById("type").value = "2";
-        document.getElementById("valnum").value = document.getElementById(rangeid).textContent;
-        document.getElementById("defnum").value = document.getElementById(defaultid).textContent;
+        document.getElementById("min").value = document.getElementById(rangeid).textContent;
+        document.getElementById("max").value = document.getElementById(defaultid).textContent;
     } else if (document.getElementById(typeid).textContent == "radio_button") {
         console.log("radio");
          document.getElementById("type").value = "3";
@@ -198,13 +331,13 @@ function changeQuestion() {
     deleteQuestion(x);
 }
 
-function deleteQuestion(x) {
+/*function deleteQuestion(x) {
     //TODO: track down exactly what x is, rename variable accordingly.
     // deletes a question.
     console.log("delete");
     var old = document.getElementById(x);
     old.parentNode.removeChild(old);
-}
+}*/
 
 // shall henceforth be referred to as "The Monster"
 function createQuestion() {
@@ -215,12 +348,12 @@ function createQuestion() {
     if (document.getElementById("type").value == '2') {
         html += 'Question type: <div id="' + name + 'type">slider</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
-        html += 'Slider range: <div id="' + name + 'range">' + document.question.valnum.value + '</div>';
-        html += 'default: <div id="' + name + 'default">' + document.question.defnum.value + '</div>';
+        html += 'Slider range: <div id="' + name + 'range">' + document.question.min.value + '</div>';
+        html += 'default: <div id="' + name + 'default">' + document.question.max.value + '</div>';
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="slider"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
-        html += '<input type="text" style="display:none;" name="' + name + 'range" value="' + document.question.valnum.value + '"></input>';
-        html += '<input type="text" style="display:none;" name="' + name + 'default" value="' + document.question.defnum.value + '"></input>';
+        html += '<input type="text" style="display:none;" name="' + name + 'range" value="' + document.question.min.value + '"></input>';
+        html += '<input type="text" style="display:none;" name="' + name + 'default" value="' + document.question.max.value + '"></input>';
     } else if (document.getElementById("type").value == '3') {
         html += 'Question type: <div id="' + name + 'type">radio_button</div>';
         html += 'Question text: <div id="' + name + 'text">' + document.question.text.value + '</div>';
@@ -248,7 +381,7 @@ function createQuestion() {
         html += '<input type="text" style="display:none;" name="' + name + 'type" value="informational_text"></input>';
         html += '<input type="text" style="display:none;" name="' + name + 'text" value="' + document.question.text.value + '"></input>';
     }
-    html += '<button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>';
+    html += '<button class="btn btn-primary" data-toggle="modal" data-target="#editQuestionModal" onclick="setModal(\'' + name + '\'); return false;">Edit</button>';
     html += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + name + '\'); return false;">Delete</button>';
     addHTML(html);
 }
@@ -286,9 +419,11 @@ function end() {
     //old: var payload = JSON.stringify($('#survey').serializeArray());
 
     //this works
-    var payload = JSON.stringify($( document.getElementsByName("survey") ).serializeArray());
+    /*var payload = JSON.stringify($( document.getElementsByName("survey") ).serializeArray());
     console.log(payload);
-    $.post("/update_weekly", payload);
+    $.post("/update_weekly", payload);*/
+
+    exportSurvey();
 }
 
 

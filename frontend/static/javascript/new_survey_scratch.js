@@ -1,7 +1,7 @@
 function clearModal() {
     //this method replaces function clearModal()
     /*loop sets all attributes of the modal dialogue to empty/default values.*/
-    var attrs = ["name","text","valnum","defnum","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
+    var attrs = ["name","text","min","max","anstxt","tfttxt","min_value", "max_value", "answers", "fields_div", "text_field_type"];
     for (var i = 0; i < attrs.length; i++) {
         if (i<=5) { document.getElementById(attrs[i]).value = ""; }
         if (i>5) { document.getElementById(attrs[i]).style.display = "none"; }
@@ -55,7 +55,7 @@ function add_Q_header(question_id) {
 }
 
 function add_Q_footer(question_id) {
-    var footer = '<p><button class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal(\'' + question_id + '\'); return false;">Edit</button>';
+    var footer = '<p><button class="btn btn-primary" data-toggle="modal" data-target="#editQuestionModal" onclick="setModal(\'' + question_id + '\'); return false;">Edit</button>';
     footer += '<button class="btn btn-primary" onclick="deleteQuestion(\'' + question_id + '\'); return false;">Delete</button>';
     add_to_survey(footer);
 }
@@ -154,8 +154,8 @@ function create_question_slider( question_id ) {
     var div4 = create_div(question_id, "Default: ", "default");
     var input1 = setup_input_field(question_id, "slider", "text", "data");
     var input2 = setup_input_field(question_id, "slider", "type", document.question.text.value );
-    var input3 = setup_input_field(question_id, "slider", "range", document.question.valnum.value );
-    var input4 = setup_input_field(question_id, "slider", "default", document.question.defnum.value );
+    var input3 = setup_input_field(question_id, "slider", "range", document.question.min.value );
+    var input4 = setup_input_field(question_id, "slider", "default", document.question.max.value );
 }
 // question type 3 is a radio button
 function create_question_radio_button( question_id ) {
@@ -193,25 +193,4 @@ function submit() {
     var payload = JSON.stringify($('#survey').serializeArray());
     console.log(payload);
     $.post("/update_weekly", payload);
-}
-
-
-
-/* JOSH EXPERIMENTAL CODE FOR RADIO BUTTON AND CHECKBOX QUESTIONS
-3 LINES OF NECESSARY HTML:
-<div id="fieldsDiv">
-</div>
-<button type="button" onclick="addField()">Add new field</button>
-*/
-function addField() {
-    /* TODO: give the input fields unique IDs! */
-    var fieldsDiv = document.getElementById('fieldsDiv');
-    var newField = document.createElement("div");
-    newField.innerHTML = '<input type="text" name="option' + 2 + '"></input><button type="button" onclick="deleteField(this)">Delete</button><br><br>';
-    /*alert(newField.innerHTML);*/
-    fieldsDiv.appendChild(newField);
-}
-
-function deleteField(elem) {
-    elem.parentNode.remove();
 }
