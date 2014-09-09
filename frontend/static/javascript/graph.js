@@ -65,7 +65,6 @@ plot1 = $.jqplot ('chart1', [input], {
 
 function replot_user_results(data) {
     $('#chart1').empty();
-    alert(data.max())
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
     graph(data);
