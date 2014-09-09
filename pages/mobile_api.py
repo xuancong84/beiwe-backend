@@ -10,7 +10,8 @@ mobile_api = Blueprint('mobile_api', __name__)
 ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog', \
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-SURVEY_TAG = 'surveyAnswers'
+
+= ['surveyAnswers', 'surveyTimings']
 
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
 def login_or_register_user():
@@ -93,7 +94,7 @@ def upload():
     if uploaded_file and file_name and allowed_extension(file_name):
         new_filename = s3_prep_filename(file_name)
         user_id, file_type, timestamp  = parse_filetype(file_name)
-        if
+        for
         s3_upload_handler(s3_prep_filename(file_name), uploaded_file)
 #         user_id, file_type, timestamp  = parse_filetype(file_name)
 #         if "surveyAnswers" in filetype or "surveyTimings" in filetype:

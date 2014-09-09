@@ -46,13 +46,27 @@ def grab_weekly_file_names(all_files):
     else:
         return sorted(all_files[len(all_files) - 7:])
 
-def get_weekly_results(username="ABCDEF12", question_id='A105'):
-    answer_list = []
+def get_weekly_results(username="ABCDEF12"):
     weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers42/'))
-
     # Convert each csv_file to a readable data list
-    for csv_file in weekly_files:
-        data = csv_to_dict(csv_file)
+    weekly_surveys = [csv_to_dict(file_name) for file_name in weekly_files]
+
+    # Adds all question ids to a set, then turns that set into an ordered list
+    # Also, creates the final list of answers to be sent to the graph
+    ordered_question_ids = set()
+    all_answers = []
+    for question in weekly_surveys[0]:
+        ordered_question_ids.add(question['question id'])
+        all_answers.append([])
+    list_ordered_question_ids = [question_id for question_id in ordered_question_ids]
+
+    # Adds all answers to it
+    for survey in weekly_surveys:
+            for question in survey:
+                current_id = question['question id']
+                answer = question['answer']
+                all_answers[list_ordered_question_ids.index(current_id)].append(answer)
+    return all_answers
 
         # If the dictionary is empty, append a string
         if (len(data) == 0):
