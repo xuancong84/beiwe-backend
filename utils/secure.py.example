@@ -1,0 +1,17 @@
+# Create secure.py file, put it only on your production server right next to
+# this secure.py.example file and name it "secure.py"
+
+# Back up the key and iv.  Do this somewhere that will be accessible to you
+# in the future.
+
+# IF YOU LOSE THESE KEYS YOU WILL NOT BE ABLE TO ACCESS DATA FROM YOUR STUDY.
+
+# Both the key and iv must be 32 characters long (256 bits).
+# Do not use the example key or iv in any production environment.
+# Do not use the same string for both the key and iv.
+# We strongly recommend using a cryptographically secure random number generator
+# to generate both values, these should NOT be human-readable passwords.
+
+
+ENCRYPTION_KEY = "abcdefghijklmnopqrstuvwxyz012345"
+ENCRYPTION_IV = "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"

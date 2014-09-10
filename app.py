@@ -4,6 +4,23 @@ from utils.logging import log_error
 from utils.security import set_secret_key
 from pages import mobile_api, admin, survey_designer
 
+try:
+    from utils.secure import ENCRYPTION_KEY, ENCRYPTION_IV
+except ImportError as e:
+    if e.message != "No module named secure":
+        raise
+    else:
+        print "You have not provided a secure.py file."
+        exit()
+
+if len( ENCRYPTION_KEY ) != 32:
+    print "Your key is not 32 characters. The key must be exactly 32 charcters long."
+    exit()
+
+if len( ENCRYPTION_IV ) != 32:
+    print "Your iv is not 32 characters. The iv must be exactly 32 charcters long."
+    exit()
+
 
 def subdomain(directory):
     app = Flask(__name__, static_folder=directory + "/static")
