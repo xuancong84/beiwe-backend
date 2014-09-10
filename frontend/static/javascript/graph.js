@@ -1,4 +1,5 @@
 function graph(input){
+console.log(input);
 plot1 = $.jqplot ('chart1', [input], {
         // Give the plot a title.
       title: 'Graph Of a question',
