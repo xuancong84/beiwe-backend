@@ -126,7 +126,7 @@ def upload():
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 #
 def fetch_graph():
-#     userID = request.values['patientID']
+    userID = request.values['patientID']
 #     password = request.values['pwd']
     return render_template("phone_graphs.html",
                             data=json.dumps(get_weekly_results(username='sur')))
