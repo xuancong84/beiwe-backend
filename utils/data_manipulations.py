@@ -63,7 +63,9 @@ def set_to_list(set_of_ids):
 def get_weekly_results(username="sur"):
     file_path = username + '/surveyAnswers/'
     survey_id = get_most_recent_id(file_path)
-    weekly_files = grab_weekly_file_names(list_s3_files(username + '/surveyAnswers/' + str(survey_id) + '/'))
+    weekly_files = grab_weekly_file_names(list_s3_files(username +
+                                                        '/surveyAnswers/' +
+                                                         str(survey_id) + '/'))
     # Convert each csv_file to a readable data list
     weekly_surveys = [csv_to_dict(file_name) for file_name in weekly_files]
 
