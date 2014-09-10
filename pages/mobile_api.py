@@ -123,8 +123,8 @@ def upload():
 # 4) you need to render a template with the appropriate graph
 
 
-@mobile_api.route('/graph')
-# , methods=['GET', 'POST']
+@mobile_api.route('/graph', methods=['GET', 'POST'])
+#
 def fetch_graph():
 #     userID = request.values['patientID']
 #     password = request.values['pwd']
