@@ -132,6 +132,7 @@ def get_user_info():
     password = request.values['pwd']
     droidID = request.values['droidID']
     bluetoothID = request.values['btID']
+    print (userID + password + droidID + bluetoothID)
 
     # TODO: Make a folder called user ID
     # TODO: Make a function called check_user_exists (checks for the existense of the folder)
