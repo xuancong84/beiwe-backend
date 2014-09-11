@@ -125,15 +125,25 @@ def upload():
 # 3)  once you pulled and aggregated that data, you need to transform that data into the appropriate format for Dori's graphing component
 # 4) you need to render a template with the appropriate graph
 
+@mobile_api.route('/userinfo', methods=['GET', 'POST'])
+def get_user_info():
+    """ Method for receiving user info upon registration """
+    userID = request.values['patientID']
+    password = request.values['pwd']
+    droidID = request.values['droidID']
+    bluetoothID = request.values['btID']
+
+    # TODO: Make a folder called user ID
+    # TODO: Make a function called check_user_exists (checks for the existense of the folder)
+    # TODO: Make a MAC address file (nothing to do with it yet)
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
-#
 def fetch_graph():
     userID = request.values['patientID']
     password = request.values['pwd']
-    data = [json.dumps(i) for i in get_weekly_results(username=userID)]
-    print data
-    return render_template("phone_graphs.html", data=data)
+    results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    print results
+    return render_template("phone_graphs.html", data=results)
 
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():

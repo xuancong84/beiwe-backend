@@ -18,6 +18,7 @@ def _get_bucket(name ):
         return None
 
 
+# TODO: Ask Kevin about uploading Strings and uploading empty files
 def s3_upload_handler( key_name, file_obj ):
     """ Method uploads file object to bucket with key_name"""
     bucket = _get_bucket(DB)
