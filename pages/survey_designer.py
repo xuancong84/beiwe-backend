@@ -5,25 +5,10 @@ from datetime import datetime
 
 survey_designer = Blueprint('survey_designer', __name__)
 
-def get_surveys(prefix="survey/"):
-    surveys = list_s3_files(prefix)
-    return [i.strip(prefix).strip(".json") for i in surveys]
 
-
-def get_latest_weekly():
-    """ Method responsible for fetching latest created weekly survey
-        (frequency 1) """
-    weeklies = get_surveys("survey/weekly/")
-    weeklies = sorted(weeklies, reverse=True)
-    return jsonify(s3_retrieve(weeklies[0]))
-
-
-def get_latest_daily():
-    """ Method responsible for fetching latest created daily survey (frequency 1) """
-    dailies = get_surveys("survey/daily/")
-    dailies = sorted(dailies, reverse=True)
-    return jsonify(s3_retrieve(dailies[0]))
-
+################################################################################
+############################### Setters ########################################
+################################################################################
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated
@@ -62,40 +47,60 @@ def save_new_daily():
     return redirect("/daily_survey/")
 
 
+################################################################################
+############################### Getters ########################################
+################################################################################
+
+def get_surveys(prefix="survey/"):
+    surveys = list_s3_files(prefix)
+    return [i.strip(prefix).strip(".json") for i in surveys]
+
+
+def get_latest_weekly():
+    """ Method responsible for fetching latest created weekly survey
+        (frequency 1) """
+    weeklies = get_surveys("survey/weekly/")
+    weeklies = sorted(weeklies, reverse=True)
+    return jsonify(s3_retrieve(weeklies[0]))
+
+
+def get_latest_daily():
+    """ Method responsible for fetching latest created daily survey (frequency 1) """
+    dailies = get_surveys("survey/daily/")
+    dailies = sorted(dailies, reverse=True)
+    return jsonify(s3_retrieve(dailies[0]))
+
+
+################################################################################
+########################### Pure routes ########################################
+################################################################################
+
 @survey_designer.route('/survey_designer')
 @auth.authenticated
 def render_survey_builder():
     data = {}
     return render_template('survey_designer.html', data)
 
-
 @survey_designer.route('/surveys')
 @auth.authenticated
 def render_surveys():
-    data = {
-            #"sms_cohorts": [c for c in Cohorts()],
-            #"email_cohorts": [ec for ec in EmailCohorts()]
-           }
+    data = {}
     return render_template('surveys.html', data)
-
 
 @survey_designer.route('/survey_designer')
 @auth.authenticated
 def render_survey_designer():
     return render_template('survey_designer.html')
 
-
 @survey_designer.route('/question_designer')
 @auth.authenticated
 def question_designer():
     return render_template('question_designer.html')
 
-
 @survey_designer.route('/weekly_survey')
 @auth.authenticated
 def weekly_survey():
     return render_template('weekly_survey.html')
-
 
 @survey_designer.route('/daily_survey')
 @auth.authenticated
