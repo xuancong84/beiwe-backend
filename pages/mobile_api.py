@@ -72,10 +72,12 @@ def parse_filename(filename):
     if len(l) == 3:
         return l[0], l[1], l[2]
 
+
 def parse_filetype(file_type):
     parsed_id = filter(str.isdigit, file_type)
     ftype = filter(str.isalpha, file_type)
     return ftype, parsed_id
+
 
 def s3_prep_filename(filename):
     """ Preps a filename to become a S3 file path for prefix organization. """
@@ -88,6 +90,7 @@ def s3_prep_filename(filename):
 def allowed_extension(filename):
     """ Method checks to see if uploaded file has filename that ends in an allowed extension. Does not verify content. """
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @mobile_api.route('/upload', methods=['POST'])
 def upload():

@@ -1,16 +1,16 @@
 from utils.s3 import list_s3_files, s3_retrieve
 
-# TODO: DEPRECATE!!
-#
-# def read_file(file_path):
-#     """reads in a file, returns a string of the entire file."""
-#     with open(file_path, 'r') as f:
-#         return f.read()
+
+def csv_to_dict(s3_file_path):
+    return read_csv_string( s3_retrieve( s3_file_path ) )
 
 
-def read_csv_other(csv_string):
+def read_csv_string(csv_string):
+    #TODO: Dori, test for empty entry handling in graphing, we can change behavior of empty entries.
+    """ Converts a string formatted as a csv into a dictionary with the format
+        {Column Name: [list of data points] }. Data are in their original order,
+        any empty entries are dropped.  """
     #grab a list of every line in the file, strips off trailing whitespace.
-    #
     lines = [ line for line in csv_string.splitlines() ]
 
     header_list = lines[0].split(',')
@@ -23,28 +23,14 @@ def read_csv_other(csv_string):
     return list_of_entries
 
 
-# Dori's working code
-def manipulate_csv(readed_file):
-    modified_list = [line for line in readed_file.splitlines()]
-    headers = modified_list[0].split(',')
-    result = []
-    for element in modified_list[1:]:
-        listed_values = element.split(',')
-        dictionary = {header : listed_values[header_index] for (header_index, header) in enumerate(headers)}
-        result.append(dictionary)
-    return result
-
-def csv_to_dict(file_path):
-    return read_csv_other( s3_retrieve( file_path ) )
-
+#TODO: add a user id parameter?
 def grab_weekly_file_names(all_files):
-
-    # Added an if statement to avoid index out of bounds
     # Returns a sorted list of all files
     if (len(all_files) <= 7):
         return sorted(all_files)
     else:
-        return sorted(all_files[len(all_files) - 7:])
+        return sorted(all_files[-7:])
+
 
 def get_most_recent_id(file_path):
     all_files = list_s3_files(file_path)
@@ -54,11 +40,9 @@ def get_most_recent_id(file_path):
         organizing_list = filename.split('/')
         survey_id = int(organizing_list[2])
         id_set.add(survey_id)
-    result_list = set_to_list(id_set)
+    result_list = sorted(id_set)
     return result_list[len(result_list) - 1]
 
-def set_to_list(set_of_ids):
-    return sorted([item for item in set_of_ids])
 
 def get_weekly_results(username="sur", methods=['GET', 'POST']):
     file_path = username + '/surveyAnswers/'
@@ -74,7 +58,7 @@ def get_weekly_results(username="sur", methods=['GET', 'POST']):
     for question in weekly_surveys[0]:
         ordered_question_ids.add(question['question id'])
         all_answers.append([])
-    list_ordered_question_ids = set_to_list(ordered_question_ids)
+    list_ordered_question_ids = sorted(ordered_question_ids)
 
     # Adds all answers to it in a formatted way
     for survey in weekly_surveys:
