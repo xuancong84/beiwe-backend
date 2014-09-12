@@ -1,12 +1,10 @@
 from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
-
 import mimetypes
+from constants import DB
 
 CONN = connect_s3()
-
-from constants import DB
 
 
 def _get_bucket(name ):
@@ -31,8 +29,8 @@ def s3_upload_handler( key_name, file_obj ):
 
 def list_s3_files( prefix ):
     """ Method fetches a list of filenames with prefix"""
-    b = _get_bucket(DB)
-    results = b.list(prefix=prefix)
+    bucket = _get_bucket(DB)
+    results = bucket.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
 
 
@@ -41,5 +39,9 @@ def s3_retrieve( key_name ):
     key = Key(_get_bucket(DB), key_name)
     return key.read()
 
-def s3_retreive_two_weeks( prefix ): pass
-    #TODO: using a user ID retrieve two weeks (14 points??) of data
+def s3_retrieve_two_weeks( prefix ): pass
+    #TODO: using a user ID retrieve two weeks (14 points?) of data
+
+
+def s3_get_user_file(user_id, key_name):
+    pass
