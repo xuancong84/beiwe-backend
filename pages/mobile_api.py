@@ -14,6 +14,7 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
+
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
 def login_or_register_user():
     """ TODO: Spec: Web app on server is responsible for relaying and storing password information, as well as checking
@@ -111,19 +112,6 @@ def upload():
     else:
         abort(400)
 
-#TODO:
-# # this should be a dynamic page, probably looking like "uuid/graph"
-# # google dynamic URL in flask?
-# @mobile_api.route('/users/<int:userid>/')
-# def graph(userid):
-#
-
-# def graph(user_id)
-# 1) check against user credentials (stored in s3) to authenticate
-# - what does the credentials file look like in s3? well, it can be as simple as "user_identifier_credentials.pem" with the contents being the hashed username-device-identier/password
-# 2) once you've determined they are authenticated, you need pull the last two weeks of relevant csv files. There S3 functions to do that, namely, something like "mobile_api.fetch_user_responses"
-# 3)  once you pulled and aggregated that data, you need to transform that data into the appropriate format for Dori's graphing component
-# 4) you need to render a template with the appropriate graph
 
 @mobile_api.route('/userinfo', methods=['GET', 'POST'])
 def get_user_info():
@@ -138,6 +126,12 @@ def get_user_info():
     # TODO: Make a function called check_user_exists (checks for the existense of the folder)
     # TODO: Make a MAC address file (nothing to do with it yet)
 
+
+#TODO:
+# this should be a dynamic page, the url should look like "/uuid/graph"
+# @mobile_api.route('/users/<int:userid>/')
+# def graph(userid):
+
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 def fetch_graph():
     userID = request.values['patientID']
@@ -146,14 +140,15 @@ def fetch_graph():
     print results
     return render_template("phone_graphs.html", data=results)
 
+
+#FIXME: this is debug code.
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
-    """ Method responsible for serving the latest survey JSON. """
-    f = open("/var/www/scrubs/keyFile", 'rb')
-    return f.read()
-#     return jsonify(json.load(f))
-#     if request.method == 'POST':
-#         if request.values["magic"] == "12345":
-#             return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
-#     else:
-#         return
+    return open("/var/www/scrubs/keyFile", 'rb').read()
+
+
+#fixme: implement
+@mobile_api.route('/<int:user_id>/key', methods=['GET', 'POST'])
+def get_key():
+    pass
+
