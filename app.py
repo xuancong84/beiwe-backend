@@ -5,7 +5,7 @@ from utils.security import set_secret_key
 from pages import mobile_api, admin, survey_designer
 
 try:
-    from utils.secure import ENCRYPTION_KEY
+    from utils.secure import PASSWORD
 except ImportError as e:
     if e.message != "No module named secure":
         raise
@@ -13,7 +13,7 @@ except ImportError as e:
         print "You have not provided a secure.py file."
         exit()
 
-if len( ENCRYPTION_KEY ) != 32:
+if len( PASSWORD ) != 32:
     print "Your key is not 32 characters. The key must be exactly 32 charcters long."
     exit()
 
