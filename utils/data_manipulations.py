@@ -23,13 +23,13 @@ def read_csv_string(csv_string):
     return list_of_entries
 
 
-#TODO: Dori. add a user id parameter?
+# This is a method to get the last seven names saved in a folder
 def grab_weekly_file_names(all_files):
     # Returns a sorted list of all files
     if (len(all_files) <= 7):
         return sorted(all_files)
     else:
-        return sorted(all_files[-7:])
+        return sorted(all_files[len(all_files) - 7:])
 
 
 def get_most_recent_id(file_path):

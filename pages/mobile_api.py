@@ -34,6 +34,7 @@ def login_or_register_user():
         return "User Password combination not found"
 
 
+
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
 #@auth.authenticated #TODO to make authenticated on user level
 def render_user_panel(user_id):
@@ -46,6 +47,7 @@ def render_user_panel(user_id):
     # 3. Render graph if applicable
 
 
+# Deprecate - This is received by the fetch_graph function
 def fetch_user_responses(user_id):
     """ Method fetches a user's survey responses. """
     #TODO: Dori. untested, old, test and update
