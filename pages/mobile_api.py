@@ -34,6 +34,18 @@ def login_or_register_user():
         return "User Password combination not found"
 
 
+@mobile_api.route('/<user_id>', methods=['GET', 'POST'])
+#@auth.authenticated #TODO to make authenticated on user level
+def render_user_panel(user_id):
+    """ Method displays user information. """
+    responses = fetch_user_responses(user_id)
+    return jsonify(responses)
+    #TODO: Dori
+    # 1. Fetch all files related to user_id in S3
+    # 2. Render list of contents
+    # 3. Render graph if applicable
+
+
 def fetch_user_responses(user_id):
     """ Method fetches a user's survey responses. """
     #TODO: Dori. untested, old, test and update
