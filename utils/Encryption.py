@@ -8,7 +8,11 @@
     Device: public  """
 
 
-#public-private
+
+################################################################################
+################################# RSA ##########################################
+################################################################################
+
 from Crypto.PublicKey import RSA
 
 def generate_key_pairing():
@@ -45,59 +49,19 @@ def prepare_X509_key_for_java( exported_key ):
     return "".join(exported_key.split('\n')[1:-2])
 
 
-# symmetric
 
-# initialization_vector = Random.new().read(AES.block_size)
-# symmetric_cipher = AES.new(aes_key, AES.MODE_CTC, initialization_vector)
-#
-# encrypting_string = b"Attack at dawn"
-# length = 16 - (len(data) % 16)
-# data += chr(length)*length
-#
-# msg = initialization_vector + symmetric_cipher.encrypt(data)
-# and when reading data strip bytes
+################################################################################
+################################# AES ##########################################
+################################################################################
+
+""" We are using AES in CFB mode because we do not have a [good-and-simple] way
+    of enforcing separate storage of initialization vectors from keys or files. """
+
 from Crypto.Cipher import AES
-from Crypto import Random
-from utils.secure import ENCRYPTION_IV, ENCRYPTION_KEY
+from utils.secure import ENCRYPTION_KEY
 
 def encrypt_aes(input_string):
-    #TODO: update this comment, we are just asking for an iv in secure.py
-    """ W/regards the iv: we can could store the iv along with the rest of the
-        patient's data either per-patient or per-file, but this makes the "secret"
-        iv totally pointless.  We can store the iv in a separate location/database,
-        this is complicated (user must set up a second database), but the most secure.
-        We could use the same iv for everything, require that it be provided
-        at the same as the key, and prepend random noise to the beginning of all
-        files we encrypt, and then ignore it later.  This is better than using no
-        iv or a static iv without prepended noise. """
-        #we could do a hash of the password?
-    
-    #TODO: test and research if we need this to be called every single time we
-    # make the encrypt call, or if we can call it once as a global variable.
-    symmetric_cipher = AES.new(ENCRYPTION_KEY, AES.MODE_CBC, ENCRYPTION_IV)
-    
-    # In order to use CBC we need to make sure the data to be encrypted is a
-    # multiple of the block size.  We generate a random string that satisfies this
-    # length requirement, and then insert a new line so we can separate the data
-    # out it upon decryption.  We do need to make sure there are not new line
-    # chars in this prepended data.
-    
-    random_padding = Random.new().read(AES.block_size + (len(input_string) % AES.block_size) - 1  )
-    while '\n' in random_padding:
-        random_padding = Random.new().read(AES.block_size + (len(input_string) % AES.block_size) - 1  )
-    random_padding += '\n'
-    
-    output = symmetric_cipher.encrypt( random_padding + input_string )
-    return output
-    
+    return AES.new(ENCRYPTION_KEY, AES.MODE_CFB).encrypt( input_string )
     
 def decrypt_aes(input_string):
-    symmetric_cipher = AES.new( ENCRYPTION_KEY, AES.MODE_CBC, ENCRYPTION_IV )
-    try:
-        return symmetric_cipher.decrypt(input_string).split("\n", 1)[1]
-    except IndexError:
-        #TODO: log that an error occurred, either an error in the decryption resulting
-        # in nonsense, or the data was empty.
-        raise
-    
-    
+    return AES.new( ENCRYPTION_KEY, AES.MODE_CFB).decrypt( input_string )
