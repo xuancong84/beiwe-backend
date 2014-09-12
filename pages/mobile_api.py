@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, jsonify, json
 from werkzeug import secure_filename
-from utils.s3 import s3_upload_handler, list_s3_files, s3_retrieve
+from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve
 from flask import request, render_template
 from utils.data_manipulations import get_weekly_results
 
@@ -105,10 +105,10 @@ def upload():
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype(file_type)
             s3_prepped_filename = "%s/%s/%s/%s" % (user_id, ftype, parsed_id, timestamp)
-            s3_upload_handler(s3_prepped_filename, uploaded_file)
+            s3_upload_handler_file(s3_prepped_filename, uploaded_file)
             #mongo_survey_response_instance.save(user_id, timestamp, uploaded_file.read())
         else:
-            s3_upload_handler(s3_prep_filename(file_name), uploaded_file)
+            s3_upload_handler_file(s3_prep_filename(file_name), uploaded_file)
         return'200'
     else:
         abort(400)

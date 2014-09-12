@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
 from utils import auth
-from utils.s3 import list_s3_files, s3_retrieve, s3_upload_handler
+from utils.s3 import list_s3_files, s3_retrieve, s3_upload_handler_file
 from datetime import datetime
 
 survey_designer = Blueprint('survey_designer', __name__)
@@ -31,7 +31,7 @@ def save_new_weekly():
 #     print "\n\n", request.files["json"] , "\n\n"
 #
 #     try:
-    s3_upload_handler(key_name, json.dumps(request.files["json"]))
+    s3_upload_handler_file(key_name, json.dumps(request.files["json"]))
 #     except Exception as e:
 #         print "\n", e
 #         raise e
@@ -45,7 +45,7 @@ def save_new_daily():
     """ Method responsible for saving newly created daily survey (frequency 1) """
     dailies = get_surveys("survey/daily/")
     key_name = "survey/daily/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(dailies) + 1)
-    s3_upload_handler(key_name, json.dumps(request.files["json"]))
+    s3_upload_handler_file(key_name, json.dumps(request.files["json"]))
     return redirect("/daily_survey/")
 
 

@@ -17,7 +17,7 @@ def _get_bucket(name ):
 
 
 # TODO: Eli. Ask Kevin about uploading Strings and uploading empty files
-def s3_upload_handler( key_name, file_obj ):
+def s3_upload_handler_file( key_name, file_obj ):
     """ Method uploads file object to bucket with key_name"""
     bucket = _get_bucket(DB)
     key = bucket.new_key(key_name)
@@ -26,6 +26,13 @@ def s3_upload_handler( key_name, file_obj ):
     file_obj.seek(0)
     key.set_contents_from_file(file_obj)
 
+
+def s3_upload_handler_string( key_name, some_string ):
+    """ Method uploads string to bucket with key_name"""
+    bucket = _get_bucket(DB)
+    key = bucket.new_key(key_name)
+    key.set_contents_from_string(some_string)
+    
 
 def list_s3_files( prefix ):
     """ Method fetches a list of filenames with prefix"""

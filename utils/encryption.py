@@ -6,7 +6,7 @@
     Server: private
     Device: public  """
 
-from utils.s3 import s3_retrieve, s3_upload_handler, S3ResponseError
+from utils.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -15,7 +15,7 @@ from utils.s3 import s3_retrieve, s3_upload_handler, S3ResponseError
 def create_client_key_pair(user_id):
     """Generate key pairing, push to database, return sanitized key for client."""
     public, private = _generate_key_pairing()
-    s3_upload_handler( "keys/" + user_id, private )
+    s3_upload_handler_file( "keys/" + user_id, private )
     return prepare_X509_key_for_java(public)
 
 
