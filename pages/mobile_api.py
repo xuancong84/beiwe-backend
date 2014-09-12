@@ -44,18 +44,6 @@ def fetch_user_responses(user_id):
     return all_responses
 
 
-@mobile_api.route('/<user_id>', methods=['GET', 'POST'])
-#@auth.authenticated #TODO to make authenticated on user level
-def render_user_panel(user_id):
-    """ Method displays user information. """
-    responses = fetch_user_responses(user_id)
-    return jsonify(responses)
-    #TODO: Dori
-    # 1. Fetch all files related to user_id in S3
-    # 2. Render list of contents
-    # 3. Render graph if applicable
-
-
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
