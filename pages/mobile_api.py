@@ -17,12 +17,12 @@ TIMINGS_TAG = 'surveyTimings'
 
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
 def login_or_register_user():
-    """ TODO: Spec: Web app on server is responsible for relaying and storing password information, as well as checking
+    """ TODO: Eli. Spec: Web app on server is responsible for relaying and storing password information, as well as checking
     password match upon future login attempts, and given a successful match, redirects to another web page which a user
     see's a list and graph of past survey responses. """
     user_id = request.values["username"]
     password = request.values["password"]
-    #TODO:
+    #TODO: Eli
     # 1. check if user with user_id already exists
     # 2. if not, create user to store user password
     # 3. if yes, check if password matches
@@ -35,7 +35,8 @@ def login_or_register_user():
 
 
 def fetch_user_responses(user_id):
-    """ Method fetches a user's survey responses. TODO: untested """
+    """ Method fetches a user's survey responses. """
+    #TODO: Dori. untested, old, test and update
     all_responses = {}
     list_of_s3names = list_s3_files(user_id + 'surveyResponses')
     for l in list_of_s3names:
@@ -49,7 +50,7 @@ def render_user_panel(user_id):
     """ Method displays user information. """
     responses = fetch_user_responses(user_id)
     return jsonify(responses)
-    #TODO:
+    #TODO: Dori
     # 1. Fetch all files related to user_id in S3
     # 2. Render list of contents
     # 3. Render graph if applicable
@@ -121,13 +122,13 @@ def get_user_info():
     droidID = request.values['droidID']
     bluetoothID = request.values['btID']
     print (userID + password + droidID + bluetoothID)
+    #TODO: Dori
+    # Make a folder called user ID
+    # Make a function called check_user_exists (checks for the existense of the folder)
+    # Make a MAC address file (nothing to do with it yet)
 
-    # TODO: Make a folder called user ID
-    # TODO: Make a function called check_user_exists (checks for the existense of the folder)
-    # TODO: Make a MAC address file (nothing to do with it yet)
 
-
-#TODO:
+#TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "/uuid/graph"
 # @mobile_api.route('/users/<int:userid>/')
 # def graph(userid):
@@ -141,7 +142,7 @@ def fetch_graph():
     return render_template("phone_graphs.html", data=results)
 
 
-#FIXME: this is debug code.
+#FIXME: Eli. this is debug code.
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()

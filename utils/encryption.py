@@ -41,13 +41,13 @@ def _generate_key_pairing():
     return public_key.exportKey(), private_key.exportKey()
     
     
-#TODO: depricate
+#TODO: Eli. deprecate
 def get_private_key_from_file(file_name):
     with open("file_name", 'r') as f:
         return RSA.importKey( f.read() )
     
     
-#TODO: merge with the csv reader?
+#TODO: Eli. merge with the csv reader?
 def decrypt_rsa(encrypted_csv, private_key):
     """ This function takes a csv file encrypted on the client device and
         decrypts every line separately.  It then returns those concatenated

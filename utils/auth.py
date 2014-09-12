@@ -15,7 +15,7 @@ def logout_loggedin_admin():
 
 
 def login_admin():
-    #TODO: Currently only 1 admin user. Allow more than one admin user.
+    #TODO: Eli/Kevin. Currently only 1 admin user. Allow more than one admin user.
     session['admin_uuid'] = "12345678987654321" #111111111^2
     session['expiry'] = datetime.now() + timedelta(hours=6)
 

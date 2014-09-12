@@ -32,8 +32,8 @@ def validate_login_credentials(password, username):
     if password == "1" and username == "1":
         return True
     return False
-    #TODO: make this a real thing.
-    #todo: move to auth?
+    #TODO: Eli/Kevin make this a real thing.
+    #move to auth.py?
 
 @admin.route("/logout")
 def logout():

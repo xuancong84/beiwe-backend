@@ -9,12 +9,11 @@ survey_designer = Blueprint('survey_designer', __name__)
 ############################### Setters ########################################
 ################################################################################
 
-#FIXME: determine if these will be used at all (as Josh has rewritten the submission
-# pages, if not REMOVE THEM
+#FIXME: Eli. determine if these will be used at all (as Josh has rewritten the submission pages, if not REMOVE THEM
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated
-#TODO: clean this up
+#TODO: Eli. clean this up
 def save_new_weekly():
     """ Method responsible for saving newly created weekly survey (frequency 1) """
     print request.values, "\n-\n"

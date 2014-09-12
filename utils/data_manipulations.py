@@ -23,7 +23,7 @@ def read_csv_string(csv_string):
     return list_of_entries
 
 
-#TODO: add a user id parameter?
+#TODO: Dori. add a user id parameter?
 def grab_weekly_file_names(all_files):
     # Returns a sorted list of all files
     if (len(all_files) <= 7):
@@ -66,7 +66,7 @@ def get_weekly_results(username="sur", methods=['GET', 'POST']):
                 current_id = question['question id']
                 answer = question['answer']
 
-                # TODO: This will change. For now, the graph can't deal with string answers..
+                # TODO: Dori. This will change. For now, the graph can't deal with string answers..
                 try:
                     all_answers[list_ordered_question_ids.index(current_id)].append(int(answer))
                 except ValueError:

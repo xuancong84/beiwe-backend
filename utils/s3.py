@@ -16,7 +16,7 @@ def _get_bucket(name ):
         return None
 
 
-# TODO: Ask Kevin about uploading Strings and uploading empty files
+# TODO: Eli. Ask Kevin about uploading Strings and uploading empty files
 def s3_upload_handler( key_name, file_obj ):
     """ Method uploads file object to bucket with key_name"""
     bucket = _get_bucket(DB)
@@ -40,7 +40,7 @@ def s3_retrieve( key_name ):
     return key.read()
 
 def s3_retrieve_two_weeks( prefix ): pass
-    #TODO: using a user ID retrieve two weeks (14 points?) of data
+    #TODO: Dori/Eli. using a user ID retrieve two weeks (14 points?) of data
 
 
 def s3_get_user_file(user_id, key_name):
