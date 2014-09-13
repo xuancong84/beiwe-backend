@@ -16,7 +16,6 @@ def _get_bucket(name ):
         return None
 
 
-# TODO: Eli. Ask Kevin about uploading Strings and uploading empty files
 def s3_upload_handler_file( key_name, file_obj ):
     """ Method uploads file object to bucket with key_name"""
     bucket = _get_bucket(DB)
@@ -35,7 +34,9 @@ def s3_upload_handler_string( key_name, some_string ):
     
 
 def list_s3_files( prefix ):
-    """ Method fetches a list of filenames with prefix"""
+    """ Method fetches a list of filenames with prefix.
+        note: entering the empty string into this search without later calling
+        the object results in a truncated/paginated view."""
     bucket = _get_bucket(DB)
     results = bucket.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
@@ -45,6 +46,7 @@ def s3_retrieve( key_name ):
     """ Method returns file contents with specified S3 key path"""
     key = Key(_get_bucket(DB), key_name)
     return key.read()
+
 
 def s3_retrieve_two_weeks( prefix ): pass
     #TODO: Dori/Eli. using a user ID retrieve two weeks (14 points?) of data

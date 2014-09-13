@@ -1,9 +1,8 @@
-from flask import Blueprint, request, abort, jsonify, json
+from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve
-from flask import request, render_template
 from utils.data_manipulations import get_weekly_results
-
+from utils.encryption import check_client_key 
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -14,13 +13,34 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
+#TODO: Eli/Dori.  correctly receive data from device.
+
+#notes:
+# a return without a value results in a 200 OK HTTP response
+
+@mobile_api.route('/register_user', methods=['GET', 'POST'])
+def register_user():
+    user_id = request.values["user_id"]
+    #check if user_id is a valid, registerable user_id.
+    
+    #if a client key already exists, the user cannot register a device (403 forbidden)
+    if check_client_key(user_id):
+        return 403
+    #if the client does not already
+
+
+def verify_user(user_id):
+    pass
+
 
 @mobile_api.route('/login_user', methods=['GET', 'POST'])
-def login_or_register_user():
-    """ TODO: Eli. Spec: Web app on server is responsible for relaying and storing password information, as well as checking
-    password match upon future login attempts, and given a successful match, redirects to another web page which a user
-    see's a list and graph of past survey responses. """
-    user_id = request.values["username"]
+def login_user():
+    #TODO: Eli.
+    """ Spec: Web app on server is responsible for relaying and storing password
+        information, as well as checking password match upon future login attempts,
+        and given a successful match, redirects to another web page which a user
+        see's a list and graph of past survey responses. """
+    user_id = request.values["user_id"]
     password = request.values["password"]
     #TODO: Eli
     # 1. check if user with user_id already exists
@@ -32,7 +52,6 @@ def login_or_register_user():
         return render_user_panel(user_id)
     else:
         return "User Password combination not found"
-
 
 
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
