@@ -6,7 +6,8 @@
     Server: private
     Device: public  """
 
-from utils.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError
+from utils.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError,\
+    list_s3_files
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -27,6 +28,11 @@ def get_client_key(user_id):
     return RSA.importKey( key )
 
 
+def check_client_key(user_id):
+    if len(list_s3_files( "keys/" + user_id )) == 1:
+        return True
+    return False
+
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
@@ -39,12 +45,6 @@ def _generate_key_pairing():
     private_key = RSA.generate(ASYMMETRIC_KEY_LENGTH)
     public_key = private_key.publickey()
     return public_key.exportKey(), private_key.exportKey()
-    
-    
-#TODO: Eli. deprecate
-def get_private_key_from_file(file_name):
-    with open("file_name", 'r') as f:
-        return RSA.importKey( f.read() )
     
     
 #TODO: Eli. merge with the csv reader?
@@ -60,7 +60,7 @@ def prepare_X509_key_for_java( exported_key ):
     # This may actually be a PKCS8 Key specification.
     """ Removes all extraneous data (new lines and labels from a formatted key
         string, because this is how Java likes its key files to be formatted. """
-    return "".join(exported_key.split('\n')[1:-2])
+    return "".join( exported_key.split('\n')[1:-2] )
     
     
 # This function is never intended to be used, it is only for debugging.
@@ -81,7 +81,7 @@ from Crypto.Cipher import AES
 from utils.secure import PASSWORD as ENCRYPTION_KEY
 
 def encrypt_aes(input_string):
-    return AES.new(ENCRYPTION_KEY, AES.MODE_CFB).encrypt( input_string )
+    return AES.new( ENCRYPTION_KEY, AES.MODE_CFB ).encrypt( input_string )
     
 def decrypt_aes(input_string):
-    return AES.new( ENCRYPTION_KEY, AES.MODE_CFB).decrypt( input_string )
+    return AES.new( ENCRYPTION_KEY, AES.MODE_CFB ).decrypt( input_string )
