@@ -13,7 +13,6 @@ survey_designer = Blueprint('survey_designer', __name__)
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
 @auth.authenticated
-#TODO: Eli. clean this up
 def save_new_weekly():
     """ Method responsible for saving newly created weekly survey (frequency 1) """
     print request.values, "\n-\n"
