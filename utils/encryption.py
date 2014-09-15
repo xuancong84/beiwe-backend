@@ -78,7 +78,7 @@ def prepare_X509_key_for_java( exported_key ):
     of enforcing separate storage of initialization vectors from keys or files. """
 
 from Crypto.Cipher import AES
-from utils.secure import PASSWORD as ENCRYPTION_KEY
+from secure import PASSWORD as ENCRYPTION_KEY
 
 def encrypt_aes(input_string):
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB ).encrypt( input_string )
