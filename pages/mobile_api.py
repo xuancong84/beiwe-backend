@@ -174,3 +174,9 @@ def fetch_key():
 def get_key():
     pass
 
+#TODO: Eli, I (Josh) need a function called /update_survey
+# I want to send a POST or GET request to it that has a long (~1kb) string of JSON
+# I want it to save the current survey.json file (right now it's sample_survey.json on the server)
+# as an older version (maybe timestamped or something)
+# And then I want it to overwrite the survey.json file with the string I pass it.
+# I'm not sure where the survey.json file will be; I think Kevin wanted it to be a file on S3.
