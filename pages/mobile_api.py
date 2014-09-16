@@ -78,10 +78,10 @@ def get_user_info():
 # @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
 @mobile_api.route('/graph')
 def fetch_graph():
-    userID = request.values['patientID']
-    password = request.values['pwd']
-    results = [json.dumps(i) for i in get_weekly_results(username=userID)]
-    return render_template("phone_graphs.html", data=results)
+#     userID = request.values['patientID']
+#     password = request.values['pwd']
+#     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    return render_template("phone_graphs.html")#, data=results)
 
 
 #TODO: Eli, I (Josh) need a function called /update_survey
