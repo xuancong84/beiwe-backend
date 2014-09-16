@@ -5,26 +5,23 @@ class User( DatabaseObject ):
     PATH = "database.users"
     
     #defaults are column names.  a dictionary containing key: sql_flag-thing and type
-    DEFAULTS = { "client_id": REQUIRED, "password": None, 'device_id': None }
+    #instead of using an ID, we are using the client ID as a unique Id.
+    DEFAULTS = { "password": None, 'device_id': None }
     
-    @staticmethod
-    def retrieve( some_client_id ):
-        # if I want
-        if User.exists( client_id=some_client_id ):
-            return User( client_id=some_client_id )
-        return None
+#     @staticmethod
+#     def retrieve( some_client_id ):
+#         # if I want
+#         if User.exists( client_id=some_client_id ):
+#             return User( client_id=some_client_id )
+#         return None
     
     @classmethod
     def create(cls, some_client_id):
         #if I add new columns
-        new_client = {'client_id': some_client_id, "password":None, 'device_id': None }
+        new_client = {ID_KEY: some_client_id, "password":None, 'device_id': None }
         return super(User, cls).create(new_client)
     
-    @classmethod
-    def remove(cls):
-        #TODO: implement
-        pass
-
+    #random notes: remove is implemented on the object
 
 #the thing I use to access the entire table
 class Users( DatabaseCollection ):
