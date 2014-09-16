@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
-from utils import auth
-from utils.s3 import list_s3_files, s3_retrieve, s3_upload_handler_file
+from libs import admin_authentication
+from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_file
 from datetime import datetime
 
 survey_designer = Blueprint('survey_designer', __name__)
@@ -12,7 +12,7 @@ survey_designer = Blueprint('survey_designer', __name__)
 #FIXME: Eli. determine if these will be used at all (as Josh has rewritten the submission pages, if not REMOVE THEM
 
 @survey_designer.route('/update_weekly', methods=['GET', 'POST'])
-@auth.authenticated
+@admin_authentication.authenticated
 def save_new_weekly():
     """ Method responsible for saving newly created weekly survey (frequency 1) """
     print request.values, "\n-\n"
@@ -39,7 +39,7 @@ def save_new_weekly():
 
 
 @survey_designer.route('/update_daily')
-@auth.authenticated
+@admin_authentication.authenticated
 def save_new_daily():
     """ Method responsible for saving newly created daily survey (frequency 1) """
     dailies = get_surveys("survey/daily/")
@@ -53,7 +53,7 @@ def save_new_daily():
 ################################################################################
 
 def get_surveys(prefix="survey/"):
-    surveys = list_s3_files(prefix)
+    surveys = s3_list_files(prefix)
     return [i.strip(prefix).strip(".json") for i in surveys]
 
 
@@ -77,33 +77,33 @@ def get_latest_daily():
 ################################################################################
 
 @survey_designer.route('/survey_designer')
-@auth.authenticated
+@admin_authentication.authenticated
 def render_survey_builder():
     data = {}
     return render_template('survey_designer.html', data)
 
 @survey_designer.route('/surveys')
-@auth.authenticated
+@admin_authentication.authenticated
 def render_surveys():
     data = {}
     return render_template('surveys.html', data)
 
 @survey_designer.route('/survey_designer')
-@auth.authenticated
+@admin_authentication.authenticated
 def render_survey_designer():
     return render_template('survey_designer.html')
 
 @survey_designer.route('/question_designer')
-@auth.authenticated
+@admin_authentication.authenticated
 def question_designer():
     return render_template('question_designer.html')
 
 @survey_designer.route('/weekly_survey')
-@auth.authenticated
+@admin_authentication.authenticated
 def weekly_survey():
     return render_template('weekly_survey.html')
 
 @survey_designer.route('/daily_survey')
-@auth.authenticated
+@admin_authentication.authenticated
 def daily_survey():
     return render_template('daily_survey.html')

@@ -1,7 +1,5 @@
 '''
-Created on Sep 12, 2014
-
-@author: Eli
+TODO: deprecate this entire file. (it may have useful logic, not built yet.
 '''
 
 from s3 import s3_retrieve, s3_upload_handler_string

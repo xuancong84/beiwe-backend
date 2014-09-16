@@ -1,9 +1,9 @@
 from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
-from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve,\
+from libs.s3 import s3_upload_handler_file, s3_list_files, s3_retrieve,\
     s3_upload_handler_string
-from utils.data_manipulations import get_weekly_results
-from utils.encryption import check_client_key
+from libs.data_handlers import get_weekly_results
+from libs.encryption import check_client_key
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -88,7 +88,7 @@ def fetch_graph():
 # as an older version (maybe timestamped or something)
 # And then I want it to overwrite the survey.json file with the string I pass it.
 # I'm not sure where the survey.json file will be; I think Kevin wanted it to be a file on S3.
-import utils.s3 as s3
+import libs.s3 as s3
 from datetime import datetime
 @mobile_api.route('/update_survey', methods=['GET', 'POST'])
 def update_survey():
@@ -161,7 +161,7 @@ def verify_user(user_id):
 
 
 def check_user_exists(userID):
-    return (len(list_s3_files(userID + '/')) > 0)
+    return (len(s3_list_files(userID + '/')) > 0)
 
 
 ################################################################################
@@ -169,7 +169,7 @@ def check_user_exists(userID):
 ################################################################################
 
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
-#@auth.authenticated
+#@admin_authentication.authenticated
 #TODO: Kevin.  I'm pretty sure we don't have this kind of user authentication.
 def render_user_panel(user_id):
     """ Method displays user information. """
@@ -186,7 +186,7 @@ def fetch_user_responses(user_id):
     """ Method fetches a user's survey responses. """
     #TODO: Dori. untested, old, test and update
     all_responses = {}
-    list_of_s3_names = list_s3_files(user_id + 'surveyResponses')
+    list_of_s3_names = s3_list_files(user_id + 'surveyResponses')
     for l in list_of_s3_names:
         all_responses["l"] = s3_retrieve(l)
     return all_responses

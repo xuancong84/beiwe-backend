@@ -1,9 +1,11 @@
-from utils.s3 import list_s3_files, s3_retrieve
+from libs.s3 import s3_list_files, s3_retrieve
 
+################################################################################
+########################### CSV HANDLERS #######################################
+################################################################################
 
-def csv_to_dict(s3_file_path):
+def s3_csv_to_dict(s3_file_path):
     return read_csv_string( s3_retrieve( s3_file_path ) )
-
 
 def read_csv_string(csv_string):
     #TODO: Dori, test for empty entry handling in graphing, we can change behavior of empty entries.
@@ -23,6 +25,10 @@ def read_csv_string(csv_string):
     return list_of_entries
 
 
+################################################################################
+########################### GRAPH DATA HANDLERS ################################
+################################################################################
+
 # This is a method to get the last seven names saved in a folder
 def grab_weekly_file_names(all_files):
     # Returns a sorted list of all files
@@ -33,7 +39,7 @@ def grab_weekly_file_names(all_files):
 
 
 def get_most_recent_id(file_path):
-    all_files = list_s3_files(file_path)
+    all_files = s3_list_files(file_path)
     id_set = set()
     for filename in all_files:
         # This assumes that the 3rd entry is always an integer
@@ -47,9 +53,9 @@ def get_most_recent_id(file_path):
 def get_weekly_results(username="sur", methods=['GET', 'POST']):
     file_path = username + '/surveyAnswers/'
     survey_id = get_most_recent_id(file_path)
-    weekly_files = grab_weekly_file_names(list_s3_files(file_path + str(survey_id) + '/'))
+    weekly_files = grab_weekly_file_names(s3_list_files(file_path + str(survey_id) + '/'))
     # Convert each csv_file to a readable data list
-    weekly_surveys = [csv_to_dict(file_name) for file_name in weekly_files]
+    weekly_surveys = [s3_csv_to_dict(file_name) for file_name in weekly_files]
 
     # Adds all question ids to a set, then turns that set into an ordered list
     # Also, creates the final list of answers to be sent to the graph

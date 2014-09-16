@@ -6,8 +6,8 @@
     Server: private
     Device: public  """
 
-from utils.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError,\
-    list_s3_files
+from libs.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError,\
+    s3_list_files
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -29,16 +29,15 @@ def get_client_key(user_id):
 
 
 def check_client_key(user_id):
-    if len(list_s3_files( "keys/" + user_id )) == 1:
+    if len(s3_list_files( "keys/" + user_id )) == 1:
         return True
     return False
 
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
-
 from Crypto.PublicKey import RSA
-from utils.constants import ASYMMETRIC_KEY_LENGTH
+from data.constants import ASYMMETRIC_KEY_LENGTH
 
 def _generate_key_pairing():
     """Generates a public-private key pairing, returns tuple (public, private)"""
@@ -73,12 +72,10 @@ def prepare_X509_key_for_java( exported_key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-
 """ We are using AES in CFB mode because we do not have a [good-and-simple] way
     of enforcing separate storage of initialization vectors from keys or files. """
-
 from Crypto.Cipher import AES
-from secure import PASSWORD as ENCRYPTION_KEY
+from data.passwords import PASSWORD as ENCRYPTION_KEY
 
 def encrypt_aes(input_string):
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB ).encrypt( input_string )
