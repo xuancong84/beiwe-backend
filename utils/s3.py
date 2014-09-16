@@ -49,14 +49,13 @@ def s3_retrieve( key_name ):
     return key.read()
 
 
-def s3_retrieve_as_raw_key( key_name ):
-    """ Method returns file with specified S3 key path"""
-    key = Key(_get_bucket(DB), key_name)
-    return key
+def s3_retrieve_raw( key_name ):
+    """ Method returns the Key associated specified S3 key path"""
+    return Key(_get_bucket(DB), key_name)
 
 
 def s3_retrieve_two_weeks( prefix ): pass
-    #TODO: Dori/Eli. using a user ID retrieve two weeks (14 points?) of data
+    #TODO: Dori. using a user ID retrieve two weeks (14 points?) of data
 
 
 def s3_copy_with_new_name(old_name, new_name):
