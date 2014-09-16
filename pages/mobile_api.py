@@ -140,9 +140,9 @@ def upload():
 def get_user_info():
     """ Method for receiving user info upon registration """
     userID = request.values['patientID']
-    droidID = request.values['droidID'].decode('hex').decode('utf-16')
-    bluetoothID = request.values['btID'].decode('hex').decode('utf-16')
-    print userID + "\n" + droidID + "\n" + bluetoothID
+    droidID = request.values['droidID']
+    bluetoothID = request.values['btID']
+    print userID + "\n" + droidID.decode('hex').decode('utf-16') + "\n" + bluetoothID.decode('hex').decode('utf-16')
     # FIXME: Dori/Eli. This is for debug purposes only, until the database goes on!
     if (check_user_exists(userID)):
         return 'Exists'
