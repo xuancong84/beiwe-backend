@@ -7,7 +7,7 @@ from constants import DB
 CONN = connect_s3()
 
 
-def _get_bucket(name ):
+def _get_bucket(name):
     """ Method tries to get a bucket; returns None if bucket doesn't exist """
     try:
         bucket = CONN.get_bucket(name)
@@ -32,6 +32,7 @@ def s3_upload_handler_string( key_name, some_string ):
     key = bucket.new_key(key_name)
     key.set_contents_from_string(some_string)
     
+    
 
 def list_s3_files( prefix ):
     """ Method fetches a list of filenames with prefix.
@@ -48,9 +49,17 @@ def s3_retrieve( key_name ):
     return key.read()
 
 
+def s3_retrieve_as_raw_key( key_name ):
+    """ Method returns file with specified S3 key path"""
+    key = Key(_get_bucket(DB), key_name)
+    return key
+
+
 def s3_retrieve_two_weeks( prefix ): pass
     #TODO: Dori/Eli. using a user ID retrieve two weeks (14 points?) of data
 
 
-def s3_get_user_file(user_id, key_name):
-    pass
+def s3_copy_with_new_name(old_name, new_name):
+    bucket = _get_bucket(DB)
+    bucket.copy_key(new_name, DB, old_name)
+    bucket.delete(old_name)

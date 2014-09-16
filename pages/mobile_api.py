@@ -2,7 +2,7 @@ from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
 from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve
 from utils.data_manipulations import get_weekly_results
-from utils.encryption import check_client_key 
+from utils.encryption import check_client_key
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -29,6 +29,7 @@ def register_user():
     #if the client does not already
 
 
+# TODO: Eli.  Implement
 def verify_user(user_id):
     pass
 
@@ -180,3 +181,14 @@ def get_key():
 # as an older version (maybe timestamped or something)
 # And then I want it to overwrite the survey.json file with the string I pass it.
 # I'm not sure where the survey.json file will be; I think Kevin wanted it to be a file on S3.
+import utils.s3 as s3
+from datetime import datetime
+@mobile_api.route('/update_survey', methods=['GET', 'POST'])
+def update_survey():
+    #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
+    # you will probably need to write the post request before you can answer this question.
+    new_quiz = request.values("whatever-it-is-that-josh-supplies-as-a-label-in-the-post-request")
+    s3.s3_copy_with_new_name("survey", "survey." + datetime.now().isoformat() )
+    s3.s3_upload_handler_string("survey", new_quiz)
+    
+    
