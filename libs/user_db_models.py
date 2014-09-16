@@ -2,7 +2,7 @@ from libs.user_db import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 
 class User( DatabaseObject ):
     #internal table name
-    PATH = "users"
+    PATH = "database.users"
     
     #defaults are column names.  a dictionary containing key: sql_flag-thing and type
     DEFAULTS = { "client_id": REQUIRED, "password": None, 'device_id': None }
