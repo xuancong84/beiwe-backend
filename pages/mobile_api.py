@@ -151,7 +151,7 @@ def get_user_info():
         return 'Not_Exists'
 
 def check_user_exists(userID):
-    return (len(list_s3_files(userID + '/') > 0))
+    return (len(list_s3_files(userID + '/')) > 0)
 
     #TODO: Dori
     # Make a folder called user ID
