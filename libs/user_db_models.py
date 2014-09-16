@@ -17,7 +17,7 @@ class User( DatabaseObject ):
     @classmethod
     def create(cls, some_client_id):
         #if I add new columns
-        new_client = {'client_id': some_client_id, "password":None, 'device_id': None, }
+        new_client = {'client_id': some_client_id, "password":None, 'device_id': None }
         return super(User, cls).create(new_client)
     
     @classmethod
