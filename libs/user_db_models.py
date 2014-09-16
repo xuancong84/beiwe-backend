@@ -1,4 +1,4 @@
-from libs.clients_database import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
+from libs.user_db import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 
 class User( DatabaseObject ):
     #internal table name
