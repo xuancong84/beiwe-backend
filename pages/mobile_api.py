@@ -71,17 +71,16 @@ def get_user_info():
         s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
         return 'Not_Exists'
 
-#, methods=['GET', 'POST']
 
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
 # @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
-@mobile_api.route('/graph')
+@mobile_api.route('/graph', methods=['GET', 'POST'])
 def fetch_graph():
-#     userID = request.values['patientID']
-#     password = request.values['pwd']
-    results = [json.dumps(i) for i in get_weekly_results(username='ser')]
-    return render_template("phone_graphs.html")#, data=results)
+    userID = request.values['patientID']
+    password = request.values['pwd']
+    results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    return render_template("phone_graphs.html", data=results)
 
 
 #TODO: Eli, I (Josh) need a function called /update_survey
