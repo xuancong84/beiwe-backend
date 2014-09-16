@@ -71,11 +71,12 @@ def get_user_info():
         s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
         return 'Not_Exists'
 
+#, methods=['GET', 'POST']
 
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
 # @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
-@mobile_api.route('/graph', methods=['GET', 'POST'])
+@mobile_api.route('/graph')
 def fetch_graph():
     userID = request.values['patientID']
     password = request.values['pwd']
