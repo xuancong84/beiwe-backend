@@ -3,15 +3,16 @@ from flask import Flask, render_template, redirect
 from pages import mobile_api, admin, survey_designer
 from libs.logging import log_error
 from libs.security import set_secret_key
+from libs.logging import log_error
 
-#TODO: Eli. is this logic at all good?
 try:
     from data.passwords import PASSWORD
 except ImportError as e:
     if e.message != "No module named secure":
+        log_error(e)
         raise
     else:
-        print "You have not provided a secure.py file."
+        print "\nYou have not provided a secure.py file.\n"
         exit()
 
 
