@@ -6,7 +6,7 @@ from libs.security import set_secret_key
 
 #TODO: Eli. is this logic at all good?
 try:
-    from data.secure import PASSWORD
+    from data.passwords import PASSWORD
 except ImportError as e:
     if e.message != "No module named secure":
         raise
