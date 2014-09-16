@@ -80,7 +80,7 @@ def get_user_info():
 def fetch_graph():
 #     userID = request.values['patientID']
 #     password = request.values['pwd']
-#     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    results = [json.dumps(i) for i in get_weekly_results(username='ser')]
     return render_template("phone_graphs.html")#, data=results)
 
 
