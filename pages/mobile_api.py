@@ -144,8 +144,14 @@ def get_user_info():
     bluetoothID = request.values['btID']
     print (userID + droidID + bluetoothID)
     # FIXME: Dori/Eli. This is for debug purposes only, until the database goes on!
-    s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
-    return
+    if (check_user_exists(userID)):
+        return 'Exists'
+    else:
+        s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
+        return 'Not_Exists'
+
+def check_user_exists(userID):
+    return (len(list_s3_files(userID + '/') > 0))
 
     #TODO: Dori
     # Make a folder called user ID
