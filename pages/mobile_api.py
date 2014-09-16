@@ -153,12 +153,6 @@ def get_user_info():
 def check_user_exists(userID):
     return (len(list_s3_files(userID + '/')) > 0)
 
-    #TODO: Dori
-    # Make a folder called user ID
-    # Make a function called check_user_exists (checks for the existense of the folder)
-    # Make a MAC address file (nothing to do with it yet)
-
-
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "/uuid/graph"
 # @mobile_api.route('/users/<int:userid>/')
