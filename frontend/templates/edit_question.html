@@ -1,10 +1,10 @@
 <!-- Modal for question addition/alteration-->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="editQuestionModal" tabindex="-1" role="dialog" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Edit Question</h4>
+        <h4 class="modal-title" id="editQuestionModalLabel">Edit Question</h4>
       </div>
       <form id="questionForm" name="question">
       <div class="modal-body">
@@ -17,28 +17,28 @@
           <tr>
             <td>Question Type:</td>
             <td><select id="type" name="type" onchange="setType()">
-                <option value="1">Informational Text</option>
-                <option value="2">Slider</option>
-                <option value="3">Radio Button</option>
-                <option value="4">Checkbox</option>
-                <option value="5">Free Response</option>
+                <option value="info_text_box">Informational Text</option>
+                <option value="slider">Slider</option>
+                <option value="radio_button">Radio Button</option>
+                <option value="checkbox">Checkbox</option>
+                <option value="free_response">Free Response</option>
                 </select>
             </td>
           </tr>
           <tr id="min_value" style="display:none;">
             <td>Minimum Value:</td>
-            <td><input type="number" id="valnum" name="min" min="0" max="100"></input></td>
+            <td><input type="number" id="min" name="min" min="0" max="100"></input></td>
           </tr>
           <tr id="max_value" style="display:none;">
             <td>Maximum Value:</td>
-            <td><input type="number" id="defnum" name="max" min="1" max="100"></input></td>
+            <td><input type="number" id="max" name="max" min="1" max="100"></input></td>
           </tr>
           <tr id="text_field_type" style="display:none;">
             <td>Text Field Type:</td>
             <td><select id="tfttxt" name="text_field_type">
-                <option value="1">Numeric</option>
-                <option value="2">Single-line text</option>
-                <option value="3">Multi-line text</option>
+                <option value="NUMERIC">Numeric</option>
+                <option value="SINGLE_LINE_TEXT">Single-line text</option>
+                <option value="MULTI_LINE_TEXT">Multi-line text</option>
                 </select>
             </td>
           </tr>

@@ -1,0 +1,81 @@
+{% raw %}
+<script id="question-template" type="text/x-handlebars-template">
+	{{#questions}}
+	<!-- Question text/title -->
+	<h4>{{question_text}}
+
+	</h4>
+
+	<table>
+
+		<!-- Question type -->
+		<tr>
+			<td><i>Question Type:</i></td>
+			<td>{{questionTypeTextString question_type}}</td>
+		</tr>
+
+		<!-- Slider question minimum -->
+		{{#if min}}
+		<tr>
+			<td><i>Minimum:</i></td>
+			<td>{{min}}</td>
+		</tr>
+		{{/if}}
+
+		<!-- Slider question maximum -->
+		{{#if max}}
+		<tr>
+			<td><i>Maximum:</i></td>
+			<td>{{max}}</td>
+		</tr>
+		{{/if}}
+
+		<!-- Radio Button or Checkbox question options array -->
+		{{#if answers}}
+		<tr>
+			<td><i>Options:</i></td>
+			<td>{{optionsArrayToString answers}}
+		</tr>
+		{{/if}}
+
+		<!-- Free response question text_field_type -->
+		{{#if text_field_type}}
+		<tr>
+			<td><i>Text Field Type:</i></td>
+			<td>{{text_field_type}}</td>
+		</tr>
+		{{/if}}
+
+		<tr>
+			<td colspan="2">
+				<!-- Edit button -->
+				<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#editQuestionModal" onclick="editQuestion({{@index}})">
+					Edit
+				</button>
+
+				<!-- Delete button -->
+				<button type="button" class="btn btn-default btn-sm" onclick="deleteQuestion({{@index}})">
+					Delete
+				</button>
+
+				<!-- Move up button -->
+				{{#unless @first}}
+				<button type="button" class="btn btn-default btn-sm" onclick="moveQuestionUp({{@index}})">
+					Move Up
+				</button>
+				{{/unless}}
+
+				<!-- Move down button -->
+				{{#unless @last}}
+				<button type="button" class="btn btn-default btn-sm" onclick="moveQuestionDown({{@index}})">
+					Move Down
+				</button>
+				{{/unless}}
+			</td>
+		</tr>
+
+	</table>
+	<br>
+	{{/questions}}
+</script>
+{% endraw %}

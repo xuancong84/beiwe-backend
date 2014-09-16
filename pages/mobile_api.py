@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
-from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve
+from utils.s3 import s3_upload_handler_file, list_s3_files, s3_retrieve,\
+    s3_upload_handler_string
 from utils.data_manipulations import get_weekly_results
 from utils.encryption import check_client_key
 
@@ -22,7 +23,7 @@ TIMINGS_TAG = 'surveyTimings'
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
-    
+
     #if a client key already exists, the user cannot register a device (403 forbidden)
     if check_client_key(user_id):
         return 403
@@ -140,15 +141,18 @@ def upload():
 def get_user_info():
     """ Method for receiving user info upon registration """
     userID = request.values['patientID']
-    password = request.values['pwd']
     droidID = request.values['droidID']
     bluetoothID = request.values['btID']
-    print (userID + password + droidID + bluetoothID)
-    #TODO: Dori
-    # Make a folder called user ID
-    # Make a function called check_user_exists (checks for the existense of the folder)
-    # Make a MAC address file (nothing to do with it yet)
+    print userID + "\n" + droidID + "\n" + bluetoothID
+    # FIXME: Dori/Eli. This is for debug purposes only, until the database goes on!
+    if (check_user_exists(userID)):
+        return 'Exists'
+    else:
+        s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
+        return 'Not_Exists'
 
+def check_user_exists(userID):
+    return (len(list_s3_files(userID + '/')) > 0)
 
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "/uuid/graph"

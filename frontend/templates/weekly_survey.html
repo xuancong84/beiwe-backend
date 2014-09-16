@@ -63,7 +63,7 @@
             <input type="text" style="display:none;" name="{{ c._name }}tft" value="{{ c._text_field_type }}"></input>
             {% endif %}
             <p>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="setModal('{{ c._name }}'); return false;">Edit</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editQuestionModal" onclick="setModal('{{ c._name }}'); return false;">Edit</button>
                 <button type="button" class="btn btn-primary" onclick="deleteQuestion('{{ c._name }}'); return false;">Delete</button>
             </p>
         </div>
@@ -77,7 +77,7 @@
 
     <!--This button adds questions-->
     <div class="row">
-        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal" onclick="clearModal(); return false;">
+        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#editQuestionModal" onclick="clearModal(); return false;">
         <span class="glyphicon glyphicon-plus"></span>Add Question
         </button>
     </div>
