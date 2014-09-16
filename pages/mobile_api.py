@@ -36,7 +36,8 @@ def fetch_survey():
 
 @mobile_api.route('/upload', methods=['POST'])
 def upload():
-    """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log, and Survey Response files. """
+    """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
+        Texts Log, and Survey Response files. """
     uploaded_file = request.files['file']
     #Method werkzeug.secure_filename may return empty if unsecure
     file_name = secure_filename(uploaded_file.filename)
@@ -54,8 +55,8 @@ def upload():
         abort(400)
 
 
-# FIXME: Dori/Eli. This is for debug purposes only, until the user data storage
-# is finished.
+# FIXME: Dori/Eli. DEBUG until the user data storage is finished, and we have a
+# way of getting and storing user ids safely.
 @mobile_api.route('/userinfo', methods=['GET', 'POST'])
 def get_user_info():
     """ Method for receiving user info upon registration """
@@ -98,7 +99,7 @@ def update_survey():
     s3.s3_upload_handler_string("survey", new_quiz)
 
 
-#FIXME: Eli. this is currently debug code, need to store/fetth keys on s3
+#FIXME: Eli. this is currently debug code, need to store/fetch keys on s3
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()
