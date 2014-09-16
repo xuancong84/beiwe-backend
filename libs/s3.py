@@ -53,10 +53,6 @@ def s3_retrieve_raw( key_name ):
     return Key(_get_bucket(S3_BUCKET), key_name)
 
 
-def s3_retrieve_two_weeks( prefix ): pass
-    #TODO: Dori. Using a user ID retrieve two weeks (14 points?) of data
-
-
 def s3_copy_with_new_name(old_name, new_name):
     """makes a copy of a file under a new name."""
     bucket = _get_bucket(S3_BUCKET)
