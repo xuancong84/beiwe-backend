@@ -63,6 +63,7 @@ def get_user_info():
     userID = request.values['patientID']
     droidID = request.values['droidID']
     bluetoothID = request.values['btID']
+    # TODO: Dori. Check if legal username function goes here
     print userID + "\n" + droidID + "\n" + bluetoothID
     if (check_user_exists(userID)):
         return 'Exists'

@@ -70,9 +70,9 @@ function replot_user_results(data) {
     graph(data);
 }
 
-// $(document).ready(function() {
-// graph([4, 6.5, null ,9 ,8.2]);
-// });
+$(document).ready(function() {
+graph(['', 6.5, null ,9 ,8.2]);
+});
 
 // Used in this JS to make the graph look better..
 Array.prototype.max = function() {
