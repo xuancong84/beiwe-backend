@@ -1,11 +1,11 @@
 class DatabaseIsDownError(Exception): pass
 
-from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, MONGO_SECRET_KEY
+from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 
 # set the secret key for the application
 def set_secret_key(app):
     """Flask secret key"""
-    app.secret_key = MONGO_SECRET_KEY
+    app.secret_key = FLASK_SECRET_KEY
 
 
 def pymongo():

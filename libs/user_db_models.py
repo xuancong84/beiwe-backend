@@ -16,10 +16,17 @@ class User( DatabaseObject ):
 #         return None
     
     @classmethod
-    def create(cls, some_client_id):
+    def create(cls, patient_id):
         #if I add new columns
-        new_client = {ID_KEY: some_client_id, "password":None, 'device_id': None }
+        new_client = {ID_KEY: patient_id, "password":None, 'device_id': None }
         return super(User, cls).create(new_client)
+    
+    @classmethod
+    def by_device_id(cls, device_id):
+        if User.exists( device_id=device_id ):
+            return User.exists( device_id=device_id )
+        return None
+
     
     #random notes: remove is implemented on the object
 
