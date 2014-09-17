@@ -22,3 +22,13 @@ Handlebars.registerHelper("optionsArrayToString", function(optionsArray) {
     };
     return optionsString;
 });
+
+// Return a human-readable string instead of a variable name
+Handlebars.registerHelper("textFieldTypeToReadableString", function(inString) {
+    switch (inString) {
+        case "NUMERIC": return "Numeric";
+        case "SINGLE_LINE_TEXT": return "Single-line text";
+        case "MULTI_LINE_TEXT": return "Multi-line text";
+        default: return "Text-field type error";
+    }
+});
