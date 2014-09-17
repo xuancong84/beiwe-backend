@@ -95,9 +95,13 @@ from datetime import datetime
 def update_survey():
     #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
     # you will probably need to write the post request before you can answer this question.
-    new_quiz = request.values("whatever-it-is-that-josh-supplies-as-a-label-in-the-post-request")
-    s3.s3_copy_with_new_name("survey", "survey." + datetime.now().isoformat() )
-    s3.s3_upload_handler_string("survey", new_quiz)
+    new_quiz = request.values['JSONstring']
+    print 'JSONstring = ' + new_quiz
+    # FIXME: Eli, the below two lines cause an S3 Response Error 404, NoSuchKey Error
+    #s3.s3_copy_with_new_name("survey", "survey." + datetime.now().isoformat() )
+    #s3.s3_upload_handler_string("survey", new_quiz)
+    # TODO: Josh, only return 200 on success; otherwise something else
+    return 200
 
 
 #FIXME: Eli. this is currently debug code, need to store/fetch keys on s3

@@ -17,7 +17,13 @@ function end() {
         survey_id:"42" // TODO: create a sequential survey ID (maybe a UNIX timestamp)
     }
 
-    console.log(JSON.stringify(surveyObject));
+    var postRequestContent = { JSONstring: JSON.stringify(surveyObject) };
+    console.log(postRequestContent);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "http://beiwe.org/update_survey", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.send(postRequestContent);
     // TODO: export JSON using Eli's new function
 }
 
