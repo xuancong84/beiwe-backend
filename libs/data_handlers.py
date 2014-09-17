@@ -71,7 +71,9 @@ def get_weekly_results(username="sur", methods=['GET', 'POST']):
             for question in survey:
                 current_id = question['question id']
                 answer = question['answer']
-
+                if (answer == ''):
+                    all_answers[list_ordered_question_ids.index(current_id)].append(0)
+                    continue
                 # TODO: Dori. This will change. For now, the graph can't deal with string answers..
                 try:
                     all_answers[list_ordered_question_ids.index(current_id)].append(int(answer))
