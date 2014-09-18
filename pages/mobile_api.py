@@ -45,6 +45,8 @@ def upload():
         user_id, file_type, timestamp  = parse_filename(file_name)
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype(file_type)
+            if (ftype.startswith('surveyAnswers')):
+                ftype = 'surveyAnswers'
             s3_prepped_filename = "%s/%s/%s/%s" % (user_id, ftype, parsed_id, timestamp)
             s3_upload_handler_file(s3_prepped_filename, uploaded_file)
             #mongo_survey_response_instance.save(user_id, timestamp, uploaded_file.read())

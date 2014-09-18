@@ -50,7 +50,7 @@ def get_most_recent_id(file_path):
 
 
 def get_weekly_results(username="sur", methods=['GET', 'POST']):
-    file_path = username + '/surveyAnswersSurveyCreatedAt/'
+    file_path = username + '/surveyAnswers/'
     survey_id = get_most_recent_id(file_path)
     weekly_files = grab_weekly_file_names(s3_list_files(file_path + str(survey_id) + '/'))
     # Convert each csv_file to a readable data list
