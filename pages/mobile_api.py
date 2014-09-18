@@ -101,7 +101,7 @@ def update_survey():
     #s3.s3_copy_with_new_name("survey", "survey." + datetime.now().isoformat() )
     #s3.s3_upload_handler_string("survey", new_quiz)
     # TODO: Josh, only return 200 on success; otherwise something else
-    return 200
+    return '200'
 
 
 #FIXME: Eli. this is currently debug code, need to store/fetch keys on s3
