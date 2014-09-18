@@ -8,7 +8,6 @@ def s3_csv_to_dict(s3_file_path):
     return read_csv_string( s3_retrieve( s3_file_path ) )
 
 def read_csv_string(csv_string):
-    #TODO: Dori, test for empty entry handling in graphing, we can change behavior of empty entries.
     """ Converts a string formatted as a csv into a dictionary with the format
         {Column Name: [list of data points] }. Data are in their original order,
         any empty entries are dropped.  """

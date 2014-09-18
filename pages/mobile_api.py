@@ -97,9 +97,10 @@ def update_survey():
     # you will probably need to write the post request before you can answer this question.
     new_quiz = request.values['JSONstring']
     print 'JSONstring = ' + new_quiz
-    # FIXME: Eli, the below two lines cause an S3 Response Error 404, NoSuchKey Error
-    s3.s3_copy_with_new_name("string", "survey." + datetime.now().isoformat() )
-    s3.s3_upload_handler_string("string", new_quiz)
+    if (len(s3_list_files('all_surveys/current_survey')) > 0) :
+        old_survey_new_name = "all_surveys/old_surveys/survey." + datetime.now().isoformat()
+        s3.s3_copy_with_new_name("all_surveys/current_survey", old_survey_new_name )
+    s3.s3_upload_handler_string("all_surveys/current_survey", new_quiz)
     # TODO: Josh, only return 200 on success; otherwise something else
     return '200'
 

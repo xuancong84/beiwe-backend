@@ -57,4 +57,5 @@ def s3_copy_with_new_name(old_name, new_name):
     """makes a copy of a file under a new name."""
     bucket = _get_bucket(S3_BUCKET)
     bucket.copy_key(new_name, S3_BUCKET, old_name)
+    s3_upload_handler_string(new_name, s3_retrieve(old_name))
     bucket.delete_key(old_name)
