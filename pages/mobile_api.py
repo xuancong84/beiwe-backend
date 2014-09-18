@@ -25,7 +25,7 @@ TIMINGS_TAG = 'surveyTimings'
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
-    f = s3_retrieve("all_surveys/current_survey", 'rb')
+    f = s3_retrieve("all_surveys/current_survey")
     return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
