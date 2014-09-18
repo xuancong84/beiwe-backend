@@ -25,11 +25,11 @@ TIMINGS_TAG = 'surveyTimings'
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
-    f = open("all_surveys/current_survey", 'rb')
+    f = s3_retrieve("all_surveys/current_survey", 'rb')
     return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
-            return jsonify(json.load(open("all_surveys/current_survey"), 'rb'))
+            return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
     else:
         return
 
@@ -102,6 +102,7 @@ def update_survey():
         s3.s3_copy_with_new_name("all_surveys/current_survey", old_survey_new_name )
     s3.s3_upload_handler_string("all_surveys/current_survey", new_quiz)
     # TODO: Josh, only return 200 on success; otherwise something else
+    # TODO: Josh, Javascript that pulls the survey from the server should now pull it from "all_surveys/current_survey"
     return '200'
 
 
