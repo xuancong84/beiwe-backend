@@ -25,11 +25,11 @@ TIMINGS_TAG = 'surveyTimings'
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
-    f = open("/var/www/scrubs/sample_survey.json", 'rb')
+    f = open("all_surveys/current_survey", 'rb')
     return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
-            return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
+            return jsonify(json.load(open("all_surveys/current_survey"), 'rb'))
     else:
         return
 
