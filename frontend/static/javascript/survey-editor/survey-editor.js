@@ -12,9 +12,10 @@ $.getJSON("http://beiwe.org/fetch_survey", function(data) {
 
 // On end(), export the survey as a JSON object
 function end() {
+    var timestamp = new Date().getTime();
     var surveyObject = {
-        questions:questions,
-        survey_id:"42" // TODO: create a sequential survey ID (maybe a UNIX timestamp)
+        questions: questions,
+        survey_id: "SurveyCreatedAt" + timestamp
     }
 
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
