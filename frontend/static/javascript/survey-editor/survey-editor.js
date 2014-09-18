@@ -24,6 +24,7 @@ function end() {
     xhr.open("POST", "http://beiwe.org/update_survey", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.send(postRequestContent);
+    alert("Survey results sent successfully :)")
 }
 
 // Render a list of the current questions
