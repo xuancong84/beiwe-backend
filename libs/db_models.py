@@ -1,5 +1,5 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from hashlib import pbkdf2_hmac
+import hashlib
 from data.passwords import SALT
 
 class User( DatabaseObject ):
@@ -48,7 +48,7 @@ Users() #this gets you all your users
 # in order to handle the case of different users with the same password.
 # Hash 100,000+ times, as recommended by the Python Docs for hashlib.
 def password_hash (password, username):
-    return pbkdf2_hmac('sha256', password, SALT + username, 125295)
+    return hashlib.pbkdf2_hmac('sha256', password, SALT + username, 125295)
 
 
 class Admin( DatabaseObject ):
