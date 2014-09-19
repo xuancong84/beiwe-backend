@@ -47,7 +47,7 @@ Users() #this gets you all your users
 # We hash with the salt provided in passwords.py, plus the (unique) user name
 # in order to handle the case of different users with the same password.
 # Hash 100,000+ times, as recommended by the Python Docs for hashlib.
-def password_hash (password, username):
+def password_hash ( username, password ):
     return hashlib.pbkdf2_hmac('sha256', password, SALT + username, 125295)
 
 
@@ -59,7 +59,7 @@ class Admin( DatabaseObject ):
     @classmethod
     def create(cls, username, password):
         new_admin = {ID_KEY :username,
-                    password: password_hash(password) }
+                    password: password_hash( username, password ) }
         return super(Admin, cls).create(new_admin)
     
     @classmethod
@@ -70,7 +70,7 @@ class Admin( DatabaseObject ):
     # 0.5 seconds per password_hash() function that would take 10^31 years.
     # I think we are fine.
     def check_password(cls, username, password):
-        password = password_hash( password )
+        password = password_hash( username, password )
         if not Admin.exists( password=password ):
             return False
         some_admin = Admin( password=password )
