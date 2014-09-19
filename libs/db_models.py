@@ -41,7 +41,7 @@ Users() #this gets you all your users
 """
 
 
-
+#FIXME: Eli. Welp, this is broken, can't get 2.7.8 on the server...
 # pbkdf2_hmac is a hashing function for key derivation.  (there is apparently
 # a faster implementation in somewhere in OpenSSL, from OpenSSL import something)
 # We hash with the salt provided in passwords.py, plus the (unique) user name
