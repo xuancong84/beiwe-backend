@@ -29,6 +29,7 @@ class User( DatabaseObject ):
             return User( device_id=device_id )
         return None
     
+    #TODO: Add to the create User a check to see if a user under that ID already exists on s3
 
 #the thing I use to access the entire table
 class Users( DatabaseCollection ):
@@ -39,6 +40,23 @@ User.retrieve(id) #this is how you retrieve a user
 User.create(id) #thjis is how you create a new user
 Users() #this gets you all your users
 """
+
+
+# TODO: implement initial user setup/device registration pin provided by an admin to a user.
+# actually we should implement this by just setting a default password that the user has to type in on first run.
+
+# TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
+
+# HOWTO: implement password reset
+# on login screen: 1 regular enter password to log-in field, one forgot password button
+# forgot password button: explains they need to call the study, and talk with someone.
+# that someone will send them a reset code, which they type into the single field
+# that you can enter from the forgot password screen.  On entering the reset pin
+# sets the reset pin to be your new password.  You can then go and reset your password in
+# the password reset screen.  Note that resetting a password requires a data connection.
+
+# TODO: Dori.  The reset password activity inside of the app (the one that you
+# can access when you are logged in on the device) requires an active internet connection.
 
 
 #FIXME: Eli. Welp, this is broken, can't get 2.7.8 on the server...
