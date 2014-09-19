@@ -1,7 +1,8 @@
 from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
 from libs import admin_authentication
-from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_file
+from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_string, s3_copy_with_new_name
 from datetime import datetime
+
 
 survey_designer = Blueprint('survey_designer', __name__)
 
@@ -9,43 +10,36 @@ survey_designer = Blueprint('survey_designer', __name__)
 ############################### Setters ########################################
 ################################################################################
 
-#FIXME: Eli. determine if these will be used at all (as Josh has rewritten the submission pages, if not REMOVE THEM
+# TODO: Eli/Josh. Check that enabling the @admin_authentication.authenticated
+# does not break survey editing.
 
-@survey_designer.route('/update_weekly', methods=['GET', 'POST'])
-@admin_authentication.authenticated
-def save_new_weekly():
-    """ Method responsible for saving newly created weekly survey (frequency 1) """
-    print request.values, "\n-\n"
-    print request.form, "\n-\n"
-    print request
-    weeklies = get_surveys("survey/weekly/")
-#     print "weeklies done"
-    key_name = "survey/weekly/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(weeklies) + 1)
-#     print "key name done"
-#     breaks here
-#     from pprint import pprint
-#     import pickle
-#     pickle.dump(request.values, open('thingX.pickle', 'w'))
-#     pprint (request.values)
-#     print "\n\n", request.files["json"] , "\n\n"
-#
-#     try:
-    s3_upload_handler_file(key_name, json.dumps(request.files["json"]))
-#     except Exception as e:
-#         print "\n", e
-#         raise e
-#     print "upload done"
-    return redirect("/weekly_survey/")
+@survey_designer.route('/update_survey', methods=['GET', 'POST'])
+# @admin_authentication.authenticated
+def update_daily():
+    #TODO: Josh. set this to the correct survey name after javascript handles both daily and weekly.
+    return update_survey("current_survey", request)
+    #return update_survey("daily", request)
 
 
-@survey_designer.route('/update_daily')
-@admin_authentication.authenticated
-def save_new_daily():
-    """ Method responsible for saving newly created daily survey (frequency 1) """
-    dailies = get_surveys("survey/daily/")
-    key_name = "survey/daily/{0}/{1}.json".format(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), len(dailies) + 1)
-    s3_upload_handler_file(key_name, json.dumps(request.files["json"]))
-    return redirect("/daily_survey/")
+# @survey_designer.route('/update_survey', methods=['GET', 'POST'])
+# @admin_authentication.authenticated
+# def update_weekly():
+#     return update_survey("weekly", request)
+
+
+def update_survey(survey_name, request):
+    survey_name = "all_surveys/" + survey_name
+    #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
+    # you will probably need to write the post request before you can answer this question.
+    new_quiz = request.values['JSONstring']
+    print 'JSONstring = ' + new_quiz
+    if (len(s3_list_files( survey_name )) > 0) :
+        old_survey_new_name = survey_name + datetime.now().isoformat()
+        s3_copy_with_new_name( survey_name, old_survey_new_name )
+    s3_upload_handler_string( survey_name, new_quiz )
+    # TODO: Josh, only return 200 on success; otherwise something else
+    # TODO: Josh, Javascript that pulls the survey from the server should now pull it from "all_surveys/current_survey"
+    return '200'
 
 
 ################################################################################

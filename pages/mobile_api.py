@@ -85,29 +85,6 @@ def fetch_graph():
     return render_template("phone_graphs.html", data=results)
 
 
-#TODO: Eli, I (Josh) need a function called /update_survey
-# I want to send a POST or GET request to it that has a long (~1kb) string of JSON
-# I want it to save the current survey.json file (right now it's sample_survey.json on the server)
-# as an older version (maybe timestamped or something)
-# And then I want it to overwrite the survey.json file with the string I pass it.
-# I'm not sure where the survey.json file will be; I think Kevin wanted it to be a file on S3.
-import libs.s3 as s3
-from datetime import datetime
-@mobile_api.route('/update_survey', methods=['GET', 'POST'])
-def update_survey():
-    #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
-    # you will probably need to write the post request before you can answer this question.
-    new_quiz = request.values['JSONstring']
-    print 'JSONstring = ' + new_quiz
-    if (len(s3_list_files('all_surveys/current_survey')) > 0) :
-        old_survey_new_name = "all_surveys/old_surveys/survey." + datetime.now().isoformat()
-        s3.s3_copy_with_new_name("all_surveys/current_survey", old_survey_new_name )
-    s3.s3_upload_handler_string("all_surveys/current_survey", new_quiz)
-    # TODO: Josh, only return 200 on success; otherwise something else
-    # TODO: Josh, Javascript that pulls the survey from the server should now pull it from "all_surveys/current_survey"
-    return '200'
-
-
 #FIXME: Eli. this is currently debug code, need to store/fetch keys on s3
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():

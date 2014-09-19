@@ -17,7 +17,7 @@ function end() {
         questions: questions,
         survey_id: "SurveyCreatedAt" + timestamp
     }
-
+    //TODO: Josh.  Implement a check for pushing to daily and pushing to weekly.
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     var postRequestContent = "JSONstring=" + JSON.stringify(surveyObject);
     var xhr = new XMLHttpRequest();
