@@ -95,8 +95,7 @@ def fetch_key():
 #@admin_authentication.authenticated
 #TODO: Eli. check that this syntax is correct.
 def get_key(user_id):
-    return encryption.get_client_public_key( user_id )
-    
+    return encryption.get_client_public_key_string( user_id )
 
 
 #TODO: Eli/Dori. implement user registration.
