@@ -51,6 +51,14 @@ def render_main():
     return render_template('admin_panel.html', **data)
 
 
+#TODO: Eli. implement
+def reset_user_password(): pass
+
+
+#TODO: Eli. implement
+def reset_admin_password(): pass
+
+
 ################################################################################
 ############################# Other Stuff ######################################
 ################################################################################
