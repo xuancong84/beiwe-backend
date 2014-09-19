@@ -90,7 +90,8 @@ def fetch_graph():
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()
 
-#TODO: Eli. move fully over get_key.
+
+#TODO: Eli. move fully over to get_key once real keys exist.
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
 #@admin_authentication.authenticated
 def get_key(user_id):
@@ -98,17 +99,28 @@ def get_key(user_id):
 
 
 #TODO: Eli. implement user registration.
-# note: a return statment without a value results in a 200 OK HTTP response.
+# note: a return without a value results in a 200 OK HTTP response.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
-
+    
     #if a client key already exists, the user cannot register a device (403 forbidden)
     if check_client_key(user_id):
         return 403
     #if the client does not have a key
 
+
+# register cases
+# id valid, no existing device
+# id valid, there is already an existing device
+# id invalid
+
+
+# graphs cases:
+# valid device id, username, and password
+# invalid something
+#
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
@@ -148,6 +160,10 @@ def verify_user(user_id):
 
 def check_user_exists(userID):
     return (len(s3_list_files(userID + '/')) > 0)
+
+
+#TODO: Eli. implement
+def reset_user_password(): pass
 
 
 ################################################################################
