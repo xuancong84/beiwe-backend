@@ -4,6 +4,7 @@ from libs.s3 import s3_upload_handler_file, s3_list_files, s3_retrieve,\
     s3_upload_handler_string
 from libs.data_handlers import get_weekly_results
 from libs.encryption import check_client_key
+from libs import encryption
 
 mobile_api = Blueprint('mobile_api', __name__)
 
@@ -85,16 +86,17 @@ def fetch_graph():
     return render_template("phone_graphs.html", data=results)
 
 
-#FIXME: Eli. this is currently debug code, need to store/fetch keys on s3
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()
 
-
-#fixme: Eli. implement
+#TODO: Eli. move fully over get_key.
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
-def get_key():
-    pass
+#@admin_authentication.authenticated
+#TODO: Eli. check that this syntax is correct.
+def get_key(user_id):
+    return encryption.get_client_public_key( user_id )
+    
 
 
 #TODO: Eli/Dori. implement user registration.
@@ -156,7 +158,7 @@ def check_user_exists(userID):
 
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
 #@admin_authentication.authenticated
-#TODO: Kevin.  I'm pretty sure we don't have this kind of user authentication.
+#FIXME: Eli/Kevin.  set up user authentication?
 def render_user_panel(user_id):
     """ Method displays user information. """
     responses = fetch_user_responses(user_id)

@@ -3,7 +3,6 @@ from flask import Flask, render_template, redirect
 from pages import mobile_api, admin, survey_designer
 from libs.logging import log_error
 from libs.security import set_secret_key
-from libs.logging import log_error
 
 try:
     from data.passwords import PASSWORD

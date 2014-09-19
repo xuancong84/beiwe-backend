@@ -5,9 +5,9 @@
     
     Server: private
     Device: public  """
-
-from libs.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError,\
-    s3_list_files
+    
+from libs.s3 import (s3_retrieve, s3_upload_handler_file, S3ResponseError,
+    s3_list_files, s3_upload_handler_string)
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -16,18 +16,28 @@ from libs.s3 import s3_retrieve, s3_upload_handler_file, S3ResponseError,\
 def create_client_key_pair(user_id):
     """Generate key pairing, push to database, return sanitized key for client."""
     public, private = _generate_key_pairing()
-    s3_upload_handler_file( "keys/" + user_id, private )
-    return prepare_X509_key_for_java(public)
-
-
-def get_client_key(user_id):
-    """Grabs a user's key file from s3, if key does not exist returns None."""
-    try: key = s3_retrieve( "keys/" + user_id )
-    except S3ResponseError:
-        return None
+    s3_upload_handler_string( "keys/" + user_id + "_private", private )
+    s3_upload_handler_string( "keys/" + user_id + "_public", public )
+    
+    
+def get_client_public_key_string(user_id):
+    """Grabs a user's public key string from s3."""
+    key_string = s3_retrieve( "keys/" + user_id +"_public" )
+    return prepare_X509_key_for_java( key_string )
+    
+    
+def get_client_public_key(user_id):
+    """Grabs a user's public key file from s3."""
+    key = s3_retrieve( "keys/" + user_id +"_public" )
     return RSA.importKey( key )
-
-
+    
+    
+def get_client_private_key(user_id):
+    """Grabs a user's private key file from s3."""
+    key = s3_retrieve( "keys/" + user_id +"_private" )
+    return RSA.importKey( key )
+    
+    
 def check_client_key(user_id):
     if len(s3_list_files( "keys/" + user_id )) == 1:
         return True
