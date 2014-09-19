@@ -1,4 +1,5 @@
 from libs.s3 import s3_list_files, s3_retrieve
+from libs.encryption import get_client_private_key, decrypt_rsa_lines
 
 ################################################################################
 ########################### CSV HANDLERS #######################################
@@ -7,16 +8,17 @@ from libs.s3 import s3_list_files, s3_retrieve
 def s3_csv_to_dict(s3_file_path):
     return read_csv_string( s3_retrieve( s3_file_path ) )
 
+
 def read_csv_string(csv_string):
     """ Converts a string formatted as a csv into a dictionary with the format
         {Column Name: [list of data points] }. Data are in their original order,
         any empty entries are dropped.  """
     #grab a list of every line in the file, strips off trailing whitespace.
     lines = [ line for line in csv_string.splitlines() ]
-
+    
     header_list = lines[0].split(',')
     list_of_entries = []
-
+    
     for line in lines[1:]:
         data = line.split(',')
         #creates a dict of {column name: data point, ...}

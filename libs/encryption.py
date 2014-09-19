@@ -43,6 +43,7 @@ def check_client_key(user_id):
         return True
     return False
 
+
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
@@ -56,13 +57,10 @@ def _generate_key_pairing():
     return public_key.exportKey(), private_key.exportKey()
     
     
-#TODO: Eli. merge with the csv reader?
-def decrypt_rsa(encrypted_csv, private_key):
-    """ This function takes a csv file encrypted on the client device and
-        decrypts every line separately.  It then returns those concatenated
-        lines?"""
-    lines = encrypted_csv.splitlines()
-    return "\n".join( [ private_key.decrypt( line ) for line in lines ] )
+def decrypt_rsa_lines(encrypted_lines, private_key):
+    """ This function takes a list of encrypted lines (from a client device) and
+        decrypts every line separately, and returns a list of decrypted lines."""
+    return "\n".join([ private_key.decrypt( line.decode("hex") ) for line in encrypted_lines ])
     
     
 def prepare_X509_key_for_java( exported_key ):
