@@ -17,7 +17,7 @@ survey_designer = Blueprint('survey_designer', __name__)
 # @admin_authentication.authenticated
 def update_daily():
     #TODO: Josh. set this to the correct survey name after javascript handles both daily and weekly.
-    return update_survey("current_survey", request)
+    return update_survey("current_survey")
     #return update_survey("daily", request)
 
 
@@ -27,7 +27,7 @@ def update_daily():
 #     return update_survey("weekly", request)
 
 
-def update_survey(survey_name, request):
+def update_survey(survey_name):
     survey_name = "all_surveys/" + survey_name
     #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
     # you will probably need to write the post request before you can answer this question.
