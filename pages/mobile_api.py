@@ -93,12 +93,11 @@ def fetch_key():
 #TODO: Eli. move fully over get_key.
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
 #@admin_authentication.authenticated
-#TODO: Eli. check that this syntax is correct.
 def get_key(user_id):
     return encryption.get_client_public_key_string( user_id )
 
 
-#TODO: Eli/Dori. implement user registration.
+#TODO: Eli. implement user registration.
 # note: a return statment without a value results in a 200 OK HTTP response.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 def register_user():
