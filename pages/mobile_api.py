@@ -125,7 +125,7 @@ def register_user():
 # TODO: Dori implement verify password using the mongo database
 @mobile_api.route('/check_passwords', methods=['GET', 'POST'])
 def check_passwords_match:
-
+# TODO: Dori. Implement interactions between this and the database
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
