@@ -104,7 +104,7 @@ def get_key(user_id):
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
-    
+
     #if a client key already exists, the user cannot register a device (403 forbidden)
     if check_client_key(user_id):
         return 403
@@ -121,6 +121,11 @@ def register_user():
 # valid device id, username, and password
 # invalid something
 #
+
+# TODO: Dori implement verify password using the mongo database
+@mobile_api.route('/check_passwords', methods=['GET', 'POST'])
+def check_passwords_match:
+# TODO: Dori. Implement interactions between this and the database
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
