@@ -1,6 +1,5 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-import hashlib
-from data.passwords import SALT
+from libs.security import password_hash
 
 class User( DatabaseObject ):
     #internal table name
@@ -57,16 +56,6 @@ Users() #this gets you all your users
 
 # TODO: Dori.  The reset password activity inside of the app (the one that you
 # can access when you are logged in on the device) requires an active internet connection.
-
-
-#FIXME: Eli. Welp, this is broken, can't get 2.7.8 on the server...
-# pbkdf2_hmac is a hashing function for key derivation.  (there is apparently
-# a faster implementation in somewhere in OpenSSL, from OpenSSL import something)
-# We hash with the salt provided in passwords.py, plus the (unique) user name
-# in order to handle the case of different users with the same password.
-# Hash 100,000+ times, as recommended by the Python Docs for hashlib.
-def password_hash ( username, password ):
-    return hashlib.pbkdf2_hmac('sha256', password, SALT + username, 125295)
 
 
 class Admin( DatabaseObject ):
