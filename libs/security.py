@@ -22,4 +22,4 @@ def pymongo():
 # TODO: Eli. Profile and make sure this is a good number of iterations
 # pbkdf2 is a hashing function for key derivation.
 def password_hash ( username, password ):
-    return PBKDF2(password, SALT, iterations=1000).read(32)
+    return PBKDF2(password, SALT, iterations=1000).read(32).encode("base64")
