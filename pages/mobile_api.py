@@ -122,15 +122,13 @@ def register_user():
     # invalid something
 
 
-# TODO: Dori implement verify password using the mongo database
 @mobile_api.route('/check_password', methods=['GET', 'POST'])
 def check_password_match():
     password = request.values['pwd']
     patient_id = request.values['patientID']
-    if User.check_password( password, patient_id):
+    if User.check_password( password, patient_id ):
         return 200
     else: return 403
-# TODO: Dori. Implement interactions between this and the database
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################

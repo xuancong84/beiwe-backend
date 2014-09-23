@@ -1,50 +1,45 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from libs.security import password_hash
+from libs.security import generate_hash_and_salt, compare_hashes
 
 class User( DatabaseObject ):
-    #internal table name
+    
     PATH = "database.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
     # We are using the patient's assigned ID as a unique Id.
-    #TODO: Eli. Check with Kevin/Ben that this uniqueness is enforced.
-    DEFAULTS = { "password": None, 'device_id': None }
+    DEFAULTS = { "password":None, 'device_id':None, 'salt':None }
     
     @classmethod
+    #TODO: Add to create User a check to see if a user under that ID already exists on s3
     def create(cls, patient_id):
-        new_client = {ID_KEY: patient_id, "password":None, 'device_id':None }
+        new_client = {ID_KEY: patient_id, "password":None, 'device_id':None, "salt":None }
         return super(User, cls).create(new_client)
     
-    # Use this for reference, it is a modified retrieve method.
-    # @staticmethod
-    # def retrieve( some_client_id ):
-    #    if User.exists( client_id=some_client_id ):
-    #        return User( client_id=some_client_id )
-    #    return None
-
+    
     @classmethod
     def by_device_id(cls, device_id):
-        if User.exists( device_id=device_id ):
-            return User( device_id=device_id )
-        return None
+        return User( device_id=device_id )
     
-    #TODO: Add to the create User a check to see if a user under that ID already exists on s3
+    
     @classmethod
-    def check_password(self, patient_id, password):
-        password = password_hash( patient_id, password )
-        if not User.exists( password=password ):
+    def check_password(self, patient_id, compare_me ):
+        if not User.exists( patient_id ):
             return False
-        some_user = User( password=password )
-        if some_user[ID_KEY] == patient_id:
-            return True
-        return False
+        user = User( patient_id )
+        return user.validate_password( compare_me )
     
-    @classmethod
-    def set_password(cls, patient_id, password):
-        if cls.exists(patient_id):
-            Users( ID_KEY = patient_id )[0]['password'] = password
-            
-            
+    
+    #provide this instance with a password, it returns true if it matches
+    def validate_password(self, compare_me):
+        return compare_hashes( compare_me, self['salt'], self['password'] )
+    
+    
+    def set_password(self, password):
+        password, salt  = generate_hash_and_salt( password )
+        self['password'] = password
+        self['salt'] = password
+
+
 
 #the thing I use to access the entire table
 class Users( DatabaseCollection ):
@@ -77,12 +72,12 @@ Users() #this gets you all your users
 class Admin( DatabaseObject ):
     PATH = "database.admins"
     
-    DEFAULTS = { "password":REQUIRED }
+    DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED }
     
     @classmethod
     def create(cls, username, password):
         new_admin = {ID_KEY :username,
-                    password: password_hash( username, password ) }
+                    password: generate_hash_and_salt( username, password ) }
         return super(Admin, cls).create(new_admin)
     
     @classmethod
@@ -93,7 +88,7 @@ class Admin( DatabaseObject ):
     # 0.5 seconds per password_hash() function that would take 10^31 years.
     # I think we are fine.
     def check_password(cls, username, password):
-        password = password_hash( username, password )
+        password = generate_hash_and_salt( username, password )
         if not Admin.exists( password=password ):
             return False
         some_admin = Admin( password=password )
