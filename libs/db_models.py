@@ -77,7 +77,7 @@ class Admin( DatabaseObject ):
     @classmethod
     def create(cls, username, password):
         new_admin = {ID_KEY :username,
-                    password: generate_hash_and_salt( username, password ) }
+                    password: generate_hash_and_salt( password ) }
         return super(Admin, cls).create(new_admin)
     
     @classmethod
