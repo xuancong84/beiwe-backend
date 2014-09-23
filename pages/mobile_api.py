@@ -1,20 +1,22 @@
 from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
+
+from libs.data_handlers import get_weekly_results
+from libs.db_models import User
+from libs.encryption import check_client_key, get_client_public_key_string
+from libs.security import generate_random_user_id
 from libs.s3 import (s3_upload_handler_file, s3_list_files, s3_retrieve,
                      s3_upload_handler_string)
-from libs.data_handlers import get_weekly_results
-from libs.encryption import check_client_key
-from libs import encryption
 
-from libs.db_models import User
+from mongolia.errors import DatabaseConflictError
+
+################################################################################
+############################# GLOBALS... #######################################
+################################################################################
 mobile_api = Blueprint('mobile_api', __name__)
 
-################################################################################
-############################# GLOBALS ##########################################
-################################################################################
-
 ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
-FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog', \
+FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
 ANSWERS_TAG = 'surveyAnswers'
@@ -28,12 +30,9 @@ TIMINGS_TAG = 'surveyTimings'
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
     return s3_retrieve("all_surveys/current_survey")
-#     return jsonify(json.load(f))
     if request.method == 'POST':
         if request.values["magic"] == "12345":
             return jsonify(json.load(open("/var/www/scrubs/sample_survey.json"), 'rb'))
-    else:
-        return
 
 
 @mobile_api.route('/upload', methods=['POST'])
@@ -41,7 +40,7 @@ def upload():
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
     uploaded_file = request.files['file']
-    #Method werkzeug.secure_filename may return empty if unsecure
+    # werkzeug.secure_filename may return empty if unsecure
     file_name = secure_filename(uploaded_file.filename)
     if uploaded_file and file_name and allowed_extension(file_name):
         user_id, file_type, timestamp  = parse_filename(file_name)
@@ -51,7 +50,6 @@ def upload():
                 ftype = 'surveyAnswers'
             s3_prepped_filename = "%s/%s/%s/%s" % (user_id, ftype, parsed_id, timestamp)
             s3_upload_handler_file(s3_prepped_filename, uploaded_file)
-            #mongo_survey_response_instance.save(user_id, timestamp, uploaded_file.read())
         else:
             s3_upload_handler_file(s3_prep_filename(file_name), uploaded_file)
         return'200'
@@ -59,23 +57,28 @@ def upload():
         abort(400)
 
 
-# FIXME: Dori/Eli. DEBUG until the user data storage is finished, and we have a
-# way of getting and storing user ids safely.
+# FIXME: Eli. I beleive this is the beginning of the user authentication code.
+# TODO: Dori. check what the response codes from this is.
 @mobile_api.route('/userinfo', methods=['GET', 'POST'])
-def get_user_info():
-    """ Method for receiving user info upon registration """
-    userID = request.values['patientID']
-    droidID = request.values['droidID']
-    bluetoothID = request.values['btID']
-    # TODO: Dori. Check if legal username function goes here
-    print userID + "\n" + droidID + "\n" + bluetoothID
-    if (check_user_exists(userID)):
-        return 'Exists'
-    else:
-        s3_upload_handler_string(userID + '/ids.csv', droidID + ',' + bluetoothID)
-        return 'Not_Exists'
-
-
+# @user auth...
+def set_user_info():
+    """ Method for receiving and setting user info upon registration. """
+    user_id = request.values['patientID']
+    android_id = request.values['android_id']
+    bluetooth_id = request.values['btID']
+    
+    if User.exists( patient_id=user_id ):
+        s3_upload_handler_string( user_id + '/ids.csv', android_id + '\n' + bluetooth_id)
+    
+    
+@mobile_api.route('/valid_user', methods=['GET', 'POST'])
+def check_user_exists():
+    user_id = request.values['patientID']
+    if User.exists( patient_id=user_id ):
+        return 200
+    return 403
+    
+    
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
 # @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
@@ -86,23 +89,9 @@ def fetch_graph():
     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     print results[0][1]
     return render_template("phone_graphs.html", data=results)
-
-
-#TODO: Eli. deprecate
-@mobile_api.route('/fetch_key', methods=['GET', 'POST'])
-def fetch_key():
-    return open("/var/www/scrubs/keyFile", 'rb').read()
-
-
-#TODO: Eli. move fully over to get_key once real keys exist.
-@mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
-#@admin_authentication.authenticated
-def get_key(user_id):
-    return encryption.get_client_public_key_string( user_id )
-
-
+    
+    
 #TODO: Eli. implement user registration.
-# note: a return without a value results in a 200 OK HTTP response.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 def register_user():
     user_id = request.values["user_id"]
@@ -118,10 +107,6 @@ def register_user():
     # id valid, there is already an existing device
     # id invalid
 
-    # graphs cases:
-    # valid device id, username, and password
-    # invalid something
-
 
 @mobile_api.route('/check_password', methods=['GET', 'POST'])
 def check_password_match():
@@ -129,7 +114,33 @@ def check_password_match():
     patient_id = request.values['patientID']
     if User.check_password( patient_id, password ):
         return 200
-    else: return 403
+    return 403
+
+#TODO: Eli. modify after implementing user authentication.
+#should you be given a user id and passwor on registration, or do you create your password?
+#(yes)
+@mobile_api.route('/set_password', methods=['GET', 'POST'])
+def set_password():
+    old_password = request.values['pwd']
+    patient_id = request.values['patientID']
+    new_password = request.valuse('new_pwd')
+    
+    if User.check_password(patient_id, old_password):
+        User(patient_id).set_password(new_password)
+        return 200
+    return 403
+
+################################################################################
+
+#TODO: Eli. deprecate
+@mobile_api.route('/fetch_key', methods=['GET', 'POST'])
+def fetch_key():
+    return open("/var/www/scrubs/keyFile", 'rb').read()
+
+#TODO: Eli. move fully over to get_key once real keys exist.
+@mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
+def get_key(user_id):
+    return get_client_public_key_string( user_id )
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
@@ -166,16 +177,7 @@ def allowed_extension(filename):
 def verify_user(user_id):
     pass
 
-
-def check_user_exists(userID):
-    return (len(s3_list_files(userID + '/')) > 0)
-
-
-#TODO: Eli. implement
-def reset_user_password(): pass
-
-from libs.security import generate_random_user_id
-from mongolia.errors import DatabaseConflictError
+    
 # TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
 def create_new_user():
     try:
