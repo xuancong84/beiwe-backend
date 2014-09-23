@@ -1,5 +1,5 @@
 function graph(graphtitle, input){
-plot1 = $.jqplot ('chart1', [input], {
+plot1 = $.jqplot ('chart1', input, {
         // Give the plot a title.
       title: graphtitle,
       animate: true,
@@ -61,6 +61,7 @@ plot1 = $.jqplot ('chart1', [input], {
             sizeAdjust: 7.5 , tooltipLocation : 'ne'
         }
     });
+
 }
 
 function replot_user_results(title, data) {
