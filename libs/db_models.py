@@ -38,7 +38,7 @@ class User( DatabaseObject ):
         password, salt  = generate_hash_and_salt( password )
         self['password'] = password
         self['salt'] = salt
-
+        self.save()
 
 
 #the thing I use to access the entire table
