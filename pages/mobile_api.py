@@ -106,17 +106,17 @@ def get_key(user_id):
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
-    
+
     #if a client key already exists, the user cannot register a device (403 forbidden)
     if check_client_key(user_id):
         return 403
     #if the client does not have a key
-    
+
     # register cases
     # id valid, no existing device
     # id valid, there is already an existing device
     # id invalid
-    
+
     # graphs cases:
     # valid device id, username, and password
     # invalid something
