@@ -174,7 +174,15 @@ def check_user_exists(userID):
 #TODO: Eli. implement
 def reset_user_password(): pass
 
-
+from libs.security import generate_random_user_id
+from mongolia.errors import DatabaseConflictError
+# TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
+def create_new_user():
+    try:
+        User.create( generate_random_user_id )
+    except DatabaseConflictError:
+        create_new_user()
+        
 ################################################################################
 ############################## TO BE DEPRECATED ################################
 ################################################################################

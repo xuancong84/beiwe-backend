@@ -2,6 +2,8 @@ from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 from data.constants import ITERATIONS
 from pbkdf2 import PBKDF2
 from os import urandom
+import hashlib
+import re
 
 class DatabaseIsDownError(Exception): pass
 
@@ -46,4 +48,11 @@ def compare_hashes( compare_me, salt, real_password_hash ):
         return True
     return False
     
-    
+################################################################################
+############################## USER IDS ########################################
+################################################################################
+
+def generate_random_user_id():
+    #generates an alphanumeric uppercase letter string 10 characters long.
+    random_string = hashlib.md5( urandom(16) ).digest().encode("base64")
+    return re.sub(r'[^A-Z0-9]', "", random_string)[:10]

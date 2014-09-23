@@ -55,8 +55,6 @@ Users() #this gets you all your users
 # TODO: implement initial user setup/device registration pin provided by an admin to a user.
 # actually we should implement this by just setting a default password that the user has to type in on first run.
 
-# TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
-
 # HOWTO: implement password reset
 # on login screen: 1 regular enter password to log-in field, one forgot password button
 # forgot password button: explains they need to call the study, and talk with someone.
