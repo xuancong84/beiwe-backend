@@ -1,11 +1,12 @@
 from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
-from libs.s3 import s3_upload_handler_file, s3_list_files, s3_retrieve,\
-    s3_upload_handler_string
+from libs.s3 import (s3_upload_handler_file, s3_list_files, s3_retrieve,
+                     s3_upload_handler_string)
 from libs.data_handlers import get_weekly_results
 from libs.encryption import check_client_key
 from libs import encryption
 
+from libs.db_models import User
 mobile_api = Blueprint('mobile_api', __name__)
 
 ################################################################################
@@ -86,6 +87,7 @@ def fetch_graph():
     return render_template("phone_graphs.html", data=results)
 
 
+#TODO: Eli. deprecate
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()
@@ -104,27 +106,30 @@ def get_key(user_id):
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
-
+    
     #if a client key already exists, the user cannot register a device (403 forbidden)
     if check_client_key(user_id):
         return 403
     #if the client does not have a key
+    
+    # register cases
+    # id valid, no existing device
+    # id valid, there is already an existing device
+    # id invalid
+    
+    # graphs cases:
+    # valid device id, username, and password
+    # invalid something
 
-
-# register cases
-# id valid, no existing device
-# id valid, there is already an existing device
-# id invalid
-
-
-# graphs cases:
-# valid device id, username, and password
-# invalid something
-#
 
 # TODO: Dori implement verify password using the mongo database
-@mobile_api.route('/check_passwords', methods=['GET', 'POST'])
-def check_passwords_match:
+@mobile_api.route('/check_password', methods=['GET', 'POST'])
+def check_password_match():
+    password = request.values['pwd']
+    patient_id = request.values['patientID']
+    if User.check_password( password, patient_id):
+        return 200
+    else: return 403
 # TODO: Dori. Implement interactions between this and the database
 
 ################################################################################

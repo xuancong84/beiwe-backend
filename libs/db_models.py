@@ -29,6 +29,15 @@ class User( DatabaseObject ):
         return None
     
     #TODO: Add to the create User a check to see if a user under that ID already exists on s3
+    @classmethod
+    def check_password(cls, patient_id, password):
+        password = password_hash( patient_id, password )
+        if not User.exists( password=password ):
+            return False
+        some_user = User( password=password )
+        if some_user[ID_KEY] == patient_id:
+            return True
+        return False
 
 #the thing I use to access the entire table
 class Users( DatabaseCollection ):
