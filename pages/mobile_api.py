@@ -83,11 +83,13 @@ def get_user_info():
 def fetch_graph():
     userID = request.values['patientID']
     password = request.values['pwd']
-    results = get_weekly_results(username=userID)
     data_results = []
+#     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    results = get_weekly_results(username=userID)
     for pair in results:
         data_results.append([json.dumps(pair[0]), json.dumps(pair[1])])
-    return render_template("phone_graphs.html", data=data_results)
+    print results[0][1]
+    return render_template("phone_graphs.html", data=results)
 
 
 #TODO: Eli. deprecate

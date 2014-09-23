@@ -20,9 +20,10 @@
     <!-- There actually is a way to make this section better. For now, keep like this.. -->
     {% for i in range ( data|length ) %}
         <button type="button" onClick="replot_user_results({{ data[i][0] , data[i][1] }})">Question {{i + 1}}</button>
-        {% if (i + 1 is divisibleby 3) %}
+        {% if ((i + 1) is divisibleby 3) %}
             <br>
         {% endif %}
+        <script> console.log(typeof data[i][1]) </script>
     {% endfor %}
 </div>
 </body>
