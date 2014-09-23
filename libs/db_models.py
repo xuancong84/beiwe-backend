@@ -37,7 +37,7 @@ class User( DatabaseObject ):
     def set_password(self, password):
         password, salt  = generate_hash_and_salt( password )
         self['password'] = password
-        self['salt'] = password
+        self['salt'] = salt
 
 
 
