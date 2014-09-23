@@ -22,7 +22,7 @@ class User( DatabaseObject ):
     
     
     @classmethod
-    def check_password(self, patient_id, compare_me ):
+    def check_password(cls, patient_id, compare_me ):
         if not User.exists( patient_id ):
             return False
         user = User( patient_id )
