@@ -18,7 +18,7 @@
 <div style="margin-top:20px; margin-left:20px; width:400px; height:200px; text-align:center; padding: 100px 0px 0px 0px;">
     <h3> Choose a question to view its past results </h3>
     <!-- There actually is a way to make this section better. For now, keep like this.. -->
-    {% for i in range ( length( data ) ) %}
+    {% for i in range ( data|length ) %}
         <button type="button" onClick="replot_user_results({{ data[i][0], data[i][1] }})">Question {{i + 1}}</button>
         {% if (i + 1 is divisibleby 3) %}
             <br>
