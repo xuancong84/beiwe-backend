@@ -14,9 +14,15 @@ except ImportError as e:
         print "\nYou have not provided a secure.py file.\n"
         exit()
 
-
 if len( PASSWORD ) != 32:
     print "Your key is not 32 characters. The key must be exactly 32 charcters long."
+    exit()
+
+try:
+    import pbkdf2
+except ImportError as e:
+    log_error(e)
+    print "You need to install a package called pbkdf2"
     exit()
 
 
