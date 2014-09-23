@@ -76,8 +76,8 @@ class Admin( DatabaseObject ):
     
     @classmethod
     def create(cls, username, password):
-        new_admin = {ID_KEY :username,
-                    password: generate_hash_and_salt( username, password ) }
+        password, salt = generate_hash_and_salt( password )
+        new_admin = {ID_KEY :username, 'password':password, 'salt':salt }
         return super(Admin, cls).create(new_admin)
     
     @classmethod
@@ -87,14 +87,17 @@ class Admin( DatabaseObject ):
     # and SHA-256 has 256 bits, so we need 2^128 hash events. At a rate of about
     # 0.5 seconds per password_hash() function that would take 10^31 years.
     # I think we are fine.
-    def check_password(cls, username, password):
-        password = generate_hash_and_salt( username, password )
-        if not Admin.exists( password=password ):
+    def check_password(cls, username, compare_me ):
+        if not Admin.exists( username ):
             return False
-        some_admin = Admin( password=password )
-        if some_admin[ID_KEY] == username:
-            return True
-        return False
+        admin = Admin( username )
+        return admin.validate_password( compare_me )
+    
+    
+    #provide this instance with a password, it returns true if it matches
+    def validate_password(self, compare_me):
+        return compare_hashes( compare_me, self['salt'], self['password'] )
+    
     
 class Admins( DatabaseCollection ):
     OBJTYPE = Admin
