@@ -22,7 +22,7 @@ try:
     import pbkdf2
 except ImportError as e:
     log_error(e)
-    print "You need to install a package called pbkdf2"
+    print "You need to install a package called pbkdf2. (use pip)"
     exit()
 
 
