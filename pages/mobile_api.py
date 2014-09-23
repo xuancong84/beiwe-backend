@@ -86,7 +86,11 @@ def check_user_exists():
 def fetch_graph():
     userID = request.values['patientID']
     password = request.values['pwd']
-    results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    data_results = []
+#     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+    results = get_weekly_results(username=userID)
+    for pair in results:
+        data_results.append([json.dumps(pair[0]), json.dumps(pair[1])])
     print results[0][1]
     return render_template("phone_graphs.html", data=results)
     
