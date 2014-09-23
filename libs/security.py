@@ -37,11 +37,11 @@ def generate_hash_and_salt ( password ):
     salt = urandom(16)
     return PBKDF2(password, salt, iterations=ITERATIONS).read(32).encode("base64"), salt
 
-def hash_with_salt( data, salt ):
-    return PBKDF2( data, salt, iterations=ITERATIONS )
+# def hash_with_salt( data, salt ):
+#     return PBKDF2( data, salt, iterations=ITERATIONS ).read(32)
 
 def compare_hashes( compare_me, salt, real_password_hash ):
-    if PBKDF2( compare_me, salt, iterations=ITERATIONS) == real_password_hash.decode("base64"):
+    if PBKDF2( compare_me, salt, iterations=ITERATIONS).read(32) == real_password_hash.decode("base64"):
         return True
     return False
     
