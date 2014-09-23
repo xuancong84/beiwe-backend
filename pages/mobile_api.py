@@ -126,7 +126,7 @@ def register_user():
 def check_password_match():
     password = request.values['pwd']
     patient_id = request.values['patientID']
-    if User.check_password( password, patient_id ):
+    if User.check_password( patient_id, password ):
         return 200
     else: return 403
 
