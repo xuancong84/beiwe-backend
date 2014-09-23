@@ -1,7 +1,7 @@
-function graph(input){
+function graph(graphtitle, input){
 plot1 = $.jqplot ('chart1', [input], {
         // Give the plot a title.
-      title: 'Graph Of a question',
+      title: graphtitle,
       animate: true,
       series:[{
             // Don't show a line, just show markers.
@@ -63,16 +63,16 @@ plot1 = $.jqplot ('chart1', [input], {
     });
 }
 
-function replot_user_results(data) {
+function replot_user_results(title, data) {
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
-    graph(data);
+    graph(title, data);
 }
 
-$(document).ready(function() {
-graph(['', 6.5, null ,9 ,8.2]);
-});
+// $(document).ready(function() {
+// graph(['', 6.5, null ,9 ,8.2]);
+// });
 
 // Used in this JS to make the graph look better..
 Array.prototype.max = function() {
