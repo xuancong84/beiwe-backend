@@ -153,8 +153,8 @@ from libs.user_authentication import authenticated
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
 @authenticated
 def test_function():
-    print 'something, anything'
-    return 200
+    print 'this line was printed from inside the test function'
+    return render_template('admin_login')
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################

@@ -4,6 +4,7 @@ import functools
 
 
 def authenticated(f):
+    print "this line was printed inside the decorator, type 1."
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
        device IDs are invalid."""
@@ -30,6 +31,7 @@ def check_identifiers( patient_id, device_id, password ):
 
 
 # def authenticated(f):
+#     print "this line was printed inside the decorator, type 2."
 #     """Decorator for functions (pages) that require a user to provide identification.
 #        Returns 403 (forbidden) if the identifying info (usernames, passwords
 #        device IDs are invalid."""
