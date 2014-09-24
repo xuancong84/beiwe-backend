@@ -150,7 +150,7 @@ def get_key(user_id):
 ################################################################################
 
 from libs.user_authentication import authenticated
-@mobile_api.route('test_auth/')
+@mobile_api.route('/test_auth')
 @authenticated
 def test_function():
     return 200
