@@ -153,6 +153,7 @@ from libs.user_authentication import authenticated
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
 @authenticated
 def test_function():
+    print 'something, anything'
     return 200
 
 ################################################################################
