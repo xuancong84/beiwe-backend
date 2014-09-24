@@ -44,5 +44,4 @@ def create_admin(username, password):
 
 
 def remove_admin(username):
-    #Eli: this line of code is wrong.  Ask kevin or ben.
-    Admins(username).remove(username)
+    Admin(username).remove()
