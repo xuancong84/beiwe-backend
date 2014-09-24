@@ -85,7 +85,7 @@ def check_user_exists():
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 def fetch_graph():
     userID = request.values['patientID']
-    password = request.values['pwd']
+#     password = request.values['pwd']
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=userID)
@@ -119,7 +119,7 @@ def check_password_match():
     if User.check_password( patient_id, password ):
         return 200
     return 403
-
+    
 #TODO: Eli. modify after implementing user authentication.
 #should you be given a user id and passwor on registration, or do you create your password?
 #(yes)
@@ -145,6 +145,15 @@ def fetch_key():
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
 def get_key(user_id):
     return get_client_public_key_string( user_id )
+
+
+################################################################################
+
+from libs.user_authentication import authenticated
+@mobile_api.route('test_auth/')
+@authenticated
+def test_function():
+    return 200
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
