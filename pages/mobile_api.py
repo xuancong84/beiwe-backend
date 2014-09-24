@@ -150,7 +150,7 @@ def get_key(user_id):
 ################################################################################
 
 from libs.user_authentication import authenticated
-@mobile_api.route('/test_auth')
+@mobile_api.route('/test_auth', methods=['GET', 'POST'])
 @authenticated
 def test_function():
     return 200
@@ -205,6 +205,7 @@ def create_new_user():
 @mobile_api.route('/<user_id>', methods=['GET', 'POST'])
 #@admin_authentication.authenticated
 #FIXME: Eli/Kevin.  set up user authentication?
+
 def render_user_panel(user_id):
     """ Method displays user information. """
     responses = fetch_user_responses(user_id)
