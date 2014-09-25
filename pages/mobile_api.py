@@ -194,31 +194,3 @@ def create_new_user():
         User.create( generate_random_user_id )
     except DatabaseConflictError:
         create_new_user()
-
-################################################################################
-############################## TO BE DEPRECATED ################################
-################################################################################
-
-@mobile_api.route('/<user_id>', methods=['GET', 'POST'])
-#@admin_authentication.authenticated
-#FIXME: Eli/Kevin.  set up user authentication?
-
-def render_user_panel(user_id):
-    """ Method displays user information. """
-    responses = fetch_user_responses(user_id)
-    return jsonify(responses)
-    #TODO: Dori
-    # 1. Fetch all files related to user_id in S3
-    # 2. Render list of contents
-    # 3. Render graph if applicable
-
-
-# Deprecate - This is received by the fetch_graph function
-def fetch_user_responses(user_id):
-    """ Method fetches a user's survey responses. """
-    #TODO: Dori. untested, old, test and update
-    all_responses = {}
-    list_of_s3_names = s3_list_files(user_id + 'surveyResponses')
-    for l in list_of_s3_names:
-        all_responses["l"] = s3_retrieve(l)
-    return all_responses
