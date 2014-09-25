@@ -17,10 +17,9 @@ def login_admin():
 
 
 def validate_login_credentials(password, username):
-    if password == "1" and username == "1":
+    if Admin.check_password(username, password):
         return True
     return False
-    #TODO: Eli/Kevin make this a real thing.
 
 
 def is_logged_in():

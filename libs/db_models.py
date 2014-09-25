@@ -97,5 +97,12 @@ class Admin( DatabaseObject ):
         return compare_hashes( compare_me, self['salt'], self['password'] )
     
     
+#     def set_password(self, new_password):
+#         password, salt = generate_hash_and_salt( new_password )
+#         self['password'] = password
+#         self['salt'] = salt
+#         self.save()
+    
+    
 class Admins( DatabaseCollection ):
     OBJTYPE = Admin
