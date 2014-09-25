@@ -29,12 +29,21 @@ def check_identifiers( *args, **kwargs ):
     password = request.values['password']
     print 'password: ', password
 
-    if not User.exists(patient_id): return False
-    print 'a'
+    if not User.exists(patient_id):
+        print "user id was false"
+        return False
+    print 'user id was true'
     user = User( patient_id )
     
-    if not user.validate_password( password ): return False
-    print 'b'
-    if not user['device_id'] == device_id: return False
-    print 'c'
+    if not user.validate_password( password ):
+        print 'password was false'
+        return False
+    print 'password was true'
+    
+    if not user['device_id'] == device_id:
+        print "device id was false"
+        return False
+    print 'device id was true'
+    print 'RETURNING TRUE'
+    
     return True
