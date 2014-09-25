@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, jsonify, json, render_template, redirect
+from flask import Blueprint, request, abort, jsonify, json, render_template
 from werkzeug import secure_filename
 
 from libs.data_handlers import get_weekly_results
@@ -7,6 +7,7 @@ from libs.encryption import check_client_key, get_client_public_key_string
 from libs.security import generate_random_user_id
 from libs.s3 import (s3_upload_handler_file, s3_list_files, s3_retrieve,
                      s3_upload_handler_string)
+from libs.user_authentication import authenticate_user
 
 from mongolia.errors import DatabaseConflictError
 
@@ -27,6 +28,7 @@ TIMINGS_TAG = 'surveyTimings'
 ################################################################################
 
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
+# @authenticate_user
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
     return s3_retrieve("all_surveys/current_survey")
@@ -36,6 +38,7 @@ def fetch_survey():
 
 
 @mobile_api.route('/upload', methods=['POST'])
+# @authenticate_user
 def upload():
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
@@ -60,7 +63,7 @@ def upload():
 # FIXME: Eli. I beleive this is the beginning of the user authentication code.
 # TODO: Dori. check what the response codes from this is.
 @mobile_api.route('/userinfo', methods=['GET', 'POST'])
-# @user auth...
+# @authenticate_user
 def set_user_info():
     """ Method for receiving and setting user info upon registration. """
     user_id = request.values['patientID']
@@ -72,6 +75,7 @@ def set_user_info():
 
 
 @mobile_api.route('/valid_user', methods=['GET', 'POST'])
+# @authenticate_user
 def check_user_exists():
     user_id = request.values['patientID']
     if User.exists( patient_id=user_id ):
@@ -83,6 +87,7 @@ def check_user_exists():
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
 @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
 # @mobile_api.route('/graph', methods=['GET', 'POST'])
+# @authenticate_user
 def fetch_graph( user_id ):
 #     userID = request.values['patientID']
 #     password = request.values['pwd']
@@ -97,6 +102,7 @@ def fetch_graph( user_id ):
 
 #TODO: Eli. implement user registration.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
+# @authenticate_user
 def register_user():
     user_id = request.values["user_id"]
     #check if user_id is a valid, registerable user_id.
@@ -113,6 +119,7 @@ def register_user():
 
 
 @mobile_api.route('/check_password', methods=['GET', 'POST'])
+# @authenticate_user
 def check_password_match():
     password = request.values['pwd']
     patient_id = request.values['patientID']
@@ -124,15 +131,11 @@ def check_password_match():
 #should you be given a user id and passwor on registration, or do you create your password?
 #(yes)
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
+# @authenticate_user
 def set_password():
-    old_password = request.values['pwd']
-    patient_id = request.values['patientID']
-    new_password = request.valuse('new_pwd')
+    User(request.values["patient_id"]).set_password(request.values["new_password"])
+    return 200
 
-    if User.check_password(patient_id, old_password):
-        User(patient_id).set_password(new_password)
-        return 200
-    return 403
 
 ################################################################################
 
@@ -143,18 +146,17 @@ def fetch_key():
 
 #TODO: Eli. move fully over to get_key once real keys exist.
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
+# @authenticate_user
 def get_key(user_id):
     return get_client_public_key_string( user_id )
 
-
 ################################################################################
 
-from libs.user_authentication import authenticated
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
-@authenticated
+@authenticate_user
 def test_function():
-    print 'this line was printed from inside the test function'
-    return redirect("/")
+    return 200
+#     return redirect("/")
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
@@ -184,11 +186,6 @@ def allowed_extension(filename):
     """ Method checks to see if uploaded file has filename that ends in an
         allowed extension. Does not verify content. """
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
-# TODO: Eli.  Implement... currently unsure how to do this...
-def verify_user(user_id):
-    pass
 
 
 # TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
