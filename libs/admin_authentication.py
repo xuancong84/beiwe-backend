@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import session, redirect
-from libs.db_models import Adminf
+from libs.db_models import Admin
 import functools
 
 
