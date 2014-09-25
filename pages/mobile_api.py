@@ -154,7 +154,7 @@ def get_key(user_id):
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
 @authenticate_user
 def test_function():
-    return render_template("200.html")
+    return render_template("blank.html"), 200
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
