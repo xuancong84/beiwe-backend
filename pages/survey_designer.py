@@ -1,5 +1,5 @@
 from flask import Blueprint, request, abort, jsonify, render_template, json, redirect
-from libs import admin_authentication
+from libs.admin_authentication import authenticate_admin
 from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_string, s3_copy_with_new_name
 from datetime import datetime
 
@@ -10,11 +10,11 @@ survey_designer = Blueprint('survey_designer', __name__)
 ############################### Setters ########################################
 ################################################################################
 
-# TODO: Eli/Josh. Check that enabling the @admin_authentication.authenticated
+# TODO: Eli/Josh. Check that enabling the @authenticate_admin
 # does not break survey editing.
 
 @survey_designer.route('/update_survey', methods=['GET', 'POST'])
-# @admin_authentication.authenticated
+# @admin_authenticated
 def update_daily():
     #TODO: Josh. set this to the correct survey name after javascript handles both daily and weekly.
     return update_survey("current_survey")
@@ -22,7 +22,7 @@ def update_daily():
 
 
 # @survey_designer.route('/update_survey', methods=['GET', 'POST'])
-# @admin_authentication.authenticated
+# @authenticate_admin
 # def update_weekly():
 #     return update_survey("weekly", request)
 
@@ -71,33 +71,33 @@ def get_latest_daily():
 ################################################################################
 
 @survey_designer.route('/survey_designer')
-@admin_authentication.authenticated
+@authenticate_admin
 def render_survey_builder():
     data = {}
     return render_template('survey_designer.html', data)
 
 @survey_designer.route('/surveys')
-@admin_authentication.authenticated
+@authenticate_admin
 def render_surveys():
     data = {}
     return render_template('surveys.html', data)
 
 @survey_designer.route('/survey_designer')
-@admin_authentication.authenticated
+@authenticate_admin
 def render_survey_designer():
     return render_template('survey_designer.html')
 
 @survey_designer.route('/question_designer')
-@admin_authentication.authenticated
+@authenticate_admin
 def question_designer():
     return render_template('question_designer.html')
 
 @survey_designer.route('/weekly_survey')
-@admin_authentication.authenticated
+@authenticate_admin
 def weekly_survey():
     return render_template('weekly_survey.html')
 
 @survey_designer.route('/daily_survey')
-@admin_authentication.authenticated
+@authenticate_admin
 def daily_survey():
     return render_template('daily_survey.html')
