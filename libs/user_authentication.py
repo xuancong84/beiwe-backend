@@ -23,11 +23,11 @@ def check_identifiers( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match"""
 #     patient_id, device_id, password
     patient_id = request.values['patient_id'],
-    print "patient id: ", patient_id
+    print "patient id: ", patient_id, ' -- type: ', type(patient_id)
     device_id = request.values['device_id'],
-    print "device id: ", device_id
+    print "device id: ", device_id, ' -- type: ', type(device_id)
     password = request.values['password']
-    print 'password: ', password
+    print 'password: ', password, ' -- type: ', type(password)
 
     if not User.exists(patient_id):
         print "user id was false"
