@@ -66,35 +66,35 @@ def set_user_info():
     user_id = request.values['patientID']
     android_id = request.values['android_id']
     bluetooth_id = request.values['btID']
-    
+
     if User.exists( patient_id=user_id ):
         s3_upload_handler_string( user_id + '/ids.csv', android_id + '\n' + bluetooth_id)
-    
-    
+
+
 @mobile_api.route('/valid_user', methods=['GET', 'POST'])
 def check_user_exists():
     user_id = request.values['patientID']
     if User.exists( patient_id=user_id ):
         return 200
     return 403
-    
-    
+
+
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
-# @mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
-@mobile_api.route('/graph', methods=['GET', 'POST'])
-def fetch_graph():
-    userID = request.values['patientID']
+@mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
+# @mobile_api.route('/graph', methods=['GET', 'POST'])
+def fetch_graph( user_id ):
+#     userID = request.values['patientID']
 #     password = request.values['pwd']
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
-    results = get_weekly_results(username=userID)
+    results = get_weekly_results(username=user_id)
     for pair in results:
         data_results.append([json.dumps(pair[0]), json.dumps(pair[1])])
     print results[0][1]
     return render_template("phone_graphs.html", data=results)
-    
-    
+
+
 #TODO: Eli. implement user registration.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 def register_user():
@@ -119,7 +119,7 @@ def check_password_match():
     if User.check_password( patient_id, password ):
         return 200
     return 403
-    
+
 #TODO: Eli. modify after implementing user authentication.
 #should you be given a user id and passwor on registration, or do you create your password?
 #(yes)
@@ -128,7 +128,7 @@ def set_password():
     old_password = request.values['pwd']
     patient_id = request.values['patientID']
     new_password = request.valuse('new_pwd')
-    
+
     if User.check_password(patient_id, old_password):
         User(patient_id).set_password(new_password)
         return 200
@@ -191,14 +191,14 @@ def allowed_extension(filename):
 def verify_user(user_id):
     pass
 
-    
+
 # TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
 def create_new_user():
     try:
         User.create( generate_random_user_id )
     except DatabaseConflictError:
         create_new_user()
-        
+
 ################################################################################
 ############################## TO BE DEPRECATED ################################
 ################################################################################
