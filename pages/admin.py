@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, send_file, render_template, redirect
+from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
 
 admin = Blueprint('admin', __name__)
@@ -40,7 +40,7 @@ def login():
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-@admin_authentication.authenticated
+@admin_authentication.admin_authenticated
 def render_main():
     """ Method responsible rendering admin template"""
     data = {
