@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, jsonify, json, render_template
+from flask import Blueprint, request, abort, jsonify, json, render_template, redirect
 from werkzeug import secure_filename
 
 from libs.data_handlers import get_weekly_results
@@ -154,8 +154,7 @@ from libs.user_authentication import authenticated
 @authenticated
 def test_function():
     print 'this line was printed from inside the test function'
-    return render_template('admin_login')
-
+    return redirect("/")
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################

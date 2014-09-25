@@ -29,12 +29,12 @@ def is_logged_in():
     logout_loggedin_admin()
 
 
-def authenticated(f):
+def authenticated(some_function):
     """Decorator for functions (pages) that require a login.
        Redirects to index if not authenticated"""
-    @functools.wraps(f)
+    @functools.wraps(some_function)
     def wrapped(*args, **kwargs):
-        if is_logged_in(): return f(*args, **kwargs)
+        if is_logged_in(): return some_function(*args, **kwargs)
         return redirect("/")
     return wrapped
 

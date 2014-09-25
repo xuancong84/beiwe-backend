@@ -3,16 +3,16 @@ from libs.db_models import User
 import functools
 
 
-def authenticated(f):
+def authenticated(some_function):
     print "this line was printed inside the decorator, type 2."
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
        device IDs are invalid."""
-    @functools.wraps(f)
+    @functools.wraps(some_function)
     def wrapped(*args, **kwargs):
         is_this_user_valid = check_identifiers( *args, **kwargs )
-        return f(*args, **kwargs)
-        if is_this_user_valid: return f(*args, **kwargs)
+        return some_function(*args, **kwargs)
+        if is_this_user_valid: return some_function(*args, **kwargs)
         #return 403
     return wrapped
 
