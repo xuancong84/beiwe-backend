@@ -11,14 +11,14 @@ def authenticated(some_function):
     @functools.wraps(some_function)
     def wrapped(*args, **kwargs):
         is_this_user_valid = check_identifiers( *args, **kwargs )
-        return some_function(*args, **kwargs)
+#        return some_function(*args, **kwargs)
         if is_this_user_valid: return some_function(*args, **kwargs)
         #return 403
     return wrapped
 
 
 def check_identifiers( *args, **kwargs ):
-    return True
+#    return True
     print "something"
     """Check if user exists, check if the provided passwords match"""
 #     patient_id, device_id, password
