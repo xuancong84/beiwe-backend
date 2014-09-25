@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, abort
 from libs.db_models import User
 import functools
 
@@ -13,7 +13,7 @@ def authenticated(some_function):
         is_this_user_valid = check_identifiers( *args, **kwargs )
 #        return some_function(*args, **kwargs)
         if is_this_user_valid: return some_function(*args, **kwargs)
-        #return 403
+        return abort(403)
     return wrapped
 
 
