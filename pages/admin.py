@@ -40,7 +40,7 @@ def login():
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-@admin_authentication.admin_authenticated
+@admin_authentication.authenticate_admin
 def render_main():
     """ Method responsible rendering admin template"""
     data = {
