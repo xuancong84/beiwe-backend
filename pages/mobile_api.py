@@ -5,8 +5,7 @@ from libs.data_handlers import get_weekly_results
 from libs.db_models import User
 from libs.encryption import check_client_key, get_client_public_key_string
 from libs.security import generate_random_user_id
-from libs.s3 import (s3_upload_handler_file, s3_list_files, s3_retrieve,
-                     s3_upload_handler_string)
+from libs.s3 import s3_upload_handler_file, s3_retrieve, s3_upload_handler_string
 from libs.user_authentication import authenticate_user
 
 from mongolia.errors import DatabaseConflictError
@@ -155,8 +154,8 @@ def get_key(user_id):
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
 @authenticate_user
 def test_function():
-    return 200
-#     return redirect("/")
+    return
+
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
