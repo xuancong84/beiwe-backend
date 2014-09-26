@@ -36,7 +36,7 @@ def pymongo():
 
 def generate_random_password_and_salt():
     password = generate_upper_case_alphanumeric_string()
-    return generate_hash_and_salt( password )
+    return password, generate_hash_and_salt( password )
 
 def generate_hash_and_salt ( password ):
     salt = urandom(16).encode('base64')
