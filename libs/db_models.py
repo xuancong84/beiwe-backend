@@ -13,7 +13,6 @@ class User( DatabaseObject ):
     DEFAULTS = { "password":REQUIRED, 'device_id':None, 'salt':REQUIRED }
     
     @classmethod
-    #TODO: Add to create User a check to see if a user under that ID already exists on s3
     def create(cls):
         patient_id = generate_upper_case_alphanumeric_string()
         password, password_hash, salt = generate_random_password_and_salt()
@@ -40,7 +39,11 @@ class User( DatabaseObject ):
     def validate_password(self, compare_me):
         return compare_hashes( compare_me, self['salt'], self['password'] )
     
-    
+    def reset_password(self):
+        password = generate_upper_case_alphanumeric_string()
+        self.set_password(password)
+        return password
+        
     def set_password(self, password):
         password, salt  = generate_hash_and_salt( password )
         self['password'] = password
