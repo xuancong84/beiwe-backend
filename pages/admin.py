@@ -1,7 +1,8 @@
 from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
 from libs.db_models import User
-
+from libs.s3 import s3_upload_handler_string
+from libs.encryption import create_client_key_pair
 admin = Blueprint('admin', __name__)
 
 
@@ -57,6 +58,14 @@ def reset_user_password():
         return new_password
     return "that patient id does not exist"
 
+
+# @admin_authentication.authenticate_admin
+def create_new_patient():
+    patient_id, password = User.create()
+    s3_upload_handler_string(patient_id, "")
+    create_client_key_pair(patient_id)
+    return "patient_id: " + patient_id + "\npassword: " + password
+    
 
 ################################################################################
 ############################# Other Stuff ######################################
