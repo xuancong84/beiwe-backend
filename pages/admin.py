@@ -3,8 +3,8 @@ from libs import admin_authentication
 from libs.db_models import User
 from libs.s3 import s3_upload_handler_string
 from libs.encryption import create_client_key_pair
-admin = Blueprint('admin', __name__)
 
+admin = Blueprint('admin', __name__)
 
 ################################################################################
 ############################# Login/Logoff #####################################
@@ -38,7 +38,7 @@ def login():
 
 
 ################################################################################
-######################### Actual Functionality #################################
+############################# The Admin Page ###################################
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
@@ -48,10 +48,18 @@ def render_main():
     return render_template('admin_panel.html')
 
 
+################################################################################
+######################### Actual Functionality #################################
+################################################################################
+
 #TODO: Someone. We need response pages (or some other way of telling the person
 # that they have entered bad information)
+
+
+#TODO: create route and response page.
 @admin_authentication.authenticate_admin
 def reset_user_password():
+    """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values("patient_id")
     if User.exists( patient_id=patient_id ):
         new_password = User(patient_id).reset_password()
@@ -59,13 +67,16 @@ def reset_user_password():
     return "that patient id does not exist"
 
 
+#TODO: create route and response page.
 # @admin_authentication.authenticate_admin
 def create_new_patient():
+    """ Creates a new user, generates a password and keys, pushes data to s3
+    and user database, returns a string containing password and patient id"""
     patient_id, password = User.create()
     s3_upload_handler_string(patient_id, "")
     create_client_key_pair(patient_id)
     return "patient_id: " + patient_id + "\npassword: " + password
-    
+
 
 ################################################################################
 ############################# Other Stuff ######################################
