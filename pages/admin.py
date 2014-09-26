@@ -1,5 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
+from libs.db_models import User
 
 admin = Blueprint('admin', __name__)
 
@@ -43,20 +44,24 @@ def login():
 @admin_authentication.authenticate_admin
 def render_main():
     """ Method responsible rendering admin template"""
-    data = {
-            #"users": []
-            #"sms_cohorts": [c for c in Cohorts()],
-            #"email_cohorts": [ec for ec in EmailCohorts()]
-           }
-    return render_template('admin_panel.html', **data)
+    return render_template('admin_panel.html')
+
+
+#TODO: Someone. We need response pages (or some other way of telling the person
+# that they have entered bad information)
+@admin_authentication.authenticate_admin
+def reset_user_password():
+    patient_id = request.values("patient_id")
+    if User.exists( patient_id=patient_id ):
+        new_password = User(patient_id).reset_password()
+        return new_password
+    return "that patient id does not exist"
 
 
 #TODO: Eli. implement
-def reset_user_password(): pass
-
-
-#TODO: Eli. implement
-def reset_admin_password(): pass
+@admin_authentication.authenticate_admin
+def reset_admin_password():
+    request.values
 
 
 ################################################################################
