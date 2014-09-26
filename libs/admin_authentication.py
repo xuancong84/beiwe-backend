@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from flask import session, redirect
 from libs.db_models import Admin
+from libs.security import generate_upper_case_alphanumeric_string
 import functools
 
 
@@ -12,8 +13,10 @@ def logout_loggedin_admin():
 
 def login_admin():
     #TODO: Eli/Kevin. Currently only 1 admin user. Allow more than one admin user.
-    session['admin_uuid'] = "12345678987654321" #111111111^2
+    session['admin_uuid'] = generate_upper_case_alphanumeric_string()
     session['expiry'] = datetime.now() + timedelta(hours=6)
+    from pprint import pprint
+    pprint(session)
 
 
 def validate_login_credentials(password, username):
