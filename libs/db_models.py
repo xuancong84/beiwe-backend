@@ -1,5 +1,7 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from libs.security import generate_hash_and_salt, compare_hashes
+from libs.security import (generate_hash_and_salt, compare_hashes,
+                           generate_random_password_and_salt)
+
 
 class User( DatabaseObject ):
     
@@ -7,13 +9,17 @@ class User( DatabaseObject ):
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
     # We are using the patient's assigned ID as a unique Id.
-    DEFAULTS = { "password":None, 'device_id':None, 'salt':None }
+    DEFAULTS = { "password":REQUIRED, 'device_id':None, 'salt':REQUIRED }
     
     @classmethod
     #TODO: Add to create User a check to see if a user under that ID already exists on s3
     def create(cls, patient_id):
-        new_client = {ID_KEY: patient_id, "password":None, 'device_id':None, "salt":None }
-        return super(User, cls).create(new_client)
+        password, password_hash, salt = generate_random_password_and_salt()
+        new_client = {ID_KEY: patient_id, "password":password_hash,
+                      'device_id':None, "salt":salt }
+        super(User, cls).create(new_client)
+        return password
+        
     
     
     @classmethod

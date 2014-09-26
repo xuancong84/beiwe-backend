@@ -4,7 +4,7 @@ from werkzeug import secure_filename
 from libs.data_handlers import get_weekly_results
 from libs.db_models import User
 from libs.encryption import check_client_key, get_client_public_key_string
-from libs.security import generate_random_user_id
+from libs.security import generate_upper_case_alphanumeric_string
 from libs.s3 import s3_upload_handler_file, s3_retrieve, s3_upload_handler_string
 from libs.user_authentication import authenticate_user
 
@@ -127,8 +127,7 @@ def check_password_match():
     return 403
 
 #TODO: Eli. modify after implementing user authentication.
-#should you be given a user id and passwor on registration, or do you create your password?
-#(yes)
+#you will be given a randomly generated user id and password upon registration.
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
 # @authenticate_user
 def set_password():
@@ -142,6 +141,7 @@ def set_password():
 @mobile_api.route('/fetch_key', methods=['GET', 'POST'])
 def fetch_key():
     return open("/var/www/scrubs/keyFile", 'rb').read()
+
 
 #TODO: Eli. move fully over to get_key once real keys exist.
 @mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
@@ -190,6 +190,6 @@ def allowed_extension(filename):
 # TODO: add a randomly-generate new user id.  User only needs to type in a user ID on device registration.
 def create_new_user():
     try:
-        User.create( generate_random_user_id )
+        User.create( generate_upper_case_alphanumeric_string )
     except DatabaseConflictError:
         create_new_user()

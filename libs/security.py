@@ -34,6 +34,9 @@ def pymongo():
 # TODO: Eli. Profile and make sure this is a good number of ITERATIONS
 # pbkdf2 is a hashing function for key derivation.
 
+def generate_random_password_and_salt():
+    password = generate_upper_case_alphanumeric_string()
+    return generate_hash_and_salt( password )
 
 def generate_hash_and_salt ( password ):
     salt = urandom(16).encode('base64')
@@ -52,7 +55,7 @@ def compare_hashes( compare_me, salt, real_password_hash ):
 ############################## USER IDS ########################################
 ################################################################################
 
-def generate_random_user_id():
+def generate_upper_case_alphanumeric_string():
     #generates an alphanumeric uppercase letter string 10 characters long.
     random_string = hashlib.md5( urandom(16) ).digest().encode("base64")
     return re.sub(r'[^A-Z0-9]', "", random_string)[:10]
