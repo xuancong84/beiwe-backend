@@ -4,31 +4,21 @@ from libs.db_models import Admin
 from libs.security import generate_upper_case_alphanumeric_string
 import functools
 
+#note: admin passwords cannot currently be changed.
 
+################################################################################
+############################ Existence Modifiers ###############################
+################################################################################
 
-def logout_loggedin_admin():
-    if "admin_uuid" in session: del session['admin_uuid']
-    if "expiry" in session: del session['expiry']
+def create_admin(username, password):
+    Admin.create(username, password)
 
+def remove_admin(username):
+    Admin(username).remove()
 
-def login_admin():
-    #TODO: Eli/Kevin. Currently only 1 admin user. Allow more than one admin user.
-    session['admin_uuid'] = generate_upper_case_alphanumeric_string()
-    session['expiry'] = datetime.now() + timedelta(hours=6)
-    from pprint import pprint
-    pprint(session)
-
-
-def validate_login_credentials(password, username):
-    if Admin.check_password(username, password):
-        return True
-    return False
-
-
-def is_logged_in():
-    if 'expiry' in session and session['expiry'] > datetime.now():
-        return 'admin_uuid' in session
-    logout_loggedin_admin()
+################################################################################
+############################ Website Functions #################################
+################################################################################
 
 
 def authenticate_admin(some_function):
@@ -41,9 +31,23 @@ def authenticate_admin(some_function):
     return wrapped
 
 
-def create_admin(username, password):
-    Admin.create(username, password)
+def login_admin():
+    session['admin_uuid'] = generate_upper_case_alphanumeric_string()
+    session['expiry'] = datetime.now() + timedelta(hours=6)
 
 
-def remove_admin(username):
-    Admin(username).remove()
+def logout_loggedin_admin():
+    if "admin_uuid" in session: del session['admin_uuid']
+    if "expiry" in session: del session['expiry']
+
+
+def validate_login_credentials(password, username):
+    if Admin.check_password(username, password):
+        return True
+    return False
+
+
+def is_logged_in():
+    if 'expiry' in session and session['expiry'] > datetime.now():
+        return 'admin_uuid' in session
+    logout_loggedin_admin()

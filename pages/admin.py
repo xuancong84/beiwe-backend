@@ -58,12 +58,6 @@ def reset_user_password():
     return "that patient id does not exist"
 
 
-#TODO: Eli. implement
-@admin_authentication.authenticate_admin
-def reset_admin_password():
-    request.values
-
-
 ################################################################################
 ############################# Other Stuff ######################################
 ################################################################################
