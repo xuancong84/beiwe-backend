@@ -45,12 +45,12 @@ def upload():
     # werkzeug.secure_filename may return empty if unsecure
     file_name = secure_filename(uploaded_file.filename)
     if uploaded_file and file_name and allowed_extension(file_name):
-        user_id, file_type, timestamp  = parse_filename(file_name)
+        patient_id, file_type, timestamp  = parse_filename(file_name)
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype(file_type)
             if (ftype.startswith('surveyAnswers')):
                 ftype = 'surveyAnswers'
-            s3_prepped_filename = "%s/%s/%s/%s" % (user_id, ftype, parsed_id, timestamp)
+            s3_prepped_filename = "%s/%s/%s/%s" % (patient_id, ftype, parsed_id, timestamp)
             s3_upload_handler_file(s3_prepped_filename, uploaded_file)
         else:
             s3_upload_handler_file(s3_prep_filename(file_name), uploaded_file)
@@ -59,62 +59,60 @@ def upload():
         abort(400)
 
 
-# FIXME: Eli. I beleive this is the beginning of the user authentication code.
 # TODO: Dori. check what the response codes from this is.
 @mobile_api.route('/userinfo', methods=['GET', 'POST'])
 # @authenticate_user
 def set_user_info():
     """ Method for receiving and setting user info upon registration. """
-    user_id = request.values['patientID']
+    patient_id = request.values['patientID']
     android_id = request.values['android_id']
     bluetooth_id = request.values['btID']
-
-    if User.exists( patient_id=user_id ):
-        s3_upload_handler_string( user_id + '/ids.csv', android_id + '\n' + bluetooth_id)
+    
+    if User.exists( patient_id=patient_id ):
+        s3_upload_handler_string( patient_id + '/ids.csv', android_id + '\n' + bluetooth_id)
 
 
 @mobile_api.route('/valid_user', methods=['GET', 'POST'])
 # @authenticate_user
 def check_user_exists():
-    user_id = request.values['patientID']
-    if User.exists( patient_id=user_id ):
+    patient_id = request.values['patientID']
+    if User.exists( patient_id=patient_id ):
         return 200
     return 403
 
 
 #TODO: Eli + Dori
 # this should be a dynamic page, the url should look like "users/some-uuid/graph"
-@mobile_api.route('/users/<user_id>/graph', methods=['GET', 'POST'])
+@mobile_api.route('/users/<patient_id>/graph', methods=['GET', 'POST'])
 # @mobile_api.route('/graph', methods=['GET', 'POST'])
 # @authenticate_user
-def fetch_graph( user_id ):
-#     userID = request.values['patientID']
-#     password = request.values['pwd']
+def fetch_graph( patient_id ):
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
-    results = get_weekly_results(username=user_id)
+    results = get_weekly_results(username=patient_id)
     for pair in results:
         data_results.append([json.dumps(pair[0]), json.dumps(pair[1])])
     print results[0][1]
     return render_template("phone_graphs.html", data=results)
 
 
-#TODO: Eli. implement user registration.
+# TODO: Dori.  This registration url
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 # @authenticate_user
 def register_user():
-    user_id = request.values["user_id"]
-    #check if user_id is a valid, registerable user_id.
-
-    #if a client key already exists, the user cannot register a device (403 forbidden)
-    if check_client_key(user_id):
-        return 403
-    #if the client does not have a key
-
-    # register cases
-    # id valid, no existing device
-    # id valid, there is already an existing device
-    # id invalid
+    patient_id = request.values["patient_id"]
+    device_id = request.values["device_id"]
+    
+    #if a device is already registered with this patient_id, forbid.
+    if User(patient_id) is not None:
+        #TODO: Dori, change this code to something meaningful that you can
+        # respond to on the Android side.
+        return render_template('empty.html'), 403  
+    
+    # TODO: Eli/Dori.  Oops, we need to make the bluetooth database.
+    
+    #if the device id matches, then all is good and we return the user's public key
+    return get_client_public_key_string(patient_id), 200
 
 
 @mobile_api.route('/check_password', methods=['GET', 'POST'])
@@ -123,8 +121,8 @@ def check_password_match():
     password = request.values['pwd']
     patient_id = request.values['patientID']
     if User.check_password( patient_id, password ):
-        return 200
-    return 403
+        return render_template('blank.html'), 200
+    return abort(403)
 
 #TODO: Eli. modify after implementing user authentication.
 #you will be given a randomly generated user id and password upon registration.
@@ -132,23 +130,10 @@ def check_password_match():
 # @authenticate_user
 def set_password():
     User(request.values["patient_id"]).set_password(request.values["new_password"])
-    return 200
-
+    return render_template('blank.html'), 200
 
 ################################################################################
-
-#TODO: Eli. deprecate
-@mobile_api.route('/fetch_key', methods=['GET', 'POST'])
-def fetch_key():
-    return open("/var/www/scrubs/keyFile", 'rb').read()
-
-
-#TODO: Eli. move fully over to get_key once real keys exist.
-@mobile_api.route('/<user_id>/key', methods=['GET', 'POST'])
-# @authenticate_user
-def get_key(user_id):
-    return get_client_public_key_string( user_id )
-
+############################## test... #########################################
 ################################################################################
 
 @mobile_api.route('/test_auth', methods=['GET', 'POST'])
@@ -161,10 +146,10 @@ def test_function():
 ################################################################################
 
 def parse_filename(filename):
-    """ Splits filename into user-id, file-type, unix-timestamp """
-    l = filename.split("_")
-    if len(l) == 3:
-        return l[0], l[1], l[2]
+    """ Splits filename into user-id, file-type, unix-timestamp. """
+    name = filename.split("_")
+    if len(name) == 3:
+        return name[0], name[1], name[2]
 
 
 def parse_filetype(file_type):

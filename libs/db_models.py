@@ -20,6 +20,7 @@ from libs.security import (generate_hash_and_salt, compare_hashes,
 # can access when you are logged in on the device) requires an active internet connection.
 
 
+# TODO: Eli/Dori.  weeeee need to make a single column bluetooth address database...
 
 class User( DatabaseObject ):
     
