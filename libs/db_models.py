@@ -1,6 +1,7 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 from libs.security import (generate_hash_and_salt, compare_hashes,
-                           generate_random_password_and_salt)
+                           generate_random_password_and_salt,
+                           generate_upper_case_alphanumeric_string )
 
 
 class User( DatabaseObject ):
@@ -13,13 +14,13 @@ class User( DatabaseObject ):
     
     @classmethod
     #TODO: Add to create User a check to see if a user under that ID already exists on s3
-    def create(cls, patient_id):
+    def create(cls):
+        patient_id = generate_upper_case_alphanumeric_string()
         password, password_hash, salt = generate_random_password_and_salt()
         new_client = {ID_KEY: patient_id, "password":password_hash,
                       'device_id':None, "salt":salt }
         super(User, cls).create(new_client)
-        return password
-        
+        return patient_id, password
     
     
     @classmethod
