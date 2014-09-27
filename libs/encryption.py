@@ -6,8 +6,7 @@
     Server: private
     Device: public  """
     
-from libs.s3 import (s3_retrieve, s3_upload_handler_file, S3ResponseError,
-    s3_list_files, s3_upload_handler_string)
+from libs.s3 import s3_retrieve, s3_list_files, s3_upload_handler_string
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -38,10 +37,10 @@ def get_client_private_key(patient_id):
     return RSA.importKey( key )
     
     
-def check_client_key(patient_id):
-    if len(s3_list_files( "keys/" + patient_id )) == 1:
-        return True
-    return False
+# def check_client_key_exists(patient_id):
+#     if len(s3_list_files( "keys/" + patient_id )) == 1:
+#         return True
+#     return False
 
 
 ################################################################################
@@ -57,9 +56,10 @@ def _generate_key_pairing():
     return public_key.exportKey(), private_key.exportKey()
     
     
-def decrypt_rsa_lines(encrypted_lines, private_key):
+def decrypt_rsa_lines(encrypted_lines, patient_id):
     """ This function takes a list of encrypted lines (from a client device) and
         decrypts every line separately, and returns a list of decrypted lines."""
+    private_key = get_client_private_key(patient_id)
     return "\n".join([ private_key.decrypt( line.decode("hex") ) for line in encrypted_lines ])
     
     
