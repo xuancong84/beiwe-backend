@@ -62,8 +62,12 @@ class User( DatabaseObject ):
         password = generate_upper_case_alphanumeric_string()
         self.set_password(password)
         return password
-        
-        
+    
+    
+    def reset_device(self):
+        self['device_id'] =  None
+        self.save()
+    
     def set_password(self, password):
         """ Sets the instance's password hash to match the provided string."""
         password, salt  = generate_hash_and_salt( password )
