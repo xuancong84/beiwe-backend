@@ -6,6 +6,7 @@ from libs.encryption import create_client_key_pair
 
 admin = Blueprint('admin', __name__)
 
+
 ################################################################################
 ############################# Login/Logoff #####################################
 ################################################################################
@@ -62,8 +63,20 @@ def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values("patient_id")
     if User.exists( patient_id=patient_id ):
-        new_password = User(patient_id).reset_password()
+        user = User(patient_id)
+        new_password = user.reset_password()
+        user.reset_device()
         return new_password
+    return "that patient id does not exist"
+
+
+#TODO: create route and response page.
+def reset_device():
+    patient_id = request.values("patient_id")
+    if User.exists( patient_id=patient_id ):
+        user = User(patient_id)
+        user.reset_device()
+        return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
 
