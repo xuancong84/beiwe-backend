@@ -65,8 +65,10 @@ class User( DatabaseObject ):
     
     
     def reset_device(self):
+        """ Clears the device entry."""
         self['device_id'] =  None
         self.save()
+    
     
     def set_password(self, password):
         """ Sets the instance's password hash to match the provided string."""
