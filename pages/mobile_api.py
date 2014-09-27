@@ -83,7 +83,7 @@ def upload():
         abort(400)
 
 
-# TODO: Dori.  Make sure you are handling the different response codes correctly in android.
+# TODO: Dori.  Make sure android handling the different response codes correctly in android.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 # @authenticate_user_registration
 def register_user():
@@ -91,12 +91,19 @@ def register_user():
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
         Returns the encryption key for this patient. """
+        
+    #Case: If the id and password combination do not match, the decorator returns
+    # a 403 error.
     patient_id = request.values['patientID']
     mac_address = request.values['btID']
     user = User(patient_id)
     if user['device_id'] is not None:
-        return render_template('empty.html'), 403
+        # Case: this patient has previously registered a device, 405 is the
+        # "method not allowed" error, seems like a good response to me.
+        return render_template('empty.html'), 405
     upload_bluetooth(patient_id, mac_address)
+    #Case: this device has been registered successfully, the return is the
+    # encryption key associated with this user.
     return get_client_public_key_string(patient_id), 200
 
 
@@ -125,19 +132,16 @@ def upload_bluetooth( patient_id, mac_address ):
     s3_upload_handler_string(patient_id + '/mac_' + str(number_mac_addresses),
                              mac_address )
 
-
 def parse_filename(filename):
     """ Splits filename into user-id, file-type, unix-timestamp. """
     name = filename.split("_")
     if len(name) == 3:
         return name[1], name[2]
 
-
 def parse_filetype(file_type):
     """TODO: Josh/Dori.  Fill in this documentation line."""
     parsed_id = filter(str.isdigit, file_type)
     return filter(str.isalpha, file_type), parsed_id
-
 
 def allowed_extension(filename):
     """ Checks if string has a recognized file extension. """
