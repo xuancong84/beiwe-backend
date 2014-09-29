@@ -36,7 +36,9 @@ def fetch_survey():
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 # @authenticate_user
 def fetch_graph():
-    """ TODO: Dori. Document."""
+    """ TODO: This function fetches the patient's answers to the most recent survey,
+    marked by survey ID. The results are rendered on a template in the patient's
+    phone"""
     patient_id = request.values('patient_id')
     #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
@@ -64,13 +66,13 @@ def upload():
     file_name = secure_filename( uploaded_file.filename )
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-        
+
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
-            
+
             if ftype.startswith( 'surveyAnswers' ):
                 ftype = 'surveyAnswers'
-                
+
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_file(s3_filename, uploaded_file)
         else:
@@ -91,7 +93,7 @@ def register_user():
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
         Returns the encryption key for this patient. """
-        
+
     #Case: If the id and password combination do not match, the decorator returns
     # a 403 error.
     patient_id = request.values['patientID']
