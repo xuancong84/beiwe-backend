@@ -21,14 +21,12 @@ ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
 
-
-
 from pprint import pprint
-mobile_api.route('/test', methods=['GET', 'POST'])
+mobile_api.route( '/test', methods=['GET', 'POST'] )
 @authenticate_user
 def test_page():
     pprint(request)
-
+    return render_template('blank.html'), 200
 
 ################################################################################
 ############################# DOWNLOADS ########################################
