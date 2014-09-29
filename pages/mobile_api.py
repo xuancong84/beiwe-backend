@@ -6,7 +6,7 @@ from libs.db_models import User
 from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
 from libs.s3 import (s3_upload_handler_file, s3_retrieve, s3_list_files,
                      s3_upload_handler_string)
-# from libs.user_authentication import authenticate_user, authenticate_user_registration
+from libs.user_authentication import authenticate_user, authenticate_user_registration
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -19,6 +19,16 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
+
+
+
+
+from pprint import pprint
+mobile_api.route('/test', methods=['GET', 'POST'])
+@authenticate_user
+def test_page():
+    pprint(request)
+
 
 ################################################################################
 ############################# DOWNLOADS ########################################
@@ -65,13 +75,13 @@ def upload():
     file_name = secure_filename( uploaded_file.filename )
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-
+        
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
-
+            
             if ftype.startswith( 'surveyAnswers' ):
                 ftype = 'surveyAnswers'
-
+                
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_file(s3_filename, uploaded_file)
         else:
@@ -82,7 +92,7 @@ def upload():
         return render_template('blank.html'), 200
     else:
         # Did not match any data upload files
-        abort(400)
+        return abort(400)
 
 
 # TODO: Dori.  Make sure android handling the different response codes correctly in android.
