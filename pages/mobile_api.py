@@ -20,14 +20,6 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
-
-from pprint import pprint
-mobile_api.route( '/test', methods=['GET', 'POST'] )
-@authenticate_user
-def test_page():
-    pprint(request)
-    return render_template('blank.html'), 200
-
 ################################################################################
 ############################# DOWNLOADS ########################################
 ################################################################################
@@ -122,7 +114,7 @@ def register_user():
 ################################################################################
 
 @mobile_api.route('/validate_user', methods=['GET', 'POST'])
-# @authenticate_user
+@authenticate_user
 def validate_user():
         return render_template("blank.html"), 200
 
