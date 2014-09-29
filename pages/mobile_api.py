@@ -31,8 +31,7 @@ def fetch_survey():
     return s3_retrieve("all_surveys/current_survey")
 
 
-#TODO: Dori.  Update the url in the android app to point to /
-# @mobile_api.route('/users/<patient_id>/graph', methods=['GET', 'POST'])
+#TODO: Dori.  Update the url in the android app to point to /graph
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 # @authenticate_user
 def fetch_graph():
@@ -82,6 +81,7 @@ def upload():
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
         return render_template('blank.html'), 200
     else:
+        # Did not match any data upload files
         abort(400)
 
 
