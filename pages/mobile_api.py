@@ -113,9 +113,9 @@ def register_user():
 ############################### USER FUNCTIONS #################################
 ################################################################################
 
-@mobile_api.route('/validate_user', methods=['GET', 'POST'])
+@mobile_api.route('/test', methods=['GET', 'POST'])
 @authenticate_user
-def validate_user():
+def test():
         return render_template("blank.html"), 200
 
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
