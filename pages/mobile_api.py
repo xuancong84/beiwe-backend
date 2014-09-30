@@ -100,7 +100,7 @@ def register_user():
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
         Returns the encryption key for this patient. """
-
+    
     #Case: If the id and password combination do not match, the decorator returns
     # a 403 error.
     patient_id = request.values['patientID']
@@ -111,6 +111,7 @@ def register_user():
         # "method not allowed" error, seems like a good response to me.
         return render_template('empty.html'), 405
     upload_bluetooth(patient_id, mac_address)
+    user.set_device( request.values['device_id'] )
     #Case: this device has been registered successfully, the return is the
     # encryption key associated with this user.
     return get_client_public_key_string(patient_id), 200
