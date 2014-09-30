@@ -32,7 +32,7 @@ def test():
 ################################################################################
 
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
-# @authenticate_user
+@authenticate_user
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
     return s3_retrieve("all_surveys/current_survey")
@@ -72,13 +72,13 @@ def upload():
     file_name = secure_filename( uploaded_file.filename )
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-        
+
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
-            
+
             if ftype.startswith( 'surveyAnswers' ):
                 ftype = 'surveyAnswers'
-                
+
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_file(s3_filename, uploaded_file)
         else:
