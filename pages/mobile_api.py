@@ -20,6 +20,15 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
+
+@mobile_api.route('/test', methods=['GET', 'POST'])
+@authenticate_user
+def test():
+        return "abc123", 200
+
+
+
+
 ################################################################################
 ############################# DOWNLOADS ########################################
 ################################################################################
@@ -112,11 +121,6 @@ def register_user():
 ################################################################################
 ############################### USER FUNCTIONS #################################
 ################################################################################
-
-@mobile_api.route('/test', methods=['GET', 'POST'])
-@authenticate_user
-def test():
-        return render_template("blank.html"), 200
 
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
 # @authenticate_user
