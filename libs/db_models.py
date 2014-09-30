@@ -64,7 +64,7 @@ class User( DatabaseObject ):
         return password
     
     
-    def reset_device(self):
+    def set_device(self):
         """ Clears the device entry."""
         self['device_id'] =  None
         self.save()
