@@ -19,8 +19,8 @@ def authenticate_user(some_function):
 
 def validate_post( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match"""
-    if ("patient_id" not in request.values or password not in reqest.values or
-        "device_id" not in request.values):
+    if ("patient_id" not in request.values or "password" not in request.values
+        or "device_id" not in request.values):
         return False
     
     if not User.exists(request.values['patient_id']): return False
