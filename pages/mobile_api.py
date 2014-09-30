@@ -32,7 +32,7 @@ def test():
 ################################################################################
 
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
-# @authenticate_user
+@authenticate_user
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
     return s3_retrieve("all_surveys/current_survey")
