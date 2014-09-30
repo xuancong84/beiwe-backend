@@ -27,6 +27,7 @@ def validate_post( *args, **kwargs ):
     if not User.exists(request.values['patient_id']): return False
     user = User( request.values['patient_id'] )
     
+    #TODO: Eli.  decode hex passwords (or base64
     if not user.validate_password( request.values['password'] ): return False
     if not user['device_id'] == request.values['device_id']: return False
     
