@@ -45,15 +45,15 @@ def fetch_graph():
     """ TODO: This function fetches the patient's answers to the most recent survey,
     marked by survey ID. The results are rendered on a template in the patient's
     phone"""
-    patient_id = request.values('patient_id')
+    patient_id = request.values['patient_id']
     #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=patient_id)
     for pair in results:
         data_results.append([json.dumps(pair[0]), json.dumps(pair[1])])
-    print results[0][1]
-    return render_template("phone_graphs.html", data=results)
+    print data_results[0]
+    return render_template("phone_graphs.html", data=data_results)
 
 
 ################################################################################
