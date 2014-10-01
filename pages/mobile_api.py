@@ -103,13 +103,13 @@ def register_user():
     
     #Case: If the id and password combination do not match, the decorator returns
     # a 403 error.
-    patient_id = request.values['patientID']
-    mac_address = request.values['btID']
+    patient_id = request.values['patient_id']
+    mac_address = request.values['bluetooth_id']
     user = User(patient_id)
     if user['device_id'] is not None:
         # Case: this patient has previously registered a device, 405 is the
         # "method not allowed" error, seems like a good response to me.
-        return render_template('empty.html'), 405
+        return render_template('blank.html'), 405
     upload_bluetooth(patient_id, mac_address)
     user.set_device( request.values['device_id'] )
     #Case: this device has been registered successfully, the return is the
