@@ -94,13 +94,13 @@ def upload():
 
 # TODO: Dori.  Make sure android handling the different response codes correctly in android.
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
-# @authenticate_user_registration
+@authenticate_user_registration
 def register_user():
     """ Checks that the patient id has been granted, and that there is no device
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
         Returns the encryption key for this patient. """
-    
+
     #Case: If the id and password combination do not match, the decorator returns
     # a 403 error.
     patient_id = request.values['patient_id']
