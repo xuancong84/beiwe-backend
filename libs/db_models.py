@@ -64,7 +64,13 @@ class User( DatabaseObject ):
         return password
     
     
-    def set_device(self):
+    def set_device(self, device_id):
+        #TODO: do we want a check to see if the value is empty?
+        """ Sets the device id to the new value"""
+        self['device_id'] =  device_id
+        self.save()
+        
+    def clear_device(self):
         """ Clears the device entry."""
         self['device_id'] =  None
         self.save()
