@@ -53,7 +53,7 @@ def render_main():
 ######################### Actual Functionality #################################
 ################################################################################
 
-#TODO: Someone. We need response pages (or some other way of telling the person
+#TODO: Josh/Dori/Eli. We need response pages (or some other way of telling the person
 # that they have entered bad information)
 
 
@@ -65,7 +65,7 @@ def reset_user_password():
     if User.exists( patient_id=patient_id ):
         user = User(patient_id)
         new_password = user.reset_password()
-        user.reset_device()
+        user.set_password(new_password)
         return new_password
     return "that patient id does not exist"
 
@@ -75,7 +75,7 @@ def reset_device():
     patient_id = request.values("patient_id")
     if User.exists( patient_id=patient_id ):
         user = User(patient_id)
-        user.reset_device()
+        user.clear_device()
         return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
