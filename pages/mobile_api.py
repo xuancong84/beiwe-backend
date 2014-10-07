@@ -48,15 +48,15 @@ def fetch_graph():
     patient_id = request.values['patient_id']
     #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
-    titles = []
+    graph_titles = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=patient_id)
     for pair in results:
         data_results.append(json.dumps(pair[1]))
-        titles.append(pair[0])
+        graph_titles.append(pair[0])
     print data_results
-    print titles
-    return render_template("phone_graphs.html", data=data_results, titles=titles)
+    print graph_titles
+    return render_template("phone_graphs.html", data=data_results, titles=graph_titles)
 
 
 ################################################################################
