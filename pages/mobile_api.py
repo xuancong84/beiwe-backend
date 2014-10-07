@@ -51,7 +51,6 @@ def fetch_graph():
     graph_titles = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=patient_id)
-    print results
     for pair in results:
         data_results.append(json.dumps(pair[1]))
         graph_titles.append(pair[0])
