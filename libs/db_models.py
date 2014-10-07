@@ -68,7 +68,7 @@ class User( DatabaseObject ):
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
         password = generate_upper_case_alphanumeric_string()
-        device_password_hash = device_hash( password )
+        device_password_hash = device_hash(device_hash( password ))
         self.set_password( device_password_hash )
         return password
     
