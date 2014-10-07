@@ -56,7 +56,7 @@ def fetch_graph():
         titles.append(pair[0])
     print data_results
     print titles
-    return render_template("phone_graphs.html", data=data_results, titles=json.dumps(titles))
+    return render_template("phone_graphs.html", data=data_results, titles=titles)
 
 
 ################################################################################
