@@ -53,10 +53,10 @@ def fetch_graph():
     results = get_weekly_results(username=patient_id)
     for pair in results:
         data_results.append(json.dumps(pair[1]))
-        titles.append(json.dumps(pair[0]))
+        titles.append(pair[0])
     print data_results
     print titles
-    return render_template("phone_graphs.html", data=data_results, titles=titles)
+    return render_template("phone_graphs.html", data=data_results, titles=json.dumps(titles))
 
 
 ################################################################################
