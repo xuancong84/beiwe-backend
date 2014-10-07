@@ -83,5 +83,4 @@ def get_weekly_results(username="sur", methods=['GET', 'POST']):
     for value in tuple_values:
         for question_num, corresponding_answers in value.items():
             result.append([question_num, corresponding_answers])
-            print corresponding_answers
     return result

@@ -52,7 +52,7 @@ def fetch_graph():
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=patient_id)
     for result in results:
-        print result
+        print result + "\n"
     return render_template("phone_graphs.html", data=json.dumps(results))
 
 
