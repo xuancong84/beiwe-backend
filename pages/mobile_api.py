@@ -131,7 +131,7 @@ def set_password():
 # @ authenticate_user
 def forgot_password():
     print User(request.values['patient_id'])['password']
-    print request.values['new_password']
+    print request.values['password']
     print User(request.values['patient_id'])['password'] == request.values['new_password']
     if (User(request.values['patient_id'])['password'] == request.values['new_password']):
         return 200
