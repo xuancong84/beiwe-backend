@@ -71,7 +71,7 @@ function replot_user_results(title, data) {
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
-    graph(title, data);
+    // graph(title, data);
 }
 
 // $(document).ready(function() {
