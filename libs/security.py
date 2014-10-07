@@ -33,6 +33,13 @@ def pymongo():
 # TODO: Eli. Profile and make sure this is a good number of ITERATIONS
 # pbkdf2 is a hashing function for key derivation.
 
+def device_hash( data ):
+    """takes a string, hashes it and outputs an exact match of the device's password hashing function"""
+    hasher = hashlib("sha256")
+    hasher.update(data)
+    return hasher.digest().encode("base64").replace('\n', "").replace("=", "")
+
+
 def generate_hash_and_salt ( password ):
     salt = urandom(16).encode('base64')
     return (PBKDF2(password, salt, iterations=ITERATIONS).read(32).encode("base64"),

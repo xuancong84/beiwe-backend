@@ -18,6 +18,7 @@ def render_login_page():
         return redirect("/admin_panel")
     return render_template('admin_login.html')
 
+
 @admin.route("/logout")
 def logout():
     admin_authentication.logout_loggedin_admin()
