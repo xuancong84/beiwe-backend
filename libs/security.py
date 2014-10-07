@@ -7,6 +7,7 @@ import re
 
 class DatabaseIsDownError(Exception): pass
 
+
 # set the secret key for the application
 def set_secret_key(app):
     """Flask secret key"""
@@ -35,7 +36,7 @@ def pymongo():
 
 def device_hash( data ):
     """takes a string, hashes it and outputs an exact match of the device's password hashing function"""
-    hasher = hashlib("sha256")
+    hasher = hashlib.sha256()
     hasher.update(data)
     return hasher.digest().encode("base64").replace('\n', "").replace("=", "")
 

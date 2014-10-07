@@ -1,7 +1,8 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 from libs.security import (generate_hash_and_salt, compare_hashes,
                            generate_random_password_and_salt,
-                           generate_upper_case_alphanumeric_string )
+                           generate_upper_case_alphanumeric_string,
+                           device_hash)
 
 # NOTES on the password setup (by eli, he was tired.)
 
@@ -56,11 +57,19 @@ class User( DatabaseObject ):
         return compare_hashes( compare_me, self['salt'], self['password'] )
     
     
-    def reset_password(self):
-        """ Resets the instance's password to match something new and random,
+    def reset_password_for_debugging(self):
+        """ Resets the password to match something new and random,
             returns the new password string."""
         password = generate_upper_case_alphanumeric_string()
         self.set_password(password)
+        return password
+    
+    
+    def reset_password(self):
+        """ Resets the patient's password to match an sha256 hash of the returned string."""
+        password = generate_upper_case_alphanumeric_string()
+        device_password_hash = device_hash( password )
+        self.set_password( device_password_hash )
         return password
     
     
@@ -68,8 +77,8 @@ class User( DatabaseObject ):
         """ Sets the device id to the new value"""
         self['device_id'] =  device_id
         self.save()
-        
-        
+    
+    
     def clear_device(self):
         """ Clears the device entry."""
         self['device_id'] =  None
