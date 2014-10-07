@@ -62,10 +62,11 @@ plot1 = $.jqplot ('chart1', input, {
             sizeAdjust: 7.5 , tooltipLocation : 'ne'
         }
     });
-
 }
 
 function replot_user_results(title, data) {
+    console.log(title)
+    console.log(data)
     $('#chart1').empty();
     // TODO: Need to grab information specific to that question in the last X days.
     // For now, the question_number variable is useless
