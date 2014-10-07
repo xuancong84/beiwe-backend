@@ -1,6 +1,6 @@
 function graph(graphtitle, input){
   var title = graphtitle;
-  plot1 = $.jqplot ('chart1', [input], {
+  plot1 = $.jqplot ('chart1', input, {
         // Give the plot a title.
       title: title,
       animate: true,
