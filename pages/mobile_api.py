@@ -127,6 +127,17 @@ def set_password():
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
 
+@mobile_api.route('/forgot_password', methods=['GET', 'POST'])
+# @ authenticate_user
+def forgot_password():
+    print User(request.values['patient_id'])['password']
+    print request.values['password']
+    print User(request.values['patient_id'])['password'] == request.values['password']
+    if (User(request.values['patient_id'])['password'] == request.values['password']):
+        return 200
+    else:
+        return abort( 403 )
+
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
