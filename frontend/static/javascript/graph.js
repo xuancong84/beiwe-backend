@@ -1,4 +1,6 @@
 function graph(graphtitle, input){
+  document.write(input);
+  document.write(graphtitle);
   plot1 = $.jqplot ('chart1', input, {
         // Give the plot a title.
       title: graphtitle,
