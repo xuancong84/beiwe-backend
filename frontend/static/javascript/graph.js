@@ -1,8 +1,7 @@
 function graph(graphtitle, input){
-  var title = graphtitle;
   plot1 = $.jqplot ('chart1', input, {
         // Give the plot a title.
-      title: title,
+      title: graphtitle,
       animate: true,
       series:[{
             // Don't show a line, just show markers.
