@@ -47,12 +47,14 @@ def fetch_graph():
     phone"""
     patient_id = request.values['patient_id']
     #TODO: Dori.  clean up, make variable named what they contain.
+    title_results = []
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
     results = get_weekly_results(username=patient_id)
     for result in results:
-        data_results.append(json.dumps(result))
-    return render_template("phone_graphs.html", data=data_results)
+        title_results.append(result[0])
+        data_results.append(json.dumps(result[1]))
+    return render_template("phone_graphs.html", data=[title_results, data_results])
 
 
 ################################################################################
