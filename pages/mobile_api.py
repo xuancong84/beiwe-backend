@@ -53,7 +53,7 @@ def fetch_graph():
     for pair in results:
         data_results.append([pair[0], json.dumps(pair[1])])
     print data_results
-    return render_template("phone_graphs.html", data=results)
+    return render_template("phone_graphs.html", data=data_results)
 
 
 ################################################################################
