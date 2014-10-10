@@ -1,6 +1,7 @@
 function graph(graphtitle, input){
   // This is a function used to create the graph in JQPlot
   plot1 = $.jqplot ('chart1', input, {
+  		//note: jqplot wants the input coordinates to be a doubly nested array.
       title: graphtitle,
       animate: true,
       series:[{
@@ -53,7 +54,9 @@ function graph(graphtitle, input){
 
 function replot_user_results(title, data) {
 	//clears the graph, plots to supplied coordinates
+	console.log("title:")
     console.log(title);
+    console.log("data:")
     console.log(data);
     $('#chart1').empty();
     graph(title, data);
