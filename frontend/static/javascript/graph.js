@@ -50,19 +50,15 @@ function graph(graphtitle, input){
     });
 }
 
-// This function should be changed so it uses the commented out area
+
 function replot_user_results(title, data) {
+	//clears the graph, plots to supplied coordinates
     console.log(title);
     console.log(data);
-    // $('#chart1').empty();
-    // TODO: Need to grab information specific to that question in the last X days.
-    // For now, the question_number variable is useless
-    // graph(title, data);
+    $('#chart1').empty();
+    graph(title, data);
 }
 
-// $(document).ready(function() {
-// graph(['', 6.5, null ,9 ,8.2]);
-// });
 
 // Used in this JS to make the graph look better..
 Array.prototype.max = function() {

@@ -38,7 +38,6 @@ def fetch_survey():
     return s3_retrieve("all_surveys/current_survey")
 
 
-#TODO: Dori.  Update the url in the android app to point to /graph
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 # @authenticate_user
 def fetch_graph():
@@ -49,11 +48,19 @@ def fetch_graph():
     #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
 #     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+
+    #results is a list of lists (which should probably be tuples)...
+    # value 0 is the title/question text, value 1 is a list of y coordinates
     results = get_weekly_results(username=patient_id)
     for pair in results:
-        data_results.append([json.dumps(pair[0]), [json.dumps(pair[1])]])
+        
+        coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
+        # javascript understands json null/none values but not python Nones,
+        # we must dump all variables individually.
+        data_results.append( [ json.dumps( pair[0] ), coordinates ] )
+        
     print data_results
-    return render_template("phone_graphs.html", data=data_results)
+    return render_template("phone_graphs.html", graphs=data_results)
 
 
 ################################################################################
@@ -126,6 +133,7 @@ def register_user():
 def set_password():
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
+
 
 @mobile_api.route('/forgot_password', methods=['GET', 'POST'])
 # @ authenticate_user

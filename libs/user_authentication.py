@@ -38,7 +38,6 @@ def validate_post( *args, **kwargs ):
 
 
 
-
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
