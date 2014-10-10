@@ -27,7 +27,7 @@ function graph(graphtitle, input){
           label: "Day in the week",
           pad:2,
           min:0,
-          max: input.length + 1,
+          max: input[0].length + 1,
           tickInterval:1
         },
         yaxis: {
