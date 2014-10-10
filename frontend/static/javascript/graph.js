@@ -34,7 +34,7 @@ function graph(graphtitle, input){
             label: "Answer",
             labelOptions: {angle: 0},
             min:0,
-            max:input.max() + 1,
+            max:input[0].max() + 1,
             tickInterval: 1,
             pad:2
         },
@@ -58,6 +58,7 @@ function replot_user_results(title, data) {
     console.log(title);
     console.log("data:")
     console.log(data);
+    console.log(data[0].max());
     $('#chart1').empty();
     graph(title, data);
 }
@@ -68,5 +69,5 @@ Array.prototype.max = function() {
   var max = this[0];
   var len = this.length;
   for (var i = 1; i < len; i++) if (this[i] > max) max = this[i];
-  return max;
+  return parseInt(max);
 }

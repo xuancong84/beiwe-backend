@@ -20,7 +20,7 @@
     <!-- There actually is a way to make this section better. For now, keep like this.. -->
     {% for i in range ( graphs|length ) %}
         <!-- this is reating a button, each button contains (title, coordinates) -->
-        <button type="button" onClick="replot_user_results({{ graphs[i][0] }} , {{ graphs[i][1] }})">Question {{i + 1}}</button>
+        <button type="button" onClick="replot_user_results({{ graphs[i][0] }} , {{ [graphs[i][1]] }})">Question {{i + 1}}</button>
         {% if ((i + 1) is divisibleby 3) %}
             <br>
         {% endif %}
