@@ -96,7 +96,7 @@ def create_new_patient():
 ############################# Other Stuff ######################################
 ################################################################################
 
-@admin.route.route('/admin_survey', methods=['GET', 'POST'])
+@admin.route('/admin_survey', methods=['GET', 'POST'])
 @admin_authentication.authenticate_admin
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
