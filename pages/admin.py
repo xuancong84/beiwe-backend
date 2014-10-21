@@ -1,7 +1,7 @@
 from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
 from libs.db_models import User
-from libs.s3 import s3_upload_handler_string
+from libs.s3 import s3_upload_handler_string, s3_retrieve
 from libs.encryption import create_client_key_pair
 
 admin = Blueprint('admin', __name__)
@@ -95,6 +95,13 @@ def create_new_patient():
 ################################################################################
 ############################# Other Stuff ######################################
 ################################################################################
+
+@admin.route.route('/admin_survey', methods=['GET', 'POST'])
+@admin_authentication.authenticate_admin
+def fetch_survey():
+    """ Method responsible for serving the latest survey JSON. """
+    return s3_retrieve("all_surveys/current_survey")
+
 
 @admin.route("/download")
 def download():
