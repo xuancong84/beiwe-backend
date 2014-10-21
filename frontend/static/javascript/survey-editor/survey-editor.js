@@ -5,7 +5,7 @@
 var questions = [];
 
 // When the page loads, get the current JSON survey and load the questions[] array from it
-$.getJSON("http://beiwe.org/fetch_survey", function(data) {
+$.getJSON("http://beiwe.org/admin_survey", function(data) {
     questions = data["questions"];
     renderQuestionsList();
 })
