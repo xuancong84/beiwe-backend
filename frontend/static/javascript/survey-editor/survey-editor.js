@@ -23,22 +23,39 @@ function getHour() {
     return hour;
 }
 
+// If it's a weekly survey, return the selected weekday (Sunday = 1, Saturday = 7)
+function getDayOfWeek() {
+    var dayPicker = document.getElementById("day");
+    if (dayPicker === 'undefined' || dayPicker == null) {
+        return null;
+    }
+    return parseInt(dayPicker.value);
+}
+
 // On end(), export the survey as a JSON object
 function end() {
-    var timestamp = new Date().getTime();
-    var surveyObject = {
-        hour_of_day: getHour(),
-        questions: questions,
-        survey_id: "SurveyCreatedAt" + timestamp
-    }
     //TODO: Josh.  Implement a check for pushing to daily and pushing to weekly.
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
-    var postRequestContent = "JSONstring=" + JSON.stringify(surveyObject);
+    var postRequestContent = "JSONstring=" + JSON.stringify(createJsonSurveyObject());
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "http://beiwe.org/update_survey", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.send(postRequestContent);
     alert("Survey results sent successfully :)")
+}
+
+// Turn the survey into a JSON object with an array of questions and other attributes
+function createJsonSurveyObject() {
+    var surveyObject = {
+        hour_of_day: getHour(),
+        questions: questions,
+        survey_id: "SurveyCreatedAt" + new Date().getTime()
+    }
+    // If it's a weekly survey, add the day of the week to ask the survey
+    if (getDayOfWeek() != null) {
+        surveyObject.day_of_week = getDayOfWeek();
+    }
+    return surveyObject;
 }
 
 // Render a list of the current questions
