@@ -10,10 +10,24 @@ $.getJSON("http://beiwe.org/admin_survey", function(data) {
     renderQuestionsList();
 })
 
+// Return the hour number (in 24-hour time) that the user selected in the form
+function getHour() {
+    var hour = parseInt(document.getElementById("hour").value);
+    var ampm = document.getElementById("ampm").value;
+    if (hour == 12) {
+        hour = 0; // 12a.m. is really 0:00; 12p.m. is really 12:00
+    }
+    if (ampm.localeCompare("pm") == 0) {
+        hour += 12; // If time is p.m., add 12 to the hour
+    };
+    return hour;
+}
+
 // On end(), export the survey as a JSON object
 function end() {
     var timestamp = new Date().getTime();
     var surveyObject = {
+        hour_of_day: getHour(),
         questions: questions,
         survey_id: "SurveyCreatedAt" + timestamp
     }
