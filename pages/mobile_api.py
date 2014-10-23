@@ -7,6 +7,7 @@ from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
 from libs.s3 import (s3_upload_handler_file, s3_retrieve, s3_list_files,
                      s3_upload_handler_string)
 from libs.user_authentication import authenticate_user, authenticate_user_registration
+from pages.survey_designer import get_latest_survey
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -31,11 +32,24 @@ def test():
 ############################# DOWNLOADS ########################################
 ################################################################################
 
+# TODO: Josh, delete this route and replace it with the two below (need to modify the Android app to allow this)
 @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
 @authenticate_user
 def fetch_survey():
     """ Method responsible for serving the latest survey JSON. """
     return s3_retrieve("all_surveys/current_survey")
+
+
+@mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
+@authenticate_user
+def download_daily_survey():
+    return get_latest_survey('daily')
+
+
+@mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
+@authenticate_user
+def download_weekly_survey():
+    return get_latest_survey('weekly')
 
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
@@ -53,12 +67,12 @@ def fetch_graph():
     # value 0 is the title/question text, value 1 is a list of y coordinates
     results = get_weekly_results(username=patient_id)
     for pair in results:
-        
+
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
         # javascript understands json null/none values but not python Nones,
         # we must dump all variables individually.
         data_results.append( [ json.dumps( pair[0] ), coordinates ] )
-        
+
     print data_results
     return render_template("phone_graphs.html", graphs=data_results)
 
