@@ -1,8 +1,7 @@
 from datetime import datetime
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, render_template
 from libs.admin_authentication import authenticate_admin
-from libs.s3 import (s3_list_files, s3_retrieve, s3_upload_handler_string,
-                     s3_copy_with_new_name)
+from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_string
 
 
 survey_designer = Blueprint('survey_designer', __name__)

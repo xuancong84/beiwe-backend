@@ -1,7 +1,7 @@
 from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
 from libs.db_models import User
-from libs.s3 import s3_upload_handler_string, s3_retrieve
+from libs.s3 import s3_upload_handler_string
 from libs.encryption import create_client_key_pair
 
 admin = Blueprint('admin', __name__)
