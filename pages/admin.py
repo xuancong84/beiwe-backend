@@ -97,13 +97,6 @@ def create_new_patient():
 ############################# Other Stuff ######################################
 ################################################################################
 
-@admin.route('/admin_survey', methods=['GET', 'POST'])
-@admin_authentication.authenticate_admin
-def fetch_survey():
-    """ Method responsible for serving the latest survey JSON. """
-    return s3_retrieve("all_surveys/current_survey")
-
-
 @admin.route("/download")
 def download():
     """ Method responsible for distributing APK file of Android app"""
