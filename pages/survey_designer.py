@@ -43,21 +43,23 @@ def get_surveys(prefix):
     return [survey_file for survey_file in surveys]
 
 
+def get_latest_survey(type):
+    surveys = get_surveys("all_surveys/" + type + "/")
+    surveys = sorted(surveys, reverse=True)
+    return s3_retrieve(surveys[0])
+
+
 @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
 def get_latest_weekly():
     """ Method responsible for fetching latest created weekly survey
         (frequency 1) """
-    weeklies = get_surveys("all_surveys/weekly/")
-    weeklies = sorted(weeklies, reverse=True)
-    return s3_retrieve(weeklies[0])
+    return get_latest_survey("weekly")
 
 
 @survey_designer.route('/get_daily_survey', methods=['GET', 'POST'])
 def get_latest_daily():
     """ Method responsible for fetching latest created daily survey (frequency 1) """
-    dailies = get_surveys("all_surveys/daily/")
-    dailies = sorted(dailies, reverse=True)
-    return s3_retrieve(dailies[0])
+    return get_latest_survey("daily")
 
 
 ################################################################################
