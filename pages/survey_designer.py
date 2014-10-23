@@ -26,8 +26,9 @@ def update_weekly():
     return update_survey("weekly", request)
 
 
-def update_survey(survey_name, request):
-    survey_name = "all_surveys/" + survey_name + "/" + datetime.now().isoformat()
+def update_survey(survey_type, request):
+    survey_name = "all_surveys/" + survey_type + "/"  # set filepath
+    survey_name += datetime.now().isoformat() + ".json"  # set filename
     new_quiz = request.values['JSONstring']
     s3_upload_handler_string( survey_name, new_quiz )
     # TODO: Josh, only return 200 on success; otherwise something else
