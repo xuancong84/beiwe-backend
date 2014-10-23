@@ -19,6 +19,7 @@ $(document).ready(function() {
     $.getJSON(current_survey_url, function(data) {
         questions = data["questions"];
         renderQuestionsList();
+        displayScheduledTime(data["hour_of_day"], data["day_of_week"]);
     })
 });
 
@@ -89,6 +90,25 @@ function renderQuestionsList() {
 
     // Insert the template into the page's HTML
     $("#listOfCurrentQuestions").html(htmlQuestion);
+}
+
+// Display the survey's scheduled time in the drop-down menus at the top
+function displayScheduledTime(hour, day) {
+    // Translate 24-hr time to 12-hr time with a.m./p.m. labels
+    if (hour >= 12) {
+        document.getElementById("ampm").value = "pm";
+        hour -= 12;
+    }
+    else {
+        document.getElementById("ampm").value = "am";
+    }
+    // Translate 0:00 to 12:00am, and 12:00 to 12:00pm
+    if (hour == 0) {
+        hour = 12;
+    }
+    // Set the Hour and Day HTML <select> drop-downs
+    document.getElementById("hour").value = hour;
+    document.getElementById("day").value = day;
 }
 
 // Get the question object from the Edit Question modal, and append it to the questions array
