@@ -49,7 +49,9 @@ def login():
 def render_main():
     """ Method responsible rendering admin template"""
     patients = dumps({user['_id']: patient_dict(user) for user in Users()})
-    return render_template('admin_panel.html', users = patients)
+    # TODO: Josh, fix this so it exports users/patients properly
+    #return render_template('admin_panel.html', users = patients)
+    return render_template('admin_panel.html')
 
 
 def patient_dict(patient):
