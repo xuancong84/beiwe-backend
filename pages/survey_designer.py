@@ -96,9 +96,9 @@ def question_designer():
 @survey_designer.route('/weekly_survey')
 @authenticate_admin
 def weekly_survey():
-    return render_template('weekly_survey.html')
+    return render_template('edit_survey.html', daily_or_weekly='weekly')
 
 @survey_designer.route('/daily_survey')
 @authenticate_admin
 def daily_survey():
-    return render_template('daily_survey.html')
+    return render_template('edit_survey.html', daily_or_weekly='daily')
