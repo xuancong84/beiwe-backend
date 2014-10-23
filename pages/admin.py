@@ -59,7 +59,7 @@ def render_main():
 
 
 #TODO: create route and response page.
-@admin_authentication.authenticate_admin
+# @admin_authentication.authenticate_admin
 def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values("patient_id")
@@ -72,6 +72,7 @@ def reset_user_password():
 
 
 #TODO: create route and response page.
+# @admin_authentication.authenticate_admin
 def reset_device():
     patient_id = request.values("patient_id")
     if User.exists( patient_id=patient_id ):
