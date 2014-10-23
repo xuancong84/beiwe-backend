@@ -14,22 +14,21 @@ survey_designer = Blueprint('survey_designer', __name__)
 # TODO: Josh. make sure that uncommenting @authenticate_admin
 # does not break survey editing.
 
-@survey_designer.route('/update_survey', methods=['GET', 'POST'])
+@survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
 # @authenticate_admin
 def update_daily():
-    return update_survey("current_survey")
-    #return update_survey("daily", request)
+    return update_survey("daily", request)
 
 
-#TODO: Josh.  make sure the weekly and daily surveys edit their respective surveys.
-    #(this function is never called...)
-# @survey_designer.route('/update_survey', methods=['GET', 'POST'])
+@survey_designer.route('/update_weekly_survey', methods=['GET', 'POST'])
 # @authenticate_admin
-# def update_weekly():
-#     return update_survey("weekly", request)
+def update_weekly():
+    return update_survey("weekly", request)
 
 
-def update_survey(survey_name):
+def update_survey(survey_name, request):
+    #print "in update_survey(), request['hour_of_day'] = " + request.values['hour_of_day']
+    print "survey_name = " + survey_name
     survey_name = "all_surveys/" + survey_name
     #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
     # you will probably need to write the post request before you can answer this question.

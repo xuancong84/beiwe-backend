@@ -38,7 +38,14 @@ function end() {
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     var postRequestContent = "JSONstring=" + JSON.stringify(createJsonSurveyObject());
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://beiwe.org/update_survey", true);
+    // If there's a day-of-week selector, you're editing the weekly survey
+    if (getDayOfWeek() != null) {
+        xhr.open("POST", "http://beiwe.org/update_weekly_survey", true);
+    }
+    // Otherwise, you're editing the daily survey
+    else {
+        xhr.open("POST", "http://beiwe.org/update_daily_survey", true);
+    }
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.send(postRequestContent);
     alert("Survey results sent successfully :)")
