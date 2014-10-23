@@ -29,7 +29,7 @@ def update_weekly():
 def update_survey(survey_name, request):
     #print "in update_survey(), request['hour_of_day'] = " + request.values['hour_of_day']
     print "survey_name = " + survey_name
-    survey_name = "all_surveys/" + survey_name
+    survey_name = "all_surveys/" + survey_name + "/"
     #TODO: Josh. stick in the identifier for the field(?) to grab from the post request.
     # you will probably need to write the post request before you can answer this question.
     new_quiz = request.values['JSONstring']
@@ -52,19 +52,25 @@ def get_surveys(prefix="survey/"):
     return [i.strip(prefix).strip(".json") for i in surveys]
 
 
+@survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
 def get_latest_weekly():
     """ Method responsible for fetching latest created weekly survey
         (frequency 1) """
-    weeklies = get_surveys("survey/weekly/")
-    weeklies = sorted(weeklies, reverse=True)
-    return jsonify(s3_retrieve(weeklies[0]))
+    #weeklies = get_surveys("survey/weekly/")
+    #weeklies = sorted(weeklies, reverse=True)
+    #return jsonify(s3_retrieve(weeklies[0]))
+    return s3_retrieve("all_surveys/weekly/")
 
 
+# TODO: Eli, is it OK to slap a route on this function, and the one above it? -Josh
+@survey_designer.route('/get_daily_survey', methods=['GET', 'POST'])
 def get_latest_daily():
     """ Method responsible for fetching latest created daily survey (frequency 1) """
-    dailies = get_surveys("survey/daily/")
-    dailies = sorted(dailies, reverse=True)
-    return jsonify(s3_retrieve(dailies[0]))
+    #dailies = get_surveys("all_surveys/daily/")
+    #dailies = sorted(dailies, reverse=True)
+    #return jsonify(s3_retrieve(dailies[0]))
+    # TODO: Eli, for some reason the 1 line below works, but the 3 lines above don't. Is that a problem, or should we just go with the one line below? -Josh
+    return s3_retrieve("all_surveys/daily/")
 
 
 ################################################################################

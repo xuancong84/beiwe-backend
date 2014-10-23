@@ -4,11 +4,23 @@
 
 var questions = [];
 
-// When the page loads, get the current JSON survey and load the questions[] array from it
-$.getJSON("http://beiwe.org/admin_survey", function(data) {
-    questions = data["questions"];
-    renderQuestionsList();
-})
+$(document).ready(function() {
+
+    // Determine if it's a daily or weekly survey
+    var surveyType = document.getElementById("surveyType").title;
+
+    // Get the correct URL to pull the current copy of the daily or weekly survey
+    var current_survey_url = "http://beiwe.org/get_daily_survey";
+    if (surveyType.localeCompare("weekly") == 0) {
+        current_survey_url = "http://beiwe.org/get_weekly_survey";
+    }
+
+    // Get the current survey's JSON, and render it as a list of questions
+    $.getJSON(current_survey_url, function(data) {
+        questions = data["questions"];
+        renderQuestionsList();
+    })
+});
 
 // Return the hour number (in 24-hour time) that the user selected in the form
 function getHour() {
@@ -34,12 +46,12 @@ function getDayOfWeek() {
 
 // On end(), export the survey as a JSON object
 function end() {
-    //TODO: Josh.  Implement a check for pushing to daily and pushing to weekly.
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     var postRequestContent = "JSONstring=" + JSON.stringify(createJsonSurveyObject());
     var xhr = new XMLHttpRequest();
-    // If there's a day-of-week selector, you're editing the weekly survey
-    if (getDayOfWeek() != null) {
+    // If you're editing the weekly survey, update the weekly survey
+    var surveyType = document.getElementById("surveyType").title;
+    if (surveyType.localeCompare("weekly") == 0) {
         xhr.open("POST", "http://beiwe.org/update_weekly_survey", true);
     }
     // Otherwise, you're editing the daily survey

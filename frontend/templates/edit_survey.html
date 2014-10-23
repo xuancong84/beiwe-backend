@@ -17,6 +17,14 @@
 
 <body>
 <div class="container">
+
+    <!-- This div exists only to indicate to the JavaScript whether the survey is weekly or daily -->
+    {% if (daily_or_weekly == 'weekly') %}
+        <div id="surveyType" title="weekly"></div>
+    {% else %}
+        <div id="surveyType" title="daily"></div>
+    {% endif %}
+
     <div class="span12">
         <div class="row">
             {% if (daily_or_weekly == 'weekly') %}
