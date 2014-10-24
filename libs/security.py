@@ -36,7 +36,7 @@ def pymongo():
 
 def _encode_base64(data):
     """ Creates a base64 representation of an input string without padding or lines."""
-    return data.encode("base64").replace("\n", "").replace("=", "")
+    return data.encode("base64").replace("\n", "")
 
 # def _decode_base64(data):
 #     return data.decode("base64")
@@ -60,7 +60,7 @@ def generate_hash_and_salt( password ):
     return (password_hashed, salt )
 
 
-def compare_hashes( proposed_password, salt, real_password_hash ):
+def compare_password( proposed_password, salt, real_password_hash ):
     """ Compares a proposed password with a salt and a real password, returns
         True if the hash results are identical.
         Expects the proposed password to be a base64 encoded string.
