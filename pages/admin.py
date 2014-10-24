@@ -91,7 +91,8 @@ def reset_device():
     return "that patient id does not exist"
 
 
-#TODO: create route and response page.
+#TODO: make this work with admin authentication
+@admin.route('/create_new_patient', methods=["POST"])
 # @admin_authentication.authenticate_admin
 def create_new_patient():
     """ Creates a new user, generates a password and keys, pushes data to s3
