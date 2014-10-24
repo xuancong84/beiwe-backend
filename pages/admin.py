@@ -1,6 +1,7 @@
 from flask import Blueprint, request, send_file, render_template, redirect
+from json import dumps
 from libs import admin_authentication
-from libs.db_models import User
+from libs.db_models import User, Users
 from libs.s3 import s3_upload_handler_string
 from libs.encryption import create_client_key_pair
 
@@ -47,7 +48,17 @@ def login():
 @admin_authentication.authenticate_admin
 def render_main():
     """ Method responsible rendering admin template"""
+    patients = dumps({user['_id']: patient_dict(user) for user in Users()})
+    # TODO: Josh, fix this so it exports users/patients properly
+    #return render_template('admin_panel.html', users = patients)
     return render_template('admin_panel.html')
+
+
+def patient_dict(patient):
+    return {
+        'placeholder_field': 'placeholder field for future data',
+        'has_device': patient['device_id'] is not None
+    }
 
 
 ################################################################################
