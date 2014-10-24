@@ -73,7 +73,7 @@ def fetch_graph():
         # we must dump all variables individually.
         data_results.append( [ json.dumps( pair[0] ), coordinates ] )
 
-    print data_results
+    print "graph data results:\n" + data_results
     return render_template("phone_graphs.html", graphs=data_results)
 
 
@@ -152,6 +152,7 @@ def set_password():
 @mobile_api.route('/forgot_password', methods=['GET', 'POST'])
 # @ authenticate_user
 def forgot_password():
+    print "forgot password:"
     print User(request.values['patient_id'])['password']
     print request.values['password']
     print User(request.values['patient_id'])['password'] == request.values['new_password']
