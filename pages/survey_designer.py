@@ -83,11 +83,6 @@ def render_surveys():
 def render_survey_designer():
     return render_template('survey_designer.html')
 
-@survey_designer.route('/question_designer')
-@authenticate_admin
-def question_designer():
-    return render_template('question_designer.html')
-
 @survey_designer.route('/weekly_survey')
 @authenticate_admin
 def weekly_survey():
