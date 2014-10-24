@@ -1,5 +1,4 @@
 from flask import Blueprint, request, send_file, render_template, redirect
-from json import dumps
 from libs import admin_authentication
 from libs.db_models import User, Users
 from libs.s3 import s3_upload_handler_string
