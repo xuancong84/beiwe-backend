@@ -45,13 +45,11 @@ def login():
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-@admin_authentication.authenticate_admin
+#@admin_authentication.authenticate_admin
 def render_main():
     """ Method responsible rendering admin template"""
-    patients = dumps({user['_id']: patient_dict(user) for user in Users()})
-    # TODO: Josh, fix this so it exports users/patients properly
-    #return render_template('admin_panel.html', users = patients)
-    return render_template('admin_panel.html')
+    patients = {user['_id']: patient_dict(user) for user in Users()}
+    return render_template('admin_panel.html', patients = patients)
 
 
 def patient_dict(patient):

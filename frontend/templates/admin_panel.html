@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title> Zagaran Mobile Data Collection System for HSPH</title>
     <script src="../static/javascript/jquery-1.11.1.js"></script>
+    <script src="../static/javascript/handlebars-v2.0.0.js"></script>
     <script src="../static/javascript/admin.js"></script>
     <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
     <link rel="stylesheet" href="../static/css/admin.css"  type="text/css"/>
@@ -20,11 +21,38 @@
         <div class="row">
             <h3>Users</h3>
         </div>
-        <div class="list-group">
-            {% for c in users %}
-            <h4><a href="/user/{{c._id}}" class="list-group-item">{{c._id}}</a></h4>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Phone registered</th>
+                    <th>Reset password</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+
+            {% for patient in patients %}
+                <tr>
+                    <td>
+                        <b>{{patient}}</b>
+                    </td>
+                    <td>
+                        {% if patients[patient]['has_device'] %}
+                        <button type="button" class="btn btn-warning btn-sm">Un-Register Smartphone</button>
+                        {% else %}
+                        No smartphone registered
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-warning btn-sm">Reset Password</button>
+                    </td>
+                </tr>
             {% endfor %}
-        </div>
+
+            </tbody>
+        </table>
+
         </br></br>
         <div class="row">
             <h3>Surveys</h3>
