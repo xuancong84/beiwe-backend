@@ -3,7 +3,22 @@ function logout() {
 }
 
 function create_new_patient() {
-    $.post('http://beiwe.org/create_new_patient', function(response) {
+    $.post('/create_new_patient', function(response) {
         alert("Created a new patient!\n" + response);
     });
+    // TODO: reload page
+}
+
+function reset_device(patient_id) {
+    $.post('/reset_device', { 'patient_id': patient_id }, function(response) {
+        alert("For patient " + patient_id + ", " + response);
+    });
+    // TODO: reload page
+}
+
+function reset_patient_password(patient_id) {
+    $.post('/reset_patient_password', { 'patient_id': patient_id }, function(response) {
+        alert("Patient " + patient_id + "'s password has been reset to " + response);
+    });
+    // TODO: reload page
 }
