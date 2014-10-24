@@ -68,11 +68,12 @@ def patient_dict(patient):
 
 
 #TODO: create route and response page.
+@admin.route('/reset_patient_password', methods=["POST"])
 # @admin_authentication.authenticate_admin
 def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
-    patient_id = request.values("patient_id")
-    if User.exists( patient_id=patient_id ):
+    patient_id = request.values["patient_id"]
+    if User.exists(patient_id):
         user = User(patient_id)
         new_password = user.reset_password()
         user.set_password(new_password)
@@ -81,10 +82,11 @@ def reset_user_password():
 
 
 #TODO: create route and response page.
+@admin.route('/reset_device', methods=["POST"])
 # @admin_authentication.authenticate_admin
 def reset_device():
-    patient_id = request.values("patient_id")
-    if User.exists( patient_id=patient_id ):
+    patient_id = request.values["patient_id"]
+    if User.exists(patient_id):
         user = User(patient_id)
         user.clear_device()
         return "device has been reset, password is untouched."
