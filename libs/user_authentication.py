@@ -53,7 +53,7 @@ def authenticate_user_registration(some_function):
 def validate_registration( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match"""
 
-    print "\n" + request.values.keys() + "\n"
+    print "\n", request.values.keys(), "\n"
 
     if ("patient_id" not in request.values or "password" not in request.values
         or "device_id" not in request.values):
