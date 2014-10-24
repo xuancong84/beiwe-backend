@@ -1,0 +1,84 @@
+Encryption/security
+-Anonymizer function needs to be finished (Josh, see TODO in anonymizer function)
+-Test asymmetric encryption
+-Create shim for symmetric encryption
+-Encryption for AudioFileManager
+
+Wrap beiwe.org in HTTPS; make it a secure site
+-Change an import, and do a should-be-trivial find-and-replace to make Android use HTTPS instead of HTTP
+
+Patient/user management
+-Get user authentication to work
+-Test registration process (create new user, register with app, see if can upload data, etc.)
+
+Throw in a warning message (don't use IE < 8!)
+
+Graph of survey responses
+-Make it look pretty for all types of survey questions
+-Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
+-Let admins see graph for any patient? (Eli says we shouldn't do this)
+
+Password
+-Re-document backend keys and make 'em more idiot-proof
+-Make sure forget password works- the whole flow and process
+
+Admin authentication
+-Admins should probably be able to change their passwords
+
+Data handlers
+-Document and look through the data_handlers.py file, which Dori wrote
+
+Error logging
+-Use the error-logging functionality instead of just Python's print() call
+
+Figure out if we're using base.html and what to do with it
+
+Get minified versions of JS files
+
+Write a data dump/download script
+
+
+
+Survey
+-Download both surveys, not just one, and call the downloader function when the app is registered
+-Download surveys to different files on the device
+-Test and make sure everything works throughout
+
+Bluetooth
+-Determine whether Bluetooth failure is solvable (Eli)
+-Make sure Bluetooth data are formatted and uploaded correctly
+-Test whether two phones running the app actually recognize each other via Bluetooth
+
+WiFi (log of available WiFi networks)
+-Test, and see if file is written and uploaded properly
+
+PowerStateListener
+-Attempt to reproduce crash when plugging in/unplugging device (probably TextFileManager uninitiated error; might be fixed)
+
+GPS, Accel
+-Test
+
+TextFileManager
+-When you open the app, all receivers are activated (the ones with receivers defined in AndroidManifest.xml), and they can receive data before TextFileManager is started. Fix this/ check if it's fixed already
+
+Deviceinfo
+-Make sure that this is consistently a file or consistently not a file (throughout the codebase), and make sure these data actually get uploaded upon registration
+
+SMS log
+-Log outgoing MMS messages
+
+Timers & data upload
+-Add an upload/download timer to the app to regularly try uploading files
+-Add an alert if the phone hasn't been able to upload in a long time?
+-Add a server-side alert if a patient hasn't uploaded data in a long time?
+
+Should we try to log when the app was started?  We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this
+
+App UI
+-Finalize, style, and pretty-ify the UI
+-Review Dori's code for register, login, and logout logic
+-Build automatic logout thingy
+-Get an app icon
+-Write a nice voice recording prompt
+
+Look into optimizing battery/power consumption using timers; Eli may have already built all of this
