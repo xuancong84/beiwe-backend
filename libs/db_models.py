@@ -24,6 +24,8 @@ from libs.security import (generate_hash_and_salt, compare_password,
 # TODO: Eli/Dori.  weeeee need to make a single column bluetooth address database...
 
 
+# TODO: Eli.  cleanup and document this.
+
 ################################################################################
 ################################### USER STUFF #################################
 ################################################################################
