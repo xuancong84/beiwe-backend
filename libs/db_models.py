@@ -23,6 +23,13 @@ from libs.security import (generate_hash_and_salt, compare_hashes,
 
 # TODO: Eli/Dori.  weeeee need to make a single column bluetooth address database...
 
+
+################################################################################
+################################### USER STUFF #################################
+################################################################################
+
+
+
 class User( DatabaseObject ):
     
     PATH = "database.users"
@@ -98,6 +105,10 @@ class Users( DatabaseCollection ):
     """ The Users database."""
     OBJTYPE = User
     
+################################################################################
+################################### ADMIN STUFF ################################
+################################################################################
+    
     
 class Admin( DatabaseObject ):
     PATH = "database.admins"
@@ -127,12 +138,12 @@ class Admin( DatabaseObject ):
         return compare_hashes( compare_me, self['salt'], self['password'] )
     
     
-#     def set_password(self, new_password):
-#         """Sets the instances password hash to match the provided password."""
-#         password, salt = generate_hash_and_salt( new_password )
-#         self['password'] = password
-#         self['salt'] = salt
-#         self.save()
+    def set_password(self, new_password):
+        """Sets the instances password hash to match the provided password."""
+        password, salt = generate_hash_and_salt( new_password )
+        self['password'] = password
+        self['salt'] = salt
+        self.save()
     
     
 class Admins( DatabaseCollection ):
