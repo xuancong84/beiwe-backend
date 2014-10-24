@@ -1,5 +1,5 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from libs.security import (generate_hash_and_salt, compare_hashes,
+from libs.security import (generate_hash_and_salt, compare_password,
                            generate_random_password_and_salt,
                            generate_upper_case_alphanumeric_string,
                            device_hash)
@@ -61,7 +61,7 @@ class User( DatabaseObject ):
     
     def validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash."""
-        return compare_hashes( compare_me, self['salt'], self['password'] )
+        return compare_password( compare_me, self['salt'], self['password'] )
     
     
     def reset_password_for_debugging(self):
@@ -135,7 +135,7 @@ class Admin( DatabaseObject ):
     #provide this instance with a password, it returns true if it matches
     def validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash."""
-        return compare_hashes( compare_me, self['salt'], self['password'] )
+        return compare_password( compare_me, self['salt'], self['password'] )
     
     
     def set_password(self, new_password):
