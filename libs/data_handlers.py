@@ -1,5 +1,4 @@
 from libs.s3 import s3_list_files, s3_retrieve
-from libs.encryption import get_client_private_key, decrypt_rsa_lines
 
 ################################################################################
 ########################### CSV HANDLERS #######################################
