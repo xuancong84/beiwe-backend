@@ -1,8 +1,10 @@
 from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from libs.security import (generate_hash_and_salt, compare_password,
-                           generate_random_password_and_salt,
-                           generate_upper_case_alphanumeric_string,
-                           device_hash)
+from libs.security import (generate_admin_hash_and_salt,
+                           generate_user_hash_and_salt,
+                           compare_password, device_hash,
+                           generate_user_password_and_salt,
+                           generate_admin_password_and_salt,
+                           generate_upper_case_alphanumeric_string,)
 
 # NOTES on the password setup (by eli, he was tired.)
 
@@ -44,7 +46,7 @@ class User( DatabaseObject ):
     def create(cls):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_upper_case_alphanumeric_string()
-        password, password_hash, salt = generate_random_password_and_salt()
+        password, password_hash, salt = generate_user_password_and_salt()
         new_client = {ID_KEY: patient_id, "password":password_hash,
                       'device_id':None, "salt":salt }
         super(User, cls).create(new_client)
@@ -96,7 +98,7 @@ class User( DatabaseObject ):
     
     def set_password(self, password):
         """ Sets the instance's password hash to match the provided string."""
-        password, salt  = generate_hash_and_salt( password )
+        password, salt  = generate_user_hash_and_salt( password )
         self['password'] = password
         self['salt'] = salt
         self.save()
@@ -120,7 +122,7 @@ class Admin( DatabaseObject ):
     @classmethod
     def create(cls, username, password):
         """ Creates a new Admin with provided password and user name."""
-        password, salt = generate_hash_and_salt( password )
+        password, salt = generate_admin_hash_and_salt( password )
         new_admin = {ID_KEY :username, 'password':password, 'salt':salt }
         return super(Admin, cls).create(new_admin)
     
@@ -142,7 +144,7 @@ class Admin( DatabaseObject ):
     
     def set_password(self, new_password):
         """Sets the instances password hash to match the provided password."""
-        password, salt = generate_hash_and_salt( new_password )
+        password, salt = generate_admin_hash_and_salt( new_password )
         self['password'] = password
         self['salt'] = salt
         self.save()

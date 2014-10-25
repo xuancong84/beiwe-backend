@@ -34,13 +34,6 @@ def pymongo():
 # TODO: Eli. Profile and make sure this is a good number of ITERATIONS
 # pbkdf2 is a hashing function for key derivation.
 
-def _encode_base64(data):
-    """ Creates a base64 representation of an input string without padding or lines."""
-    return data.encode("base64").replace("\n", "")
-
-# def _decode_base64(data):
-#     return data.decode("base64")
-
 
 def device_hash( data ):
     """ Hashes an input string using the sha256 hash.
@@ -50,9 +43,22 @@ def device_hash( data ):
     sha256.update(data)
     return _encode_base64( sha256.digest() )
 
-################################################################################
 
-def generate_hash_and_salt( password ):
+def _encode_base64(data):
+    """ Creates a base64 representation of an input string without padding or lines."""
+    return data.encode("base64").replace("\n", "")
+
+
+def generate_user_hash_and_salt( password ):
+    """ Generates a hash and salt that will match for a given input string.
+        Input is anticipated to be any arbitrary string."""
+    salt = _encode_base64( urandom(16) )
+    password = device_hash(password)
+    password_hashed =  _encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
+    return (password_hashed, salt )
+
+
+def generate_admin_hash_and_salt( password ):
     """ Generates a hash and salt that will match for a given input string.
         Input is anticipated to be any arbitrary string."""
     salt = _encode_base64( urandom(16) )
@@ -71,13 +77,23 @@ def compare_password( proposed_password, salt, real_password_hash ):
     return False
 
 
-def generate_random_password_and_salt():
+def generate_user_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
         The password is an uppercase alphanumeric string,
         the password hash and salt are base64 encoded strings. """
     password = generate_upper_case_alphanumeric_string()
-    password_hash, salt = generate_hash_and_salt( password )
+    password_hash, salt = generate_user_hash_and_salt( password )
     return password, password_hash, salt
+
+
+def generate_admin_password_and_salt():
+    """ Generates a random password, and an associated hash and salt.
+        The password is an uppercase alphanumeric string,
+        the password hash and salt are base64 encoded strings. """
+    password = generate_upper_case_alphanumeric_string()
+    password_hash, salt = generate_admin_hash_and_salt( password )
+    return password, password_hash, salt
+
 
 
 ################################################################################
