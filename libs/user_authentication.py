@@ -21,17 +21,12 @@ def validate_post( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match."""
 
     print request.values.keys()
-    print request
     if ("patient_id" not in request.values or "password" not in request.values
         or "device_id" not in request.values):
         return False
-    print 1
     if not User.exists(request.values['patient_id']): return False
     user = User( request.values['patient_id'] )
-    print 2
-    #TODO: Eli.  decode hex passwords (or base64
     if not user.validate_password( request.values['password'] ): return False
-    print 3
     if not user['device_id'] == request.values['device_id']: return False
 
     return True
