@@ -68,14 +68,6 @@ class User( DatabaseObject ):
         return compare_password( compare_me, self['salt'], self['password'] )
     
     
-    def reset_password_for_debugging(self):
-        """ Resets the password to match something new and random,
-            returns the new password string."""
-        password = generate_upper_case_alphanumeric_string()
-        self.set_password(password)
-        return password
-    
-    
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
         password = generate_upper_case_alphanumeric_string()
