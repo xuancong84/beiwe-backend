@@ -40,14 +40,15 @@ def fetch_survey():
     return s3_retrieve("all_surveys/current_survey")
 
 
+# TODO: get this to work with user authentication
 @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
-@authenticate_user
+#@authenticate_user
 def download_daily_survey():
     return get_latest_survey('daily')
 
 
 @mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
-@authenticate_user
+#@authenticate_user
 def download_weekly_survey():
     return get_latest_survey('weekly')
 
