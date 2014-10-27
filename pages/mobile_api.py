@@ -125,7 +125,7 @@ def register_user():
     patient_id = request.values['patient_id']
     mac_address = request.values['bluetooth_id']
     user = User(patient_id)
-    if user['device_id'] is not None and user['device_id'] == request.values['device_id']:
+    if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # Case: this patient has previously registered a device, 405 is the
         # "method not allowed" error, seems like a good response to me.
         return abort(405)
