@@ -1,5 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
+from libs.admin_authentication import authenticate_admin
 from libs.db_models import User, Users
 from libs.s3 import s3_upload_handler_string
 from libs.encryption import create_client_key_pair
@@ -44,7 +45,7 @@ def login():
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-#@admin_authentication.authenticate_admin
+#@authenticate_admin
 def render_main():
     """ Method responsible rendering admin template"""
     patients = {user['_id']: patient_dict(user) for user in Users()}
@@ -68,7 +69,7 @@ def patient_dict(patient):
 
 #TODO: create route and response page.
 @admin.route('/reset_patient_password', methods=["POST"])
-# @admin_authentication.authenticate_admin
+# @authenticate_admin
 def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values["patient_id"]
@@ -82,7 +83,7 @@ def reset_user_password():
 
 #TODO: create route and response page.
 @admin.route('/reset_device', methods=["POST"])
-# @admin_authentication.authenticate_admin
+# @authenticate_admin
 def reset_device():
     patient_id = request.values["patient_id"]
     if User.exists(patient_id):
@@ -94,7 +95,7 @@ def reset_device():
 
 #TODO: make this work with admin authentication
 @admin.route('/create_new_patient', methods=["POST"])
-# @admin_authentication.authenticate_admin
+# @authenticate_admin
 def create_new_patient():
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, returns a string containing password and patient id"""
