@@ -89,7 +89,8 @@ class User( DatabaseObject ):
     
     
     def set_password(self, password):
-        """ Sets the instance's password hash to match the provided string."""
+        """ Sets the instance's password hash to match the hash of the
+            provided string."""
         password, salt  = generate_user_hash_and_salt( password )
         self['password'] = password
         self['salt'] = salt
