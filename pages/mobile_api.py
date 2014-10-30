@@ -92,6 +92,8 @@ def upload():
     # werkzeug.secure_filename may return empty if unsecure
     # TODO: Josh? Kevin? what does it mean to be an insecure?
     file_name = secure_filename( uploaded_file.filename )
+    print "file_name = " + file_name
+    print "uploaded file = " + uploaded_file
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
 
