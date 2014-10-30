@@ -6,10 +6,6 @@ from libs.security import (generate_admin_hash_and_salt,
                            generate_admin_password_and_salt,
                            generate_upper_case_alphanumeric_string,)
 
-# NOTES on the password setup (by eli, he was tired.)
-
-# TODO: implement initial user setup/device registration pin provided by an admin to a user.
-# actually we should implement this by just setting a default password that the user has to type in on first run.
 
 # HOWTO: implement password reset
 # on login screen: 1 regular enter password to log-in field, one forgot password button
@@ -19,23 +15,24 @@ from libs.security import (generate_admin_hash_and_salt,
 # sets the reset pin to be your new password.  You can then go and reset your password in
 # the password reset screen.  Note that resetting a password requires a data connection.
 
-# TODO: Dori.  The reset password activity inside of the app (the one that you
-# can access when you are logged in on the device) requires an active internet connection.
 
-
-# TODO: Eli/Dori.  weeeee need to make a single column bluetooth address database...
-
-
-# TODO: Eli.  cleanup and document this.
 
 ################################################################################
 ################################### USER STUFF #################################
 ################################################################################
 
 
-
 class User( DatabaseObject ):
-    
+    """ The User database object contains the password hashes and unique usernames
+        of any patients in the study.  Elements in the database have the functionality
+        described here, and two convenience method static methods that can be run
+        on the User class/object itself.
+        Users have passwords hashed once with sha256 and a many times (as defined
+        in security.py) with PBKDF2, and salted using a cryptographically secure
+        random number generator.  The sha256 check duplicates the storage of the
+        password on the mobile device, so that the user's password is never stored
+        in a reversible manner.ff
+        """
     PATH = "database.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
@@ -71,8 +68,7 @@ class User( DatabaseObject ):
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
         password = generate_upper_case_alphanumeric_string()
-        device_password_hash = device_hash(device_hash( password ))
-        self.set_password( device_password_hash )
+        self.set_password( password )
         return password
     
     
