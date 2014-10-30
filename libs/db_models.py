@@ -65,6 +65,13 @@ class User( DatabaseObject ):
         return compare_password( compare_me, self['salt'], self['password'] )
     
     
+    def debug_validate_password(self, compare_me):
+        """ Checks if the input matches the instance's password hash, but does
+        the hashing for you for use on the command line."""
+        compare_me = device_hash(compare_me)
+        return compare_password( compare_me, self['salt'], self['password'] )
+    
+    
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
         password = generate_upper_case_alphanumeric_string()
