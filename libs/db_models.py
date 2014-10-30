@@ -4,7 +4,7 @@ from libs.security import (generate_admin_hash_and_salt,
                            compare_password, device_hash,
                            generate_user_password_and_salt,
                            generate_admin_password_and_salt,
-                           generate_upper_case_alphanumeric_string,)
+                           generate_easy_alphanumeric_string,)
 
 
 # HOWTO: implement password reset
@@ -42,7 +42,7 @@ class User( DatabaseObject ):
     @classmethod
     def create(cls):
         """ Creates a new patient with random patient_id and password."""
-        patient_id = generate_upper_case_alphanumeric_string()
+        patient_id = generate_easy_alphanumeric_string()
         password, password_hash, salt = generate_user_password_and_salt()
         new_client = {ID_KEY: patient_id, "password":password_hash,
                       'device_id':None, "salt":salt }
@@ -74,7 +74,7 @@ class User( DatabaseObject ):
     
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
-        password = generate_upper_case_alphanumeric_string()
+        password = generate_easy_alphanumeric_string()
         self.set_password( password )
         return password
     

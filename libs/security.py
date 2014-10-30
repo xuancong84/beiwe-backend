@@ -55,7 +55,7 @@ def generate_user_hash_and_salt( password ):
     salt = _encode_base64( urandom(16) )
     password = device_hash(password)
     password_hashed =  _encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
-    return (password_hashed, salt )
+    return ( password_hashed, salt )
 
 
 def generate_admin_hash_and_salt( password ):
@@ -63,7 +63,7 @@ def generate_admin_hash_and_salt( password ):
         Input is anticipated to be any arbitrary string."""
     salt = _encode_base64( urandom(16) )
     password_hashed =  _encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
-    return (password_hashed, salt )
+    return ( password_hashed, salt )
 
 
 def compare_password( proposed_password, salt, real_password_hash ):
@@ -81,7 +81,7 @@ def generate_user_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
         The password is an uppercase alphanumeric string,
         the password hash and salt are base64 encoded strings. """
-    password = generate_upper_case_alphanumeric_string()
+    password = generate_easy_alphanumeric_string()
     password_hash, salt = generate_user_hash_and_salt( password )
     return password, password_hash, salt
 
@@ -90,7 +90,7 @@ def generate_admin_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
         The password is an uppercase alphanumeric string,
         the password hash and salt are base64 encoded strings. """
-    password = generate_upper_case_alphanumeric_string()
+    password = generate_easy_alphanumeric_string()
     password_hash, salt = generate_admin_hash_and_salt( password )
     return password, password_hash, salt
 
@@ -100,7 +100,8 @@ def generate_admin_password_and_salt():
 ############################### Random #########################################
 ################################################################################
 
-def generate_upper_case_alphanumeric_string():
-    #generates an alphanumeric uppercase letter string 10 characters long.
+def generate_easy_alphanumeric_string():
+    """ Generates a pretty easy alphanumeric (lower case) string, this string
+        will not contain the number 0. """
     random_string = hashlib.md5( urandom(16) ).digest().encode('base64')
-    return re.sub(r'[^A-Z0-9]', "", random_string)[:10]
+    return re.sub(r'[^A-Z1-9]', "", random_string)[:6].lower()

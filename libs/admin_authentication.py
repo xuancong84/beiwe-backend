@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import session, redirect
 from libs.db_models import Admin
-from libs.security import generate_upper_case_alphanumeric_string
+from libs.security import generate_easy_alphanumeric_string
 import functools
 
 #note: admin passwords cannot currently be changed.
@@ -32,7 +32,7 @@ def authenticate_admin(some_function):
 
 
 def login_admin():
-    session['admin_uuid'] = generate_upper_case_alphanumeric_string()
+    session['admin_uuid'] = generate_easy_alphanumeric_string()
     session['expiry'] = datetime.now() + timedelta(hours=6)
 
 
