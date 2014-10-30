@@ -40,9 +40,8 @@ Write a data dump/download script
 
 
 Survey
--Download both surveys, not just one, and call the downloader function when the app is registered
--Download surveys to different files on the device
 -Test and make sure everything works throughout
+-Save daily and weekly surveys to different files; maybe just give them different ID numbers is fine
 
 Bluetooth
 -Determine whether Bluetooth failure is solvable (Eli)
@@ -80,5 +79,6 @@ App UI
 -Build automatic logout thingy
 -Get an app icon
 -Write a nice voice recording prompt
+-Make sure user can only register with correct password, and drop the "confirm password" field on the registration screen
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
