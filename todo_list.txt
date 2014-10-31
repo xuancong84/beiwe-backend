@@ -8,8 +8,7 @@ Wrap beiwe.org in HTTPS; make it a secure site
 -Change an import, and do a should-be-trivial find-and-replace to make Android use HTTPS instead of HTTP
 
 Patient/user management
--Get user authentication to work
--Test registration process (create new user, register with app, see if can upload data, etc.)
+-Test registration process (create new user, register with app, see if can upload data etc.)
 
 Throw in a warning message (don't use IE < 8!)
 
@@ -79,6 +78,5 @@ App UI
 -Build automatic logout thingy
 -Get an app icon
 -Write a nice voice recording prompt
--Make sure user can only register with correct password, and drop the "confirm password" field on the registration screen
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
