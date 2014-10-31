@@ -85,7 +85,7 @@ def fetch_graph():
 @mobile_api.route('/upload', methods=['POST'])
 # @authenticate_user
 def upload():
-    print "something, anything!"
+    print "upload called!"
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
     patient_id = request.values['patient_id']
