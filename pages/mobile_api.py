@@ -88,7 +88,7 @@ def upload():
     print "something, anything!"
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
-    #patient_id = request.values['patient_id']
+    patient_id = request.values['patient_id']
     uploaded_file = request.files['file']
     # werkzeug.secure_filename may return empty if unsecure
     # TODO: Josh? Kevin? what does it mean to be an insecure?
