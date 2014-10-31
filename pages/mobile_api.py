@@ -106,9 +106,9 @@ def upload():
                 ftype = 'surveyAnswers'
 
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
-            s3_upload_handler_file(s3_filename, uploaded_file)
+            s3_upload_handler_string(s3_filename, uploaded_file)
         else:
-            s3_upload_handler_file( file_name.replace("_", "/") , uploaded_file )
+            s3_upload_handler_string( file_name.replace("_", "/") , uploaded_file )
             #the same but with encryption.
             # data = decrypt_rsa_lines( uploaded_file.read(), patient_id )
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
