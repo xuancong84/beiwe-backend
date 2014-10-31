@@ -25,17 +25,6 @@ ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
 
 
-# Defines additional behavior for Python errors: returns only a 500 status code
-@mobile_api.errorhandler(500)
-def e500_text(e):
-    try:
-        stacktrace = traceback.format_exc()
-        print(stacktrace)
-    except Exception as e:
-        log_error(e)
-    return abort(500)
-
-
 ################################################################################
 ############################# DOWNLOADS ########################################
 ################################################################################
@@ -115,13 +104,12 @@ def upload():
 
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_string(s3_filename, uploaded_file)
-            return render_template('blank.html'), 401
         else:
             s3_upload_handler_string( file_name.replace("_", "/") , uploaded_file )
             #the same but with encryption.
             # data = decrypt_rsa_lines( uploaded_file.read(), patient_id )
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
-            return render_template('blank.html'), 404
+        return render_template('blank.html'), 200
     else:
         print "an upload failed."
         # Did not match any data upload files

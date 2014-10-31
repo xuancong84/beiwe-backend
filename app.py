@@ -54,16 +54,5 @@ def e404(e):
     return render_template("404.html")
 
 
-# Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
-@app.errorhandler(500)
-def e500_text(e):
-    try:
-        stacktrace = traceback.format_exc()
-        print(stacktrace)
-    except Exception as e:
-        log_error(e)
-    return render_template("500.html")
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
