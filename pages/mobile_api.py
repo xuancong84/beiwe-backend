@@ -83,7 +83,7 @@ def fetch_graph():
 ################################################################################
 
 @mobile_api.route('/upload', methods=['POST'])
-# @authenticate_user
+@authenticate_user
 def upload():
     print "upload called!"
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
