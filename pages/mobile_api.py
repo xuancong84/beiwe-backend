@@ -95,7 +95,7 @@ def upload():
     # TODO: Josh? Kevin? what does it mean to be an insecure?
     print "patient id" + patient_id
     print "file_name = " + file_name
-    print "uploaded file = ", uploaded_file
+    #print "uploaded file = ", uploaded_file
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
         print "upload appears to be working!"
@@ -107,12 +107,13 @@ def upload():
 
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_string(s3_filename, uploaded_file)
+            return render_template('blank.html'), 401
         else:
             s3_upload_handler_string( file_name.replace("_", "/") , uploaded_file )
             #the same but with encryption.
             # data = decrypt_rsa_lines( uploaded_file.read(), patient_id )
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
-        return render_template('blank.html'), 200
+            return render_template('blank.html'), 404
     else:
         print "an upload failed."
         # Did not match any data upload files
