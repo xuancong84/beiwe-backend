@@ -20,7 +20,7 @@ def authenticate_user(some_function):
 def validate_post( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match."""
 
-    print "user info:  ", request.values.items()
+    #print "user info:  ", request.values.items()
     #print "file info:  ", request.files.items()
     if ("patient_id" not in request.values or "password" not in request.values
         or "device_id" not in request.values):

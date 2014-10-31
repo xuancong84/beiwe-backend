@@ -176,7 +176,7 @@ def parse_filename(filename):
 def parse_filetype(file_type):
     """TODO: Josh/Dori.  Fill in this documentation line."""
     parsed_id = filter(str.isdigit, str(file_type))
-    return filter(str.isalpha, file_type), parsed_id
+    return filter(str.isalpha, str(file_type)), parsed_id
 
 def allowed_extension(filename):
     """ Checks if string has a recognized file extension. """
