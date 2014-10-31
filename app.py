@@ -1,5 +1,5 @@
 import jinja2, traceback
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, abort
 from pages import mobile_api, admin, survey_designer
 from libs.logging import log_error
 from libs.security import set_secret_key
@@ -62,7 +62,8 @@ def e500_text(e):
         print(stacktrace)
     except Exception as e:
         log_error(e)
-    return render_template("500.html")
+    #return render_template("500.html")
+    return abort(500)
 
 
 if __name__ == '__main__':
