@@ -93,6 +93,7 @@ def upload():
     # werkzeug.secure_filename may return empty if unsecure
     # TODO: Josh? Kevin? what does it mean to be an insecure?
     file_name = secure_filename( uploaded_file.filename )
+    print "patient id" + patient_id
     print "file_name = " + file_name
     print "uploaded file = ", uploaded_file
     if uploaded_file and file_name and allowed_extension( file_name ):
@@ -113,7 +114,7 @@ def upload():
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
         return render_template('blank.html'), 200
     else:
-        print "anything, something."
+        print "an upload failed."
         # Did not match any data upload files
         return abort(400)
 
