@@ -1,9 +1,11 @@
+import traceback
 from flask import Blueprint, request, abort, json, render_template
 from werkzeug import secure_filename
 
 from libs.data_handlers import get_weekly_results
 from libs.db_models import User
 from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
+from libs.logging import log_error
 from libs.s3 import (s3_upload_handler_file, s3_retrieve, s3_list_files,
                      s3_upload_handler_string)
 from libs.user_authentication import authenticate_user, authenticate_user_registration
@@ -12,6 +14,7 @@ from pages.survey_designer import get_latest_survey
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
+
 mobile_api = Blueprint('mobile_api', __name__)
 
 ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
@@ -20,6 +23,17 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 
 ANSWERS_TAG = 'surveyAnswers'
 TIMINGS_TAG = 'surveyTimings'
+
+
+# Defines additional behavior for Python errors: returns only a 500 status code
+@mobile_api.errorhandler(500)
+def e500_text(e):
+    try:
+        stacktrace = traceback.format_exc()
+        print(stacktrace)
+    except Exception as e:
+        log_error(e)
+    return abort(500)
 
 
 ################################################################################
