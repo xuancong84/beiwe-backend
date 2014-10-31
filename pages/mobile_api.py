@@ -54,7 +54,7 @@ def download_weekly_survey():
 
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
-# @authenticate_user
+@authenticate_user
 def fetch_graph():
     """ TODO: This function fetches the patient's answers to the most recent survey,
     marked by survey ID. The results are rendered on a template in the patient's
@@ -85,15 +85,16 @@ def fetch_graph():
 @mobile_api.route('/upload', methods=['POST'])
 # @authenticate_user
 def upload():
+    print "something, anything!"
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
-    patient_id = request.values['patient_id']
+    #patient_id = request.values['patient_id']
     uploaded_file = request.files['file']
     # werkzeug.secure_filename may return empty if unsecure
     # TODO: Josh? Kevin? what does it mean to be an insecure?
     file_name = secure_filename( uploaded_file.filename )
     print "file_name = " + file_name
-    print "uploaded file = " + uploaded_file
+    print "uploaded file = ", uploaded_file
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
 
@@ -112,6 +113,7 @@ def upload():
             # s3_upload_handler_file( file_name.replace("_", "/") , data )
         return render_template('blank.html'), 200
     else:
+        print "anything, something."
         # Did not match any data upload files
         return abort(400)
 
