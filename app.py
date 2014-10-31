@@ -1,5 +1,5 @@
 import jinja2, traceback
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, abort
 from pages import mobile_api, admin, survey_designer
 from libs.logging import log_error
 from libs.security import set_secret_key
@@ -52,6 +52,17 @@ def strip_dot_html(page):
 @app.errorhandler(404)
 def e404(e):
     return render_template("404.html")
+
+
+# Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
+@app.errorhandler(500)
+def e500_text(e):
+    try:
+        stacktrace = traceback.format_exc()
+        print(stacktrace)
+    except Exception as e:
+        log_error(e)
+    return abort(500)
 
 
 if __name__ == '__main__':
