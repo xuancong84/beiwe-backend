@@ -99,8 +99,10 @@ def upload():
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
 
-            if ftype.startswith( 'surveyAnswers' ):
-                ftype = 'surveyAnswers'
+            if ftype.startswith( ANSWERS_TAG ):
+                ftype = ANSWERS_TAG
+            if ftype.startswith( TIMINGS_TAG ):
+                ftype = TIMINGS_TAG
 
             s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
             s3_upload_handler_string(s3_filename, uploaded_file)
