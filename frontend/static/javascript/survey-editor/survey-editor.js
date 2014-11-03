@@ -66,10 +66,18 @@ function end() {
 
 // Turn the survey into a JSON object with an array of questions and other attributes
 function createJsonSurveyObject() {
+    var survey_id_string;
+    var surveyType = document.getElementById("surveyType").title;
+    if (surveyType.localeCompare("weekly") == 0) {
+        survey_id_string = "WeeklySurveyCreatedAt" + new Date().getTime();
+    }
+    else {
+        survey_id_string = "DailySurveyCreatedAt" + new Date().getTime();
+    }
     var surveyObject = {
         hour_of_day: getHour(),
         questions: questions,
-        survey_id: "SurveyCreatedAt" + new Date().getTime()
+        survey_id: survey_id_string
     }
     // If it's a weekly survey, add the day of the week to ask the survey
     if (getDayOfWeek() != null) {

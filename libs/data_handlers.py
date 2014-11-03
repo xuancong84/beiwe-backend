@@ -1,3 +1,4 @@
+from data.constants import DAILY_SURVEY_NAME
 from libs.s3 import s3_list_files, s3_retrieve
 
 ################################################################################
@@ -44,14 +45,14 @@ def get_most_recent_id(file_path):
     for filename in all_files:
         # This assumes that the 3rd entry is always an integer
         organizing_list = filename.split('/')
-        survey_id = int(organizing_list[2])
+        survey_id = int(organizing_list[3])
         id_set.add(survey_id)
     result_list = sorted(id_set)
     return result_list[len(result_list) - 1]
 
 
-def get_weekly_results(username="sur", methods=['GET', 'POST']):
-    file_path = username + '/surveyAnswers/'
+def get_survey_results(username="sur", survey_type=DAILY_SURVEY_NAME, methods=['GET', 'POST']):
+    file_path = username + '/surveyAnswers/' + survey_type + '/'
     survey_id = get_most_recent_id(file_path)
     weekly_files = grab_weekly_file_names(s3_list_files(file_path + str(survey_id) + '/'))
     # Convert each csv_file to a readable data list

@@ -1,13 +1,11 @@
-import traceback
 from flask import Blueprint, request, abort, json, render_template
-from werkzeug import secure_filename
 
-from libs.data_handlers import get_weekly_results
+from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
+                            DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
+from libs.data_handlers import get_survey_results
 from libs.db_models import User
 from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
-from libs.logging import log_error
-from libs.s3 import (s3_upload_handler_file, s3_retrieve, s3_list_files,
-                     s3_upload_handler_string)
+from libs.s3 import s3_retrieve, s3_list_files, s3_upload_handler_string
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
@@ -16,13 +14,6 @@ from pages.survey_designer import get_latest_survey
 ################################################################################
 
 mobile_api = Blueprint('mobile_api', __name__)
-
-ALLOWED_EXTENSIONS = set(['csv', '3gp', 'json', 'mp4', 'txt'])
-FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
-              'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-
-ANSWERS_TAG = 'surveyAnswers'
-TIMINGS_TAG = 'surveyTimings'
 
 
 ################################################################################
@@ -59,11 +50,11 @@ def fetch_graph():
     patient_id = request.values['patient_id']
     #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
-#     results = [json.dumps(i) for i in get_weekly_results(username=userID)]
+#     results = [json.dumps(i) for i in get_survey_results(username=userID)]
 
     #results is a list of lists (which should probably be tuples)...
     # value 0 is the title/question text, value 1 is a list of y coordinates
-    results = get_weekly_results(username=patient_id)
+    results = get_survey_results(username=patient_id, survey_type=DAILY_SURVEY_NAME)
     for pair in results:
 
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
@@ -71,7 +62,6 @@ def fetch_graph():
         # we must dump all variables individually.
         data_results.append( [ json.dumps( pair[0] ), coordinates ] )
 
-    print "graph data results:\n" + data_results
     return render_template("phone_graphs.html", graphs=data_results)
 
 
@@ -99,12 +89,14 @@ def upload():
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
 
-            if ftype.startswith( ANSWERS_TAG ):
-                ftype = ANSWERS_TAG
-            if ftype.startswith( TIMINGS_TAG ):
-                ftype = TIMINGS_TAG
+            survey_type = 'UNKNOWN_TYPE'
+            if 'daily' in ftype.lower(): survey_type = DAILY_SURVEY_NAME
+            if 'weekly' in ftype.lower(): survey_type = WEEKLY_SURVEY_NAME
+            if ftype.startswith( ANSWERS_TAG ): ftype = ANSWERS_TAG
+            if ftype.startswith( TIMINGS_TAG ): ftype = TIMINGS_TAG
 
-            s3_filename = "%s/%s/%s/%s" % ( patient_id, ftype, parsed_id, timestamp )
+            s3_filename = (patient_id + '/' + ftype + '/' + survey_type + '/' +
+                           parsed_id + '/' + timestamp)
             s3_upload_handler_string(s3_filename, uploaded_file)
         else:
             s3_upload_handler_string( file_name.replace("_", "/") , uploaded_file )
