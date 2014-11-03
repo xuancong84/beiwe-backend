@@ -39,9 +39,6 @@ Write a data dump/download script
 
 
 Survey
--Test and make sure everything works throughout
--Fix surveyAnswers and surveyTimings folders
--Save daily and weekly survey answers/timings to different files; maybe just give them different ID numbers is fine
 -Fix survey styling on Josh's phone
 
 Bluetooth
@@ -60,6 +57,7 @@ GPS, Accel
 
 TextFileManager
 -When you open the app, all receivers are activated (the ones with receivers defined in AndroidManifest.xml), and they can receive data before TextFileManager is started. Fix this/ check if it's fixed already
+-Sometimes files get saved with a NULLID, but survey files don't seem to.  At least I haven't seen that yet.
 
 Deviceinfo
 -Make sure that this is consistently a file or consistently not a file (throughout the codebase), and make sure these data actually get uploaded upon registration
