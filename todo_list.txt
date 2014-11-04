@@ -1,3 +1,5 @@
+Ask Eli: does it check that patient ID numbers are unique?
+
 Encryption/security
 -Anonymizer function needs to be finished (Josh, see TODO in anonymizer function)
 -Test asymmetric encryption
@@ -6,9 +8,6 @@ Encryption/security
 
 Wrap beiwe.org in HTTPS; make it a secure site
 -Change an import, and do a should-be-trivial find-and-replace to make Android use HTTPS instead of HTTP
-
-Patient/user management
--Test registration process (create new user, register with app, see if can upload data etc.)
 
 Throw in a warning message (don't use IE < 8!)
 
@@ -32,11 +31,7 @@ Error logging
 
 Figure out if we're using base.html and what to do with it
 
-Get minified versions of JS files
-
 Write a data dump/download script
-
-
 
 Survey
 -Fix survey styling on Josh's phone
@@ -80,3 +75,6 @@ App UI
 -Write a nice voice recording prompt
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
+
+-Double NPE crash; try to replicate it, and see if we should start things (mainly the TextFileManager) in the BackgroundProcess instead of outside it: https://bitbucket.org/zagaran/scrubs-android/issue/18/npe-crash-on-opening-graphactivity
+-Finish UI for AudioRecorderActivity
