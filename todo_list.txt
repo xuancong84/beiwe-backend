@@ -75,6 +75,3 @@ App UI
 -Write a nice voice recording prompt
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
-
--Double NPE crash; try to replicate it, and see if we should start things (mainly the TextFileManager) in the BackgroundProcess instead of outside it: https://bitbucket.org/zagaran/scrubs-android/issue/18/npe-crash-on-opening-graphactivity
--Finish UI for AudioRecorderActivity
