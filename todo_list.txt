@@ -6,9 +6,6 @@ Encryption/security
 -Create shim for symmetric encryption
 -Encryption for AudioFileManager
 
-Wrap beiwe.org in HTTPS; make it a secure site
--Change an import, and do a should-be-trivial find-and-replace to make Android use HTTPS instead of HTTP
-
 Throw in a warning message (don't use IE < 8!)
 
 Graph of survey responses
