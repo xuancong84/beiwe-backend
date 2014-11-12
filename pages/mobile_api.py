@@ -72,7 +72,6 @@ def fetch_graph():
 @mobile_api.route('/upload', methods=['POST'])
 @authenticate_user
 def upload():
-    print "upload called!"
     """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, and Survey Response files. """
     patient_id = request.values['patient_id']
@@ -80,8 +79,6 @@ def upload():
     file_name = request.values['file_name']
     # werkzeug.secure_filename may return empty if unsecure
     # TODO: Josh? Kevin? what does it mean to be an insecure?
-    print "patient id" + patient_id
-    print "file_name = " + file_name
     #print "uploaded file = ", uploaded_file
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )

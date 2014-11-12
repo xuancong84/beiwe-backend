@@ -50,14 +50,14 @@ class User( DatabaseObject ):
         return patient_id, password
     
     
-    @classmethod
-    def check_password(cls, patient_id, compare_me ):
-        """ Checks if a patient id and user name combination are valid, returns
-            a boolean."""
-        if not User.exists( patient_id ):
-            return False
-        user = User( patient_id )
-        return user.validate_password( compare_me )
+#     @classmethod
+#     def check_password(cls, patient_id, compare_me ):
+#         """ Checks if a patient id and user name combination are valid, returns
+#             a boolean."""
+#         if not User.exists( patient_id ):
+#             return False
+#         user = User( patient_id )
+#         return user.validate_password( compare_me )
     
     
     def validate_password(self, compare_me):
