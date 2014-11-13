@@ -34,7 +34,7 @@ Survey
 -Fix survey styling on Josh's phone
 
 Bluetooth
--Determine whether Bluetooth failure is solvable (Eli)
+-Determine whether Bluetooth failure is solvable (Eli) -- checked, it is not.
 -Make sure Bluetooth data are formatted and uploaded correctly
 -Test whether two phones running the app actually recognize each other via Bluetooth
 
@@ -48,12 +48,14 @@ GPS, Accel
 -Test
 
 TextFileManager
--When you open the app, all receivers are activated (the ones with receivers defined in AndroidManifest.xml), and they can receive data before TextFileManager is started. Fix this/ check if it's fixed already
--Sometimes files get saved with a NULLID, but survey files don't seem to.  At least I haven't seen that yet.
+-these problems should have been solved when Eli moved all the initializes into BackgroundProcess.
+--When you open the app, all receivers are activated (the ones with receivers defined in AndroidManifest.xml), and they can receive data before TextFileManager is started. Fix this/ check if it's fixed already
+--Sometimes files get saved with a NULLID, but survey files don't seem to.  At least I haven't seen that yet.
 
 Deviceinfo
 -Make sure that this is consistently a file or consistently not a file (throughout the codebase), and make sure these data actually get uploaded upon registration
-
+--Done
+  
 SMS log
 -Log outgoing MMS messages
 
