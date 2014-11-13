@@ -2,6 +2,8 @@ from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 from data.constants import ITERATIONS
 from pbkdf2 import PBKDF2
 from os import urandom
+
+import base64
 import hashlib
 import re
 
@@ -46,7 +48,8 @@ def device_hash( data ):
 
 def _encode_base64(data):
     """ Creates a base64 representation of an input string without padding or lines."""
-    return data.encode("base64").replace("\n", "")
+    return base64.urlsafe_b64encode(data).replace("\n","")
+#     return data.encode("base64").replace("\n", "")
 
 
 def generate_user_hash_and_salt( password ):
