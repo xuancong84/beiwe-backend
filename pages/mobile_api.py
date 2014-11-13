@@ -124,6 +124,7 @@ def register_user():
         # the "method not allowed" error, seems like a good response to me.
         return abort(405)
     upload_bluetooth(patient_id, mac_address)
+    print request.values['device_id']
     user.set_device( request.values['device_id'] )
     #Case: this device has been registered successfully, the return is the
     # encryption key associated with this user.
@@ -146,7 +147,7 @@ def set_password():
 def forgot_password():
     #FIXME: Eli. Implement.
     print "forgot password.", "patient:", request.values['patient_id']
-    return 200
+    return render_template('blank.html'), 200
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
