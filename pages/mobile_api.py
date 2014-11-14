@@ -142,12 +142,6 @@ def set_password():
     return render_template('blank.html'), 200
 
 
-@mobile_api.route('/forgot_password', methods=['GET', 'POST'])
-@ authenticate_user
-def forgot_password():
-    # Check authentication of new password; return 200 if correct. That's all!
-    return render_template('blank.html'), 200
-
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
