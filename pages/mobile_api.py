@@ -145,8 +145,7 @@ def set_password():
 @mobile_api.route('/forgot_password', methods=['GET', 'POST'])
 @ authenticate_user
 def forgot_password():
-    #FIXME: Eli. Implement.
-    print "forgot password.", "patient:", request.values['patient_id']
+    # Check authentication of new password; return 200 if correct. That's all!
     return render_template('blank.html'), 200
 
 ################################################################################
