@@ -77,5 +77,6 @@ Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
 
 -Admin Panel patients list... paginate
 
+Ask Eli: is some weird cacheing going on in the db terminal?  When I reset a password from the phone, it doesn't seem to update on the server.  But it still validates uploads OK.
+
 -Get loginactivity to check if logged in, and if so, finish.  Get forgot and reset password activities to set logged in before finishing.
-Make ResetPassword share code with ForgotPasswordActivity.
