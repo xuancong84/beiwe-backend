@@ -60,7 +60,6 @@ Should we try to log when the app was started?  We can't determine whether the a
 App UI
 -Finalize, style, and pretty-ify the UI
 -Review Dori's code for register, login, and logout logic
--Build automatic logout thingy
 -Get an app icon
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
@@ -71,9 +70,4 @@ Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
 
 -Admin Panel patients list... paginate
 
--See if want to add loading spinner to LoadingActivity
-
--Sometimes app loads, already logged in.  Seems to happen after it's killed from the task switcher.
--Have the app save a session expiration timestamp, not just a logged_in status, and a function that translates expiration date into logged in status
-
--Get loginactivity to check if logged in, and if so, finish.  Get forgot and reset password activities to set logged in before finishing.
+-Make SessionActivity extend AppActivity.  AppActivity should contain the call hotline button, a menu with the call hotline button, and the service bindings.  SessionActivity should contain all the login stuff.  LoginActivity, ResetPassword, ForgotPassword, and RegisterActivity should extend AppActivity; the rest should extend SessionActivity.
