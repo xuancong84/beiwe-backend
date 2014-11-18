@@ -43,15 +43,10 @@ PowerStateListener
 GPS, Accel
 -Test
 
-Deviceinfo
--Make sure that this is consistently a file or consistently not a file (throughout the codebase), and make sure these data actually get uploaded upon registration
---Done
-
 SMS log
 -Log outgoing MMS messages
 
 Timers & data upload
--Add an upload/download timer to the app to regularly try uploading files
 -Add an alert if the phone hasn't been able to upload in a long time?
 -Add a server-side alert if a patient hasn't uploaded data in a long time?
 
@@ -71,3 +66,8 @@ Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
 -Admin Panel patients list... paginate
 
 -Make SessionActivity extend AppActivity.  AppActivity should contain the call hotline button, a menu with the call hotline button, and the service bindings.  SessionActivity should contain all the login stuff.  LoginActivity, ResetPassword, ForgotPassword, and RegisterActivity should extend AppActivity; the rest should extend SessionActivity.
+OR:
+-Insert PostRequest.initialize() into HTTPAsync or ForgotPassword Activity
+Also instantiate LoginManager inside ForgotPasswordActivity, and anything else that isn't a SessionActivity just a regular Activity
+
+-Add an upload/download timer to the app to regularly try uploading files
