@@ -15,7 +15,6 @@ Graph of survey responses
 
 Password
 -Re-document backend keys and make 'em more idiot-proof
--Make sure forget password works- the whole flow and process
 
 Admin authentication
 -Admins should probably be able to change their passwords
@@ -29,9 +28,6 @@ Error logging
 Figure out if we're using base.html and what to do with it
 
 Write a data dump/download script
-
-Survey
--Fix survey styling on Josh's phone
 
 Bluetooth
 -Determine whether Bluetooth failure is solvable (Eli) -- checked, it is not.
@@ -47,15 +43,10 @@ PowerStateListener
 GPS, Accel
 -Test
 
-TextFileManager
--these problems should have been solved when Eli moved all the initializes into BackgroundProcess.
---When you open the app, all receivers are activated (the ones with receivers defined in AndroidManifest.xml), and they can receive data before TextFileManager is started. Fix this/ check if it's fixed already
---Sometimes files get saved with a NULLID, but survey files don't seem to.  At least I haven't seen that yet.
-
 Deviceinfo
 -Make sure that this is consistently a file or consistently not a file (throughout the codebase), and make sure these data actually get uploaded upon registration
 --Done
-  
+
 SMS log
 -Log outgoing MMS messages
 
@@ -69,8 +60,14 @@ Should we try to log when the app was started?  We can't determine whether the a
 App UI
 -Finalize, style, and pretty-ify the UI
 -Review Dori's code for register, login, and logout logic
--Build automatic logout thingy
 -Get an app icon
--Write a nice voice recording prompt
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
+
+
+-Debug AudioRecorder on Benjamin's phone
+Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
+
+-Admin Panel patients list... paginate
+
+-Make SessionActivity extend AppActivity.  AppActivity should contain the call hotline button, a menu with the call hotline button, and the service bindings.  SessionActivity should contain all the login stuff.  LoginActivity, ResetPassword, ForgotPassword, and RegisterActivity should extend AppActivity; the rest should extend SessionActivity.

@@ -136,18 +136,11 @@ def register_user():
 ################################################################################
 
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
-# @authenticate_user
+@authenticate_user
 def set_password():
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
 
-
-@mobile_api.route('/forgot_password', methods=['GET', 'POST'])
-@ authenticate_user
-def forgot_password():
-    #FIXME: Eli. Implement.
-    print "forgot password.", "patient:", request.values['patient_id']
-    return render_template('blank.html'), 200
 
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
