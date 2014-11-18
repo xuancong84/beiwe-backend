@@ -1,3 +1,34 @@
+BEFORE DEMO:
+
+Bluetooth
+-Determine whether Bluetooth failure is solvable (Eli) -- checked, it is not.
+-Make sure Bluetooth data are formatted and uploaded correctly
+-Test whether two phones running the app actually recognize each other via Bluetooth
+
+App UI
+-Finalize, style, and pretty-ify the UI
+
+-Debug AudioRecorder on Benjamin's phone
+Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
+
+WiFi (log of available WiFi networks)
+-Test, and see if file is written and uploaded properly
+
+-Add an upload/download timer to the app to regularly try uploading files
+
+-Make SessionActivity extend AppActivity.  AppActivity should contain the call hotline button, a menu with the call hotline button, and the service bindings.  SessionActivity should contain all the login stuff.  LoginActivity, ResetPassword, ForgotPassword, and RegisterActivity should extend AppActivity; the rest should extend SessionActivity.
+OR:
+-Insert PostRequest.initialize() into HTTPAsync or ForgotPassword Activity
+Also instantiate LoginManager inside ForgotPasswordActivity, and anything else that isn't a SessionActivity just a regular Activity
+
+
+
+
+
+
+
+AFTER DEMO:
+
 Ask Eli: does it check that patient ID numbers are unique?
 
 Encryption/security
@@ -6,7 +37,7 @@ Encryption/security
 -Create shim for symmetric encryption
 -Encryption for AudioFileManager
 
-Throw in a warning message (don't use IE < 8!)
+Throw in an Admin Panel warning message (don't use IE < 8!)
 
 Graph of survey responses
 -Make it look pretty for all types of survey questions
@@ -15,9 +46,6 @@ Graph of survey responses
 
 Password
 -Re-document backend keys and make 'em more idiot-proof
-
-Admin authentication
--Admins should probably be able to change their passwords
 
 Data handlers
 -Document and look through the data_handlers.py file, which Dori wrote
@@ -29,22 +57,28 @@ Figure out if we're using base.html and what to do with it
 
 Write a data dump/download script
 
-Bluetooth
--Determine whether Bluetooth failure is solvable (Eli) -- checked, it is not.
--Make sure Bluetooth data are formatted and uploaded correctly
--Test whether two phones running the app actually recognize each other via Bluetooth
-
-WiFi (log of available WiFi networks)
--Test, and see if file is written and uploaded properly
-
-PowerStateListener
--Attempt to reproduce crash when plugging in/unplugging device (probably TextFileManager uninitiated error; might be fixed)
-
 GPS, Accel
 -Test
 
 SMS log
 -Log outgoing MMS messages
+
+App UI
+-Review Dori's code for register, login, and logout logic
+-Get an app icon
+
+-Admin Panel patients list... paginate
+
+
+
+
+
+
+
+LOW PRIORITY:
+
+Admin authentication
+-Admins should probably be able to change their passwords
 
 Timers & data upload
 -Add an alert if the phone hasn't been able to upload in a long time?
@@ -52,22 +86,4 @@ Timers & data upload
 
 Should we try to log when the app was started?  We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this
 
-App UI
--Finalize, style, and pretty-ify the UI
--Review Dori's code for register, login, and logout logic
--Get an app icon
-
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
-
-
--Debug AudioRecorder on Benjamin's phone
-Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
-
--Admin Panel patients list... paginate
-
--Make SessionActivity extend AppActivity.  AppActivity should contain the call hotline button, a menu with the call hotline button, and the service bindings.  SessionActivity should contain all the login stuff.  LoginActivity, ResetPassword, ForgotPassword, and RegisterActivity should extend AppActivity; the rest should extend SessionActivity.
-OR:
--Insert PostRequest.initialize() into HTTPAsync or ForgotPassword Activity
-Also instantiate LoginManager inside ForgotPasswordActivity, and anything else that isn't a SessionActivity just a regular Activity
-
--Add an upload/download timer to the app to regularly try uploading files
