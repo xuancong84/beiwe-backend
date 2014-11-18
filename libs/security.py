@@ -43,29 +43,31 @@ def device_hash( data ):
         Anticipates an unencoded string, returns a stripped base64 string."""
     sha256 = hashlib.sha256()
     sha256.update(data)
-    return _encode_base64( sha256.digest() )
+    return encode_base64( sha256.digest() )
 
 
-def _encode_base64(data):
-    """ Creates a base64 representation of an input string without padding or lines."""
+def encode_base64(data):
+    """ Creates a base64 representation of an input string without new lines."""
     return base64.urlsafe_b64encode(data).replace("\n","")
-#     return data.encode("base64").replace("\n", "")
+
+def decode_base64(data):
+    return base64.urlsafe_b64decode(data)
 
 
 def generate_user_hash_and_salt( password ):
     """ Generates a hash and salt that will match for a given input string.
         Input is anticipated to be any arbitrary string."""
-    salt = _encode_base64( urandom(16) )
+    salt = encode_base64( urandom(16) )
     password = device_hash(password)
-    password_hashed =  _encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
+    password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
     return ( password_hashed, salt )
 
 
 def generate_admin_hash_and_salt( password ):
     """ Generates a hash and salt that will match for a given input string.
         Input is anticipated to be any arbitrary string."""
-    salt = _encode_base64( urandom(16) )
-    password_hashed =  _encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
+    salt = encode_base64( urandom(16) )
+    password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
     return ( password_hashed, salt )
 
 
@@ -74,7 +76,7 @@ def compare_password( proposed_password, salt, real_password_hash ):
         True if the hash results are identical.
         Expects the proposed password to be a base64 encoded string.
         Expects the real password to be a base64 encoded string. """
-    proposed_hash = _encode_base64( PBKDF2( proposed_password, salt, iterations=ITERATIONS).read(32) )
+    proposed_hash = encode_base64( PBKDF2( proposed_password, salt, iterations=ITERATIONS).read(32) )
     if  proposed_hash == real_password_hash :
         return True
     return False
