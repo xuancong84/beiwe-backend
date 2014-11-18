@@ -106,7 +106,7 @@ def decrypt_device_line(patient_id, data):
     
     iv = decode_base64(iv)
     data = decode_base64(data)
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key) )
+    symmetric_key = private_key.decrypt( symmetric_key )
     
     return remove_PKCS5_padding( AES.new(
                    symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt(data) )
