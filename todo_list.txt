@@ -1,3 +1,8 @@
+Real short-term
+-Test what happens if you try to encrypt a datafile before you have a key (i.e., in the RegisterActivity)
+-Fix the Fixme in BackgroundProcess for starting timers- is there a way to start timers?
+
+
 BEFORE DEMO:
 
 Bluetooth
@@ -7,17 +12,10 @@ Bluetooth
 
 App UI
 -Finalize, style, and pretty-ify the UI
+-Create an "About" page
 
 -Debug AudioRecorder on Benjamin's phone
 Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
-
-WiFi (log of available WiFi networks)
--Test, and see if file is written and uploaded properly
-
--Add an upload/download timer to the app to regularly try uploading files
-
--Create an "About" page
-
 
 
 
@@ -73,6 +71,8 @@ App UI
 
 LOW PRIORITY:
 
+Figure out how to avoid creating NULLID files
+
 Admin authentication
 -Admins should probably be able to change their passwords
 
@@ -83,3 +83,5 @@ Timers & data upload
 Should we try to log when the app was started?  We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
+
+Move Wifi timer to a repeating timer instead of having two intents (WifiLogIntent and WifiLogTimerIntent)
