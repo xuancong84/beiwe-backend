@@ -1,14 +1,4 @@
-Real short-term
--Test what happens if you try to encrypt a datafile before you have a key (i.e., in the RegisterActivity)
--Fix the Fixme in BackgroundProcess for starting timers- is there a way to start timers?
-
-
 BEFORE DEMO:
-
-Bluetooth
--Determine whether Bluetooth failure is solvable (Eli) -- checked, it is not.
--Make sure Bluetooth data are formatted and uploaded correctly
--Test whether two phones running the app actually recognize each other via Bluetooth
 
 App UI
 -Finalize, style, and pretty-ify the UI
@@ -17,13 +7,22 @@ App UI
 -Debug AudioRecorder on Benjamin's phone
 Figure out why AudioRecorder's mp4 outputs can't open in VLC or QuickTime
 
+-See what happens when you start the app, it goes to LoginActivity, you don't log in, you kill it, you restart it (seems to open on DebugInterface and bypass the login screen).  This behavior occured with AutomaticLogout time set to 5 minutes.
+
+-Check if the timers work, turn on accel and off accel, etc.
 
 
 
 
 AFTER DEMO:
 
+Bluetooth
+-Make sure Bluetooth data are formatted and uploaded correctly
+-Test whether two phones running the app actually recognize each other via Bluetooth
+
 Ask Eli: does it check that patient ID numbers are unique?
+
+-Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
 
 Encryption/security
 -Anonymizer function needs to be finished (Josh, see TODO in anonymizer function)
