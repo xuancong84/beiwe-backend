@@ -5,6 +5,7 @@
 .DS_Store
 secure.py
 .project
+*.pem
 
 # Survey JSON file(s) can be user-generated, so they aren't part of the code
 sample_survey.json
