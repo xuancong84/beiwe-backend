@@ -50,13 +50,6 @@ def _generate_key_pairing():
     return public_key.exportKey(), private_key.exportKey()
 
 
-def decrypt_rsa_lines(encrypted_lines, patient_id):
-    """ This function takes a list of encrypted lines (from a client device) and
-        decrypts every line separately, and returns a list of decrypted lines."""
-    private_key = get_client_private_key(patient_id)
-    return "\n".join([ private_key.decrypt( line.decode("hex") ) for line in encrypted_lines ])
-
-
 def prepare_X509_key_for_java( exported_key ):
     # This may actually be a PKCS8 Key specification.
     """ Removes all extraneous data (new lines and labels from a formatted key
@@ -92,6 +85,10 @@ def decrypt_server(input_string):
         Use this function with the entire file (in string form) you wish to encrypt."""
     iv = input_string[:16]
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
+
+
+def decrypt_device_file(patient_id, data):
+    return "\n".join([decrypt_device_line(patient_id, line) for line in data.split('\n')])
 
 
 def decrypt_device_line(patient_id, data):
