@@ -6,7 +6,7 @@
     Server: private
     Device: public  """
 
-from libs.s3 import s3_retrieve, s3_upload_handler_string
+from libs.s3 import s3_retrieve, s3_upload
 
 ################################################################################
 ############################## Client Keys #####################################
@@ -15,8 +15,8 @@ from libs.s3 import s3_retrieve, s3_upload_handler_string
 def create_client_key_pair(patient_id):
     """Generate key pairing, push to database, return sanitized key for client."""
     public, private = _generate_key_pairing()
-    s3_upload_handler_string( "keys/" + patient_id + "_private", private )
-    s3_upload_handler_string( "keys/" + patient_id + "_public", public )
+    s3_upload( "keys/" + patient_id + "_private", private )
+    s3_upload( "keys/" + patient_id + "_public", public )
 
 
 def get_client_public_key_string(patient_id):

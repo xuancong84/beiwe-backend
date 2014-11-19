@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, request, render_template
 from libs.admin_authentication import authenticate_admin
-from libs.s3 import s3_list_files, s3_retrieve, s3_upload_handler_string
+from libs.s3 import s3_list_files, s3_retrieve, s3_upload
 
 
 survey_designer = Blueprint('survey_designer', __name__)
@@ -29,7 +29,7 @@ def update_survey(survey_type, request):
     survey_name = 'all_surveys/' + survey_type + '/'  # set filepath
     survey_name += datetime.now().isoformat() + '.json'  # set filename
     new_quiz = request.values['JSONstring']
-    s3_upload_handler_string( survey_name, new_quiz )
+    s3_upload( survey_name, new_quiz )
     # TODO: Josh, only return 200 on success; otherwise something else
     return '200'
 

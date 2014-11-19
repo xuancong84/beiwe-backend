@@ -2,7 +2,7 @@ from flask import Blueprint, request, send_file, render_template, redirect
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin
 from libs.db_models import User, Users
-from libs.s3 import s3_upload_handler_string
+from libs.s3 import s3_upload
 from libs.encryption import create_client_key_pair
 
 admin = Blueprint('admin', __name__)
@@ -100,7 +100,7 @@ def create_new_patient():
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, returns a string containing password and patient id"""
     patient_id, password = User.create()
-    s3_upload_handler_string(patient_id, "")
+    s3_upload(patient_id, "")
     create_client_key_pair(patient_id)
     return "patient_id: " + patient_id + "\npassword: " + password
 

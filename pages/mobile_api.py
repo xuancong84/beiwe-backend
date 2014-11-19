@@ -5,7 +5,7 @@ from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
 from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
-from libs.s3 import s3_retrieve, s3_list_files, s3_upload_handler_string
+from libs.s3 import s3_retrieve, s3_list_files, s3_upload
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
@@ -91,15 +91,13 @@ def upload():
             if 'weekly' in ftype.lower(): survey_type = WEEKLY_SURVEY_NAME
             if ftype.startswith( ANSWERS_TAG ): ftype = ANSWERS_TAG
             if ftype.startswith( TIMINGS_TAG ): ftype = TIMINGS_TAG
-
+            
             s3_filename = (patient_id + '/' + ftype + '/' + survey_type + '/' +
                            parsed_id + '/' + timestamp)
-            s3_upload_handler_string(s3_filename, uploaded_file)
+            s3_upload(s3_filename, uploaded_file)
+            
         else:
-            s3_upload_handler_string( file_name.replace("_", "/") , uploaded_file )
-            #the same but with encryption.
-            # data = decrypt_rsa_lines( uploaded_file.read(), patient_id )
-            # s3_upload_handler_file( file_name.replace("_", "/") , data )
+            s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
     else:
         print "an upload failed."
@@ -149,7 +147,7 @@ def set_password():
 def upload_bluetooth( patient_id, mac_address ):
     """ Uploads the user's bluetooth mac address safely. """
     number_mac_addresses = len( s3_list_files(patient_id + '/mac' ) )
-    s3_upload_handler_string(patient_id + '/mac_' + str(number_mac_addresses),
+    s3_upload(patient_id + '/mac_' + str(number_mac_addresses),
                              mac_address )
 
 def parse_filename(filename):
