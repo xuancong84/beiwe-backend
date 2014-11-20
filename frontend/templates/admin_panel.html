@@ -13,8 +13,8 @@
 <body>
 <div class="container">
     <div class="jumbotron">
-        <h2>Zagaran Mobile Data Collection System for HSPH</h2>
-        <p>Welcome to the Zagaran Smartphone Data Collection System for HSPH system. Manage your system here.</p>
+        <h2>Beiwe</h2>
+        <p>Welcome to the Beiwe data collection control panel. Manage surveys and users here.</p>
         <div align='right'><a href="/logout" class="btn btn-default btn-large" id="logout">Logout</a></div>
     </div>
     <div class="span12">
@@ -62,19 +62,6 @@
             <h4><a href="/daily_survey" class="list-group-item">Daily Survey</a></h4>
 	    <h4><a href="/weekly_survey" class="list-group-item">Weekly Survey</a></h4>
         </div>
-        </br></br>
-        <div class="row">
-            <h3>Voice Recording Prompts</h3>
-        </div>
-        <div class="list-group">
-            {% for c in voice_prompts %}
-            <h4><a href="/voice/{{c._id}}" class="list-group-item">{{c._id}}</a></h4>
-            {% endfor %}
-        </div>
-        <form class="form-inline" method="POST" action="/create_voice_prompt" name="create_voice_prompt" accept-charset="utf-8">
-            <input type="text" class="input-large" name="cohort_name" type="text" placeholder="Enter new voice prompt name here..."/>
-            <button type="submit" class="btn btn-success">Create Voice Prompt</button>
-        </form>
     </div>
 </div>
 <footer class="section">
