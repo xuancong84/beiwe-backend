@@ -10,9 +10,9 @@ $(document).ready(function() {
     var surveyType = document.getElementById("surveyType").title;
 
     // Get the correct URL to pull the current copy of the daily or weekly survey
-    var current_survey_url = "http://beiwe.org/get_daily_survey";
+    var current_survey_url = "https://beiwe.org/get_daily_survey";
     if (surveyType.localeCompare("weekly") == 0) {
-        current_survey_url = "http://beiwe.org/get_weekly_survey";
+        current_survey_url = "https://beiwe.org/get_weekly_survey";
     }
 
     // Get the current survey's JSON, and render it as a list of questions
@@ -53,11 +53,11 @@ function end() {
     // If you're editing the weekly survey, update the weekly survey
     var surveyType = document.getElementById("surveyType").title;
     if (surveyType.localeCompare("weekly") == 0) {
-        xhr.open("POST", "http://beiwe.org/update_weekly_survey", true);
+        xhr.open("POST", "https://beiwe.org/update_weekly_survey", true);
     }
     // Otherwise, you're editing the daily survey
     else {
-        xhr.open("POST", "http://beiwe.org/update_daily_survey", true);
+        xhr.open("POST", "https://beiwe.org/update_daily_survey", true);
     }
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.send(postRequestContent);
