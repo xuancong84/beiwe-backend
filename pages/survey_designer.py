@@ -14,13 +14,13 @@ survey_designer = Blueprint('survey_designer', __name__)
 # does not break survey editing.
 
 @survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
-# @authenticate_admin
+@authenticate_admin
 def update_daily():
     return update_survey('daily', request)
 
 
 @survey_designer.route('/update_weekly_survey', methods=['GET', 'POST'])
-# @authenticate_admin
+@authenticate_admin
 def update_weekly():
     return update_survey('weekly', request)
 
