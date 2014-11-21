@@ -22,6 +22,7 @@ Bluetooth
 -Test whether two phones running the app actually recognize each other via Bluetooth
 
 Ask Eli: does it check that patient ID numbers are unique?
+	No.  we should probably do that.
 
 -Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
 
@@ -60,7 +61,6 @@ SMS log
 -Log outgoing MMS messages
 
 App UI
--Review Dori's code for register, login, and logout logic
 -Get an app icon
 
 -Admin Panel patients list... paginate
