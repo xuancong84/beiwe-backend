@@ -1,7 +1,8 @@
 from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 from data.constants import ITERATIONS
-from pbkdf2 import PBKDF2
 from os import urandom
+from pbkdf2 import PBKDF2
+# pbkdf2 is a hashing protocol specifically for safe password hash generation.
 
 import base64
 import hashlib
@@ -10,9 +11,8 @@ import re
 class DatabaseIsDownError(Exception): pass
 
 
-# set the secret key for the application
 def set_secret_key(app):
-    """Flask secret key"""
+    """grabs the Flask secret key"""
     app.secret_key = FLASK_SECRET_KEY
 
 
@@ -30,32 +30,27 @@ def pymongo():
 ################################## HASHING #####################################
 ################################################################################
 
-# Hashing note: Mongo does not like strings with arbitrary binary data, so we
-# store passwords using base64 encoding.
-
-# TODO: Eli. Profile and make sure this is a good number of ITERATIONS
-# pbkdf2 is a hashing function for key derivation.
-
+# Mongo does not like strings with invalid binary data, so we store binary data
+# using url safe base64 encoding.
 
 def device_hash( data ):
-    """ Hashes an input string using the sha256 hash.
-        Used with the android device identifier, mirrors android behavior.
-        Anticipates an unencoded string, returns a stripped base64 string."""
+    """ Hashes an input string using the sha256 hash, mimicing the hash used on
+    the devices.  Expects a string not in base64, returns a base64 string."""
     sha256 = hashlib.sha256()
     sha256.update(data)
     return encode_base64( sha256.digest() )
 
-
 def encode_base64(data):
-    """ Creates a base64 representation of an input string without new lines."""
+    """ Creates a url safe base64 representation of an input string, strips
+        new lines."""
     return base64.urlsafe_b64encode(data).replace("\n","")
 
 def decode_base64(data):
+    """ unpacks url safe base64 encoded string. """
     return base64.urlsafe_b64decode(data)
 
-
 def generate_user_hash_and_salt( password ):
-    """ Generates a hash and salt that will match for a given input string.
+    """ Generates a hash and salt that will match a given input string.
         Input is anticipated to be any arbitrary string."""
     salt = encode_base64( urandom(16) )
     password = device_hash(password)
@@ -98,7 +93,6 @@ def generate_admin_password_and_salt():
     password = generate_easy_alphanumeric_string()
     password_hash, salt = generate_admin_hash_and_salt( password )
     return password, password_hash, salt
-
 
 
 ################################################################################
