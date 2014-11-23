@@ -7,7 +7,6 @@ from libs.encryption import create_client_key_pair
 
 admin = Blueprint('admin', __name__)
 
-
 ################################################################################
 ############################# Login/Logoff #####################################
 ################################################################################
@@ -28,7 +27,8 @@ def logout():
 
 @admin.route("/validate_login", methods=["GET", "POST"])
 def login():
-    # Method responsible to authenticate researcher administrators.
+    """ Authenticates administrator login, redirects to login page
+        if authentication fails."""
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
@@ -53,21 +53,14 @@ def render_main():
 
 
 def patient_dict(patient):
-    return {
-        'placeholder_field': 'placeholder field for future data',
-        'has_device': patient['device_id'] is not None
-    }
+    return {'placeholder_field': 'placeholder field for future data',
+            'has_device': patient['device_id'] is not None }
 
 
 ################################################################################
 ######################### Actual Functionality #################################
 ################################################################################
 
-#TODO: Josh/Dori/Eli. We need response pages (or some other way of telling the person
-# that they have entered bad information)
-
-
-#TODO: create route and response page.
 @admin.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin
 def reset_user_password():
@@ -81,10 +74,11 @@ def reset_user_password():
     return "that patient id does not exist"
 
 
-#TODO: create route and response page.
 @admin.route('/reset_device', methods=["POST"])
 @authenticate_admin
 def reset_device():
+    """ Resets a patient's device.  The patient will not be able to connect
+        until expect to register a new device. """
     patient_id = request.values["patient_id"]
     if User.exists(patient_id):
         user = User(patient_id)
@@ -93,7 +87,6 @@ def reset_device():
     return "that patient id does not exist"
 
 
-#TODO: make this work with admin authentication
 @admin.route('/create_new_patient', methods=["POST"])
 @authenticate_admin
 def create_new_patient():
