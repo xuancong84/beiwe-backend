@@ -1,10 +1,5 @@
-""" The private key is stored server-side (on S3), and the public key is sent to
-    the android device.
-    Decryption is line by line, current method of separating data is by
-    encoding the binary data as hex
-
-    Server: private
-    Device: public  """
+""" The private keys are stored server-side (S3), and the public key is sent to
+    the android device. """
 
 from libs.s3 import s3_retrieve, s3_upload
 
@@ -58,7 +53,7 @@ def prepare_X509_key_for_java( exported_key ):
     return "".join( exported_key.split('\n')[1:-1] )
 
 
-# This function is never intended to be used, it is only for debugging.
+# This function is only for use in debugging.
 # def encrypt_rsa(blob, private_key):
 #     return private_key.encrypt("blob of text", "literally anything")
 #     """ 'blob of text' can be either a long or a string, we will use strings.
@@ -71,23 +66,25 @@ def prepare_X509_key_for_java( exported_key ):
 """ We are using AES in CFB mode because we do not have a [good-and-simple] way
     of enforcing separate storage of initialization vectors from keys or files. """
 from Crypto.Cipher import AES
-from data.passwords import PASSWORD as ENCRYPTION_KEY
+from data.passwords import ENCRYPTION_KEY
 from security import decode_base64
 from os import urandom
 
 def encrypt_server(input_string):
+    """ encrypts data using the ENCRYPTION_KEY, prepends the generated
+        initialization vector.
+        Use this function on an entire file (as a string)."""
     iv = urandom(16)
     return iv + AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
 def decrypt_server(input_string):
-    """ encrypts data using the ENCRYPTION_KEY, prepends the generated
-        initialization vector.
-        Use this function with the entire file (in string form) you wish to encrypt."""
+    """ decrypts data encrypted using the encrypt_server function. """
     iv = input_string[:16]
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 
 
 def decrypt_device_file(patient_id, data):
+    """ Runs the line-by-line decryption of a file encrypted by a device. """
     return "\n".join([decrypt_device_line(patient_id, line) for line in data.split('\n')])
 
 
