@@ -2,8 +2,6 @@ from flask import request, abort
 from libs.db_models import User
 import functools
 
-#TODO: Eli (or whomever). is there a way to clean this up without adding complexity?
-
 
 def authenticate_user(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
@@ -31,7 +29,6 @@ def validate_post( *args, **kwargs ):
     if not user['device_id'] == request.values['device_id']: return False
 
     return True
-
 
 
 def authenticate_user_registration(some_function):
