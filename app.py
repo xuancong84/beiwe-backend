@@ -5,7 +5,7 @@ from libs.logging import log_error
 from libs.security import set_secret_key
 
 try:
-    from data.passwords import PASSWORD
+    from data.passwords import ENCRYPTION_KEY
 except ImportError as e:
     if e.message != "No module named secure":
         log_error(e)
@@ -14,7 +14,7 @@ except ImportError as e:
         print "\nYou have not provided a secure.py file.\n"
         exit()
 
-if len( PASSWORD ) != 32:
+if len( ENCRYPTION_KEY ) != 32:
     print "Your key is not 32 characters. The key must be exactly 32 charcters long."
     exit()
 
