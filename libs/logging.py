@@ -9,6 +9,3 @@ def log_error(e, message=None):
         print(traceback.format_exc())
         print("-------------------")
     except: print("ERROR IN log_error")
-
-
-# TODO: Find places where this should be used.
