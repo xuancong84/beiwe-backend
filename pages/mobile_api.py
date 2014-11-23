@@ -4,64 +4,67 @@ from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
-from libs.encryption import get_client_public_key_string#, decrypt_rsa_lines
+from libs.encryption import get_client_public_key_string
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
+
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
-
 mobile_api = Blueprint('mobile_api', __name__)
-
 
 ################################################################################
 ############################# DOWNLOADS ########################################
 ################################################################################
 
-# TODO: Josh, delete this route and replace it with the two below (need to modify the Android app to allow this)
-@mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
-@authenticate_user
-def fetch_survey():
-    """ Method responsible for serving the latest survey JSON. """
-    return s3_retrieve("all_surveys/current_survey")
+# TODO: Josh/Eli, this function appears unused in the android app,
+#  but I'm not positive.  remove it if no problems occur when it is commented out
+#  (note: s3 retrieve is used here, otherwise unused)
+# @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
+# @authenticate_user
+# def fetch_survey():
+#     """ Method responsible for serving the latest survey JSON. """
+#     return s3_retrieve("all_surveys/current_survey")
 
 
-# TODO: get this to work with user authentication
+# TODO: josh. check that this to works with user authentication
 @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
 #@authenticate_user
 def download_daily_survey():
     return get_latest_survey('daily')
-
 
 @mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
 #@authenticate_user
 def download_weekly_survey():
     return get_latest_survey('weekly')
 
+################################################################################
+############################# graph data #######################################
+################################################################################
+
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 @authenticate_user
 def fetch_graph():
-    """ TODO: This function fetches the patient's answers to the most recent survey,
-    marked by survey ID. The results are rendered on a template in the patient's
-    phone"""
+    """ Fetches the patient's answers to the most recent survey, marked by
+        survey ID. The results are dumped into a jinja template and pushed
+        to the device."""
     patient_id = request.values['patient_id']
-    #TODO: Dori.  clean up, make variable named what they contain.
     data_results = []
-#     results = [json.dumps(i) for i in get_survey_results(username=userID)]
-
-    #results is a list of lists (which should probably be tuples)...
-    # value 0 is the title/question text, value 1 is a list of y coordinates
+    
+    #results is a list of lists
+    # inner list 0 is the title/question text
+    # inner list 1 is a list of y coordinates
     results = get_survey_results(username=patient_id, survey_type=DAILY_SURVEY_NAME)
     for pair in results:
-
+        
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
         # javascript understands json null/none values but not python Nones,
         # we must dump all variables individually.
         data_results.append( [ json.dumps( pair[0] ), coordinates ] )
-
+        
     return render_template("phone_graphs.html", graphs=data_results)
 
 
@@ -77,9 +80,7 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    # werkzeug.secure_filename may return empty if unsecure
-    # TODO: Josh? Kevin? what does it mean to be an insecure?
-    #print "uploaded file = ", uploaded_file
+    
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
         print "upload appears to be working!"
@@ -136,6 +137,7 @@ def register_user():
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
 @authenticate_user
 def set_password():
+    """ After authenticating a user, sets the new password and returns 200."""
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
 
@@ -157,7 +159,7 @@ def parse_filename(filename):
         return name[1], name[2]
 
 def parse_filetype(file_type):
-    """TODO: Josh/Dori.  Fill in this documentation line."""
+    """ Separates alphabetical characters from digits for parsing."""
     parsed_id = filter(str.isdigit, str(file_type))
     return filter(str.isalpha, str(file_type)), parsed_id
 

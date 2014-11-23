@@ -8,11 +8,10 @@ from libs.s3 import s3_list_files, s3_retrieve
 def s3_csv_to_dict(s3_file_path):
     return read_csv_string( s3_retrieve( s3_file_path ) )
 
-
 def read_csv_string(csv_string):
     """ Converts a string formatted as a csv into a dictionary with the format
         {Column Name: [list of data points] }. Data are in their original order,
-        any empty entries are dropped.  """
+        any empty entries are dropped."""
     #grab a list of every line in the file, strips off trailing whitespace.
     lines = [ line for line in csv_string.splitlines() ]
 
@@ -21,7 +20,7 @@ def read_csv_string(csv_string):
 
     for line in lines[1:]:
         data = line.split(',')
-        #creates a dict of {column name: data point, ...}
+        #creates a dict of {column name: data point, ...}, strips empty strings
         list_of_entries.append( { header_list[i]: entry for i, entry in enumerate(data) if entry != ''} )
     return list_of_entries
 
@@ -30,28 +29,34 @@ def read_csv_string(csv_string):
 ########################### GRAPH DATA HANDLERS ################################
 ################################################################################
 
-# This is a method to get the last seven names saved in a folder
+
 def grab_weekly_file_names(all_files):
-    # Returns a sorted list of all files
-    if (len(all_files) <= 7):
+    """ Takes a list, returns a list of the most recent 7 files."""
+    if ( len(all_files) <= 7):
         return sorted(all_files)
     else:
-        return sorted(all_files[len(all_files) - 7:])
+        return sorted( all_files[ len(all_files) - 7:])
 
 
 def get_most_recent_id(file_path):
+    """TODO: Eli. doc."""
     all_files = s3_list_files(file_path)
     id_set = set()
     for filename in all_files:
-        # This assumes that the 3rd entry is always an integer
+        # assumes that the 3rd entry is always an integer
         organizing_list = filename.split('/')
-        survey_id = int(organizing_list[3])
-        id_set.add(survey_id)
-    result_list = sorted(id_set)
-    return result_list[len(result_list) - 1]
+        survey_id = int( organizing_list[3] )
+        id_set.add( survey_id )
+    result_list = sorted( id_set )
+    return result_list[ len(result_list) - 1]
 
 
-def get_survey_results(username="sur", survey_type=DAILY_SURVEY_NAME, methods=['GET', 'POST']):
+
+    #results in a list of lists
+    # inner list 0 is the title/question text
+    # inner list 1 is a list of y coordinates
+def get_survey_results( username="sur", survey_type=DAILY_SURVEY_NAME, methods=['GET', 'POST'] ):
+    """ TODO: Eli. Doc."""
     file_path = username + '/surveyAnswers/' + survey_type + '/'
     survey_id = get_most_recent_id(file_path)
     weekly_files = grab_weekly_file_names(s3_list_files(file_path + str(survey_id) + '/'))
@@ -65,7 +70,7 @@ def get_survey_results(username="sur", survey_type=DAILY_SURVEY_NAME, methods=['
     for question in weekly_surveys[0]:
         ordered_question_ids.add(question['question id'])
         all_answers[question['question id']] = { question['question text'] : []}
-    list_ordered_question_ids = sorted(ordered_question_ids)
+#     list_ordered_question_ids = sorted(ordered_question_ids)
 
     # Adds all answers to it in a formatted way
     for survey in weekly_surveys:
