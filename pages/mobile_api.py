@@ -1,4 +1,7 @@
+
 from flask import Blueprint, request, abort, json, render_template
+
+from kitchen.text.converters import to_bytes as thingy
 
 from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
@@ -31,7 +34,7 @@ mobile_api = Blueprint('mobile_api', __name__)
 
 # TODO: josh. check that this to works with user authentication
 @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
-#@authenticate_user
+@authenticate_user
 def download_daily_survey():
     return get_latest_survey('daily')
 
@@ -46,7 +49,7 @@ def download_weekly_survey():
 
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
-@authenticate_user
+#@authenticate_user
 def fetch_graph():
     """ Fetches the patient's answers to the most recent survey, marked by
         survey ID. The results are dumped into a jinja template and pushed
@@ -80,10 +83,13 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    
+
+    print "file name:", file_name
+    #print "uploaded file = ", uploaded_file
+
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-        print "upload appears to be working!"
+        
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
 
@@ -98,6 +104,8 @@ def upload():
             s3_upload(s3_filename, uploaded_file)
             
         else:
+            if file_name[-4:] == ".mp4":
+                print len(uploaded_file)
             s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
     else:
