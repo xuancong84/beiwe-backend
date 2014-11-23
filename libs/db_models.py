@@ -3,18 +3,7 @@ from libs.security import (generate_admin_hash_and_salt,
                            generate_user_hash_and_salt,
                            compare_password, device_hash,
                            generate_user_password_and_salt,
-                           generate_admin_password_and_salt,
                            generate_easy_alphanumeric_string,)
-
-
-# HOWTO: implement password reset
-# on login screen: 1 regular enter password to log-in field, one forgot password button
-# forgot password button: explains they need to call the study, and talk with someone.
-# that someone will send them a reset code, which they type into the single field
-# that you can enter from the forgot password screen.  On entering the reset pin
-# sets the reset pin to be your new password.  You can then go and reset your password in
-# the password reset screen.  Note that resetting a password requires a data connection.
-
 
 
 ################################################################################
@@ -23,7 +12,7 @@ from libs.security import (generate_admin_hash_and_salt,
 
 
 class User( DatabaseObject ):
-    """ The User database object contains the password hashes and unique usernames
+    """ The User database object contains the password hashes and unique user names
         of any patients in the study.  Elements in the database have the functionality
         described here, and two convenience method static methods that can be run
         on the User class/object itself.
@@ -31,8 +20,8 @@ class User( DatabaseObject ):
         in security.py) with PBKDF2, and salted using a cryptographically secure
         random number generator.  The sha256 check duplicates the storage of the
         password on the mobile device, so that the user's password is never stored
-        in a reversible manner.ff
-        """
+        in a reversible manner. """
+        
     PATH = "database.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
@@ -43,21 +32,13 @@ class User( DatabaseObject ):
     def create(cls):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
+        if User(patient_id): return User.create()
+        
         password, password_hash, salt = generate_user_password_and_salt()
         new_client = {ID_KEY: patient_id, "password":password_hash,
                       'device_id':None, "salt":salt }
         super(User, cls).create(new_client)
         return patient_id, password
-    
-    
-#     @classmethod
-#     def check_password(cls, patient_id, compare_me ):
-#         """ Checks if a patient id and user name combination are valid, returns
-#             a boolean."""
-#         if not User.exists( patient_id ):
-#             return False
-#         user = User( patient_id )
-#         return user.validate_password( compare_me )
     
     
     def validate_password(self, compare_me):
@@ -100,7 +81,6 @@ class User( DatabaseObject ):
         self.save()
 
 
-#the thing I use to access the entire table
 class Users( DatabaseCollection ):
     """ The Users database."""
     OBJTYPE = User
@@ -132,7 +112,6 @@ class Admin( DatabaseObject ):
         return admin.validate_password( compare_me )
     
     
-    #provide this instance with a password, it returns true if it matches
     def validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash."""
         return compare_password( compare_me, self['salt'], self['password'] )
