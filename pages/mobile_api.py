@@ -21,15 +21,6 @@ mobile_api = Blueprint('mobile_api', __name__)
 ############################# DOWNLOADS ########################################
 ################################################################################
 
-# TODO: Josh/Eli, this function appears unused in the android app,
-#  but I'm not positive.  remove it if no problems occur when it is commented out
-#  (note: s3 retrieve is used here, otherwise unused)
-# @mobile_api.route('/fetch_survey', methods=['GET', 'POST'])
-# @authenticate_user
-# def fetch_survey():
-#     """ Method responsible for serving the latest survey JSON. """
-#     return s3_retrieve("all_surveys/current_survey")
-
 
 # TODO: josh. check that this to works with user authentication
 @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
@@ -55,18 +46,18 @@ def fetch_graph():
         to the device."""
     patient_id = request.values['patient_id']
     data_results = []
-    
+
     #results is a list of lists
     # inner list 0 is the title/question text
     # inner list 1 is a list of y coordinates
     results = get_survey_results(username=patient_id, survey_type=DAILY_SURVEY_NAME)
     for pair in results:
-        
+
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
         # javascript understands json null/none values but not python Nones,
         # we must dump all variables individually.
         data_results.append( [ json.dumps( pair[0] ), coordinates ] )
-        
+
     return render_template("phone_graphs.html", graphs=data_results)
 
 
@@ -88,7 +79,7 @@ def upload():
 
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-        
+
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
 
@@ -97,11 +88,11 @@ def upload():
             if 'weekly' in ftype.lower(): survey_type = WEEKLY_SURVEY_NAME
             if ftype.startswith( ANSWERS_TAG ): ftype = ANSWERS_TAG
             if ftype.startswith( TIMINGS_TAG ): ftype = TIMINGS_TAG
-            
+
             s3_filename = (patient_id + '/' + ftype + '/' + survey_type + '/' +
                            parsed_id + '/' + timestamp)
             s3_upload(s3_filename, uploaded_file)
-            
+
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
