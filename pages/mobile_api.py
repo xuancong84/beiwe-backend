@@ -38,7 +38,7 @@ def download_weekly_survey():
 
 
 @mobile_api.route('/graph', methods=['GET', 'POST'])
-#@authenticate_user
+@authenticate_user
 def fetch_graph():
     """ Fetches the patient's answers to the most recent survey, marked by
         survey ID. The results are dumped into a jinja template and pushed
