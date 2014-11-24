@@ -7,8 +7,7 @@ from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
-from libs.encryption import get_client_public_key_string
-from libs.s3 import s3_retrieve, s3_list_files, s3_upload
+from libs.s3 import s3_retrieve, s3_list_files, s3_upload, get_client_public_key_string
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 

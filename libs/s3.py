@@ -2,8 +2,7 @@ from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
 from data.constants import S3_BUCKET
-from libs.encryption import encrypt_server, decrypt_server
-
+from libs import encryption
 # import mimetypes
 
 CONN = connect_s3()
@@ -38,13 +37,13 @@ def s3_upload( key_name, some_string ):
 def s3_upload_encrypted( key_name, some_string ):
     bucket = _get_bucket(S3_BUCKET)
     key = bucket.new_key(key_name)
-    data = encrypt_server(some_string)
+    data = encryption.encrypt_server(some_string)
     key.set_contents_from_string(data)
 
 
 def s3_retrieve_decrypt(key_name):
     key = Key(_get_bucket(S3_BUCKET), key_name)
-    return decrypt_server( key.read() )
+    return encryption.decrypt_server( key.read() )
 
 
 def s3_list_files( prefix ):
@@ -73,3 +72,32 @@ def s3_retrieve_raw( key_name ):
 #     bucket.copy_key(new_name, S3_BUCKET, old_name)
 #     s3_upload(new_name, s3_retrieve(old_name))
 #     bucket.delete_key(old_name)
+
+
+################################################################################
+######################### Client Key Management ################################
+################################################################################
+
+def create_client_key_pair(patient_id):
+    """Generate key pairing, push to database, return sanitized key for client."""
+    public, private = encryption.generate_key_pairing()
+    s3_upload( "keys/" + patient_id + "_private", private )
+    s3_upload( "keys/" + patient_id + "_public", public )
+
+
+def get_client_public_key_string(patient_id):
+    """Grabs a user's public key string from s3."""
+    key_string = s3_retrieve( "keys/" + patient_id +"_public" )
+    return encryption.prepare_X509_key_for_java( key_string )
+
+
+def get_client_public_key(patient_id):
+    """Grabs a user's public key file from s3."""
+    key = s3_retrieve( "keys/" + patient_id +"_public" )
+    return encryption.import_RSA_key( key )
+
+
+def get_client_private_key(patient_id):
+    """Grabs a user's private key file from s3."""
+    key = s3_retrieve( "keys/" + patient_id +"_private" )
+    return encryption.import_RSA_key( key )

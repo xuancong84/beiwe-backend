@@ -1,36 +1,6 @@
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
 
-from libs.s3 import s3_retrieve, s3_upload
-
-################################################################################
-############################## Client Keys #####################################
-################################################################################
-
-def create_client_key_pair(patient_id):
-    """Generate key pairing, push to database, return sanitized key for client."""
-    public, private = _generate_key_pairing()
-    s3_upload( "keys/" + patient_id + "_private", private )
-    s3_upload( "keys/" + patient_id + "_public", public )
-
-
-def get_client_public_key_string(patient_id):
-    """Grabs a user's public key string from s3."""
-    key_string = s3_retrieve( "keys/" + patient_id +"_public" )
-    return prepare_X509_key_for_java( key_string )
-
-
-def get_client_public_key(patient_id):
-    """Grabs a user's public key file from s3."""
-    key = s3_retrieve( "keys/" + patient_id +"_public" )
-    return RSA.importKey( key )
-
-
-def get_client_private_key(patient_id):
-    """Grabs a user's private key file from s3."""
-    key = s3_retrieve( "keys/" + patient_id +"_private" )
-    return RSA.importKey( key )
-
 
 ################################################################################
 ################################# RSA ##########################################
@@ -38,7 +8,7 @@ def get_client_private_key(patient_id):
 from Crypto.PublicKey import RSA
 from data.constants import ASYMMETRIC_KEY_LENGTH
 
-def _generate_key_pairing():
+def generate_key_pairing():
     """Generates a public-private key pairing, returns tuple (public, private)"""
     private_key = RSA.generate(ASYMMETRIC_KEY_LENGTH)
     public_key = private_key.publickey()
@@ -51,6 +21,10 @@ def prepare_X509_key_for_java( exported_key ):
         string, because this is how Java likes its key files to be formatted.
         Y'know, not according to the specification.  Because Java. """
     return "".join( exported_key.split('\n')[1:-1] )
+
+
+def import_RSA_key( key ):
+    return RSA.importKey( key )
 
 
 # This function is only for use in debugging.
@@ -83,19 +57,19 @@ def decrypt_server(input_string):
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 
 
-def decrypt_device_file(patient_id, data):
+def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
-    return "\n".join([decrypt_device_line(patient_id, line) for line in data.split('\n')])
+    return "\n".join([decrypt_device_line(patient_id, line, private_key) for line in data.split('\n')])
 
 
-def decrypt_device_line(patient_id, data):
+# provide a key by running get_client_private_key(patient_id)
+def decrypt_device_line(patient_id, data, private_key):
     """ data is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES cipher.
         value 3 is the data, encrypted using AES in cipher feedback mode, using
             the provided symmetric key and iv. """
     
-    private_key = get_client_private_key(patient_id)
     symmetric_key, iv, data = data.split(":")
     
     iv = decode_base64(iv)
