@@ -10,9 +10,6 @@ survey_designer = Blueprint('survey_designer', __name__)
 ############################### Setters ########################################
 ################################################################################
 
-# TODO: Josh. make sure that uncommenting @authenticate_admin
-# does not break survey editing.
-
 @survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
 @authenticate_admin
 def update_daily():
