@@ -16,9 +16,6 @@ Encryption/security
 -Anonymizer function needs to be finished (Josh, see TODO in anonymizer function)
 -Create shim for symmetric encryption
 
-Data handlers
--Document and look through the data_handlers.py file, which Dori wrote.  The code is messy, needs to be documented, and still has corner cases where it breaks (no data).
-
 Write a data dump/download script
 
 SMS log
