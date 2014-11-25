@@ -49,7 +49,8 @@ def fetch_graph():
     #results is a list of lists
     # inner list 0 is the title/question text
     # inner list 1 is a list of y coordinates
-    results = get_survey_results(username=patient_id, survey_type=DAILY_SURVEY_NAME)
+    results = get_survey_results(username=patient_id,
+                                 survey_type=DAILY_SURVEY_NAME, number_points=7)
     for pair in results:
 
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
