@@ -48,6 +48,7 @@ def get_most_recent_id(user_file_path):
         id_set.add( survey_id )
     result_list = sorted( id_set )
     # return the last entry, which is the most recent survey id.
+    if len(result_list) == 0: return []
     return result_list[ -1 ]
 
 
