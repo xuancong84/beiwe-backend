@@ -9,14 +9,6 @@ App UI
 AudioRecorder
 -Debug audio recorder on Benjamin's phone (API v10)
 
-WiFi
--See if WiFi log and power state writing the header multiple times is still an issue
--Add WiFi signal strength, and any additional data that are easy to grab
-
-Bluetooth
--Add Bluetooth signal strength, and any additional data that are easy to grab
--Make sure Bluetooth data are formatted and uploaded correctly
--Test whether two phones running the app actually recognize each other via Bluetooth
 
 -(Josh) Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
 
