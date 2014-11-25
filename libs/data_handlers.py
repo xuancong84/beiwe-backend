@@ -57,6 +57,7 @@ def compile_question_data(surveys):
     """ Grabs all question ids, grabs all answers. """
     ordered_question_ids = set()
     all_answers = {}
+    if not surveys: return set(), {}
     for question in surveys[0]:
         ordered_question_ids.add( question['question id'] )
         all_answers[ question['question id'] ] = { question['question text'] : [] }
