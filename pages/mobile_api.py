@@ -123,6 +123,7 @@ def register_user():
     upload_bluetooth(patient_id, mac_address)
     print "device id:", request.values['device_id']
     user.set_device( request.values['device_id'] )
+    User(patient_id).set_password(request.values['new_password'])
     #Case: this device has been registered successfully, the return is the
     # encryption key associated with this user.
     return get_client_public_key_string(patient_id), 200
