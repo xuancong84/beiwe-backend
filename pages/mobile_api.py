@@ -9,7 +9,7 @@ from libs.data_handlers import get_survey_results
 from libs.db_models import User
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload, get_client_public_key_string, get_client_private_key
 
-from libs.encryption import decrypt_device_file
+from libs.encryption import decrypt_device_audio_file
 
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
@@ -99,7 +99,7 @@ def upload():
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
-                uploaded_file = decrypt_device_file(patient_id, uploaded_file, get_client_private_key(patient_id) )
+                uploaded_file = decrypt_device_audio_file(patient_id, uploaded_file, get_client_private_key(patient_id) )
             s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
     else:

@@ -57,6 +57,26 @@ def decrypt_server(input_string):
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 
 
+def decrypt_device_audio_file(patient_id, data, private_key):
+    return "\n".join( [ decrypt_device_line(patient_id, line, private_key) for line in data.split() ] )
+
+
+def decrypt_audio(patient_id, data, private_key):
+    """ data is expected to be 3 colon separated values.
+        value 1 is the symmetric key, encrypted with the patient's public key.
+        value 2 is the initialization vector for the AES cipher.
+        value 3 is the data, encrypted using AES in cipher feedback mode, using
+            the provided symmetric key and iv. """
+    
+    symmetric_key, iv, data = data.split(":")
+    
+    iv = decode_base64(iv)
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key) )
+    
+    return remove_PKCS5_padding( AES.new(
+                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt(data) )
+
+
 def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #we are relying on a quirk? in the split function, which only strips empty
