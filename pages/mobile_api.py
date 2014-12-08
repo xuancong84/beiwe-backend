@@ -99,8 +99,7 @@ def upload():
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
-            
-            new_data = decrypt_device_file(patient_id, uploaded_file, get_client_private_key(patient_id) )
+                new_data = decrypt_device_file(patient_id, uploaded_file, get_client_private_key(patient_id) )
             s3_upload( file_name.replace("_", "/") , new_data )
         return render_template('blank.html'), 200
     else:
