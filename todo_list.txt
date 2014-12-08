@@ -1,29 +1,24 @@
+Set all timers to correct intervals, including survey timers
+Compile APK, upload to server, print out download QR code
+
+File upload
+-Make upload_all_files() get called by a listener that listens for new files or a change in WiFi state
+
+Add crash logging
+http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+http://www.acra.ch/
+http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
+
+
 App UI
 -Finalize, style, and pretty-ify the UI
 -Get an app icon
 
 -(Josh) Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
 
-Encryption/security
--Anonymizer function needs to be finished (Josh, see TODO in anonymizer function)
--Create shim for symmetric encryption
-
-SMS log
--Log outgoing MMS messages
--Make sure all four datatypes (incoming, outgoing, SMS, MMS) are logged properly in the SMSlogfile.csv
-
-File upload
--Make the upload_all_files() function @synchronized because sometimes it tries to upload a file that's already been deleted (set the upload timer to something super short, like 5 seconds, to check for this).  Problem: it's also a static function.  Does this kill the effect of @synchronized, i.e., what we really want is for it to only be able to run once at a time.
--Make upload_all_files() get called by a listener that listens for new files
--Close data files/create new data files should be separate from try to upload data files (i.e., don't need to create new datafiles every time you try to upload)
-
 -Make sure max recording time length is significantly shorter than automatic logout time
 
--Test and see if we're still getting the message "MediaRecorder went away with unhandled events"; if we are, try this: http://stackoverflow.com/a/11984387
-
 -Check if NULLID files are still getting created.  If they are, Figure out what to do with phones uploading NULLID files or files with a patient_id different from the patient_id in the login credentials.  Dump em?  Keep em?  Or something else?
-
--Test Bluetooth
 
 
 
@@ -32,6 +27,12 @@ File upload
 AFTER MONDAY'S INSTALLATION
 
 Write up security doc and take screenshots for IRB
+
+Encryption/security
+-Create shim for symmetric encryption
+-Write a data download and decryption script
+
+Test Bluetooth
 
 (Josh) Graph of survey responses
 -Make it look pretty for all types of survey questions
@@ -43,6 +44,10 @@ AudioRecorder
 -Debug audio recorder on Benjamin's phone (API v10)
 
 Write a data dump/download script
+
+MMS logging:
+-When we receive MMS messages, get and log the "sent time" timestamp from them
+-Debug why we log several (like 3) copies of the same MMS when logging sent MMS messages
 
 
 
