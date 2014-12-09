@@ -1,7 +1,8 @@
-from flask import Blueprint, request, send_file, render_template, redirect
+from flask import (Blueprint, redirect, render_template, request, send_file,
+                   session)
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin
-from libs.db_models import User, Users
+from libs.db_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
 
 admin = Blueprint('admin', __name__)
@@ -31,12 +32,33 @@ def login():
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
-        if admin_authentication.validate_login_credentials(password, username):
-            admin_authentication.login_admin()
+        if Admin.check_password(username, password):
+            admin_authentication.login_admin(username)
             return redirect("/admin_panel")
         return "Username password combination is incorrect. Try again."
     else:
         return redirect("/admin")
+
+
+@admin.route('/reset_admin_password_form')
+@authenticate_admin
+def render_reset_admin_password_form():
+    return render_template('reset_admin_password.html')
+
+
+@admin.route('/reset_admin_password', methods=['POST'])
+@authenticate_admin
+def reset_admin_password():
+    username = session['admin_username']
+    current_password = request.values['current_password']
+    new_password = request.values['new_password']
+    confirm_new_password = request.values['confirm_new_password']
+    if not Admin.check_password(username, current_password):
+        return 'The "Current Password" you entered is invalid'
+    if new_password != confirm_new_password:
+        return 'New Password does not match Confirm New Password'
+    Admin(username).set_password(new_password)
+    return redirect('/')
 
 
 ################################################################################

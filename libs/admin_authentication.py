@@ -31,20 +31,15 @@ def authenticate_admin(some_function):
     return wrapped
 
 
-def login_admin():
+def login_admin(username):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
     session['expiry'] = datetime.now() + timedelta(hours=6)
+    session['admin_username'] = username
 
 
 def logout_loggedin_admin():
     if "admin_uuid" in session: del session['admin_uuid']
     if "expiry" in session: del session['expiry']
-
-
-def validate_login_credentials(password, username):
-    if Admin.check_password(username, password):
-        return True
-    return False
 
 
 def is_logged_in():
