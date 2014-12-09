@@ -37,14 +37,12 @@ def import_RSA_key( key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-""" We are using AES in CFB mode because we do not have a [good-and-simple] way
-    of enforcing separate storage of initialization vectors from keys or files. """
 from Crypto.Cipher import AES
 from data.passwords import ENCRYPTION_KEY
 from security import decode_base64
 from os import urandom
 
-def encrypt_server(input_string):
+def encrypt_for_server(input_string):
     """ encrypts data using the ENCRYPTION_KEY, prepends the generated
         initialization vector.
         Use this function on an entire file (as a string)."""
@@ -52,29 +50,12 @@ def encrypt_server(input_string):
     return iv + AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
 def decrypt_server(input_string):
-    """ decrypts data encrypted using the encrypt_server function. """
+    """ Decrypts data encrypted by the encrypt_for_server function."""
+    
     iv = input_string[:16]
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 
-
-def decrypt_device_audio_file(patient_id, data, private_key):
-    return "\n".join( [ decrypt_audio(patient_id, line, private_key) for line in data.split() ] )
-
-
-def decrypt_audio(patient_id, data, private_key):
-    symmetric_key, iv, data = data.split(":")
-
-    print "key:", len(symmetric_key), 'iv:', len(iv), 'data:', len(data)
-    #print "\nthe iv: '"+ iv + "'\n"
-    iv = decode_base64( iv.encode( "utf-8" ) )
-    data = decode_base64( data.encode( "utf-8" ) )
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
-    
-    print "\n\n\n\n this line is the line you want to see \n\n\n"
-    
-    return remove_PKCS5_padding( AES.new(
-                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data ) )
-
+###############################################################################
 
 def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
@@ -87,18 +68,17 @@ def decrypt_device_file(patient_id, data, private_key):
 def decrypt_device_line(patient_id, data, private_key):
     """ data is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.
-        value 2 is the initialization vector for the AES cipher.
-        value 3 is the data, encrypted using AES in cipher feedback mode, using
-            the provided symmetric key and iv. """
+        value 2 is the initialization vector for the AES CBC cipher.
+        value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
     
     symmetric_key, iv, data = data.split(":")
-    
-    iv = decode_base64(iv.strip())
-    data = decode_base64(data.strip)
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.strip()) )
-    
-    return remove_PKCS5_padding( AES.new(
-                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt(data) )
+
+    print "lengths - key:", len(symmetric_key), 'iv:', len(iv), 'data:', len(data)
+    iv = decode_base64( iv.encode( "utf-8" ) )
+    data = decode_base64( data.encode( "utf-8" ) )
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
+    decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
+    return remove_PKCS5_padding( decrypted )
 
 
 def remove_PKCS5_padding(data):

@@ -37,7 +37,7 @@ def s3_upload( key_name, some_string ):
 def s3_upload_encrypted( key_name, some_string ):
     bucket = _get_bucket(S3_BUCKET)
     key = bucket.new_key(key_name)
-    data = encryption.encrypt_server(some_string)
+    data = encryption.encrypt_for_server(some_string)
     key.set_contents_from_string(data)
 
 
