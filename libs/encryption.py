@@ -58,23 +58,19 @@ def decrypt_server(input_string):
 
 
 def decrypt_device_audio_file(patient_id, data, private_key):
-    return "\n".join( [ decrypt_device_line(patient_id, line, private_key) for line in data.split() ] )
+    return "\n".join( [ decrypt_audio(patient_id, line, private_key) for line in data.split() ] )
 
 
 def decrypt_audio(patient_id, data, private_key):
-    """ data is expected to be 3 colon separated values.
-        value 1 is the symmetric key, encrypted with the patient's public key.
-        value 2 is the initialization vector for the AES cipher.
-        value 3 is the data, encrypted using AES in cipher feedback mode, using
-            the provided symmetric key and iv. """
-    
     symmetric_key, iv, data = data.split(":")
+    #print "\nthe iv: '"+ iv + "'\n"
+    iv = decode_base64( iv.encode( "utf-8" ) )
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) )
     
-    iv = decode_base64(iv)
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key) )
+    print "\n\n\n\n this line is the line you want to see \n\n\n"    
     
     return remove_PKCS5_padding( AES.new(
-                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt(data) )
+                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data ) )
 
 
 def decrypt_device_file(patient_id, data, private_key):
@@ -94,9 +90,9 @@ def decrypt_device_line(patient_id, data, private_key):
     
     symmetric_key, iv, data = data.split(":")
     
-    iv = decode_base64(iv)
-    data = decode_base64(data)
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key) )
+    iv = decode_base64(iv.strip())
+    data = decode_base64(data.strip)
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.strip()) )
     
     return remove_PKCS5_padding( AES.new(
                    symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt(data) )

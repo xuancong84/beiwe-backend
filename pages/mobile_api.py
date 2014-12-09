@@ -99,8 +99,10 @@ def upload():
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
-                uploaded_file = decrypt_device_audio_file(patient_id, uploaded_file, get_client_private_key(patient_id) )
-            s3_upload( file_name.replace("_", "/") , uploaded_file )
+                #print uploaded_file[:4096]
+                s3_upload( file_name.replace("_", "/") , decrypt_device_audio_file(patient_id, uploaded_file, get_client_private_key(patient_id) ) )
+            else:
+                s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
     else:
         print "an upload failed."
