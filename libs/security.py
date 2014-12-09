@@ -47,7 +47,8 @@ def encode_base64(data):
 
 def decode_base64(data):
     """ unpacks url safe base64 encoded string. """
-    print "\ndecoding this data:\n", data#[:100]
+    #there seemed to be some problems with inserting a data.encode('utf-8') here,
+    # never determined why.
     return base64.urlsafe_b64decode(data)
 
 def generate_user_hash_and_salt( password ):
