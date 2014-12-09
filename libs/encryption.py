@@ -65,12 +65,12 @@ def decrypt_audio(patient_id, data, private_key):
     symmetric_key, iv, data = data.split(":")
     #print "\nthe iv: '"+ iv + "'\n"
     iv = decode_base64( iv.encode( "utf-8" ) )
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) )
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
     
-    print "\n\n\n\n this line is the line you want to see \n\n\n"    
+    print "\n\n\n\n this line is the line you want to see \n\n\n"
     
     return remove_PKCS5_padding( AES.new(
-                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data ) )
+                   symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data.encode( "utf-8" ) ) )
 
 
 def decrypt_device_file(patient_id, data, private_key):
