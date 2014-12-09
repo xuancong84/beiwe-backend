@@ -41,11 +41,17 @@ Test Bluetooth
 AudioRecorder
 -Debug audio recorder on Benjamin's phone (API v10)
 
-Write a data dump/download script
+
+(Eli)Write a data dump/download script
 
 MMS logging:
 -When we receive MMS messages, get and log the "sent time" timestamp from them
 -Debug why we log several (like 3) copies of the same MMS when logging sent MMS messages
+	(Eli): I tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
+		Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
+			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
+			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
+
 
 Change name of server from ubuntu@SCRUBS
 
