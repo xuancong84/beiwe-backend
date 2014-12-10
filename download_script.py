@@ -1,3 +1,5 @@
+print "\n...\n"
+
 try:
     from libs.s3 import s3_list_files as _s3_list, s3_retrieve as _s3_retrieve
     from urllib2 import urlopen as _urlopen
@@ -7,7 +9,8 @@ except ImportError as e:
     print e.message, "\n"
     raise e
 
-print "\n\n...\n"
+print "\n...\n"
+
 try:
     _encrypted_user_list = _urlopen("https://beiwe.org/user_list").read()
     user_list = _decrypt(_encrypted_user_list).split(',')

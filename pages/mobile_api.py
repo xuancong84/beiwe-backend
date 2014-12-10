@@ -77,7 +77,6 @@ def upload():
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
     print "uploaded file name:", file_name
-
     
     if patient_id =="18wh3b" and file_name[-4:] != ".mp4":
         #print "data received:", uploaded_file[:4096]
@@ -85,24 +84,15 @@ def upload():
                                               get_client_private_key(patient_id) )
         #print "decrypted:", uploaded_file[:4096]
     
-    
-    if uploaded_file and file_name and allowed_extension( file_name ):
-        file_type, timestamp  = parse_filename( file_name )
-        print "file_type", file_type
-
-        if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
-            ftype, parsed_id = parse_filetype( file_type )
-            print "ftype", ftype
-            print "parsed_id", parsed_id
-            survey_type = 'UNKNOWN_TYPE'
-            if 'daily' in ftype.lower(): survey_type = DAILY_SURVEY_NAME
-            if 'weekly' in ftype.lower(): survey_type = WEEKLY_SURVEY_NAME
-            
-            if ftype.startswith( ANSWERS_TAG ): ftype = ANSWERS_TAG
-            if ftype.startswith( TIMINGS_TAG ): ftype = TIMINGS_TAG
-            
-            s3_filename = (patient_id + '/' + ftype + '/' + survey_type + '/' +
-                           parsed_id + '/' + timestamp)
+    #if uploaded data a) actually exists, B) is validly named and typed...
+    if ( uploaded_file  and file_name  and
+         contains_valid_extension( file_name ) ):
+        
+        data_type, timestamp  = parse_filename( file_name )
+        
+        if (ANSWERS_TAG in data_type  or
+            TIMINGS_TAG in data_type):
+            s3_filename = get_survey_type(data_type, patient_id, timestamp)
             s3_upload(s3_filename, uploaded_file)
             
         else:
@@ -114,11 +104,37 @@ def upload():
             else:
                 s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
+    
+    #error cases.
     else:
-        print "an upload failed."
-        # Did not match any data upload files
+        print "an upload has failed, ",
+        if not uploaded_file: print "there was no uploaded file."
+        elif not file_name: print "there was no provided file name."
+        elif file_name and not contains_valid_extension( file_name ):
+            print "the file name contains an invalid extension. ", grab_file_extension(file_name)
+        else: print "AN UNKNOWN ERROR OCCURRED"
         return abort(400)
 
+
+def get_survey_type( data_type, patient_id, timestamp ):
+    survey_data_type, question_created_timestamp = parse_filetype( data_type )
+    print "survey_data_type", survey_data_type
+    print "question_created_timestamp", question_created_timestamp
+    
+    survey_frequency = 'UNKNOWN_TYPE'
+    if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
+    if 'weekly' in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
+    
+    if survey_data_type.startswith( ANSWERS_TAG ): survey_data_type = ANSWERS_TAG
+    if survey_data_type.startswith( TIMINGS_TAG ): survey_data_type = TIMINGS_TAG
+    
+    return (patient_id + '/' +
+            survey_data_type + '/' +
+            survey_frequency + '/' +
+            question_created_timestamp + '/' +
+            timestamp )
+            
+    
 
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
@@ -175,9 +191,14 @@ def parse_filename(filename):
 
 def parse_filetype(file_type):
     """ Separates alphabetical characters from digits for parsing."""
-    parsed_id = filter(str.isdigit, str(file_type))
-    return filter(str.isalpha, str(file_type)), parsed_id
+    question_created_timestamp = filter(str.isdigit, str(file_type)).lower()
+    survey_data_type = filter(str.isalpha, str(file_type)).lower()
+    return survey_data_type, question_created_timestamp
 
-def allowed_extension(filename):
-    """ Checks if string has a recognized file extension. """
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+def grab_file_extension(file_name):
+    return file_name.rsplit('.', 1)[1]
+    
+def contains_valid_extension(file_name):
+    """ Checks if string has a recognized file extension, this is not necessarily
+        limited to 4 characters."""
+    return '.' in file_name and grab_file_extension(file_name) in ALLOWED_EXTENSIONS
