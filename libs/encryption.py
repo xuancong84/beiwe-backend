@@ -88,7 +88,7 @@ def decrypt_device_line(patient_id, data, private_key):
         print "an error occurred in decryption"
         print "data length:", len(data)
         print "start of data:", data[:4096]
-        print "end of data:", data[:-256]
+        print "end of data:", data[-256:]
         raise e2
     
     return remove_PKCS5_padding( decrypted )

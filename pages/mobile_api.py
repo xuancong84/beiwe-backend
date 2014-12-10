@@ -81,7 +81,7 @@ def upload():
     if patient_id =="18wh3b" and file_name[-4:] != ".mp4":
         #print "data received:", uploaded_file[:4096]
         uploaded_file = decrypt_device_file(patient_id, uploaded_file,
-                                              get_client_private_key(patient_id) )
+                                            get_client_private_key(patient_id))
         #print "decrypted:", uploaded_file[:4096]
     
     #if uploaded data a) actually exists, B) is validly named and typed...
