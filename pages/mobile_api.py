@@ -77,6 +77,10 @@ def upload():
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
 
+
+    if patient_id =="18wh3b":
+        uploaded_file = decrypt_device_file(patient_id, uploaded_file,
+                                              get_client_private_key(patient_id) )
     print "uploaded file name:", file_name
     #print "uploaded file = ", uploaded_file
     
@@ -100,7 +104,6 @@ def upload():
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
-                #print uploaded_file[:4096]
                 s3_upload(file_name.replace("_", "/"),
                           decrypt_device_file(patient_id, uploaded_file,
                                               get_client_private_key(patient_id) ) )
