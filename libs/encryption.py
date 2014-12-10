@@ -70,7 +70,7 @@ def decrypt_device_line(patient_id, data, private_key):
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
-    
+    print "data length:", len(data), "\ndata:", data
     symmetric_key, iv, data = data.split(":")
 
     print "lengths - key:", len(symmetric_key), 'iv:', len(iv), 'data:', len(data)

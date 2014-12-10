@@ -79,7 +79,7 @@ def upload():
     print "uploaded file name:", file_name
 
     
-    if patient_id =="18wh3b":
+    if patient_id =="18wh3b" and file_name[-4:] != ".mp4":
         print "data received:", uploaded_file[:4096]
         uploaded_file = decrypt_device_file(patient_id, uploaded_file,
                                               get_client_private_key(patient_id) )
