@@ -92,7 +92,7 @@ def upload():
         
         if (ANSWERS_TAG in data_type  or
             TIMINGS_TAG in data_type):
-            s3_filename = get_survey_type(data_type, patient_id, timestamp)
+            s3_filename = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             s3_upload(s3_filename, uploaded_file)
             
         else:
@@ -116,10 +116,10 @@ def upload():
         return abort(400)
 
 
-def get_survey_type( data_type, patient_id, timestamp ):
-    survey_data_type, question_created_timestamp = parse_filetype( data_type )
+def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
+    survey_data_type, questions_created_timestamp = parse_filetype( data_type )
     print "survey_data_type", survey_data_type
-    print "question_created_timestamp", question_created_timestamp
+    print "questions_created_timestamp", questions_created_timestamp
     
     survey_frequency = 'UNKNOWN_TYPE'
     if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
@@ -131,7 +131,7 @@ def get_survey_type( data_type, patient_id, timestamp ):
     return (patient_id + '/' +
             survey_data_type + '/' +
             survey_frequency + '/' +
-            question_created_timestamp + '/' +
+            questions_created_timestamp + '/' +
             timestamp )
             
     
@@ -191,9 +191,9 @@ def parse_filename(filename):
 
 def parse_filetype(file_type):
     """ Separates alphabetical characters from digits for parsing."""
-    question_created_timestamp = filter(str.isdigit, str(file_type)).lower()
+    questions_created_timestamp = filter(str.isdigit, str(file_type)).lower()
     survey_data_type = filter(str.isalpha, str(file_type)).lower()
-    return survey_data_type, question_created_timestamp
+    return survey_data_type, questions_created_timestamp
 
 def grab_file_extension(file_name):
     return file_name.rsplit('.', 1)[1]
