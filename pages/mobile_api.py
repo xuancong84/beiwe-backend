@@ -80,18 +80,20 @@ def upload():
 
     
     if patient_id =="18wh3b" and file_name[-4:] != ".mp4":
-        print "data received:", uploaded_file[:4096]
+        #print "data received:", uploaded_file[:4096]
         uploaded_file = decrypt_device_file(patient_id, uploaded_file,
                                               get_client_private_key(patient_id) )
-        print "decrypted:", uploaded_file[:4096]
+        #print "decrypted:", uploaded_file[:4096]
     
     
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
-        
+        print "file_type", file_type
+
         if ANSWERS_TAG in file_type or TIMINGS_TAG in file_type:
             ftype, parsed_id = parse_filetype( file_type )
-            
+            print "ftype", ftype
+            print "parsed_id", parsed_id
             survey_type = 'UNKNOWN_TYPE'
             if 'daily' in ftype.lower(): survey_type = DAILY_SURVEY_NAME
             if 'weekly' in ftype.lower(): survey_type = WEEKLY_SURVEY_NAME
