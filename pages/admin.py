@@ -4,6 +4,7 @@ from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin
 from libs.db_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
+from libs.encryption import encrypt_for_server
 
 admin = Blueprint('admin', __name__)
 
@@ -128,8 +129,9 @@ def download():
     """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
-
 @admin.route("/user_list")
-@authenticate_admin
 def get_user_list():
-    return "python compatible string:\n" + str([user['_id'] for user in Users()])
+    all_users = ""
+    for user in Users():
+        all_users += user['_id'] + ','
+    return encrypt_for_server( all_users[:-1] )
