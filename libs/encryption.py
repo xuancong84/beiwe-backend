@@ -71,14 +71,26 @@ def decrypt_device_line(patient_id, data, private_key):
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
         
-    #print "data length:", len(data), "\ndata:", data
-    symmetric_key, iv, data = data.split(":")
-    #print "lengths - key:", len(symmetric_key), 'iv:', len(iv), 'data:', len(data)
+    try:
+        try:
+            symmetric_key, iv, data = data.split(":")
+        except Exception as e1:
+            print "malformed line, could not split, this dump could be big..."
+            print data
+            raise e1
+        
+        iv = decode_base64( iv.encode( "utf-8" ) )
+        data = decode_base64( data.encode( "utf-8" ) )
+        symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
+        decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
+    except Exception as e2:
+        if "unpack" in e2.message: raise e2
+        print "an error occurred in decryption"
+        print "data length:", len(data)
+        print "start of data:", data[:4096]
+        print "end of data:", data[:-256]
+        raise e2
     
-    iv = decode_base64( iv.encode( "utf-8" ) )
-    data = decode_base64( data.encode( "utf-8" ) )
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
-    decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     return remove_PKCS5_padding( decrypted )
 
 
