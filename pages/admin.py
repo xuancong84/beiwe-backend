@@ -127,3 +127,9 @@ def create_new_patient():
 def download():
     """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
+
+
+@admin.route("/user_list")
+@authenticate_admin
+def get_user_list():
+    return "python compatible string:\n" + str([user['_id'] for user in Users()])
