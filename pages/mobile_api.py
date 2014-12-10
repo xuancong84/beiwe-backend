@@ -76,13 +76,15 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
+    print "uploaded file name:", file_name
 
-
+    
     if patient_id =="18wh3b":
+        print "data received:", uploaded_file[:4096]
         uploaded_file = decrypt_device_file(patient_id, uploaded_file,
                                               get_client_private_key(patient_id) )
-    print "uploaded file name:", file_name
-    #print "uploaded file = ", uploaded_file
+        print "decrypted:", uploaded_file[:4096]
+    
     
     if uploaded_file and file_name and allowed_extension( file_name ):
         file_type, timestamp  = parse_filename( file_name )
