@@ -85,6 +85,7 @@ def decrypt_device_file(patient_id, data, private_key):
                 #the data is not colon separated correctly
                 # implies an interrupted write operation (or read)
                 raise
+            e.message = "there was an error in decryption"
             raise
     #drop the last new line char
     return return_data[:-1]
