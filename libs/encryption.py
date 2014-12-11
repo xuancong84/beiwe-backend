@@ -61,7 +61,7 @@ def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #we are relying on a quirk? in the split function, which only strips empty
     # entries if no argument is supplied.
-    data = [line for line in data.split('\n') if line ]
+    data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     for line in data:
         try:
@@ -69,11 +69,11 @@ def decrypt_device_file(patient_id, data, private_key):
             return_data += new_thing + "\n"
         except Exception as e:
             if "unpack" in e.message:
-                print "could not split", data
+                print "could not split", line
             else:
-                print "data length:", len(data)
-                print "start of data:", data[:4096]
-                print "end of data:", data[-256:]
+                print "data length:", len(line)
+                print "start of data:", line[:4096]
+                print "end of data:", line[-256:]
             raise e
     #drop the last new line char
     return return_data[:-1]
