@@ -68,12 +68,10 @@ def decrypt_device_file(patient_id, data, private_key):
             new_thing = decrypt_device_line(patient_id, line, private_key)
             return_data += new_thing + "\n"
         except Exception as e:
-            if "unpack" in e.message:
-                print "could not split", line
-            else:
                 print "data length:", len(line)
                 print "start of data:", line[:4096]
                 print "end of data:", line[-256:]
+            
             raise e
     #drop the last new line char
     return return_data[:-1]
