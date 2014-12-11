@@ -1,6 +1,7 @@
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
 
+import logging
 
 ################################################################################
 ################################# RSA ##########################################
@@ -67,8 +68,23 @@ def decrypt_device_file(patient_id, data, private_key):
         try:
             return_data += decrypt_device_line(patient_id, line, private_key) + "\n"
         except Exception as e:
-            print e.keys()
-            print e.message
+            print "############", e.message, "##############"
+            if 'AES key' in e.message:
+                #AES key is a bad length
+                raise
+            if 'Incorrect padding' in e.message:
+                #base64 decoding error, means data is getting truncated
+                # only seen in mp4 files
+                # possibilities?:
+                #  upload during write operation.
+                raise
+            if 'IV must be' in e.message:
+                #iv is a bad length
+                raise
+            if "unpack" in e.message:
+                #the data is not colon separated correctly
+                # implies an interrupted write operation (or read)
+                raise
             raise
     #drop the last new line char
     return return_data[:-1]
