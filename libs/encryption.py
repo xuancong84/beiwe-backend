@@ -79,6 +79,10 @@ def decrypt_device_line(patient_id, data, private_key):
             print "malformed line, could not split, this dump could be big..."
             print data
             raise e1
+        iv = ""
+        symmetric_key = ""
+        data = ""
+        
         
         iv = decode_base64( iv.encode( "utf-8" ) )
         data = decode_base64( data.encode( "utf-8" ) )
