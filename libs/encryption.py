@@ -64,15 +64,8 @@ def decrypt_device_file(patient_id, data, private_key):
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     for line in data:
-        try:
-            new_thing = decrypt_device_line(patient_id, line, private_key)
-            return_data += new_thing + "\n"
-        except Exception as e:
-                print "data length:", len(line)
-                print "start of data:", line[:4096]
-                print "end of data:", line[-256:]
-            
-            raise e
+        new_thing = decrypt_device_line(patient_id, line, private_key)
+        return_data += new_thing + "\n"
     #drop the last new line char
     return return_data[:-1]
 
@@ -88,18 +81,10 @@ def decrypt_device_line(patient_id, data, private_key):
     data = ""
     
     symmetric_key, iv, data = data.split(":")
-    try:
-        iv = decode_base64( iv.encode( "utf-8" ) )
-        data = decode_base64( data.encode( "utf-8" ) )
-        symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
-        decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
-    except Exception as e2:
-        print "an error occurred in decryption"
-        print "iv length", len(iv)
-        print 'iv', iv
-        print "symmetric_key length", len(symmetric_key)
-        print "symmetric key", symmetric_key
-        raise e2
+    iv = decode_base64( iv.encode( "utf-8" ) )
+    data = decode_base64( data.encode( "utf-8" ) )
+    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
+    decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     
     return remove_PKCS5_padding( decrypted )
 
