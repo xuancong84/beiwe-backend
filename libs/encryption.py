@@ -64,8 +64,12 @@ def decrypt_device_file(patient_id, data, private_key):
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     for line in data:
-        new_thing = decrypt_device_line(patient_id, line, private_key)
-        return_data += new_thing + "\n"
+        try:
+            return_data += decrypt_device_line(patient_id, line, private_key) + "\n"
+        except Exception as e:
+            print e.keys()
+            print e.message
+            raise
     #drop the last new line char
     return return_data[:-1]
 
@@ -76,22 +80,12 @@ def decrypt_device_line(patient_id, data, private_key):
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
-    if len(data.split(':')) != 3:
-        print ""
-        print data
-        print ""
-
-    symmetric_key, iv, data = data.split(":")
     
-
+    symmetric_key, iv, data = data.split(":")
     iv = decode_base64( iv.encode( "utf-8" ) )
     data = decode_base64( data.encode( "utf-8" ) )
     symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
-    try:
-        decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
-    except ValueError as e:
-	print e
-	raise
+    decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     
     return remove_PKCS5_padding( decrypted )
 
