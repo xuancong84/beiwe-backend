@@ -61,7 +61,8 @@ def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #we are relying on a quirk? in the split function, which only strips empty
     # entries if no argument is supplied.
-    return "\n".join( [ decrypt_device_line(patient_id, line, private_key) for line in data.split() ] )
+    data = [line for line in data.split('\n') if line ]
+    return "\n".join( [ decrypt_device_line(patient_id, line, private_key) for line in data  ] )
 
 
 # provide a key by running get_client_private_key(patient_id)
