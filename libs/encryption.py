@@ -68,24 +68,25 @@ def decrypt_device_file(patient_id, data, private_key):
         try:
             return_data += decrypt_device_line(patient_id, line, private_key) + "\n"
         except Exception as e:
+            new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
             if 'AES key' in e.message:
                 #AES key is a bad length
-                raise
-            if 'Incorrect padding' in e.message:
+                raise new_e
+            elif 'Incorrect padding' in e.message:
                 #base64 decoding error, means data is getting truncated
                 # only seen in mp4 files
                 # possibilities?:
                 #  upload during write operation.
-                raise
-            if 'IV must be' in e.message:
+                raise new_e
+            elif 'IV must be' in e.message:
                 #iv is a bad length
-                raise
-            if "unpack" in e.message:
+                raise new_e
+            elif "unpack" in e.message:
                 #the data is not colon separated correctly
                 # implies an interrupted write operation (or read)
-                raise
-            e.message = "there was an error in decryption"
+                raise new_e
+            
             raise
     #drop the last new line char
     return return_data[:-1]
