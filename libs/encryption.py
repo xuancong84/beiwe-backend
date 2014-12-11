@@ -62,7 +62,21 @@ def decrypt_device_file(patient_id, data, private_key):
     #we are relying on a quirk? in the split function, which only strips empty
     # entries if no argument is supplied.
     data = [line for line in data.split('\n') if line ]
-    return "\n".join( [ decrypt_device_line(patient_id, line, private_key) for line in data  ] )
+    return_data = ""
+    for line in data:
+        try:
+            new_thing = decrypt_device_line(patient_id, line, private_key)
+            return_data += new_thing + "\n"
+        except Exception as e:
+            if "unpack" in e.message:
+                print "could not split", data
+            else:
+                print "data length:", len(data)
+                print "start of data:", data[:4096]
+                print "end of data:", data[-256:]
+            raise e
+    #drop the last new line char
+    return return_data[:-1]
 
 
 # provide a key by running get_client_private_key(patient_id)
@@ -71,33 +85,22 @@ def decrypt_device_line(patient_id, data, private_key):
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
-        
+    iv = ""
+    symmetric_key = ""
+    data = ""
+    
+    symmetric_key, iv, data = data.split(":")
     try:
-        try:
-            symmetric_key, iv, data = data.split(":")
-        except Exception as e1:
-            print "malformed line, could not split, this dump could be big..."
-            print data
-            raise e1
-        iv = ""
-        symmetric_key = ""
-        data = ""
-        
-        
         iv = decode_base64( iv.encode( "utf-8" ) )
         data = decode_base64( data.encode( "utf-8" ) )
         symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
         decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception as e2:
-        if "unpack" in e2.message: raise e2
         print "an error occurred in decryption"
         print "iv length", len(iv)
         print 'iv', iv
         print "symmetric_key length", len(symmetric_key)
         print "symmetric key", symmetric_key
-        print "data length:", len(data)
-        print "start of data:", data[:4096]
-        print "end of data:", data[-256:]
         raise e2
     
     return remove_PKCS5_padding( decrypted )
