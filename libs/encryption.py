@@ -86,6 +86,10 @@ def decrypt_device_line(patient_id, data, private_key):
     except Exception as e2:
         if "unpack" in e2.message: raise e2
         print "an error occurred in decryption"
+        print "iv length", len(iv)
+        print 'iv', iv
+        print "symmetric_key length", len(symmetric_key)
+        print "symmetric key", symmetric_key
         print "data length:", len(data)
         print "start of data:", data[:4096]
         print "end of data:", data[-256:]
