@@ -101,9 +101,14 @@ def upload():
         else:
             if file_name[-4:] == ".mp4":
                 print len(uploaded_file)
-                s3_upload(file_name.replace("_", "/"),
-                          decrypt_device_file(patient_id, uploaded_file,
-                                              get_client_private_key(patient_id) ) )
+                try:
+                    s3_upload(file_name.replace("_", "/"),
+                              decrypt_device_file(patient_id, uploaded_file,
+                                                  get_client_private_key(patient_id) ) )
+                except Exception as e:
+                    if not e.message == "there was an error in decryption":
+                        raise
+                    return abort(406)
             else:
                 s3_upload( file_name.replace("_", "/") , uploaded_file )
         return render_template('blank.html'), 200
