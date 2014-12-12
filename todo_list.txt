@@ -1,15 +1,17 @@
 Write up security doc and take screenshots for IRB
 Send them stuff about the text in the app and what it needs
 
-File upload
--Make upload_all_files() get called by a listener that listens for new files or a change in WiFi state
+Build a listener for WiFi connected, then try to upload files and download surveys
+
+Make AudioRecorderActivity record to a temporary file, then encrypt that file to a new file either when you press record, or when in onDestroy()->isFinishing().  Make there be only one unencrypted file at a time, make it never get uploaded.  Make it get deleted whenever possible.
+Try to add a protection against a half-written encrypted voiceRecordingFile being uploaded.
+
+-What if you make two recordings while on the audiorecorderactivity page
 
 Add crash logging
 http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
 http://www.acra.ch/
 http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
-
-Don't let it upload a partially-recorded audio file/look into putting a write lock around uploading
 
 App UI
 -Finalize, style, and pretty-ify the UI
@@ -17,12 +19,7 @@ App UI
 
 -(Josh) Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
 
--Make sure max recording time length is significantly shorter than automatic logout time
--Move audio recording max length into a constant in Timer.java
-
 -Check if NULLID files are still getting created.  If they are, Figure out what to do with phones uploading NULLID files or files with a patient_id different from the patient_id in the login credentials.  Dump em?  Keep em?  Or something else?
-
--Fix the makeNewFilesForEverything() and getAllUploadableFiles()
 
 Encryption/security
 -Create shim for symmetric encryption
@@ -56,7 +53,6 @@ Change name of server from ubuntu@SCRUBS
 
 
 
-
 LOW PRIORITY:
 
 Timers & data upload
@@ -73,6 +69,8 @@ Admin Panel UI
 -Make the page reload after they create a new patient or remove a device
 
 In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
+
+Consider making TextFileManager.closeFile() trigger an upload loop... but what happens when many are created at once? Just make closeFile() and createNewFilesForEverything() trigger upload loops.
 
 
 
