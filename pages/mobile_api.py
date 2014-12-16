@@ -76,7 +76,7 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    print "uploaded file name:", file_name
+    print "uploaded file name:", file_name, len(uploaded_file)
     
     if patient_id == "18wh3b" and file_name[-4:] != ".mp4":
         try:
@@ -86,7 +86,7 @@ def upload():
             if not e.message == "there was an error in decryption":
                 raise
             return abort(406)
-    
+    print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
     if ( uploaded_file  and file_name  and
          contains_valid_extension( file_name ) ):
@@ -111,12 +111,16 @@ def upload():
                     return abort(406)
             else:
                 s3_upload( file_name.replace("_", "/") , uploaded_file )
+        print "upload success: ", file_name
         return render_template('blank.html'), 200
     
     #error cases.
     else:
-        print "an upload has failed, ",
-        if not uploaded_file: print "there was no uploaded file."
+        print "an upload has failed, ", file_name,
+        if not uploaded_file:
+            print "there was no/an empty uploaded file.\nHAX: returning 200 OK so that empty files are deleted from the device."
+            return render_template('blank.html'), 200
+
         elif not file_name: print "there was no provided file name."
         elif file_name and not contains_valid_extension( file_name ):
             print "the file name contains an invalid extension. ", grab_file_extension(file_name)
