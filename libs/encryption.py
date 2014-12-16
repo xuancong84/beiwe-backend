@@ -1,8 +1,6 @@
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
 
-import logging
-
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
@@ -64,25 +62,19 @@ def decrypt_device_file(patient_id, data, private_key):
     # entries if no argument is supplied.
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
-    i = 0
     
     decoded_key = decode_base64( data[0].encode( "utf-8" ) )
     decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
-    #we may have an inefficiency in this encryption process, this might not need to be
-    #doubly encoded in base64
+    #we may have an inefficiency in this encryption process, this might not need
+    # to be doubly encoded in base64
 
     print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
         try:
-            #if i%100 == 0: print decrypt_device_line(patient_id, decrypted_key, line) 
-            i += 1
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
             new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
-            print data#[i-10]
-            #print line
-            print "#########################################"
             if 'AES key' in e.message:
                 #AES key is a bad length
                 raise new_e
@@ -99,10 +91,8 @@ def decrypt_device_file(patient_id, data, private_key):
                 #the data is not colon separated correctly
                 # implies an interrupted write operation (or read)
                 raise new_e
-            
             raise
-    #drop the last new line char
-    return return_data[:-1]
+    return return_data
 
 # provide a key by running get_client_private_key(patient_id)
 def decrypt_device_line(patient_id, key, data):

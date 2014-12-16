@@ -100,7 +100,7 @@ def upload():
             
         else:
             if file_name[-4:] == ".mp4":
-                print len(uploaded_file)
+                print "media file:", len(uploaded_file)
                 try:
                     s3_upload(file_name.replace("_", "/"),
                               decrypt_device_file(patient_id, uploaded_file,
@@ -118,7 +118,7 @@ def upload():
     else:
         print "an upload has failed, ", file_name,
         if not uploaded_file:
-            print "there was no/an empty uploaded file.\nHAX: returning 200 OK so that empty files are deleted from the device."
+            print "there was no/an empty uploaded file, returning 200 OK..."
             return render_template('blank.html'), 200
 
         elif not file_name: print "there was no provided file name."
