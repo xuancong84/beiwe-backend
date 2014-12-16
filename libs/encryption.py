@@ -64,9 +64,15 @@ def decrypt_device_file(patient_id, data, private_key):
     # entries if no argument is supplied.
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
-    for line in data:
+    i = 0
+    
+    symmetric_key = decode_base64( data[0].encode( "utf-8" ) )
+    
+    for line in data[1:]
         try:
-            return_data += decrypt_device_line(patient_id, line, private_key) + "\n"
+            i += 1
+            if i%100 ==0: print i
+            return_data += decrypt_device_line(patient_id, symmetric_key, line) + "\n"
         except Exception as e:
             new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
@@ -91,33 +97,24 @@ def decrypt_device_file(patient_id, data, private_key):
     #drop the last new line char
     return return_data[:-1]
 
-
 # provide a key by running get_client_private_key(patient_id)
-def decrypt_device_line(patient_id, data, private_key):
+def decrypt_device_line(patient_id, symmetric_key, data):
     """ data is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
-    symmetric_key, iv, data = data.split(":")
-    print symmetric_key
-    sym2 = symmetric_key
+    iv, data = data.split(":")
+    #this nonsense is because we appear to accasionally get ascii encoding errors.
     iv = decode_base64( iv.encode( "utf-8" ) )
     data = decode_base64( data.encode( "utf-8" ) )
-    symmetric_key = private_key.decrypt( decode_base64( symmetric_key.encode( "utf-8" ) ) )
     
     try:
         decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception:
         print len(iv), len(data), len(symmetric_key)
-        print sym2
-        print sym2.encode('utf-8')
-        print decode_base64(sym2.encode('utf-8') )
-        print decode_base64(sym2)
-        print len(private_key.decrypt(decode_base64(sym2.encode('utf-8'))))
-        print (private_key.decrypt( decode_base64(sym2) ) )
         raise
-    return ""
-#     return remove_PKCS5_padding( decrypted )
+    
+    return remove_PKCS5_padding( decrypted )
 
 
 def remove_PKCS5_padding(data):
