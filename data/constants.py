@@ -15,8 +15,9 @@ ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
-ANSWERS_TAG = 'surveyAnswers'
-TIMINGS_TAG = 'surveyTimings'
+#these strings are tags used in identifying files created by the surveys.
+SURVEY_ANSWERS_TAG = 'surveyAnswers'
+SURVEY_TIMINGS_TAG = 'surveyTimings'
 
 DAILY_SURVEY_NAME = 'Daily'
 WEEKLY_SURVEY_NAME = 'Weekly'
