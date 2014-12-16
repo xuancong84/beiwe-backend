@@ -64,15 +64,16 @@ def decrypt_device_file(patient_id, data, private_key):
     # entries if no argument is supplied.
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
-    i = 0
+#     i = 0
     
-    symmetric_key = decode_base64( data[0].encode( "utf-8" ) )
-    
-    for line in data[1:]
+    decoded_key = decode_base64( data[0].encode( "utf-8" ) )
+    decrypted_key = private_key.decrypt( decoded_key )
+    print "length decrypted key", len(decrypted_key)
+    for line in data[1:]:
         try:
-            i += 1
-            if i%100 ==0: print i
-            return_data += decrypt_device_line(patient_id, symmetric_key, line) + "\n"
+#             i += 1
+#             if i%100 ==0: print i
+            return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
             new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
@@ -98,7 +99,7 @@ def decrypt_device_file(patient_id, data, private_key):
     return return_data[:-1]
 
 # provide a key by running get_client_private_key(patient_id)
-def decrypt_device_line(patient_id, symmetric_key, data):
+def decrypt_device_line(patient_id, key, data):
     """ data is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
@@ -109,9 +110,9 @@ def decrypt_device_line(patient_id, symmetric_key, data):
     data = decode_base64( data.encode( "utf-8" ) )
     
     try:
-        decrypted = AES.new(symmetric_key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
+        decrypted = AES.new(key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception:
-        print len(iv), len(data), len(symmetric_key)
+        print len(iv), len(data), len(key)
         raise
     
     return remove_PKCS5_padding( decrypted )
