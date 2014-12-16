@@ -1,13 +1,11 @@
-
 from flask import Blueprint, request, abort, json, render_template
 
-from kitchen.text.converters import to_bytes as thingy
-
-from data.constants import (ALLOWED_EXTENSIONS, ANSWERS_TAG, TIMINGS_TAG,
+from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
-from libs.s3 import s3_retrieve, s3_list_files, s3_upload, get_client_public_key_string, get_client_private_key
+from libs.s3 import ( s3_list_files, s3_upload, get_client_public_key_string,
+                      get_client_private_key )
 
 from libs.encryption import decrypt_device_file
 
@@ -23,7 +21,6 @@ mobile_api = Blueprint('mobile_api', __name__)
 ################################################################################
 ############################# DOWNLOADS ########################################
 ################################################################################
-
 
 @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
 @authenticate_user
@@ -76,41 +73,42 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    print "uploaded file name:", file_name, len(uploaded_file)
+    #print "uploaded file name:", file_name, len(uploaded_file)
     
+    #Debugging code, decrypts non-media files from Eli's tablet
     if patient_id == "18wh3b" and file_name[-4:] != ".mp4":
+        client_private_key = get_client_private_key(patient_id)
         try:
-            uploaded_file = decrypt_device_file(patient_id, uploaded_file,
-                                            get_client_private_key(patient_id) )
+            uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
         except Exception as e:
             if not e.message == "there was an error in decryption":
                 raise
             return abort(406)
-    print "decryption success:", file_name
-    #if uploaded data a) actually exists, B) is validly named and typed...
-    if ( uploaded_file  and file_name  and
-         contains_valid_extension( file_name ) ):
         
+    #print "decryption success:", file_name
+    #if uploaded data a) actually exists, B) is validly named and typed...
+    if uploaded_file  and file_name and contains_valid_extension( file_name ):
         data_type, timestamp  = parse_filename( file_name )
         
-        if (ANSWERS_TAG in data_type  or
-            TIMINGS_TAG in data_type):
-            s3_filename = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
-            s3_upload(s3_filename, uploaded_file)
+        #survey files have special file names and need some extra parsing logic
+        if SURVEY_ANSWERS_TAG in data_type  or SURVEY_TIMINGS_TAG in data_type:
+            file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
+        #TODO: Eli. debug, drop the file name conditional, dedent, drop the try-except, dedent.
+        if file_name[-4:] == ".mp4":
+            print "media file length:", len(uploaded_file)
+            try:
+                client_private_key =client_private_key = get_client_private_key(patient_id)
+                decrypted_data = decrypt_device_file(patient_id, uploaded_file,
+                                                     client_private_key )
+                s3_upload(file_name.replace("_", "/"), decrypted_data)
+                          
+            except Exception as e:
+                if not e.message == "there was an error in decryption":
+                    raise
+                return abort(406)
         else:
-            if file_name[-4:] == ".mp4":
-                print "media file:", len(uploaded_file)
-                try:
-                    s3_upload(file_name.replace("_", "/"),
-                              decrypt_device_file(patient_id, uploaded_file,
-                                                  get_client_private_key(patient_id) ) )
-                except Exception as e:
-                    if not e.message == "there was an error in decryption":
-                        raise
-                    return abort(406)
-            else:
-                s3_upload( file_name.replace("_", "/") , uploaded_file )
+            s3_upload( file_name.replace("_", "/") , uploaded_file )
         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
@@ -137,8 +135,10 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
     if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
     if 'weekly' in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
     
-    if survey_data_type.startswith( ANSWERS_TAG ): survey_data_type = ANSWERS_TAG
-    if survey_data_type.startswith( TIMINGS_TAG ): survey_data_type = TIMINGS_TAG
+    if survey_data_type.startswith( SURVEY_ANSWERS_TAG ):
+        survey_data_type = SURVEY_ANSWERS_TAG
+    if survey_data_type.startswith( SURVEY_TIMINGS_TAG ):
+        survey_data_type = SURVEY_TIMINGS_TAG
     
     return (patient_id + '/' +
             survey_data_type + '/' +
