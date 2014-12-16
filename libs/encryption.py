@@ -64,19 +64,25 @@ def decrypt_device_file(patient_id, data, private_key):
     # entries if no argument is supplied.
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
-#     i = 0
+    i = 0
     
     decoded_key = decode_base64( data[0].encode( "utf-8" ) )
-    decrypted_key = private_key.decrypt( decoded_key )
+    decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
+    #we may have an inefficiency in this encryption process, this might not need to be
+    #doubly encoded in base64
+
     print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
         try:
-#             i += 1
-#             if i%100 ==0: print i
+            #if i%100 == 0: print decrypt_device_line(patient_id, decrypted_key, line) 
+            i += 1
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
             new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
+            print data#[i-10]
+            #print line
+            print "#########################################"
             if 'AES key' in e.message:
                 #AES key is a bad length
                 raise new_e
