@@ -4,27 +4,6 @@ from pages import mobile_api, admin, survey_designer
 from libs.logging import log_error
 from libs.security import set_secret_key
 
-try:
-    from data.passwords import ENCRYPTION_KEY
-except ImportError as e:
-    if e.message != "No module named secure":
-        log_error(e)
-        raise
-    else:
-        print "\nYou have not provided a secure.py file.\n"
-        exit()
-
-if len( ENCRYPTION_KEY ) != 32:
-    print "Your key is not 32 characters. The key must be exactly 32 charcters long."
-    exit()
-
-try:
-    import pbkdf2
-except ImportError as e:
-    log_error(e)
-    print "You need to install a package called pbkdf2. (use pip)"
-    exit()
-
 
 def subdomain(directory):
     app = Flask(__name__, static_folder=directory + "/static")
@@ -64,6 +43,24 @@ def e500_text(e):
         log_error(e)
     return abort(500)
 
+
+def test_passwords():
+    try:
+        from data.passwords import ENCRYPTION_KEY
+    except ImportError as e:
+        if e.message != "No module named passwords":
+            log_error(e)
+            raise
+        else:
+            print "\nYou have not provided a secure.py file.\n"
+            exit()
+    
+    if len( ENCRYPTION_KEY ) != 32:
+        print "Your key is not 32 characters. The key must be exactly 32 charcters long."
+        exit()
+
+
+test_passwords()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
