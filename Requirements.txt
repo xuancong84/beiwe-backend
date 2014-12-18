@@ -1,0 +1,28 @@
+The following are required for this server installation to work:
+
+
+python packages - all of these can be installed using pip.
+    Flask (should include jinja2 and werzeug)
+    mongolia (should include pymongo)
+    pycrypto
+    boto
+    pbkdf2
+    base64 (should be a built-in)
+    hashlib (should be a built-in)
+    
+
+other software:
+    Mongo
+
+
+it is STRONGLY recommended that you have an interactive python terminal,
+we recommend ipython.  To gain command-line access to the mongo database
+run the db_shell.py it the top level of this repository, and use the handy
+imported functions.
+
+
+YOU MUST create a passwords.py file in the /data directory of this project,
+follow the example document, in it you will also find instructions for a basic
+mongodb setup.  If you have need additional or non-default setup requirements
+those should go in the libs/db_models.py file, and you should consult the mongolia
+documentation.
