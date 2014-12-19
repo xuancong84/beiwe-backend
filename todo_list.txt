@@ -1,12 +1,16 @@
-Write up security doc and take screenshots for IRB
 Send them stuff about the text in the app and what it needs
 
+Test exact survey timer (not using setRepeating in API 19+)
+Log in debugLog when survey intent gets called
+Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
+
+Sometimes message pops saying, "passwords don't match" on registration screen, but it still registers anyways.  does "A" match "a"
+
+Fix UI on survey builder page to do whatever Roy wanted it to do
+
+Make sure phone reports own hashed phone number, and can be matched to hashed Bluetooth MAC
+
 Build a listener for WiFi connected, then try to upload files and download surveys
-
-Make AudioRecorderActivity record to a temporary file, then encrypt that file to a new file either when you press record, or when in onDestroy()->isFinishing().  Make there be only one unencrypted file at a time, make it never get uploaded.  Make it get deleted whenever possible.
-Try to add a protection against a half-written encrypted voiceRecordingFile being uploaded.
-
--What if you make two recordings while on the audiorecorderactivity page
 
 Add crash logging
 http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
@@ -83,5 +87,3 @@ Should we try to log when the app was started?  We can't determine whether the a
 Give researchers the ability to turn off certain listeners for a study. Clearly document how to do this, and don't forget to comment out certain permissions in the AndroidManifest.xml file
 
 Let admins see graph for any patient? (Eli says we shouldn't do this)
-
-Improve reset password UI by not making you go to a new page
