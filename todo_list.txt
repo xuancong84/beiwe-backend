@@ -2,17 +2,15 @@ ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
 
 Enable Encryption on the server- only for certain usernames
 
-Sometimes message pops saying, "passwords don't match" on registration screen, but it still registers anyways.  does "A" match "a"
-
 Send them stuff about the text in the app and what it needs
 
 Test exact survey timer (not using setRepeating in API 19+)
 Log in debugLog when survey intent gets called
 Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
 
-Fix UI on survey builder page to do whatever Roy wanted it to do
+eli: update phone number and mac address storage on the server.
 
-Make sure phone reports own hashed phone number, and can be matched to hashed Bluetooth MAC
+Fix UI on survey builder page to do whatever Roy wanted it to do
 
 (Josh) Graph of survey responses
 -Make it look pretty for all types of survey questions
