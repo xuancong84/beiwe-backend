@@ -1,17 +1,34 @@
 ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
 
-Write up security doc and take screenshots for IRB
+Enable Encryption on the server- only for certain usernames
+
+Sometimes message pops saying, "passwords don't match" on registration screen, but it still registers anyways.  does "A" match "a"
+
 Send them stuff about the text in the app and what it needs
 
 Test exact survey timer (not using setRepeating in API 19+)
 Log in debugLog when survey intent gets called
 Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
 
-Sometimes message pops saying, "passwords don't match" on registration screen, but it still registers anyways.  does "A" match "a"
-
 Fix UI on survey builder page to do whatever Roy wanted it to do
 
 Make sure phone reports own hashed phone number, and can be matched to hashed Bluetooth MAC
+
+(Josh) Graph of survey responses
+-Make it look pretty for all types of survey questions
+-Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
+-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
+
+AudioRecorder
+-Debug audio recorder on Benjamin's phone (API v10)
+
+Change name of server from ubuntu@SCRUBS to ubuntu@BEIWE
+
+
+
+
+
+OPTIONAL:
 
 Build a listener for WiFi connected, then try to upload files and download surveys
 
@@ -20,47 +37,15 @@ http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-an
 http://www.acra.ch/
 http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
-App UI
--Finalize, style, and pretty-ify the UI
--Get an app icon
-
--(Josh) Change the error logging so that when you try to write to an encrypted datafile without a key (i.e., when you're in the RegisterActivity and the app hasn't yet been registered), the NPE logs a _different_ error than "tried to write to a text file before calling TextFileManager.start()"
-
--Check if NULLID files are still getting created.  If they are, Figure out what to do with phones uploading NULLID files or files with a patient_id different from the patient_id in the login credentials.  Dump em?  Keep em?  Or something else?
-
-Encryption/security
--Create shim for symmetric encryption
--Write a data download and decryption script
-
-Test Bluetooth
-
-(Josh) Graph of survey responses
--Make it look pretty for all types of survey questions
--Make graph not crash when there are no answers
--Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
--Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
-
-AudioRecorder
--Debug audio recorder on Benjamin's phone (API v10)
-
-
-(Eli)Write a data dump/download script
-
-MMS logging:
--When we receive MMS messages, get and log the "sent time" timestamp from them
--Debug why we log several (like 3) copies of the same MMS when logging sent MMS messages
-	(Eli): I tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
-		Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
-			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
-			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
-
-
-Change name of server from ubuntu@SCRUBS
 
 
 
 
 LOW PRIORITY:
+
+App UI
+-Finalize, style, and pretty-ify the UI
+-Get an app icon
 
 Timers & data upload
 -Add an alert if the phone hasn't been able to upload in a long time?
@@ -78,6 +63,15 @@ Admin Panel UI
 In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
 
 Consider making TextFileManager.closeFile() trigger an upload loop... but what happens when many are created at once? Just make closeFile() and createNewFilesForEverything() trigger upload loops.
+
+MMS logging:
+-When we receive MMS messages, get and log the "sent time" timestamp from them
+-Debug why we log several (like 3) copies of the same MMS when logging sent MMS messages
+	(Eli): I tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
+		Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
+			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
+			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
+
 
 
 
