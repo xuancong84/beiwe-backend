@@ -159,6 +159,10 @@ def register_user():
     # a 403 error.
     patient_id = request.values['patient_id']
     mac_address = request.values['bluetooth_id']
+    try: #grabbing the phone number if its there, not doing anything with it yet.
+        phone_number = request.values['phone_number']
+        print "REGISTERING:", phone_number
+    except Exception: pass
     user = User(patient_id)
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # Case: this patient has a different registered a device.  HTTP 405 is
