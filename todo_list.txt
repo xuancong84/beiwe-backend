@@ -1,3 +1,6 @@
+ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
+
+Write up security doc and take screenshots for IRB
 Send them stuff about the text in the app and what it needs
 
 Test exact survey timer (not using setRepeating in API 19+)
