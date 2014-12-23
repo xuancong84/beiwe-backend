@@ -2,7 +2,12 @@ ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
 
 Enable Encryption on the server- only for certain usernames
 
-Send them stuff about the text in the app and what it needs
+Change the text in the app to what Roy wrote in his edits to the Word doc
+Change the text on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
+Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
+Set automatic voice recording timeout to 5 minutes.
+
+In January, send a change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.  Maybe also a change order for a whole infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
 Test exact survey timer (not using setRepeating in API 19+)
 Log in debugLog when survey intent gets called
