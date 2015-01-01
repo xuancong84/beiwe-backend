@@ -148,6 +148,7 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
             
     
 
+
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
 def register_user():
@@ -155,25 +156,34 @@ def register_user():
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
         Returns the encryption key for this patient. """
-    #Case: If the id and password combination do not match, the decorator returns
+    #CASE: If the id and password combination do not match, the decorator returns
     # a 403 error.
     patient_id = request.values['patient_id']
     mac_address = request.values['bluetooth_id']
-    try: #grabbing the phone number if its there, not doing anything with it yet.
-        phone_number = request.values['phone_number']
-        print "REGISTERING:", phone_number
-    except Exception: pass
+    phone_number = request.values['phone_number']
+    device_id = request.values['device_id']
     user = User(patient_id)
+    print "REGISTERING:", patient_id, phone_number, mac_address, device_id
+    
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
-        # Case: this patient has a different registered a device.  HTTP 405 is
-        # the "method not allowed" error, seems like a good response to me.
+        # CASE: this patient has a registered a device already and it does not
+        # match this device.  They need to contact the study and unregister
+        # their their other device.  The device will receive a 405 error and
+        # should alert the user accordingly.
+        # Provided a user does not completely reset their device (which resets
+        # the device's unique identifier) they user CAN reregister an existing
+        # device, the unlock key they need to enter to at registration is their\
+        # old password.
         return abort(405)
-    upload_bluetooth(patient_id, mac_address)
-    print "device id:", request.values['device_id']
-    user.set_device( request.values['device_id'] )
+    
+    # At this point the device has been checked for validity and will be
+    # registered successfully.  Any errors after this point will be server errors
+    # and return 500 codes
+    # the final return will be the encryption key associated with this user.
+    
+    upload_device_ids(patient_id, mac_address, phone_number, device_id)
+    user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
-    #Case: this device has been registered successfully, the return is the
-    # encryption key associated with this user.
     return get_client_public_key_string(patient_id), 200
 
 
@@ -193,11 +203,13 @@ def set_password():
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
 
-def upload_bluetooth( patient_id, mac_address ):
-    """ Uploads the user's bluetooth mac address safely. """
-    number_mac_addresses = len( s3_list_files(patient_id + '/mac' ) )
-    s3_upload(patient_id + '/mac_' + str(number_mac_addresses),
-                             mac_address )
+def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
+    """ Uploads the user's various identifiers. """
+    number_of_files = len( s3_list_files(patient_id + '/identifiers' ) )
+    file_name = patient_id + '/identifiers_' + str(number_of_files)
+    file_contents = ("patient_id, MAC, phone_number, device_id\n" +
+                     patient_id, "," + mac_address + "," + phone_number +"," + device_id )
+    s3_upload( file_name, file_contents )
 
 def parse_filename(filename):
     """ Splits filename into user-id, file-type, unix-timestamp. """
