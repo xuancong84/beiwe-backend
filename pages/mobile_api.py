@@ -112,42 +112,23 @@ def upload():
         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
-    #error cases.
+    #error cases, (self documenting)
     else:
         print "an upload has failed, ", file_name,
         if not uploaded_file:
-            print "there was no/an empty uploaded file, returning 200 OK..."
+            print "there was no/an empty uploaded file, returning 200 OK so device deletes bad file."
             return render_template('blank.html'), 200
-
-        elif not file_name: print "there was no provided file name."
+        elif not file_name: print "there was no provided file name, device error."
         elif file_name and not contains_valid_extension( file_name ):
-            print "the file name contains an invalid extension. ", grab_file_extension(file_name)
+            print ("contains an invalid extension, it was interpretted as",
+            grab_file_extension(file_name) )
         else: print "AN UNKNOWN ERROR OCCURRED"
         return abort(400)
 
 
-def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
-    survey_data_type, questions_created_timestamp = parse_filetype( data_type )
-    print "survey_data_type", survey_data_type
-    print "questions_created_timestamp", questions_created_timestamp
-    
-    survey_frequency = 'UNKNOWN_TYPE'
-    if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
-    if 'weekly' in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
-    
-    if survey_data_type.startswith( SURVEY_ANSWERS_TAG ):
-        survey_data_type = SURVEY_ANSWERS_TAG
-    if survey_data_type.startswith( SURVEY_TIMINGS_TAG ):
-        survey_data_type = SURVEY_TIMINGS_TAG
-    
-    return (patient_id + '/' +
-            survey_data_type + '/' +
-            survey_frequency + '/' +
-            questions_created_timestamp + '/' +
-            timestamp )
-            
-    
-
+################################################################################
+############################## Registration ####################################
+################################################################################
 
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
@@ -208,7 +189,7 @@ def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
     number_of_files = len( s3_list_files(patient_id + '/identifiers' ) )
     file_name = patient_id + '/identifiers_' + str(number_of_files)
     file_contents = ("patient_id, MAC, phone_number, device_id\n" +
-                     patient_id, "," + mac_address + "," + phone_number +"," + device_id )
+                     patient_id+","+mac_address+","+phone_number+","+device_id )
     s3_upload( file_name, file_contents )
 
 def parse_filename(filename):
@@ -230,3 +211,27 @@ def contains_valid_extension(file_name):
     """ Checks if string has a recognized file extension, this is not necessarily
         limited to 4 characters."""
     return '.' in file_name and grab_file_extension(file_name) in ALLOWED_EXTENSIONS
+
+
+def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
+    """ The survey data files is in the name of the file, this function processes
+        the supplied information and returns the correct file path string."""
+    survey_data_type, questions_created_timestamp = parse_filetype( data_type )
+    print "survey_data_type", survey_data_type
+    print "questions_created_timestamp", questions_created_timestamp
+    
+    survey_frequency = 'UNKNOWN_TYPE'
+    if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
+    if 'weekly' in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
+    
+    if survey_data_type.startswith( SURVEY_ANSWERS_TAG ):
+        survey_data_type = SURVEY_ANSWERS_TAG
+    if survey_data_type.startswith( SURVEY_TIMINGS_TAG ):
+        survey_data_type = SURVEY_TIMINGS_TAG
+    
+    return (patient_id + '/' +
+            survey_data_type + '/' +
+            survey_frequency + '/' +
+            questions_created_timestamp + '/' +
+            timestamp )
+
