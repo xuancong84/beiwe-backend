@@ -1,14 +1,13 @@
+import calendar, time
+
 from flask import Blueprint, request, abort, json, render_template
 
 from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
-from libs.s3 import ( s3_list_files, s3_upload, get_client_public_key_string,
-                      get_client_private_key )
-
 from libs.encryption import decrypt_device_file
-
+from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
@@ -168,6 +167,16 @@ def register_user():
     return get_client_public_key_string(patient_id), 200
 
 
+def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
+    """ Uploads the user's various identifiers. """
+    unix_time = str(calendar.timegm(time.gmtime() ) )
+    file_name = patient_id + '/identifiers_' + unix_time + ".csv"
+    file_contents = ("patient_id, MAC, phone_number, device_id\n" +
+                     patient_id+","+mac_address+","+phone_number+","+device_id )
+    s3_upload( file_name, file_contents )
+
+
+
 ################################################################################
 ############################### USER FUNCTIONS #################################
 ################################################################################
@@ -183,14 +192,6 @@ def set_password():
 ################################################################################
 ############################ RELATED FUNCTIONALITY #############################
 ################################################################################
-
-def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
-    """ Uploads the user's various identifiers. """
-    number_of_files = len( s3_list_files(patient_id + '/identifiers' ) )
-    file_name = patient_id + '/identifiers_' + str(number_of_files)
-    file_contents = ("patient_id, MAC, phone_number, device_id\n" +
-                     patient_id+","+mac_address+","+phone_number+","+device_id )
-    s3_upload( file_name, file_contents )
 
 def parse_filename(filename):
     """ Splits filename into user-id, file-type, unix-timestamp. """
@@ -234,4 +235,3 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
             survey_frequency + '/' +
             questions_created_timestamp + '/' +
             timestamp )
-
