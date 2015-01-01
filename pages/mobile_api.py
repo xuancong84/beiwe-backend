@@ -67,8 +67,8 @@ def fetch_graph():
 @mobile_api.route('/upload', methods=['POST'])
 @authenticate_user
 def upload():
-    """ Entry point to relay GPS, Accelerometer, Audio, PowerState, Calls Log,
-        Texts Log, and Survey Response files. """
+    """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log,
+        Texts Log, Survey Response, and debugging files to s3"""
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
@@ -167,6 +167,7 @@ def register_user():
     return get_client_public_key_string(patient_id), 200
 
 
+# do not incorporate into register_user function.
 def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
     """ Uploads the user's various identifiers. """
     unix_time = str(calendar.timegm(time.gmtime() ) )
