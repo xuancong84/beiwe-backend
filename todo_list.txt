@@ -1,29 +1,32 @@
+----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
+
 ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
 	-Cannot replicate, ask josh how to create a bug report, then probably depricate.
 
 Enable Encryption on the server- only for certain usernames 
 	-this exists, but remains in the list because it needs to be either removed or have josh's name added.
 
-Change the text in the app to what Roy wrote in his edits to the Word doc
-Change the text on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
-Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
+Change text...
+	in the app to what Roy wrote in his edits to the Word doc
+	on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
+	Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
 
 In January, send a change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.  Maybe also a change order for a whole infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
 Fix UI on survey builder page to do whatever Roy wanted it to do
 
-(Josh) Graph of survey responses
--Make it look pretty for all types of survey questions
--Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
--Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
+Graph stuff (Josh)
+	-Make it look pretty for all types of survey questions
+	-Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
+	-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
 
 Change name of server from ubuntu@SCRUBS to ubuntu@BEIWE
 
-(Eli is not sure who the following applies to, he assumes this is something josh was working on.)
-Test exact survey timer (not using setRepeating in API 19+)
-Log in debugLog when survey intent gets called
-Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
-
+Timer stuff:
+	(Eli is not sure who the following applies to, he assumes this is something josh was working on.)
+	Test exact survey timer (not using setRepeating in API 19+)
+	change timer Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
+	Log in debugLog when a survey intent gets called
 
 
 
@@ -31,7 +34,7 @@ Check for surveys more frequently (maybe put it on a WiFi listener, but don't ca
 OPTIONAL:
 
 AudioRecorder
--Debug audio recorder on Benjamin's phone (API v10)
+	-Debug audio recorder on Benjamin's phone (API v10)
 
 Build a listener for WiFi connected, then try to upload files and download surveys
 
@@ -40,28 +43,29 @@ http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-an
 http://www.acra.ch/
 http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
-add in more user device info, specifically I am thinking of android version, sdk version.
+add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
 
 
 
-LOW PRIORITY:
+----------------------------- LOW PRIORITY THINGS -------------------------:
 
 App UI
--Finalize, style, and pretty-ify the UI
--Get an app icon
+	-Finalize, style, and pretty-ify the UI
+	-Get an app icon
 
 Timers & data upload
--Add an alert if the phone hasn't been able to upload in a long time?
--Add a server-side alert if a patient hasn't uploaded data in a long time?
+	-Add an alert if the phone hasn't been able to upload in a long time?
+	-Add a server-side alert if a patient hasn't uploaded data in a long time?
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
+	(if this means anything other than testing real world numbers, this is probably unnecessary.)
 
 Admin Panel UI
--Figure out if we're using base.html and what to do with it
--Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
--(Josh) Admin Panel patients list... paginate
--(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
--Make the page reload after they create a new patient or remove a device
+	-Figure out if we're using base.html and what to do with it
+	-Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
+	-(Josh) Admin Panel patients list... paginate
+	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
+	-Make the page reload after they create a new patient or remove a device
 
 In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
 
@@ -70,7 +74,7 @@ Consider making TextFileManager.closeFile() trigger an upload loop... but what h
 MMS logging:
 -When we receive MMS messages, get and log the "sent time" timestamp from them
 -Debug why we log several (like 3) copies of the same MMS when logging sent MMS messages
-	(Eli): I tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
+	Eli tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
 		Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
 			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
 			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
@@ -79,7 +83,8 @@ Eli: implement a flask url function for a device's phone number changing. all it
 
 
 
-NOT GOING TO DO THESE THINGS:
+
+---------------------------NOT GOING TO DO THESE THINGS --------------------:
 
 Should we try to log when the app was started?  We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this
 
@@ -88,3 +93,8 @@ Give researchers the ability to turn off certain listeners for a study. Clearly 
 Let admins see graph for any patient? (Eli says we shouldn't do this)
 
 Eli: if we restart the background service occasionally we can get around the user-disabled bluetooth "problem"
+
+There is not currently a way to inform the user that the key is corrupted, if this corruption occurs after registration.
+	A) this is unlikely
+	B) the easy solution is to uninstall and reregister the device.
+	C) new functionality for 
