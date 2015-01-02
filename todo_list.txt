@@ -1,10 +1,11 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
 
 ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
-	-Cannot replicate, ask josh how to create a bug report, then probably depricate.
+	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
 
-Enable Encryption on the server- only for certain usernames 
-	-this exists, but remains in the list because it needs to be either removed or have josh's name added.
+Enable Decryption on the server
+
+Enable server-side Encryption (s3 encryption)
 
 Change text...
 	in the app to what Roy wrote in his edits to the Word doc
@@ -31,34 +32,19 @@ Timer stuff:
 
 
 
-OPTIONAL:
-
-AudioRecorder
-	-Debug audio recorder on Benjamin's phone (API v10)
-
-Build a listener for WiFi connected, then try to upload files and download surveys
-
-Add crash logging
-http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
-http://www.acra.ch/
-http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
-
-add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
-
-
-
 ----------------------------- LOW PRIORITY THINGS -------------------------:
 
 App UI
 	-Finalize, style, and pretty-ify the UI
 	-Get an app icon
+	-probably have a conversation about "good" user password checks with JP/Roy so that they feel involved, but leave it unchanged. (only do a length check, because seriously.)
 
 Timers & data upload
 	-Add an alert if the phone hasn't been able to upload in a long time?
 	-Add a server-side alert if a patient hasn't uploaded data in a long time?
 
 Look into optimizing battery/power consumption using timers; Eli may have already built all of this
-	(if this means anything other than testing real world numbers, this is probably unnecessary.)
+	(Eli says if this means anything other than testing real world numbers it is unnecessary.)
 
 Admin Panel UI
 	-Figure out if we're using base.html and what to do with it
@@ -66,8 +52,6 @@ Admin Panel UI
 	-(Josh) Admin Panel patients list... paginate
 	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
 	-Make the page reload after they create a new patient or remove a device
-
-In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
 
 Consider making TextFileManager.closeFile() trigger an upload loop... but what happens when many are created at once? Just make closeFile() and createNewFilesForEverything() trigger upload loops.
 
@@ -81,6 +65,25 @@ MMS logging:
 
 Eli: implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number to check for changes.
 
+
+
+
+----------------------------- OPTIONAL THINGS -----------------------------:
+
+Debug audio recorder on Benjamin's phone (API v10)
+
+Build a listener for WiFi connected, then try to upload files and download surveys
+
+Add crash logging
+http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+http://www.acra.ch/
+http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
+
+add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
+
+It would be nice if we could write the temp file to memory instead of to disk. 
+
+improve compatibility testing in the loading screen (this is a big, dumb thing that is probably unnecessary.)
 
 
 
@@ -98,3 +101,5 @@ There is not currently a way to inform the user that the key is corrupted, if th
 	A) this is unlikely
 	B) the easy solution is to uninstall and reregister the device.
 	C) new functionality for 
+
+In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
