@@ -27,7 +27,6 @@ def update_survey(survey_type, request):
     survey_name += datetime.now().isoformat() + '.json'  # set filename
     new_quiz = request.values['JSONstring']
     s3_upload( survey_name, new_quiz )
-    # TODO: Josh, only return 200 on success; otherwise something else
     return '200'
 
 
