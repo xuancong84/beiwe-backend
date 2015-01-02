@@ -7,7 +7,7 @@ from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMIN
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
 from libs.encryption import decrypt_device_file
-from libs.s3 import s3_upload, s3_upload_encrypted, get_client_public_key_string, get_client_private_key
+from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
@@ -74,8 +74,8 @@ def upload():
     file_name = request.values['file_name']
     #print "uploaded file name:", file_name, len(uploaded_file)
     
-    #TODO: Debugging code, decrypts non-media files from Eli's tablet
-    if patient_id == "18wh3b" and file_name[-4:] != ".mp4":
+    #TODO: to enable global decryption, remove this if statement and dedent.
+    if patient_id == "18wh3b":
         client_private_key = get_client_private_key(patient_id)
         try:
             uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
@@ -93,21 +93,9 @@ def upload():
         if SURVEY_ANSWERS_TAG in data_type  or SURVEY_TIMINGS_TAG in data_type:
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
-        #TODO: Eli. debug(?), drop the file name conditional, dedent, drop the try-except, dedent.
         if file_name[-4:] == ".mp4":
             print "media file length:", len(uploaded_file)
-            try:
-                client_private_key =client_private_key = get_client_private_key(patient_id)
-                decrypted_data = decrypt_device_file(patient_id, uploaded_file,
-                                                     client_private_key )
-                s3_upload_encrypted(file_name.replace("_", "/"), decrypted_data)
-                          
-            except Exception as e:
-                if not e.message == "there was an error in decryption":
-                    raise
-                return abort(406)
-        else:
-            s3_upload( file_name.replace("_", "/") , uploaded_file )
+        s3_upload( file_name.replace("_", "/") , uploaded_file )
         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
@@ -119,7 +107,7 @@ def upload():
             return render_template('blank.html'), 200
         elif not file_name: print "there was no provided file name, device error."
         elif file_name and not contains_valid_extension( file_name ):
-            print ("contains an invalid extension, it was interpreted as",
+            print ("contains an invalid extension, it was interpretted as",
             grab_file_extension(file_name) )
         else: print "AN UNKNOWN ERROR OCCURRED"
         return abort(400)
