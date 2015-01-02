@@ -105,3 +105,6 @@ There is not currently a way to inform the user that the key is corrupted, if th
 	C) new functionality for 
 
 In RegistrationActivity, don't set username and password on the device UNTIL they've been validated by the server.  This would, however, require substantial changes to PostRequest.java.  Leaving it as-is may not actually present any serious security flaws.
+
+we may be able to reduce some HTTPS overhead using the following stackoverflow
+	http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient
