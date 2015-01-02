@@ -58,8 +58,7 @@ def decrypt_server(input_string):
 
 def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
-    #we are relying on a quirk? in the split function, which only strips empty
-    # entries if no argument is supplied.
+
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     
@@ -76,21 +75,29 @@ def decrypt_device_file(patient_id, data, private_key):
             new_e = Exception("there was an error in decryption")
             print "############", e.message, "##############"
             if 'AES key' in e.message:
-                #AES key is a bad length
+                print "AES key is a bad length."
                 raise new_e
-            elif 'Incorrect padding' in e.message:
-                #base64 decoding error, means data is getting truncated
-                # only seen in mp4 files
-                # possibilities?:
-                #  upload during write operation.
-                raise new_e
+            
             elif 'IV must be' in e.message:
-                #iv is a bad length
+                print "iv is a bad length"
                 raise new_e
+            
+            elif 'Incorrect padding' in e.message:
+                print "base64 padding error, data is getting truncated"
+                # this is only seen in mp4 files. possibilities:
+                #  upload during write operation.
+                #  broken base64 conversion is app
+                #  some unanticipated error in the file upload
+                raise new_e
+            
             elif "unpack" in e.message:
-                #the data is not colon separated correctly
+                print "malformed line of data, dropping it."
+                #the data is not colon separated correctly, this is a single
+                # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
-                raise new_e
+                continue
+#                 raise new_e
+            #some other error has occured, and we raise
             raise
     return return_data
 
