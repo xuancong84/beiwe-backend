@@ -1,7 +1,5 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
-
-ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
-	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
+to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
 Enable Decryption on the server
 
@@ -33,6 +31,10 @@ Timer stuff:
 
 
 ----------------------------- LOW PRIORITY THINGS -------------------------:
+
+ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
+	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
+
 
 App UI
 	-Finalize, style, and pretty-ify the UI
