@@ -14,6 +14,9 @@ python packages - all of these can be installed using pip.
 other software:
     Mongo
 
+AWS (Amazon Web Services):
+    Amazaon S3 access credentials
+    a specific S3 bucket
 
 it is STRONGLY recommended that you have an interactive python terminal,
 we recommend ipython.  To gain command-line access to the mongo database

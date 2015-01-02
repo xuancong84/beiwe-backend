@@ -5,7 +5,10 @@ from data.constants import S3_BUCKET
 from libs import encryption
 # import mimetypes
 
-CONN = connect_s3()
+from data.passwords import aws_secret_access_key, aws_access_key_id
+
+CONN = connect_s3(aws_access_key_id=aws_access_key_id,
+                  aws_secret_access_key=aws_secret_access_key)
 
 
 def _get_bucket(name):
