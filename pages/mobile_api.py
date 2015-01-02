@@ -7,7 +7,7 @@ from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMIN
 from libs.data_handlers import get_survey_results
 from libs.db_models import User
 from libs.encryption import decrypt_device_file
-from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
+from libs.s3 import s3_upload, s3_upload_encrypted, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 
@@ -100,7 +100,7 @@ def upload():
                 client_private_key =client_private_key = get_client_private_key(patient_id)
                 decrypted_data = decrypt_device_file(patient_id, uploaded_file,
                                                      client_private_key )
-                s3_upload(file_name.replace("_", "/"), decrypted_data)
+                s3_upload_encrypted(file_name.replace("_", "/"), decrypted_data)
                           
             except Exception as e:
                 if not e.message == "there was an error in decryption":
@@ -119,7 +119,7 @@ def upload():
             return render_template('blank.html'), 200
         elif not file_name: print "there was no provided file name, device error."
         elif file_name and not contains_valid_extension( file_name ):
-            print ("contains an invalid extension, it was interpretted as",
+            print ("contains an invalid extension, it was interpreted as",
             grab_file_extension(file_name) )
         else: print "AN UNKNOWN ERROR OCCURRED"
         return abort(400)
