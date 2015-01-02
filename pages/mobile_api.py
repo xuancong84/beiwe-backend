@@ -74,7 +74,7 @@ def upload():
     file_name = request.values['file_name']
     #print "uploaded file name:", file_name, len(uploaded_file)
     
-    #Debugging code, decrypts non-media files from Eli's tablet
+    #TODO: Debugging code, decrypts non-media files from Eli's tablet
     if patient_id == "18wh3b" and file_name[-4:] != ".mp4":
         client_private_key = get_client_private_key(patient_id)
         try:
@@ -93,7 +93,7 @@ def upload():
         if SURVEY_ANSWERS_TAG in data_type  or SURVEY_TIMINGS_TAG in data_type:
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
-        #TODO: Eli. debug, drop the file name conditional, dedent, drop the try-except, dedent.
+        #TODO: Eli. debug(?), drop the file name conditional, dedent, drop the try-except, dedent.
         if file_name[-4:] == ".mp4":
             print "media file length:", len(uploaded_file)
             try:
@@ -207,6 +207,7 @@ def parse_filetype(file_type):
     return survey_data_type, questions_created_timestamp
 
 def grab_file_extension(file_name):
+    """ grabs the chunk of text after the final period. """
     return file_name.rsplit('.', 1)[1]
     
 def contains_valid_extension(file_name):
