@@ -1,9 +1,7 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
-Enable Decryption on the server
-
-Enable server-side Encryption (s3 encryption)
+Enable Decryption on the server for all users, then delete data and all old accounts.
 
 Change text...
 	in the app to what Roy wrote in his edits to the Word doc
