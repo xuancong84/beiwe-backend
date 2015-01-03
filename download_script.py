@@ -1,3 +1,6 @@
+import os
+from os import chdir
+
 try:
     from libs.s3 import s3_list_files as _s3_list, s3_retrieve as _s3_retrieve
     from urllib2 import urlopen as _urlopen
@@ -11,41 +14,66 @@ print "\n\n...\n"
 try:
     _encrypted_user_list = _urlopen("https://beiwe.org/user_list").read()
     user_list = _decrypt(_encrypted_user_list).split(',')
-    print "\na variable \"user_list\" has been created, it contains all users "
+    print "\na variable \"user_list\" has been created, it contains all user ids"
 except Exception:
     print "\nunable to get user list.\n"
     exit()
 
-def _download(prefix):
-    print "this is going to return a dictionary of the form file_name:data"
-    file_list = _s3_list(prefix)
-    length = len(file_list)
-    data = {}
-    for i, file_name in enumerate(file_list):
-        print i , "/" , length, ":", file_name
-        data[file_name] = _s3_retrieve(file_name)
-    return data
-        
-def download_bluetooth(user_name):
-    return _download(user_name+"/bluetooth")
-    
-def download_wifi(user_name):
-    return _download(user_name+"/wifi")
-    
-def download_debug(user_name):
-    return _download(user_name+"/logFile")
+print ""
+print "you are currently in", os.path.abspath(".")
+print 'To change your current directory type chdir("/some/folderpath/here/")'
 
-def download_accel(user_name):
-    return _download(user_name+"/accel")
+def _get_user_folder_path(patient_id):
+    return patient_id + '/'
+
+def _sanitize_file_name(name):
+    return name.split('/', 1)[-1].replace("/", "_")
     
-def download_gps(user_name):
-    return _download(user_name+"/gps")
+def _download(prefix, patient_id):
+    print "this is going to download files to a folder in the current directory with named the patient id"
+    folder_path = _get_user_folder_path(patient_id)
+    if not os.path.exists(folder_path):
+        os.mkdir(folder_path)
+    extant_files = os.listdir(folder_path)
+    download_list = _s3_list(prefix)
+    length = len(download_list)
     
-def download_audio(user_name):
-    return _download(user_name+"/voiceRecording")
+    for i, server_file_name in enumerate(download_list):
+        local_file_name = _sanitize_file_name(server_file_name)
+        
+        #print statement of current status
+        print str(i+1) + "/" + str(length) + ":", local_file_name,
+        if local_file_name in extant_files:
+            print " ... file already exists, skipping"
+            continue
+        print "downloading."
+        with open(patient_id + '/' + local_file_name, 'w+') as f:
+            f.write( _s3_retrieve(server_file_name) )
+
+
+def download_bluetooth(patient_id):
+    _download(patient_id+"/bluetooth", patient_id)
     
-def download_texts(user_name):
-    return _download(user_name+"/texts")
+def download_wifi(patient_id):
+    _download(patient_id+"/wifi", patient_id)
     
-def download_calls(user_name):
-    return _download(user_name+"/call")
+def download_debug(patient_id):
+    _download(patient_id+"/logFile", patient_id)
+
+def download_accel(patient_id):
+    _download(patient_id+"/accel", patient_id)
+    
+def download_gps(patient_id):
+    _download(patient_id+"/gps", patient_id)
+    
+def download_audio(patient_id):
+    _download(patient_id+"/voiceRecording", patient_id)
+    
+def download_texts(patient_id):
+    _download(patient_id+"/texts", patient_id)
+    
+def download_calls(patient_id):
+    _download(patient_id+"/call", patient_id)
+    
+def download_all(patient_id):
+    _download(patient_id+"/", patient_id)
