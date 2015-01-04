@@ -11,7 +11,7 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 from libs.logging import log_error
-from __main__ import ERROR
+
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
