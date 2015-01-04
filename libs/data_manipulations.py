@@ -1,3 +1,4 @@
+from flask import json
 from data.constants import DAILY_SURVEY_NAME
 from libs.s3 import s3_list_files, s3_retrieve
 from libs.logging import log_error
@@ -102,3 +103,14 @@ def get_survey_results( username="", survey_type=DAILY_SURVEY_NAME, number_point
         for question_num, corresponding_answers in value.items():
             result.append( [question_num, corresponding_answers] )
     return result
+
+
+def jsonify_survey_results(results):
+    """transforms return from get_survey_results into a list that javascript can handle."""
+    return_data = []
+    for pair in results:
+        coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
+        # javascript understands json null/none values but not python Nones,
+        # we must dump all variables individually.
+        return_data.append( [ json.dumps( pair[0] ), coordinates ] )
+    return return_data

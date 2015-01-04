@@ -1,15 +1,16 @@
 import calendar, time
 
-from flask import Blueprint, request, abort, json, render_template
+from flask import Blueprint, request, abort, render_template
 
 from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
-from libs.data_handlers import get_survey_results
+from libs import data_manipulations
 from libs.db_models import User
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
+
 
 
 ################################################################################
@@ -35,7 +36,6 @@ def download_weekly_survey():
 ############################# graph data #######################################
 ################################################################################
 
-
 @mobile_api.route('/graph', methods=['GET', 'POST'])
 @authenticate_user
 def fetch_graph():
@@ -43,21 +43,13 @@ def fetch_graph():
         survey ID. The results are dumped into a jinja template and pushed
         to the device."""
     patient_id = request.values['patient_id']
-    data_results = []
 
-    #results is a list of lists
-    # inner list 0 is the title/question text
-    # inner list 1 is a list of y coordinates
-    results = get_survey_results(username=patient_id,
+    #see doc of data manipulations
+    results = data_manipulations.get_survey_results(username=patient_id,
                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
-    for pair in results:
+    results = data_manipulations.jsonify_survey_results(results)
 
-        coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
-        # javascript understands json null/none values but not python Nones,
-        # we must dump all variables individually.
-        data_results.append( [ json.dumps( pair[0] ), coordinates ] )
-
-    return render_template("phone_graphs.html", graphs=data_results)
+    return render_template("phone_graphs.html", graphs=results)
 
 
 ################################################################################
@@ -177,9 +169,8 @@ def set_password():
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
 
-
 ################################################################################
-############################ RELATED FUNCTIONALITY #############################
+########################## FILE NAME FUNCTIONALITY #############################
 ################################################################################
 
 def parse_filename(filename):
