@@ -1,6 +1,8 @@
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
 
+from libs.logging import log_error
+
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
@@ -54,7 +56,7 @@ def decrypt_server(input_string):
     iv = input_string[:16]
     return AES.new( ENCRYPTION_KEY, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 
-###############################################################################
+########################### User/Device Decryption #############################
 
 def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
@@ -67,38 +69,39 @@ def decrypt_device_file(patient_id, data, private_key):
     #we may have an inefficiency in this encryption process, this might not need
     # to be doubly encoded in base64
 
-    print "length decrypted key", len(decrypted_key)
+#     print "length decrypted key", len(decrypted_key)
+    #this is all error catching for errors we encountered (and solved).
     for line in data[1:]:
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
-            new_e = Exception("there was an error in decryption")
-            print "############", e.message, "##############"
-            if 'AES key' in e.message:
-                print "AES key is a bad length."
-                raise new_e
+            error_message = "There was an error in user decryption: "
             
-            elif 'IV must be' in e.message:
-                print "iv is a bad length"
-                raise new_e
-            
-            elif 'Incorrect padding' in e.message:
-                print "base64 padding error, data is getting truncated"
-                # this is only seen in mp4 files. possibilities:
-                #  upload during write operation.
-                #  broken base64 conversion is app
-                #  some unanticipated error in the file upload
-                raise new_e
-            
-            elif "unpack" in e.message:
-                print "malformed line of data, dropping it."
+            ################### skip these errors ##############################
+            if "unpack" in e.message:
+                error_message += "malformed line of data, dropping it and continuing."
+                log_error(e, error_message)
                 #the data is not colon separated correctly, this is a single
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
                 continue
-#                 raise new_e
-            #some other error has occured, and we raise
+            
+            ##################### flip out on these errors #####################
+            if 'AES key' in e.message:
+                error_message += "AES key has bad length."
+            elif 'IV must be' in e.message:
+                error_message += "iv has bad length."
+            
+            elif 'Incorrect padding' in e.message:
+                error_message += "base64 padding error, data is getting truncated."
+                # this is only seen in mp4 files. possibilities:
+                #  upload during write operation.
+                #  broken base64 conversion is app
+                #  some unanticipated error in the file upload
+            
+            log_error(e, error_message)
             raise
+        
     return return_data
 
 # provide a key by running get_client_private_key(patient_id)
@@ -120,6 +123,7 @@ def decrypt_device_line(patient_id, key, data):
     
     return remove_PKCS5_padding( decrypted )
 
+################################################################################
 
 def remove_PKCS5_padding(data):
     """ Unpacks encrypted data from the device that was encypted using the

@@ -10,9 +10,8 @@ from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
-
-
-
+from libs.logging import log_error
+from __main__ import ERROR
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
@@ -44,7 +43,7 @@ def fetch_graph():
         to the device."""
     patient_id = request.values['patient_id']
 
-    #see doc of data manipulations
+    #see docs in data manipulations for details.
     results = data_manipulations.get_survey_results(username=patient_id,
                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
     results = data_manipulations.jsonify_survey_results(results)
@@ -85,23 +84,25 @@ def upload():
         if SURVEY_ANSWERS_TAG in data_type  or SURVEY_TIMINGS_TAG in data_type:
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
-        if file_name[-4:] == ".mp4":
-            print "media file length:", len(uploaded_file)
         s3_upload( file_name.replace("_", "/") , uploaded_file )
-        print "upload success: ", file_name
+#         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
     else:
-        print "an upload has failed, ", file_name,
+        error_message ="an upload has failed: " + file_name + ", "
         if not uploaded_file:
-            print "there was no/an empty uploaded file, returning 200 OK so device deletes bad file."
+            error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
+            log_error( Exception("upload error"), error_message )
             return render_template('blank.html'), 200
-        elif not file_name: print "there was no provided file name, device error."
+        
+        elif not file_name:
+            error_message += "there was no provided file name, this is an app error."
         elif file_name and not contains_valid_extension( file_name ):
-            print ("contains an invalid extension, it was interpretted as",
-            grab_file_extension(file_name) )
-        else: print "AN UNKNOWN ERROR OCCURRED"
+            error_message += "contains an invalid extension, it was interpretted as "
+            error_message += grab_file_extension(file_name)
+        else: error_message += "AN UNKNOWN ERROR OCCURRED."
+        log_error( Exception("upload error"), error_message )
         return abort(400)
 
 
@@ -123,7 +124,7 @@ def register_user():
     phone_number = request.values['phone_number']
     device_id = request.values['device_id']
     user = User(patient_id)
-    print "REGISTERING:", patient_id, phone_number, mac_address, device_id
+#     print "REGISTERING:", patient_id, phone_number, mac_address, device_id
     
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # CASE: this patient has a registered a device already and it does not
@@ -199,8 +200,8 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
     """ The survey data files is in the name of the file, this function processes
         the supplied information and returns the correct file path string."""
     survey_data_type, questions_created_timestamp = parse_filetype( data_type )
-    print "survey_data_type", survey_data_type
-    print "questions_created_timestamp", questions_created_timestamp
+#     print "survey_data_type", survey_data_type
+#     print "questions_created_timestamp", questions_created_timestamp
     
     survey_frequency = 'UNKNOWN_TYPE'
     if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
