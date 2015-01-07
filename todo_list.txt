@@ -63,9 +63,6 @@ MMS logging:
 			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
 			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
 
-Eli: implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number to check for changes.
-
-
 
 
 ----------------------------- OPTIONAL THINGS -----------------------------:
@@ -85,6 +82,9 @@ It would be nice if we could write the temp file to memory instead of to disk.
 
 improve compatibility testing in the loading screen (this is a big, dumb thing that is probably unnecessary.)
 
+Work out a way to notify the user (ohey, we could use a notification, I here those are nifty!) that they need to find an internet to download things (or upload things, I guess)
+
+implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number to check for changes.
 
 
 ---------------------------NOT GOING TO DO THESE THINGS --------------------:
