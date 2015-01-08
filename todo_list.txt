@@ -1,7 +1,8 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
+
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
-Enable Decryption on the server for all users, then delete data and all old accounts.
+Delete data and all old accounts.
 
 Change text...
 	in the app to what Roy wrote in his edits to the Word doc
@@ -29,10 +30,6 @@ Timer stuff:
 
 
 ----------------------------- LOW PRIORITY THINGS -------------------------:
-
-ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
-	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
-
 
 App UI
 	-Finalize, style, and pretty-ify the UI
@@ -85,6 +82,9 @@ improve compatibility testing in the loading screen (this is a big, dumb thing t
 Work out a way to notify the user (ohey, we could use a notification, I here those are nifty!) that they need to find an internet to download things (or upload things, I guess)
 
 implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number to check for changes.
+
+ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
+	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
 
 
 ---------------------------NOT GOING TO DO THESE THINGS --------------------:
