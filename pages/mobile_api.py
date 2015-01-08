@@ -63,17 +63,17 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    #print "uploaded file name:", file_name, len(uploaded_file)
+    print "uploaded file name:", file_name, len(uploaded_file)
     
     #TODO: to enable global decryption, remove this if statement and dedent.
-    if patient_id == "hgleem":
-        client_private_key = get_client_private_key(patient_id)
-        try:
-            uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
-        except Exception as e:
-            if not e.message == "there was an error in decryption":
-                raise
-            return abort(406)
+#     if patient_id == "hgleem":
+    client_private_key = get_client_private_key(patient_id)
+    try:
+        uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
+    except Exception as e:
+        if not e.message == "there was an error in decryption":
+            raise
+        return abort(406)
         
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
