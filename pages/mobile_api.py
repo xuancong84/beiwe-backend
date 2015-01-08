@@ -85,7 +85,7 @@ def upload():
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
         s3_upload( file_name.replace("_", "/") , uploaded_file )
-#         print "upload success: ", file_name
+        print "upload success: ", file_name
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
