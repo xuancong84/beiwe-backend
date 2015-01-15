@@ -1,5 +1,7 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
 
+We will need to change the server encryption password before the ACTUAL pilot starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
+
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
 Delete data and all old accounts.
