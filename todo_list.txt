@@ -10,6 +10,8 @@ Change text...
 	in the app to what Roy wrote in his edits to the Word doc
 	on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
 	Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
+Test exact survey timer (not using setRepeating in API 19+)
+Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
 
 In January, send a change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.  Maybe also a change order for a whole infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
@@ -20,7 +22,7 @@ Graph stuff (Josh)
 	-Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
 	-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
 
-Change name of server from ubuntu@SCRUBS to ubuntu@BEIWE
+Do we want the WiFi log to NOT be fuzzy, i.e., to be an exact repeating alarm?
 
 Timer stuff:
 	(Eli is not sure who the following applies to, he assumes this is something josh was working on.)
