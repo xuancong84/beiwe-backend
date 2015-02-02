@@ -182,8 +182,8 @@ def parse_filename(filename):
 
 def parse_filetype(file_type):
     """ Separates alphabetical characters from digits for parsing."""
-    questions_created_timestamp = filter(str.isdigit, str(file_type)).lower()
-    survey_data_type = filter(str.isalpha, str(file_type)).lower()
+    questions_created_timestamp = filter(str.isdigit, str(file_type))
+    survey_data_type = filter(str.isalpha, str(file_type))
     return survey_data_type, questions_created_timestamp
 
 def grab_file_extension(file_name):
