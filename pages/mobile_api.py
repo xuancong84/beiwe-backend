@@ -200,16 +200,16 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
     """ The survey data files is in the name of the file, this function processes
         the supplied information and returns the correct file path string."""
     survey_data_type, questions_created_timestamp = parse_filetype( data_type )
-#     print "survey_data_type", survey_data_type
-#     print "questions_created_timestamp", questions_created_timestamp
+    print "survey_data_type", survey_data_type
+    print "questions_created_timestamp", questions_created_timestamp
     
     survey_frequency = 'UNKNOWN_TYPE'
-    if 'daily' in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
-    if 'weekly' in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
+    if DAILY_SURVEY_NAME in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
+    if WEEKLY_SURVEY_NAME in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
     
-    if survey_data_type.startswith( SURVEY_ANSWERS_TAG ):
+    if SURVEY_ANSWERS_TAG in survey_data_type:
         survey_data_type = SURVEY_ANSWERS_TAG
-    if survey_data_type.startswith( SURVEY_TIMINGS_TAG ):
+    if SURVEY_TIMINGS_TAG in survey_data_type:
         survey_data_type = SURVEY_TIMINGS_TAG
     
     return (patient_id + '/' +
