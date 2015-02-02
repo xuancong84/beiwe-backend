@@ -51,6 +51,8 @@ def _download(prefix, patient_id):
             f.write( _s3_retrieve(server_file_name) )
 
 
+def download_all(patient_id):
+    _download(patient_id+"/", patient_id)
 def download_bluetooth(patient_id):
     _download(patient_id+"/bluetooth", patient_id)
     
@@ -75,5 +77,15 @@ def download_texts(patient_id):
 def download_calls(patient_id):
     _download(patient_id+"/call", patient_id)
     
-def download_all(patient_id):
-    _download(patient_id+"/", patient_id)
+def download_daily_survey_results_data(patient_id):
+    _download(patient_id +'/'+"surveyAnswers/Daily", patient_id)
+    
+def download_weekly_survey_results_data(patient_id):
+    _download(patient_id +'/'+"surveyAnswers/Weekly", patient_id)
+    
+def download_weekliy_survey_timings_data(patient_id):
+    _download(patient_id +'/'+"surveyTimings/Weekly", patient_id)
+
+def download_daily_survey_timings_data(patient_id):
+    _download(patient_id +'/'+"surveytimings/Weekly", patient_id)
+
