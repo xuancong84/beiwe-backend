@@ -1,5 +1,10 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
 
+Josh:
+1. Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
+2. Try to debug why Jeanette is still not getting survey prompts on-time.  Read the logs from her phone (kyls3k), and from the other new users' phones
+3. Try to figure out why "view survey answers on graph" is broken and not showing any buttons.  Is it because stuff is encrypted now that wasn't encrypted before?
+
 We will need to change the server encryption password before the ACTUAL pilot starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
 
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
