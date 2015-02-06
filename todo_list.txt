@@ -3,7 +3,6 @@
 Josh:
 1. Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
 2. Try to debug why Jeanette is still not getting survey prompts on-time.  Read the logs from her phone (kyls3k), and from the other new users' phones
-3. Try to figure out why "view survey answers on graph" is broken and not showing any buttons.  Is it because stuff is encrypted now that wasn't encrypted before?
 
 We will need to change the server encryption password before the ACTUAL pilot starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
 
@@ -28,13 +27,6 @@ Graph stuff (Josh)
 	-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
 
 Do we want the WiFi log to NOT be fuzzy, i.e., to be an exact repeating alarm?
-
-Timer stuff:
-	(Eli is not sure who the following applies to, he assumes this is something josh was working on.)
-	Test exact survey timer (not using setRepeating in API 19+)
-	change timer Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
-	Log in debugLog when a survey intent gets called
-
 
 
 
