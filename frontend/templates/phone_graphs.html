@@ -20,7 +20,7 @@
             {% for i in range ( daily_data|length ) %}
                 <!-- this is reating a button, each button contains (title, [coordinates]) -->
                 <!-- note: null answers are ignored by by stepping over it on the X axis, if all values are null the graph works but has no data points. -->
-                <button type="button" onClick="replot_user_results({{ daily_data[i][0] }} , {{ [daily_data[i][1]] }})">Question {{i + 1}}</button>
+                <button type="button" onClick="replot_user_results({{ daily_data[i][0] }} , {{ [daily_data[i][1]] +0.1 }})">Question {{i + 1}}</button>
                 {% if ((i + 1) is divisibleby 3) %}h
                     <br>
                 {% endif %}
@@ -28,7 +28,7 @@
             <br>
             <h4> View weekly question history </h3>
             {% for i in range ( weekly_data|length ) %}
-                <button type="button" onClick="replot_user_results({{ weekly_data[i][0] }} , {{ [weekly_data[i][1]] }})">Question {{i + 1}}</button>
+                <button type="button" onClick="replot_user_results({{ weekly_data[i][0] }} , {{ [weekly_data[i][1]] +0.1 }})">Question {{i + 1}}</button>
                 {% if ((i + 1) is divisibleby 3) %}
                     <br>
                 {% endif %}
