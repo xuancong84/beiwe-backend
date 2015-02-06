@@ -76,7 +76,7 @@ def upload():
     patient_id = request.values['patient_id']
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
-    print "uploaded file name:", file_name, len(uploaded_file)
+#     print "uploaded file name:", file_name, len(uploaded_file)
     
     #TODO: to enable global decryption, remove this if statement and dedent.
 #     if patient_id == "hgleem":
@@ -98,7 +98,7 @@ def upload():
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
         s3_upload( file_name.replace("_", "/") , uploaded_file )
-        print "upload success: ", file_name
+#         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
@@ -213,8 +213,8 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
     """ The survey data files is in the name of the file, this function processes
         the supplied information and returns the correct file path string."""
     survey_data_type, questions_created_timestamp = parse_filetype( data_type )
-    print "survey_data_type", survey_data_type
-    print "questions_created_timestamp", questions_created_timestamp
+#     print "survey_data_type", survey_data_type
+#     print "questions_created_timestamp", questions_created_timestamp
     
     survey_frequency = 'UNKNOWN_TYPE'
     if DAILY_SURVEY_NAME in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
