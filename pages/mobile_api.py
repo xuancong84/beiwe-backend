@@ -44,12 +44,21 @@ def fetch_graph():
     patient_id = request.values['patient_id']
 
     #see docs in data manipulations for details.
-    results = data_manipulations.get_survey_results(username=patient_id,
+    daily_data = data_manipulations.get_survey_results(username=patient_id,
                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
-    results = data_manipulations.jsonify_survey_results(results)
+    
+#     weekly_data = data_manipulations.get_survey_results(username=patient_id,
+#                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
+    
+    return render_template("phone_graphs.html", graphs=daily_data)
 
-    return render_template("phone_graphs.html", graphs=results)
 
+@mobile_api.route("/fake", methods=["GET"] )
+def fake_survey():
+    patient_id = request.values['patient_id']
+    weekly_data = data_manipulations.get_survey_results(username=patient_id,
+                                 survey_type=WEEKLY_SURVEY_NAME, number_points=7)
+    return render_template("phone_graphs.html", graphs=weekly_data)
 
 ################################################################################
 ################################ UPLOADS #######################################

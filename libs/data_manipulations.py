@@ -102,7 +102,8 @@ def get_survey_results( username="", survey_type=DAILY_SURVEY_NAME, number_point
     for value in tuple_values:
         for question_num, corresponding_answers in value.items():
             result.append( [question_num, corresponding_answers] )
-    return result
+            
+    return jsonify_survey_results(result)
 
 
 def jsonify_survey_results(results):
