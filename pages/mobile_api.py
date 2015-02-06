@@ -50,7 +50,7 @@ def fetch_graph():
     weekly_data = data_manipulations.get_survey_results(username=patient_id,
                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
     
-    return render_template("phone_graphs.html", weekly=weekly_data, daily=daily_data)
+    return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
 
 
 @mobile_api.route("/fake", methods=["GET"] )
@@ -62,7 +62,7 @@ def fake_survey():
     weekly_data = data_manipulations.get_survey_results(username=patient_id,
                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
     
-    return render_template("phone_graphs.html", weekly=weekly_data, daily=daily_data)
+    return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
 
 ################################################################################
 ################################ UPLOADS #######################################
