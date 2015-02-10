@@ -52,6 +52,18 @@ function end() {
     var xhr = new XMLHttpRequest();
     // If you're editing the weekly survey, update the weekly survey
     var surveyType = document.getElementById("surveyType").title;
+    // Handle the response and show the user either "it worked" or "error!"
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            alert("Survey results sent successfully :)");
+        }
+        else if (xhr.readyState == 4 && xhr.status == 400) {
+            alert("Error: " + xhr.responseText);
+        }
+        else if (xhr.readyState == 4) {
+            alert("Error: unknown error. Sorry, your questions could not be submitted.");
+        }
+    }
     if (surveyType.localeCompare("weekly") == 0) {
         xhr.open("POST", "https://beiwe.org/update_weekly_survey", true);
     }
@@ -61,7 +73,6 @@ function end() {
     }
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.send(postRequestContent);
-    alert("Survey results sent successfully :)")
 }
 
 // Turn the survey into a JSON object with an array of questions and other attributes

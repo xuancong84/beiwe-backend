@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, render_template
 from libs.admin_authentication import authenticate_admin
 from libs.s3 import s3_list_files, s3_retrieve, s3_upload
+from flask.helpers import make_response
 
 
 survey_designer = Blueprint('survey_designer', __name__)
@@ -23,11 +24,18 @@ def update_weekly():
 
 
 def update_survey(survey_type, request):
-    survey_name = 'all_surveys/' + survey_type + '/'  # set filepath
-    survey_name += datetime.now().isoformat() + '.json'  # set filename
-    new_quiz = request.values['JSONstring']
-    s3_upload( survey_name, new_quiz )
-    return '200'
+    try:
+        survey_name = 'all_surveys/' + survey_type + '/'  # set filepath
+        survey_name += datetime.now().isoformat() + '.json'  # set filename
+        new_quiz = request.values['JSONstring']
+        s3_upload( survey_name, new_quiz )
+        return '200'
+    except UnicodeEncodeError as e:
+        print "UnicodeEncodeError in update_survey().\nError: ", e
+        error_msg = ("There is a Unicode character in the text of one of the "
+                     "questions you submitted. Make sure the question text "
+                     "includes only ASCII characters.")
+        return make_response(error_msg, 400)
 
 
 ################################################################################
