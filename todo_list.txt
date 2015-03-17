@@ -1,36 +1,30 @@
 ----------------------- PROBABLY IMPORTANT THINGS! ---------------------------:
 
-Josh:
-1. Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
-2. Try to debug why Jeanette is still not getting survey prompts on-time.  Read the logs from her phone (kyls3k), and from the other new users' phones
-
 We will need to change the server encryption password before the ACTUAL pilot starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
 
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
-
-Delete data and all old accounts.
 
 Change text...
 	in the app to what Roy wrote in his edits to the Word doc
 	on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
 	Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
-Test exact survey timer (not using setRepeating in API 19+)
-Check for surveys more frequently (maybe put it on a WiFi listener, but don't call it more than once per day)
 
-In January, send a change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.  Maybe also a change order for a whole infrastructure to test if the app is working and reporting data, once it's been installed and registered?
+Change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.
 
-Fix UI on survey builder page to do whatever Roy wanted it to do
+Use DataTables to paginate Patients List in admin panel
 
 Graph stuff (Josh)
 	-Make it look pretty for all types of survey questions
-	-Test display on different versions of Android (probably Android v2 and v4), and maybe different screen sizes too
 	-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
 
-Do we want the WiFi log to NOT be fuzzy, i.e., to be an exact repeating alarm?
 
 
+----------------------------- OPTIONAL THINGS -----------------------------:
 
------------------------------ LOW PRIORITY THINGS -------------------------:
+Add crash logging
+http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+http://www.acra.ch/
+http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
 App UI
 	-Finalize, style, and pretty-ify the UI
@@ -45,13 +39,10 @@ Look into optimizing battery/power consumption using timers; Eli may have alread
 	(Eli says if this means anything other than testing real world numbers it is unnecessary.)
 
 Admin Panel UI
-	-Figure out if we're using base.html and what to do with it
 	-Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
 	-(Josh) Admin Panel patients list... paginate
 	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
 	-Make the page reload after they create a new patient or remove a device
-
-Consider making TextFileManager.closeFile() trigger an upload loop... but what happens when many are created at once? Just make closeFile() and createNewFilesForEverything() trigger upload loops.
 
 MMS logging:
 -When we receive MMS messages, get and log the "sent time" timestamp from them
@@ -61,34 +52,18 @@ MMS logging:
 			we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
 			MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
 
+Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
 
-
------------------------------ OPTIONAL THINGS -----------------------------:
-
-Debug audio recorder on Benjamin's phone (API v10)
-
-Build a listener for WiFi connected, then try to upload files and download surveys
-
-Add crash logging
-http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
-http://www.acra.ch/
-http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
+Maybe also a change order for a whole infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
 add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
 
-It would be nice if we could write the temp file to memory instead of to disk. 
 
-improve compatibility testing in the loading screen (this is a big, dumb thing that is probably unnecessary.)
-
-Work out a way to notify the user (ohey, we could use a notification, I here those are nifty!) that they need to find an internet to download things (or upload things, I guess)
+---------------------------NOT GOING TO DO THESE THINGS --------------------:
 
 implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number to check for changes.
 
-ELI: check why turning off bluetooth mid-scan (?) like happened at Jennette's
-	-Cannot replicate, ask josh how to create a bug report, then probably deprecate.
-
-
----------------------------NOT GOING TO DO THESE THINGS --------------------:
+Build a listener for WiFi connected, then try to upload files and download surveys
 
 Should we try to log when the app was started?  We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this
 
