@@ -89,3 +89,5 @@ def download_weekliy_survey_timings_data(patient_id):
 def download_daily_survey_timings_data(patient_id):
     _download(patient_id +'/'+"surveytimings/Weekly", patient_id)
 
+def download_power_state_timings_data(patient_id):
+    _download(patient_id +'/'+"powerState/", patient_id)
