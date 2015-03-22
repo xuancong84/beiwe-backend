@@ -74,6 +74,7 @@ function clearModal() {
 
     clearInputFields();
     removeAllAnswerOptionsRows();
+    setQuestionType();
 }
 
 // Loop through the <input> fields and set each one to an empty string
