@@ -9,10 +9,6 @@ Change text...
 	on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
 	Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
 
-Change order for enter-your-own doctor's phone number as the hotline.  Maybe also a change order for an in-app consent form.
-
-Use DataTables to paginate Patients List in admin panel
-
 Graph stuff (Josh)
 	-Make it look pretty for all types of survey questions
 	-Fix crappy width scaling; don't hard-code it to 200px wide or whatever it is
@@ -40,7 +36,6 @@ Look into optimizing battery/power consumption using timers; Eli may have alread
 
 Admin Panel UI
 	-Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
-	-(Josh) Admin Panel patients list... paginate
 	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
 	-Make the page reload after they create a new patient or remove a device
 

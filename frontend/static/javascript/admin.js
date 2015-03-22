@@ -1,3 +1,9 @@
+$(document).ready(function(){
+    // Set up the main list of patients using DataTables
+    $("#patients_list").DataTable();
+});
+
+
 function logout() {
     window.location.href="/logout";
 }
