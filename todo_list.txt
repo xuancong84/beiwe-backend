@@ -2,12 +2,12 @@
 
 We will need to change the server encryption password before the ACTUAL pilot starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
 
+Change order also needs to be discussed: the About page text indicates that users can reset the clinician's phone number during the study
+
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
 Change text...
-	in the app to what Roy wrote in his edits to the Word doc
 	on the forgot password page to JP's comment about requesting anonymously, i.e., “I’m a subject in the XXX study and my user ID is YYY. I’m calling to request a new password.”
-	Change phrasing around the hotline to make it sound like it's not open 24/7; just say "call the study administrator to request a new password."
 
 Graph stuff (Josh)
 	-Make it look pretty for all types of survey questions
