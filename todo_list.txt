@@ -4,6 +4,10 @@ We will need to change the server encryption password before the ACTUAL pilot st
 
 Change order also needs to be discussed: the About page text indicates that users can reset the clinician's phone number during the study
 
+Add an "I do not agree" button to the consent form
+
+Add the text to the consent form: "I have read and understood this information and all of my questions about it have been answered by the study clinician"
+
 to Josh: Eli made some refactor changes to MMSSentLogger.  He is pretty sure functionality has been retained, but if you can check that it works...
 
 Change text...
