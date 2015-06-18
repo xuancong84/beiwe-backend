@@ -46,16 +46,16 @@ def e500_text(e):
 
 def test_passwords():
     try:
-        from data.passwords import ENCRYPTION_KEY
+        from data.passwords import PASSWORD
     except ImportError as e:
         if e.message != "No module named passwords":
             log_error(e)
             raise
         else:
-            print "\nYou have not provided a secure.py file.\n"
+            print "\nYou have not provided a passwords.py file.\n"
             exit()
     
-    if len( ENCRYPTION_KEY ) != 32:
+    if len( PASSWORD ) != 32:
         print "Your key is not 32 characters. The key must be exactly 32 charcters long."
         exit()
 
