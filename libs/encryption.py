@@ -1,13 +1,18 @@
+from os import urandom
+
+from Crypto.Cipher import AES
+from Crypto.PublicKey import RSA
+from data.passwords import PASSWORD as ENCRYPTION_KEY
+from data.constants import ASYMMETRIC_KEY_LENGTH
+from libs.logging import log_error
+from security import decode_base64
+
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
-
-from libs.logging import log_error
-
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
-from Crypto.PublicKey import RSA
-from data.constants import ASYMMETRIC_KEY_LENGTH
+
 
 def generate_key_pairing():
     """Generates a public-private key pairing, returns tuple (public, private)"""
@@ -38,10 +43,6 @@ def import_RSA_key( key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-from Crypto.Cipher import AES
-from data.passwords import ENCRYPTION_KEY
-from security import decode_base64
-from os import urandom
 
 def encrypt_for_server(input_string):
     """ encrypts data using the ENCRYPTION_KEY, prepends the generated
