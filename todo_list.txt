@@ -1,0 +1,95 @@
+----------------------- priority, time sensitive ---------------------------:
+
+App UI
+	-Finalize, style, and pretty-ify the UI
+	-Get an app icon
+	-probably have a conversation about "good" user password checks with JP/Roy so that they feel involved, but leave it unchanged. (only do a length check, because seriously.)
+
+----------------------- COMPLETED, YET TO BE ACTED ON ---------------------------:
+
+We will need to change the server encryption password before the FAS study starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
+
+----------------------------- REFACTOR THINGS -----------------------------:
+
+The MMSSentLogger is poorly named
+The SMSSendLogger is poorly named
+the backgroundprocess should be backgroundservice
+
+
+------------------------------- Administrative tasks ---------------------------;
+remove old data from s3:
+	It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
+	If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below (these are what Matt is using, all others can go):
+		7rzzd3
+		6sod84
+		ahhv9h
+		c7hze5
+		66f1zz
+		qrsmla
+		fwgs3q
+		g7s4zv
+		yi279c
+		v26kw2
+
+implement mongobackups of the mongo db on the server
+
+----------------------------- FUTURE -----------------------------------;
+Graph stuff
+	-Make it look pretty for all the different types of survey questions
+	-Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
+
+add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
+
+Add crash logging:
+	http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+	http://www.acra.ch/
+	http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
+
+Improve uploading:
+ Build a listener for WiFi connected, then try to upload files and download surveys
+
+ Timers & data upload
+	-Add an alert if the phone hasn't been able to upload in a long time?
+	-Add a server-side alert if a patient hasn't uploaded data in a long time? - unlikely to be useful...
+
+
+ -------------------------- KNOWN BUGS -------------------------------;
+
+MMS logging:
+	-When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
+	-Triple Logging of at least MMS messages:
+		Eli tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
+			Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
+				we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
+				MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
+
+if the background process is not running and a user presses the button
+
+----------------------------- OPTIONAL THINGS -----------------------------:
+
+Admin Panel UI
+	-Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
+	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
+	-Make the page reload after they create a new patient or remove a device
+
+Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
+	-ask josh
+
+re-analyze whether the following is true:
+	In RegistrationActivity: don't set username and password on the device UNTIL they've been validated by the server.  This would require substantial changes to PostRequest.java.  Leaving this as-is does not actually present any serious security flaws.
+
+
+--------------------------- ideas --------------------:
+
+infrastructure to test if the app is working and reporting data, once it's been installed and registered?
+
+implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number (or hash of) in order to check for changes.
+
+Trying to log when the app was started: We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this.
+
+if we restart the background service occasionally we can get around the user-disabled bluetooth "problem"
+
+There is no way to inform the user that the encryption key is corrupted.
+
+we may be able to reduce some HTTPS overhead using the following stackoverflow
+	http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient
