@@ -1,5 +1,5 @@
 from flask import request, abort
-from libs.db_models import User
+from db.user_models import User
 import functools
 
 

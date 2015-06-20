@@ -2,7 +2,7 @@ from flask import (Blueprint, redirect, render_template, request, send_file,
                    session)
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin
-from libs.db_models import User, Users, Admin
+from db.user_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.encryption import encrypt_for_server
 

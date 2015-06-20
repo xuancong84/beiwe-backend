@@ -1,15 +1,13 @@
-from libs.db_mongo import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
+from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 from libs.security import (generate_admin_hash_and_salt,
                            generate_user_hash_and_salt,
                            compare_password, device_hash,
                            generate_user_password_and_salt,
                            generate_easy_alphanumeric_string,)
 
-
 ################################################################################
 ################################### USER STUFF #################################
 ################################################################################
-
 
 class User( DatabaseObject ):
     """ The User database object contains the password hashes and unique user names
@@ -40,11 +38,9 @@ class User( DatabaseObject ):
         super(User, cls).create(new_client)
         return patient_id, password
     
-    
     def validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash."""
         return compare_password( compare_me, self['salt'], self['password'] )
-    
     
     def debug_validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash, but does
@@ -52,25 +48,21 @@ class User( DatabaseObject ):
         compare_me = device_hash(compare_me)
         return compare_password( compare_me, self['salt'], self['password'] )
     
-    
     def reset_password(self):
         """ Resets the patient's password to match an sha256 hash of the returned string."""
         password = generate_easy_alphanumeric_string()
         self.set_password( password )
         return password
     
-    
     def set_device(self, device_id):
         """ Sets the device id to the new value"""
         self['device_id'] =  device_id
         self.save()
     
-    
     def clear_device(self):
         """ Clears the device entry."""
         self['device_id'] =  None
         self.save()
-    
     
     def set_password(self, password):
         """ Sets the instance's password hash to match the hash of the
@@ -90,6 +82,14 @@ class Users( DatabaseCollection ):
 ################################################################################
     
     
+"""TODO: add to Admins...
+    a boolean saying if they are the superuser. """
+
+"""TODO: add a table containing survey editing privilages. """
+    
+"""TODO: Add the following fields to the Admin DB objects:
+site administrator - boolean."""
+
 class Admin( DatabaseObject ):
     PATH = "database.admins"
     
@@ -123,6 +123,8 @@ class Admin( DatabaseObject ):
         self['password'] = password
         self['salt'] = salt
         self.save()
+    
+    #TODO: create pages for admins - change passwords
     
     
 class Admins( DatabaseCollection ):
