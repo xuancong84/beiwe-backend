@@ -1,9 +1,11 @@
------------------------ priority, time sensitive ---------------------------:
+----------------------------- ARCHITECTURE ---------------------------------------;
 
-App UI
-	-Finalize, style, and pretty-ify the UI
-	-Get an app icon
-	-probably have a conversation about "good" user password checks with JP/Roy so that they feel involved, but leave it unchanged. (only do a length check, because seriously.)
+convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.
+
+todo: method of determining what survey is currently being modified in order to check the admin's editing privileges
+<string:file_id>'
+
+
 
 ----------------------- COMPLETED, YET TO BE ACTED ON ---------------------------:
 
@@ -11,8 +13,8 @@ We will need to change the server encryption password before the FAS study start
 
 ----------------------------- REFACTOR THINGS -----------------------------:
 
-The MMSSentLogger is poorly named
-The SMSSendLogger is poorly named
+merge mms and sms sent receivers if possible.
+
 the backgroundprocess should be backgroundservice
 
 
@@ -33,10 +35,21 @@ remove old data from s3:
 
 implement mongobackups of the mongo db on the server
 
+------------------------------Tasks----------------------------------------
+
+make a comprehensive list of feature toggles for sending to the device.
+
+
 ----------------------------- FUTURE -----------------------------------;
 Graph stuff
 	-Make it look pretty for all the different types of survey questions
 	-Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
+
+App UI
+	-Finalize, style, and pretty-ify the UI
+	-Get an app icon
+	-probably have a conversation about "good" user password checks with JP/Roy so that they feel involved, but leave it unchanged. (only do a length check, because seriously.)
+
 
 add in more user device info, specifically I am thinking of android version, sdk version (mostly for debugging)
 
@@ -62,8 +75,11 @@ MMS logging:
 			Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
 				we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
 				MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
+	-Josh tried tracking this down as well, there is a comment is smssentreceiver
 
-if the background process is not running and a user presses the button
+if the background process is not running and a user presses a notification to take a survey, the app crashes.  This is probably due to the rendering of a dynamic page requiring access to the survey's json file, which it accesses through the file manager, which has not been instantiated.
+	probably the best solution is to make the unencrypted files have their own reader?  that just creates more chances for conflicts....
+	TODO: check order of instantiation of for the dynamically rendered pages. (uhg)
 
 ----------------------------- OPTIONAL THINGS -----------------------------:
 
