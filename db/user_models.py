@@ -80,26 +80,25 @@ class Users( DatabaseCollection ):
 ################################################################################
 ################################### ADMIN STUFF ################################
 ################################################################################
-    
-    
-"""TODO: add to Admins...
-    a boolean saying if they are the superuser. """
 
-"""TODO: add a table containing survey editing privilages. """
-    
-"""TODO: Add the following fields to the Admin DB objects:
-site administrator - boolean."""
+""" TODO: we need to create the following pages for admins: 
+    change passwords
+    elevate to sysadmin?
+    create new admin
+    add admin to study
+    """
 
 class Admin( DatabaseObject ):
     PATH = "database.admins"
     
-    DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED }
+    DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED, "system_admin":REQUIRED }
     
     @classmethod
     def create(cls, username, password):
         """ Creates a new Admin with provided password and user name."""
         password, salt = generate_admin_hash_and_salt( password )
-        new_admin = {ID_KEY :username, 'password':password, 'salt':salt }
+        new_admin = {ID_KEY :username, 'password':password, 'salt':salt,
+                     "system_admin": False}
         return super(Admin, cls).create(new_admin)
     
     @classmethod
@@ -111,11 +110,9 @@ class Admin( DatabaseObject ):
         admin = Admin( username )
         return admin.validate_password( compare_me )
     
-    
     def validate_password(self, compare_me):
         """ Checks if the input matches the instance's password hash."""
         return compare_password( compare_me, self['salt'], self['password'] )
-    
     
     def set_password(self, new_password):
         """Sets the instances password hash to match the provided password."""
@@ -124,8 +121,10 @@ class Admin( DatabaseObject ):
         self['salt'] = salt
         self.save()
     
-    #TODO: create pages for admins - change passwords
-    
+    def elevate_to_sysadmin(self):
+        """Makes the admin a sysadmin."""
+        self['sysadmin'] = True
+        self.save()
     
 class Admins( DatabaseCollection ):
     """ The Admins Database."""
