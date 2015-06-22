@@ -34,7 +34,7 @@ def login():
         username = request.values["username"]
         password = request.values["password"]
         if Admin.check_password(username, password):
-            admin_authentication.login_admin(username)
+            admin_authentication.log_in_admin(username)
             return redirect("/admin_panel")
         return "Username password combination is incorrect. Try again."
     else:
