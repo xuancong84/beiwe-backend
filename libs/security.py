@@ -1,12 +1,10 @@
+import base64, hashlib, re
+
 from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 from data.constants import ITERATIONS
 from os import urandom
 from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
-
-import base64
-import hashlib
-import re
 
 class DatabaseIsDownError(Exception): pass
 
