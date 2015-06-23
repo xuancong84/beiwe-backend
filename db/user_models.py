@@ -81,13 +81,6 @@ class Users( DatabaseCollection ):
 ################################### ADMIN STUFF ################################
 ################################################################################
 
-""" TODO: we need to create the following pages for admins: 
-    change passwords
-    elevate to sysadmin?
-    create new admin
-    add admin to study
-    """
-
 class Admin( DatabaseObject ):
     PATH = "database.admins"
     

@@ -6,6 +6,7 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID
      references to surveys in the study in the Surveys table(?)
      settings for survey (as json? maybe we want another table) """
 
+#TODO: we need a study editing wrapper...
 class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
@@ -40,14 +41,14 @@ class StudyDeviceSettings( DatabaseCollection ):
     fields: reference to a study,
     type of survey (audio or regular),
     content of survey (in json)
-    timings for survey (as json) (daily, weekly, what day, what hour) 
+    timings for survey (as json) (what days, what hour) 
     """
-    
+    #TODO: we need a canonical list of survey types. (probably voice, text)
 class Survey( DatabaseCollection ):
     DEFAULTS = {'content': REQUIRED,
                 "timings": REQUIRED,
                 "survey_type": REQUIRED,
-                #TODO: do we need the following?
+                #TODO: do we need the following per-survey settings?
 #                 "other_settings": REQUIRED
                }
     #TODO: define the valid types of survey

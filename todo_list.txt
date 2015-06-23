@@ -7,9 +7,18 @@ todo: method of determining what survey is currently being modified in order to 
 
 
 
------------------------ COMPLETED, YET TO BE ACTED ON ---------------------------:
+-----------------------------------front end-------------------------------------------;
+change days of week to checkboxes instead of dropdown.
 
-We will need to change the server encryption password before the FAS study starts, when we do that all data on s3 will become unreadable, so we need to be on top of that.
+
+we need to create the following pages for admins:
+    change passwords
+    elevate to sysadmin?
+    create new admin
+    add admin to study
+    create new study
+    add survey to study
+
 
 ----------------------------- REFACTOR THINGS -----------------------------:
 
@@ -39,6 +48,7 @@ implement mongobackups of the mongo db on the server
 
 make a comprehensive list of feature toggles for sending to the device.
 
+since studies will have arbitrary time triggers, frequency triggers, and no longer have distinct names (daily, weekly, voice), and will instead be identified by some form of unique id, make sure that the timer data is included in the csv for survey answers.
 
 ----------------------------- FUTURE -----------------------------------;
 Graph stuff

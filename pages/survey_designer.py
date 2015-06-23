@@ -4,12 +4,20 @@ from libs.admin_authentication import authenticate_admin
 from libs.s3 import s3_list_files, s3_retrieve, s3_upload
 from flask.helpers import make_response
 
-
 survey_designer = Blueprint('survey_designer', __name__)
+
+#TODO: rewrite entirely.
+#TODO: refactor to use the <string:file_id> url argument
+#TODO: implement "study does not exist" page.
+#TODO: implement "survey does not exist" page.
 
 ################################################################################
 ############################### Setters ########################################
 ################################################################################
+
+#TODO: implement new survey creation
+def create_survey():
+    pass
 
 @survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
 @authenticate_admin
