@@ -24,10 +24,10 @@ def authenticate_admin(some_function):
     """Decorator for functions (pages) that require a login.
        Redirects to index if not authenticate_admin"""
     @functools.wraps(some_function)
-    def wrapped(*args, **kwargs):
+    def authenticate_and_call(*args, **kwargs):
         if is_logged_in(): return some_function(*args, **kwargs)
         return redirect("/")
-    return wrapped
+    return authenticate_and_call
 
 
 def log_in_admin(username):
@@ -50,19 +50,28 @@ def is_logged_in():
 ########################## Study Editing Privileges ############################
 ################################################################################
 
+class ArgumentMissingException(Exception): pass
+
 #TODO: test survey editing wrapper.
 #this is untested fake code and requires a proper understanding of intercepting kwargs to implement
 def authenticate_editing(some_function):
+    """ This authentication decorator is for checking whether the user has
+        permissions for the study they are accessing.
+        This decorator requires that a specific keyword argument be provided to
+        the function, the "survey_id" keyword. """
     @functools.wraps(some_function)
-    def wrapped(*args, **kwargs):
-        
-        #mongo's equality test on a list will evaluate both = and 'in'
-        admin_name = session['admin_username']
-        #these are not the kwargs we are looking for...
-        survey = Studies(name=kwargs['survey_id'], admins=admin_name)
+    def authenticate_and_call(*args, **kwargs):
+        if "survey_id" not in kwargs:
+            raise ArgumentMissingException("missing keyword argument 'survey_id'")
+        study_name = kwargs["survey_id"]
+        admin_name = session["admin_username"]
+        #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
+        #TODO: should we actually expose the database keys... probably not.  ask zags about indexing in mongolia (not that it is really important...)
+        survey = Studies(_id=study_name, admins=admin_name)
         if not survey:
+            #todo: permission denied page
             return redirect("/")
-    return wrapped
+    return authenticate_and_call
 
 
 ################################################################################
@@ -72,9 +81,10 @@ def authenticate_editing(some_function):
 # TODO: test sysadmin wrapper
 def authenticate_sysadmin(some_function):
     @functools.wraps(some_function)
-    def wrapped(*args, **kwargs):
+    def authenticate_and_call(*args, **kwargs):
         admin = Admins(session['admin_username'])
         if not admin["system_admin"]:
-            #TODO: we need a permission denied page.
+            #TODO: permission denied page.
             return redirect("/")
-    return wrapped
+    return authenticate_and_call
+

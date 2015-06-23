@@ -8,11 +8,11 @@ def authenticate_user(some_function):
        Returns 403 (forbidden) if the identifying info (usernames, passwords
        device IDs are invalid."""
     @functools.wraps(some_function)
-    def wrapped(*args, **kwargs):
+    def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_post( *args, **kwargs )
         if is_this_user_valid: return some_function(*args, **kwargs)
         return abort(403)
-    return wrapped
+    return authenticate_and_call
 
 
 def validate_post( *args, **kwargs ):
@@ -36,11 +36,11 @@ def authenticate_user_registration(some_function):
        Returns 403 (forbidden) if the identifying info (usernames, passwords
        device IDs are invalid."""
     @functools.wraps(some_function)
-    def wrapped(*args, **kwargs):
+    def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_registration( *args, **kwargs )
         if is_this_user_valid: return some_function(*args, **kwargs)
         return abort(403)
-    return wrapped
+    return authenticate_and_call
 
 
 def validate_registration( *args, **kwargs ):
