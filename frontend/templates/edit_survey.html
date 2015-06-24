@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <title> Zagaran Mobile Data Collection System for HSPH</title>
     <script src="../static/javascript/jquery-1.11.1.js"></script>
@@ -13,81 +13,81 @@
     <script src="../static/javascript/survey-editor/survey-editor.js"></script>
     <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
     <link rel="stylesheet" href="../static/css/survey_builder.css"  type="text/css"/>
-</head>
+  </head>
 
-<body>
-<div class="container">
+  <body>
+    <div class="container">
 
-    <!-- This div exists only to indicate to the JavaScript whether the survey is weekly or daily -->
-    {% if (daily_or_weekly == 'weekly') %}
+      <!-- This div exists only to indicate to the JavaScript whether the survey is weekly or daily -->
+      {% if (daily_or_weekly == 'weekly') %}
         <div id="surveyType" title="weekly"></div>
-    {% else %}
+      {% else %}
         <div id="surveyType" title="daily"></div>
-    {% endif %}
+      {% endif %}
 
-    <div class="span12">
+      <div class="span12">
         <div class="row">
-            {% if (daily_or_weekly == 'weekly') %}
-                <h1>Weekly Survey</h1>
-            {% else %}
-                <h1>Daily Survey</h1>
-            {% endif %}
+          {% if (daily_or_weekly == 'weekly') %}
+            <h1>Weekly Survey</h1>
+          {% else %}
+            <h1>Daily Survey</h1>
+          {% endif %}
         </div>
 
-    <form name="survey">
-    Schedule Deployment Time:
-    <select id="hour" name="hour">
-    {% for i in range(1, 13) %}
-        <option value={{ i }}>{{ i }}:00</option>
-    {% endfor %}
-    </select>
-    <select id="ampm" name="ampm">
-        <option value="am">AM</option>
-        <option value="pm">PM</option>
-    </select>
-    {% if (daily_or_weekly == 'weekly') %}
-    <select id="day" name="day">
-        <option value=2>Monday</option>
-        <option value=3>Tuesday</option>
-        <option value=4>Wednesday</option>
-        <option value=5>Thursday</option>
-        <option value=6>Friday</option>
-        <option value=7>Saturday</option>
-        <option value=1>Sunday</option>
-    </select>
-    {% endif %}
-    <br>
+        <form name="survey">
+          Schedule Deployment Time:
+          <select id="hour" name="hour">
+            {% for i in range(1, 13) %}
+              <option value={{ i }}>{{ i }}:00</option>
+            {% endfor %}
+          </select>
+          <select id="ampm" name="ampm">
+            <option value="am">AM</option>
+            <option value="pm">PM</option>
+          </select>
+          {% if (daily_or_weekly == 'weekly') %}
+            <select id="day" name="day">
+              <option value=2>Monday</option>
+              <option value=3>Tuesday</option>
+              <option value=4>Wednesday</option>
+              <option value=5>Thursday</option>
+              <option value=6>Friday</option>
+              <option value=7>Saturday</option>
+              <option value=1>Sunday</option>
+            </select>
+          {% endif %}
+          <br>
 
-    <br><br>
-    {% include 'question_summary.html' %}
-    <div id="listOfCurrentQuestions"></div>
+          <br><br>
+          {% include 'question_summary.html' %}
+          <div id="listOfCurrentQuestions"></div>
 
-    <br>
-    <div id="newQuestions">
+          <br>
+          <div id="newQuestions">
+          </div>
+          <br>
+          <div class="row">
+            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#editQuestionModal" onclick="clearModal(); return false;">
+            <span class="glyphicon glyphicon-plus"></span>Add Question
+            </button>
+          </div>
+          <br>
+          <div class="row">
+            <button type="submit" class="btn btn-default btn-lg" onclick="end(); return false;">
+            <span class="glyphicon glyphicon-upload"></span>Save & Deploy
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    <br>
-    <div class="row">
-        <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#editQuestionModal" onclick="clearModal(); return false;">
-        <span class="glyphicon glyphicon-plus"></span>Add Question
-        </button>
-    </div>
-    <br>
-    <div class="row">
-        <button type="submit" class="btn btn-default btn-lg" onclick="end(); return false;">
-        <span class="glyphicon glyphicon-upload"></span>Save & Deploy
-        </button>
-    </div>
-    </form>
-    </div>
-</div>
 
-{% include 'edit_question.html' %}
+    {% include 'edit_question.html' %}
 
-<footer class="section">
-    <div class="container">
+    <footer class="section">
+      <div class="container">
         <h5 style='text-align:center'><strong>Contact:</strong> <a href="mailto:sys@zagaran.com">sys@zagaran.com</a></h5>
         <p style='text-align:center' class="row center">&copy; 2014 Zagaran Software, Inc.</p>
-    </div>
-</footer>
-</body>
+      </div>
+    </footer>
+  </body>
 </html>
