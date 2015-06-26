@@ -4,6 +4,7 @@ from flask import session, redirect
 from db.user_models import Admin, Admins
 from libs.security import generate_easy_alphanumeric_string
 from db.study_models import Studies
+from werkzeug.exceptions import abort
 
 ################################################################################
 ############################ Existence Modifiers ###############################
@@ -19,10 +20,9 @@ def remove_admin(username):
 ############################ Website Functions #################################
 ################################################################################
 
-
-def authenticate_admin(some_function):
+def authenticate_admin_login(some_function):
     """Decorator for functions (pages) that require a login.
-       Redirects to index if not authenticate_admin"""
+       Redirects to index if not authenticate_admin_login"""
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         if is_logged_in(): return some_function(*args, **kwargs)
@@ -53,38 +53,50 @@ def is_logged_in():
 class ArgumentMissingException(Exception): pass
 
 #TODO: test survey editing wrapper.
-#this is untested fake code and requires a proper understanding of intercepting kwargs to implement
-def authenticate_editing(some_function):
-    """ This authentication decorator is for checking whether the user has
-        permissions for the study they are accessing.
-        This decorator requires that a specific keyword argument be provided to
-        the function, the "survey_id" keyword. """
+#todo: permission denied page
+#TODO: do we want a survey does not exist page?
+def authenticate_admin_study_access(some_function):
+    """ This authentication decorator checks whether the user has permission to
+        to access the study/survey they are accessing.
+        This decorator requires the specific keywords "survey_id" or "study_id"
+        be provided as keywords to the function, and will error if one is not.
+        The pattern is for a url with <string:survey/study_id> to pass in this
+        value. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        if "survey_id" not in kwargs:
-            raise ArgumentMissingException("missing keyword argument 'survey_id'")
-        study_name = kwargs["survey_id"]
-        admin_name = session["admin_username"]
-        #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
-        #TODO: should we actually expose the database keys... probably not.  ask zags about indexing in mongolia (not that it is really important...)
-        survey = Studies(_id=study_name, admins=admin_name)
-        if not survey:
-            #todo: permission denied page
+        if not is_logged_in(): #check for regular login requirement
             return redirect("/")
-    return authenticate_and_call
-
+        admin_name = session["admin_username"]
+        #check proper syntax usage.
+        if "survey_id" not in kwargs and "study_id" not in kwargs:
+            raise ArgumentMissingException()
+        #We want the survey_id check to execute first if both args are supplied. 
+        if "survey_id" in kwargs:
+            survey_id = kwargs["survey_id"]
+            #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
+            study = Studies(surveys=survey_id, admins=admin_name)
+            if not study: #if the admin is not authorized for this survey, fail.
+                return redirect("/")
+            return authenticate_and_call
+        if "study_id" in kwargs:
+            study_id = kwargs['study_id']
+            study = Studies(_id=study_id, admins=admin_name)
+            if not study: #if the admin is not authorized for this study, fail.
+                return redirect("/")
+            return authenticate_and_call
+        return abort(500)  #this should be unreachable code.
 
 ################################################################################
 ########################## System Administrator ################################
 ################################################################################
 
 # TODO: test sysadmin wrapper
+#TODO: permission denied page.
 def authenticate_sysadmin(some_function):
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         admin = Admins(session['admin_username'])
         if not admin["system_admin"]:
-            #TODO: permission denied page.
             return redirect("/")
     return authenticate_and_call
 
