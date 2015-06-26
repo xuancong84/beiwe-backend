@@ -45,7 +45,7 @@ class StudyDeviceSettings( DatabaseCollection ):
     """
     #TODO: we need a canonical list of survey types. (probably voice, text)
 class Survey( DatabaseCollection ):
-    DEFAULTS = {'content': REQUIRED,
+    DEFAULTS = {"content": REQUIRED,
                 "timings": REQUIRED,
                 "survey_type": REQUIRED,
                 #TODO: do we need the following per-survey settings?
