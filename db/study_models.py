@@ -1,4 +1,5 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
+from db.user_models import Users
 
 """TODO: New db table named Studies containing studies.
      Study name
@@ -6,20 +7,29 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID
      references to surveys in the study in the Surveys table(?)
      settings for survey (as json? maybe we want another table) """
 
+
 #TODO: we need a study editing wrapper...
 class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
                  "surveys": [],         #the surveys pushed in this study.
-                 "settings": REQUIRED   #the device settings for the study.
+                 "settings": REQUIRED,  #the device settings for the study.
+                 "devices": []
                  }
     
     #def add_survey(self, content, timings, survey_type):
     def add_survey(self, survey):
         self["surveys"].append(survey._id)
-        
-
+    
+    @classmethod
+    def get_studies_for_admin(admin_id):
+        return [Studies(study_id) for study_id in Studies(admins=admin_id)]
+    
+    #TODO: test that this works and is not a cyclic import (it shouldn't be...)
+    def get_users_in_study(self):
+        [ Users(device_id) for device_id in self.devices ]
+    
 class Studies( DatabaseCollection ):
     """ The Studies database."""
     OBJTYPE = Study
