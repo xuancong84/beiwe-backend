@@ -5,11 +5,10 @@ convert all surveys to one type with a list of days of the week.  no more daily-
 todo: method of determining what survey is currently being modified in order to check the admin's editing privileges
 <string:file_id>'
 
-
-
 -----------------------------------front end-------------------------------------------;
 change days of week to checkboxes instead of dropdown.
 
+change the front page from a view of all device-users to a view of device-users and the study they are enrolled in, and only visible to studies the admin has access rights to
 
 we need to create the following pages for admins:
     change passwords
@@ -18,6 +17,7 @@ we need to create the following pages for admins:
     add admin to study
     create new study
     add survey to study
+    error page for admin permission denied (put in decorator)
 
 
 Graph stuff
