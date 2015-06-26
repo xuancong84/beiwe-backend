@@ -1,7 +1,7 @@
 from flask import (Blueprint, redirect, render_template, request, send_file,
                    session)
 from libs import admin_authentication
-from libs.admin_authentication import authenticate_admin
+from libs.admin_authentication import authenticate_admin_login
 from db.user_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.encryption import encrypt_for_server
@@ -42,13 +42,13 @@ def login():
 
 
 @admin.route('/reset_admin_password_form')
-@authenticate_admin
+@authenticate_admin_login
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
 
 @admin.route('/reset_admin_password', methods=['POST'])
-@authenticate_admin
+@authenticate_admin_login
 def reset_admin_password():
     username = session['admin_username']
     current_password = request.values['current_password']
@@ -67,7 +67,7 @@ def reset_admin_password():
 ################################################################################
 
 @admin.route('/admin_panel', methods=["GET", "POST"])
-@authenticate_admin
+@authenticate_admin_login
 def render_main():
     """ Method responsible rendering admin template"""
     patients = {user['_id']: patient_dict(user) for user in Users()}
@@ -84,7 +84,7 @@ def patient_dict(patient):
 ################################################################################
 
 @admin.route('/reset_patient_password', methods=["POST"])
-@authenticate_admin
+@authenticate_admin_login
 def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values["patient_id"]
@@ -97,7 +97,7 @@ def reset_user_password():
 
 
 @admin.route('/reset_device', methods=["POST"])
-@authenticate_admin
+@authenticate_admin_login
 def reset_device():
     """ Resets a patient's device.  The patient will not be able to connect
         until expect to register a new device. """
@@ -110,7 +110,7 @@ def reset_device():
 
 
 @admin.route('/create_new_patient', methods=["POST"])
-@authenticate_admin
+@authenticate_admin_login
 def create_new_patient():
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, returns a string containing password and patient id"""
