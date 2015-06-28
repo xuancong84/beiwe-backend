@@ -46,7 +46,7 @@ def login():
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
-
+#TODO: is this linked to anywhere?
 @admin.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
 def reset_admin_password():
@@ -65,7 +65,7 @@ def reset_admin_password():
 ################################################################################
 ############################# The Admin Page ###################################
 ################################################################################
-
+#TODO: this probably can be swapped for the new render_surveys():
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @authenticate_admin_login
 def render_main():
@@ -73,7 +73,8 @@ def render_main():
     patients = {user['_id']: patient_dict(user) for user in Users()}
     return render_template('admin_panel.html', patients = patients)
 
-
+#TODO: document
+#TODO: does this need updated for new db schema? removed? only used in render_main.
 def patient_dict(patient):
     return {'placeholder_field': 'placeholder field for future data',
             'has_device': patient['device_id'] is not None }
@@ -82,7 +83,7 @@ def patient_dict(patient):
 ################################################################################
 ######################### Actual Functionality #################################
 ################################################################################
-
+#TODO: does this need update for new db schema?
 @admin.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin_login
 def reset_user_password():
@@ -95,7 +96,7 @@ def reset_user_password():
         return new_password
     return "that patient id does not exist"
 
-
+#TODO: does this need update for new db schema?
 @admin.route('/reset_device', methods=["POST"])
 @authenticate_admin_login
 def reset_device():
@@ -108,7 +109,7 @@ def reset_device():
         return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
-
+#TODO: update to new db schema
 @admin.route('/create_new_patient', methods=["POST"])
 @authenticate_admin_login
 def create_new_patient():
@@ -129,6 +130,7 @@ def download():
     """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
+#TODO: rewrite for new encryption and db schema
 @admin.route("/user_list")
 def get_user_list():
     all_users = ""
