@@ -3,7 +3,6 @@ from boto.exception import S3ResponseError
 from boto.s3.key import Key
 from data.constants import S3_BUCKET
 from libs import encryption, logging
-# import mimetypes
 
 from data.passwords import aws_secret_access_key, aws_access_key_id
 
@@ -26,10 +25,10 @@ def _get_bucket(name):
 #     key = bucket.new_key(key_name)
 #     key.set_contents_from_string(some_string)
 
-def s3_upload( key_name, some_string ):
+def s3_upload( key_name, some_string, study_id ):
     bucket = _get_bucket(S3_BUCKET)
     key = bucket.new_key(key_name)
-    data = encryption.encrypt_for_server(some_string)
+    data = encryption.encrypt_for_server(some_string, study_id)
     key.set_contents_from_string(data)
 
 # def s3_retrieve_raw( key_name ):
@@ -37,9 +36,9 @@ def s3_upload( key_name, some_string ):
 #     key = Key(_get_bucket(S3_BUCKET), key_name)
 #     return key.read()
 
-def s3_retrieve(key_name):
+def s3_retrieve(key_name, study_id):
     key = Key(_get_bucket(S3_BUCKET), key_name)
-    return encryption.decrypt_server( key.read() )
+    return encryption.decrypt_server( key.read(), study_id )
 
 
 def s3_list_files( prefix ):
