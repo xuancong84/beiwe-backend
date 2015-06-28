@@ -1,21 +1,15 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from db.user_models import Users
 
-"""TODO: New db table named Studies containing studies.
-     Study name
-     reference to administrators allowed to administer this study
-     references to surveys in the study in the Surveys table(?)
-     settings for survey (as json? maybe we want another table) """
 
-
-#TODO: we need a study editing wrapper...
 class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
                  "surveys": [],         #the surveys pushed in this study.
                  "settings": REQUIRED,  #the device settings for the study.
-                 "devices": []
+                 "devices": [],
+                 "encryption_key": REQUIRED
                  }
     
     #def add_survey(self, content, timings, survey_type):
