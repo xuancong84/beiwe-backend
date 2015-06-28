@@ -60,6 +60,7 @@ def update_survey(survey_id=None):
         return make_response(error_msg, 400)
 
 #TODO: point this at a real template
+#TODO: this probably is what we need for the main page, check and move.
 @survey_designer.route('/participants')
 @authenticate_admin_login
 def render_surveys():
