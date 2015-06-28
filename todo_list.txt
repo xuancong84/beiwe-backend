@@ -5,6 +5,8 @@ convert all surveys to one type with a list of days of the week.  no more daily-
 todo: method of determining what survey is currently being modified in order to check the admin's editing privileges
 <string:file_id>'
 
+check that app-side file handling to only upload retired files is activated for the voice recording
+
 -----------------------------------front end-------------------------------------------;
 change days of week to checkboxes instead of dropdown.
 
@@ -16,6 +18,9 @@ we need to create the following pages for admins:
     create new admin
     add admin to study
     create new study
+
+    	page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
+    	--CHECK THE PASSWORDS.PY.EXAMPLE FILE FOR DETAILS ON REQUIREMENTS FOR THESE PASSWORDS.
     add survey to study
     error page for admin permission denied (put in decorator)
 
