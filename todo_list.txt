@@ -9,6 +9,29 @@ todo: method of determining what survey is currently being modified in order to 
 
 check that app-side file handling to only upload retired files is activated for the voice recording
 
+Data Stream Toggles, customizable from the admin panel at the time of study creation:
+-Accelerometer
+-GPS
+-Phone calls
+-SMS and MMS (both sent and received)
+-WiFi
+-Bluetooth
+-PowerStateListener (Screen on/off, Power connected/disconnected, shutdown/restart/boot)- should the three of these be one toggle, or three separate toggles?  One toggle is easier, engineering-wise.
+
+Customizable Times, customizable from the admin panel at the time of study creation:
+all of the time constants at the top of Timer.java:
+UPLOAD_DATA_FILES_PERIOD, CREATE_NEW_DATA_FILES_PERIOD, CHECK_FOR_NEW_SURVEYS_PERIOD, WIFI_LOG_PERIOD, BLUETOOTH_ON_DURATION, BLUETOOTH_PERIOD, BLUETOOTH_START_TIME_IN_PERIOD (this one isn't listed in the change order because it would be hard to explain, but it is one of the constants that should be adjustable), ACCELEROMETER_ON_DURATION, ACCELEROMETER_OFF_MINIMUM_DURATION, GPS_ON_DURATION, GPS_OFF_MINIMUM_DURATION, VOICE_RECORDING_HOUR_OF_DAY, VOICE_RECORDING_MAX_TIME_LENGTH, MILLISECONDS_BEFORE_AUTO_LOGOUT
+-There should also be default values for these, so that the researcher doesn't have to set all new values from scratch at the start of the study.
+-We might also want to include error-checking (this isn't mentioned in the change order) so that, for example, BLUETOOTH_ON_DURATION must be no longer than BLUETOOTH_PERIOD minus BLUETOOTH_START_TIME_IN_PERIOD.
+
+Customizable wording, customizable from the admin panel at the time of study creation:
+-Text on the "Call Clinician" buttons throughout the app
+-Main body text on Voice Recording screen
+-About page text
+-Text in the Toast that pops up after a user submits a completed survey
+-Text in the Toast that pops up after a user submits a completed voice recording
+We should probably limit text inputs to ASCII-only, not Unicode characters. The survey editor interface currently (June 29, 2015) has a check for Unicode characters in survey_designer.py/update_survey().
+
 ############################################################
 ######################### FRONT END ########################
 ############################################################
@@ -67,12 +90,11 @@ SSL on the new server
 ########################## GENERAL TASKS ###########################
 ####################################################################
 
-make a comprehensive list of feature toggles for sending to the device.
-
 since studies will have arbitrary time triggers, frequency triggers, and no longer have distinct names (daily, weekly, voice), and will instead be identified by some form of unique id, make sure that the timer data is included in the csv for survey answers.
 
 ####################################################################
 ############################ KNOWN BUGS ############################
+####################################################################
 
 MMS logging:
 	-When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
