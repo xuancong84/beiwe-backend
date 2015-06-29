@@ -9,7 +9,7 @@ todo: method of determining what survey is currently being modified in order to 
 
 check that app-side file handling to only upload retired files is activated for the voice recording
 
-User/Access control:
+Admin/Access control:
 -Each researcher should have a drop-down menu of studies he/she is authorized to view, and be able to go to the homepage for any of those studies
 -There should be 2 levels of control: a regular researcher, and a super-admin.  A super-admin can create new researchers, reset researchers' passwords, edit which studies researchers are attached to, delete researchers, and create studies.  Only JP (and maybe Jeanette) should be super-admins.
 -The data download script should only only enable a researcher to download data from a study that researcher is authorized to view.
@@ -53,7 +53,7 @@ change days of week to checkboxes instead of dropdown.
 change the front page from a view of all device-users to a view of device-users and the study they are enrolled in, and only visible to studies the admin has access rights to
 
 we need to create the following pages for admins:
-    change passwords
+    sysadmin: change password of other user
     elevate to sysadmin?
     create new admin
     add admin to study
