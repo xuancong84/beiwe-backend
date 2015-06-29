@@ -9,6 +9,18 @@ todo: method of determining what survey is currently being modified in order to 
 
 check that app-side file handling to only upload retired files is activated for the voice recording
 
+User/Access control:
+-Each researcher should have a drop-down menu of studies he/she is authorized to view, and be able to go to the homepage for any of those studies
+-There should be 2 levels of control: a regular researcher, and a super-admin.  A super-admin can create new researchers, reset researchers' passwords, edit which studies researchers are attached to, delete researchers, and create studies.  Only JP (and maybe Jeanette) should be super-admins.
+-The data download script should only only enable a researcher to download data from a study that researcher is authorized to view.
+
+Survey modifications:
+-Have separate surveys for each study (we probably don't need a survey to be shared among multiple studies)
+-Support an arbitrary number of surveys for each study
+-Surveys can happen once a week, once a day, or multiple times per day
+-A survey can include all the questions or a random subset of the questions.  For example, the research administrator could create a 31 question survey, and either set the survey to display all 31 questions every time, or set it to display 5 questions at random from the 31.
+-Ask JP if he wants the option to make surveys display questions in randomized order
+
 Data Stream Toggles, customizable from the admin panel at the time of study creation:
 -Accelerometer
 -GPS
