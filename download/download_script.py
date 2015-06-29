@@ -7,8 +7,11 @@ try:
     from libs.encryption import decrypt_server as _decrypt
 except ImportError as e:
     print "\n You need to solve this import error, I recommend using pip."
-    print e.message, "\n"
+    print e.message, "\n\n\n"
     raise e
+
+#TODO: the download script needs to be either rewritten to grab only relevant user ids,
+# or it needs to not grab user ids at all. 
 
 print "\n\n...\n"
 try:
@@ -19,8 +22,7 @@ except Exception:
     print "\nunable to get user list.\n"
     exit()
 
-print ""
-print "you are currently in", os.path.abspath(".")
+print "\nyou are currently in", os.path.abspath(".")
 print 'To change your current directory type chdir("/some/folderpath/here/")'
 
 def _get_user_folder_path(patient_id):
@@ -53,36 +55,37 @@ def _download(prefix, patient_id):
 
 def download_all(patient_id):
     _download(patient_id+"/", patient_id)
+
 def download_bluetooth(patient_id):
     _download(patient_id+"/bluetooth", patient_id)
-    
+
 def download_wifi(patient_id):
     _download(patient_id+"/wifi", patient_id)
-    
+
 def download_debug(patient_id):
     _download(patient_id+"/logFile", patient_id)
 
 def download_accel(patient_id):
     _download(patient_id+"/accel", patient_id)
-    
+
 def download_gps(patient_id):
     _download(patient_id+"/gps", patient_id)
-    
+
 def download_audio(patient_id):
     _download(patient_id+"/voiceRecording", patient_id)
-    
+
 def download_texts(patient_id):
     _download(patient_id+"/texts", patient_id)
-    
+
 def download_calls(patient_id):
     _download(patient_id+"/call", patient_id)
-    
+
 def download_daily_survey_results_data(patient_id):
     _download(patient_id +'/'+"surveyAnswers/Daily", patient_id)
-    
+
 def download_weekly_survey_results_data(patient_id):
     _download(patient_id +'/'+"surveyAnswers/Weekly", patient_id)
-    
+
 def download_weekliy_survey_timings_data(patient_id):
     _download(patient_id +'/'+"surveyTimings/Weekly", patient_id)
 
