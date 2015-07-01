@@ -8,21 +8,25 @@ class Study( DatabaseObject ):
                  "super_admins":[],     #admins that can add admins.
                  "surveys": [],         #the surveys pushed in this study.
                  "settings": REQUIRED,  #the device settings for the study.
-                 "devices": [],
+                 "participants": [],
                  "encryption_key": REQUIRED
                  }
-    
-    #def add_survey(self, content, timings, survey_type):
-    def add_survey(self, survey):
-        self["surveys"].append(survey._id)
     
     @classmethod
     def get_studies_for_admin(admin_id):
         return [Studies(study_id) for study_id in Studies(admins=admin_id)]
     
+    #def add_survey(self, content, timings, survey_type):
+    def add_survey(self, survey):
+        self["surveys"].append(survey._id)
+    
     #TODO: test that this works and is not a cyclic import (it shouldn't be...)
-    def get_users_in_study(self):
-        [ Users(device_id) for device_id in self.devices ]
+    def get_participants_in_study(self):
+        [ Users(participants) for participants in self.participants ]
+    
+    def get_surveys_for_study(self):
+        return [Surveys(survey_id) for survey_id in self['surveys'] ]
+    
     
 class Studies( DatabaseCollection ):
     """ The Studies database."""
@@ -34,20 +38,15 @@ class DeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
     DEFAULTS = {}
-    #TODO: fill this with settings...
+    #TODO: this is a perpetual todo: fill this with toggles
     
 #TODO: this database collection needs a better name.
 class StudyDeviceSettings( DatabaseCollection ):
     OBJTYPE = DeviceSettings
     
 ################################################################################
-"""TODO: new db table Surveys.
-    fields: reference to a study,
-    type of survey (audio or regular),
-    content of survey (in json)
-    timings for survey (as json) (what days, what hour) 
-    """
-    #TODO: we need a canonical list of survey types. (probably voice, text)
+
+#TODO: we need a canonical list of survey types. (probably voice, text)
 class Survey( DatabaseCollection ):
     DEFAULTS = {"content": REQUIRED,
                 "timings": REQUIRED,
