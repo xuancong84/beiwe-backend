@@ -1,6 +1,6 @@
 import calendar, time
 
-from flask import Blueprint, request, abort, render_template
+from flask import Blueprint, request, abort, render_template, json
 
 from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
@@ -11,6 +11,7 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from pages.survey_designer import get_latest_survey
 from libs.logging import log_error
+from db.study_models import Studies, Surveys
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -21,15 +22,25 @@ mobile_api = Blueprint('mobile_api', __name__)
 ############################# DOWNLOADS ########################################
 ################################################################################
 
-@mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
+@mobile_api.route("/download_surveys", methods=['GET', 'POST']) 
 @authenticate_user
-def download_daily_survey():
-    return get_latest_survey('daily')
+def download_surveys():
+    patient_id = request.values['patient_id']
+    study = Studies(participants=patient_id).first() #is first() even valid mongolia?
+    surveys = study.get_surveys()
+    #TODO: there is no way this is valid, there is always something wrong with json dumps.
+    return json.dumps(surveys)
 
-@mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
-@authenticate_user
-def download_weekly_survey():
-    return get_latest_survey('weekly')
+#TODO: find all locations in the app that contain these two urls, point them at the new downloader
+# @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
+# @authenticate_user
+# def download_daily_survey():
+#     return get_latest_survey('daily')
+# 
+# @mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
+# @authenticate_user
+# def download_weekly_survey():
+#     return get_latest_survey('weekly')
 
 ################################################################################
 ############################# graph data #######################################
