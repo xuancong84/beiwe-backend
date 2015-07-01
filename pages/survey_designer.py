@@ -4,7 +4,6 @@ from flask.helpers import make_response
 from db.study_models import Surveys, Study
 from libs.user_authentication import authenticate_user
 
-
 survey_designer = Blueprint('survey_designer', __name__)
 
 #TODO: refactor to use the <string:survey_id> url argument
@@ -68,7 +67,7 @@ def render_surveys():
     studies = Study.get_studies_for_admin(session['admin_username'])
     users_by_study = {}
     for study in studies:
-        users_by_study[study.name] = study.get_users_in_study()
+        users_by_study[study.name] = study.get_participants_in_study()
     return render_template('surveys.html', users_by_study)
 
 #TODO: purge any usage of weekly and daily urls (below), use this instead.
