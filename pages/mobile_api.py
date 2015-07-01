@@ -63,7 +63,7 @@ def fetch_graph():
     
     return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
 
-
+# this is a debugging function, it displays the user graph for a given user.
 @mobile_api.route("/fake", methods=["GET"] )
 def fake_survey():
     patient_id = request.values['patient_id']
@@ -131,6 +131,7 @@ def upload():
 ############################## Registration ####################################
 ################################################################################
 
+#TODO: add which study a user is being registered for
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
 def register_user():
@@ -177,7 +178,6 @@ def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
     file_contents = ("patient_id, MAC, phone_number, device_id\n" +
                      patient_id+","+mac_address+","+phone_number+","+device_id )
     s3_upload( file_name, file_contents )
-
 
 
 ################################################################################
