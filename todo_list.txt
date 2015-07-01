@@ -102,11 +102,15 @@ SSL on the new server
 ########################## GENERAL TASKS ###########################
 ####################################################################
 
+UHOH, I don't think we have any code for downloading user mac addresses/hashes of them.
+
 since studies will have arbitrary time triggers, frequency triggers, and no longer have distinct names (daily, weekly, voice), and will instead be identified by some form of unique id, make sure that the timer data is included in the csv for survey answers.
 
 ####################################################################
 ############################ KNOWN BUGS ############################
 ####################################################################
+
+Known unknown bug: if the logout timer is less than the max voice recording time period
 
 MMS logging:
 	-When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
