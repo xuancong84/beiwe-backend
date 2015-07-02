@@ -9,9 +9,8 @@ from db.user_models import User
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from pages.survey_designer import get_latest_survey
 from libs.logging import log_error
-from db.study_models import Studies, Surveys
+from db.study_models import Studies
 
 ################################################################################
 ############################# GLOBALS... #######################################
