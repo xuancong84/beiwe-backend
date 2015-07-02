@@ -15,10 +15,14 @@ survey_designer = Blueprint('survey_designer', __name__)
 ################################################################################
 
 #TODO: implement new survey creation
+@survey_designer.route('/create_survey/<string:study_id>')
+@authenticate_admin_study_access
 def create_new_survey():
     pass
 
 #TODO: implement delete survey
+@survey_designer.route('/delete_survey/<string:survey_id>')
+@authenticate_admin_study_access
 def delete_survey():
     pass
 
