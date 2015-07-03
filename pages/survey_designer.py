@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, session
 from libs.admin_authentication import authenticate_admin_login, authenticate_admin_study_access
 from flask.helpers import make_response
-from db.study_models import Surveys, Study
+from db.study_models import Surveys, Study, Studies, Survey
 from libs.user_authentication import authenticate_user
 
 survey_designer = Blueprint('survey_designer', __name__)
@@ -15,15 +15,18 @@ survey_designer = Blueprint('survey_designer', __name__)
 ################################################################################
 
 #TODO: implement new survey creation
-@survey_designer.route('/create_survey/<string:study_id>')
+@survey_designer.route('/create_survey/<string:study_id>', methods=['POST'])
 @authenticate_admin_study_access
-def create_new_survey():
-    pass
+def create_new_survey(study_id=None):
+    study = Studies(_id=study_id)
+    new_survey = Survey.create_default_survey( request.values['survey_type'] )
+    study.add_survey(new_survey._id)
+
 
 #TODO: implement delete survey
 @survey_designer.route('/delete_survey/<string:survey_id>')
 @authenticate_admin_study_access
-def delete_survey():
+def delete_survey(survey_id=None):
     pass
 
 #TODO: redirect any urls in javascript to point at the arbitrarily typed survey.

@@ -22,3 +22,10 @@ SURVEY_TIMINGS_TAG = 'surveyTimings'
 #TODO: get rid of these.
 DAILY_SURVEY_NAME = 'Daily'
 WEEKLY_SURVEY_NAME = 'Weekly'
+
+#Survey types
+SURVEY_TYPES = ['audio', 'android_survey']
+
+# class SURVEY_TYPES(object):
+#     audio = "audio"
+#     android_survey = "android_survey"

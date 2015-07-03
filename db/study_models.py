@@ -1,5 +1,6 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from db.user_models import Users
+from data.constants import SURVEY_TYPES
 
 
 class Study( DatabaseObject ):
@@ -46,20 +47,30 @@ class StudyDeviceSettings( DatabaseCollection ):
     
 ################################################################################
 
+class SurveyTypeError(Exception): pass
+
 #TODO: we need a canonical list of survey types. (probably voice, text)
 class Survey( DatabaseCollection ):
     DEFAULTS = {"content": REQUIRED,
                 "timings": REQUIRED,
-                "survey_type": REQUIRED,
+                "survey_type": REQUIRED }
                 #TODO: do we need the following per-survey settings?
 #                 "other_settings": REQUIRED
-               }
+    
+    @classmethod
+    #TODO: probably should have some kind of survey type check here
+    def create_default_survey(cls, survey_type):
+        if survey_type not in SURVEY_TYPES:
+            raise SurveyTypeError("%s is not a valide survey type" % survey_type)
+        survey = {'content:':"",
+                  'timings': [False, False, False, False, False, False, False],
+                  "survey_type": survey_type }
+        cls.create(**survey)
+        
     #TODO: define the valid types of survey
     """TODO: define a valid date-time schema
         list: days of week, starting on a sunday? (check implementation on android)
-            of integers, in android we check day of the week and set that alarm.
-            
-        """
+            of integers, in android we check day of the week and set that alarm. """
     #TODO: determine exactly what data goes into a survey (I think it is already
     # a json string), and dump it in.  implement the appropriate create method.
     
