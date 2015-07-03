@@ -23,7 +23,7 @@ class Study( DatabaseObject ):
 #             raise SurveyDoesNotExistError
         self["surveys"].remove()
     
-    #TODO: test that this works and is not a cyclic import (it shouldn't be...)
+    #TODO: Eli. test that this works and is not a cyclic import (it shouldn't be...)
     def get_participants_in_study(self):
         [ Users(participants) for participants in self.participants ]
     
@@ -35,19 +35,15 @@ class DeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
     DEFAULTS = {}
-    #TODO: this is a perpetual todo: fill this with toggles
+    #TODO: Eli/Josh. fill this with all the toggles.
 
 
-#TODO: we need a canonical list of survey types. (probably voice, text)
 class Survey( DatabaseCollection ):
     DEFAULTS = {"content": REQUIRED,
                 "timings": REQUIRED,
                 "survey_type": REQUIRED }
-                #TODO: do we need the following per-survey settings?
-#                 "other_settings": REQUIRED
-    
     @classmethod
-    #TODO: probably should have some kind of survey type check here
+    #TODO: Eli. probably should have some kind of survey type check here
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valide survey type" % survey_type)
@@ -56,18 +52,18 @@ class Survey( DatabaseCollection ):
                   "survey_type": survey_type }
         cls.create(**survey)
         
-    #TODO: define the valid types of survey
-    """TODO: define a valid date-time schema
+    """TODO: Eli define a valid date-time schema
         list: days of week, starting on a sunday? (check implementation on android)
-            of integers, in android we check day of the week and set that alarm. """
-    #TODO: determine exactly what data goes into a survey (I think it is already
-    # a json string), and dump it in.  implement the appropriate create method.
+            of integers, in android we check day of the week and set that alarm.
+            (check the app, I think sunday is 0 index)"""
+    """TODO: Eli. determine exactly what data goes into a survey (I think it is already
+        # a json string), and dump it in.  implement the appropriate create method."""
 
 ############################### Collections ####################################
 class Studies( DatabaseCollection ):
     """ The Studies database."""
     OBJTYPE = Study
-#TODO: this database collection needs a better name.
+#TODO: Eli. this database collection needs a better name.
 class StudyDeviceSettings( DatabaseCollection ):
     OBJTYPE = DeviceSettings
 class Surveys(DatabaseCollection):

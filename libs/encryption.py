@@ -38,7 +38,7 @@ def import_RSA_key( key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-#TODO: make a version of the decryption function that takes an encryption key directly, for use in download script.
+#TODO: Eli. make a version of the decryption function that takes an encryption key directly, for use in download script.
 
 def encrypt_for_server(input_string, study_id):
     """ encrypts data using the ENCRYPTION_KEY, prepends the generated
@@ -71,7 +71,7 @@ def decrypt_device_file(patient_id, data, private_key):
     # and we should be informed.
     # As of the start of the first/pilot/FAS study we have not seen any of these
     # errors in many months.
-    #TODO: make errors here email us.
+    #TODO: Eli/Josh/Alvin. make errors here email us if they happen.
     # print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
         try:
@@ -94,7 +94,7 @@ def decrypt_device_file(patient_id, data, private_key):
             elif 'Incorrect padding' in e.message:
                 error_message += "base64 padding error, data is truncated."
                 # this is only seen in mp4 files. possibilities:
-                #TODO: check that app-side file handling to only upload retired files is activated for the voice recording
+                #TODO: Eli. check that app-side file handling to only upload retired files is activated for the voice recording
                 #  upload during write operation.
                 #  broken base64 conversion in the app
                 #  some unanticipated error in the file upload

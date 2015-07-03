@@ -6,15 +6,15 @@ from libs.user_authentication import authenticate_user
 
 survey_designer = Blueprint('survey_designer', __name__)
 
-#TODO: refactor to use the <string:survey_id> url argument
-#TODO: implement "study does not exist" page.
-#TODO: implement "survey does not exist" page.
+#TODO: josh/alvin. implement "study does not exist" page.
+#TODO: josh/alvin. implement "survey does not exist" page.
 
 ################################################################################
 ############################# Creation/Deletion ##############################
 ################################################################################
 
-#TODO: build create survey page, point it at this
+#TODO: josh/alvin. in javascript, point a post request with a 'survey_type' parameter.
+#TODO: josh/alvin. make the create survey page a real page.
 @survey_designer.route('/create_survey/<string:study_id>', methods=['GET','POST'])
 @authenticate_admin_study_access
 def create_new_survey(study_id=None):
@@ -26,7 +26,8 @@ def create_new_survey(study_id=None):
     if request.method == 'GET':
         return render_template("create_survey.html")
 
-#TODO: return redirect to the study page or /
+#TODO: josh/alvin. make a... button... somewhere that points to this function, suppling a survey id in the url
+#TODO: Eli. return redirect to the study page or /
 @survey_designer.route('/delete_survey/<string:survey_id>', methods=['POST'])
 @authenticate_admin_study_access
 def delete_survey(survey_id=None):
@@ -40,7 +41,6 @@ def delete_survey(survey_id=None):
 ############################# Setters and Editers ##############################
 ################################################################################
 
-#TODO: redirect any urls in javascript to point at the arbitrarily typed survey.
 # @survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
 # @authenticate_admin_login
 # def update_daily():
@@ -51,12 +51,14 @@ def delete_survey(survey_id=None):
 # def update_weekly():
 #     return update_survey('weekly', request)
 
-#TODO: make sure that this url, which is directed to by javascript, contains the session cookie.
-#TODO: test
+#TODO: Everyone. test.
+""""TODO: josh/alvin. redirect any urls in javascript and html that point to
+update_daily_survey or update_weekly_survey to instead point at this url, supplying
+a survey_ID. """
 @survey_designer.route('/update_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def update_survey(survey_id=None):
-    """TODO: the original code inside the try was:
+    """TODO: Eli. the original code inside the try statement was:
         survey_name = 'all_surveys/' + survey_type + '/'  # set filepath
         survey_name += datetime.now().isoformat() + '.json'  # set filename
         new_quiz = request.values['JSONstring']
@@ -67,7 +69,7 @@ def update_survey(survey_id=None):
         new_content = request.values['JSONstring']
         survey = Surveys(survey_id)
         survey['content'] = new_content
-        #TODO: investigate how timings are sent to the device.
+        #TODO: Eli. investigate how timings are sent to the device.
         return '200'
     except UnicodeEncodeError as e:
         print "UnicodeEncodeError in update_survey().\nError:\n", e
@@ -76,19 +78,10 @@ def update_survey(survey_id=None):
                      "includes only ASCII characters.")
         return make_response(error_msg, 400)
 
-#TODO: point this at a real template
-#TODO: this probably is what we need for the main page, check and move.
-@survey_designer.route('/participants')
-@authenticate_admin_login
-def render_surveys():
-    """Provides a list of studies that the current admin has access to."""
-    studies = Study.get_studies_for_admin(session['admin_username'])
-    users_by_study = {}
-    for study in studies:
-        users_by_study[study.name] = study.get_participants_in_study()
-    return render_template('surveys.html', users_by_study)
 
-#TODO: purge any usage of weekly and daily urls (below), use this instead.
+""""TODO: josh/alvin. any hardcoded instance of the edit survey functions
+(weekly_survey and daily_survey) should point at edit_survey/survey_id instead.
+we no longer have a distinction between weekly and daily"""
 @survey_designer.route('/edit_survey/<string:survey_id>/')
 @authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
@@ -103,33 +96,3 @@ def render_edit_survey(survey_id=None):
 # @authenticate_admin_login
 # def daily_survey():
 #     return render_template('edit_survey.html', daily_or_weekly='daily')
-
-
-################################################################################
-########################### Device Survey Getters ##############################
-################################################################################
-
-#TODO: move this to mobile api
-#TODO: make sure that this url is pointed at correctly by the app
-#TODO: check that the authenticate_user decorator is correctly used.
-@survey_designer.route('/<string:survey_id>/download/', methods=['GET', 'POST'])
-@authenticate_user
-def get_latest_survey(survey_id):
-    #TODO: another reminder about checking on how timings are sent to the app
-    # and if the need to be sent inside of this function (probably yes)
-    return Surveys(survey_id)['content']
-
-#TODO: Purge any use of the commented urls below
-# @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
-# def get_latest_weekly():
-#     """ Method responsible for fetching latest created weekly survey
-#         (frequency 1) """
-#     return get_latest_survey('weekly')
-
-# @survey_designer.route('/get_daily_survey', methods=['GET', 'POST'])
-# def get_latest_daily():
-#     """ Method responsible for fetching latest created daily survey (frequency 1) """
-#     return get_latest_survey('daily')
-# def get_surveys(prefix):
-#     surveys = s3_list_files(prefix)
-#     return [survey_file for survey_file in surveys]

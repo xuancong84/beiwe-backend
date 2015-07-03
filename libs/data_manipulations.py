@@ -8,7 +8,7 @@ from libs.logging import log_error
 ################################################################################
 
 def s3_csv_to_dict(s3_file_path):
-    #TODO: uhg, this is spaghetti.  It is probabaly better to refactor or even entirely rewrite this code, but if we don't: update this to use the new s3_retrieve function that requires a study id.
+    #TODO: Nobody.  Uhg, this is spaghetti.  It is probabaly better to refactor or even entirely rewrite this code, but if we don't: update this to use the new s3_retrieve function that requires a study id.
     return csv_to_dict( s3_retrieve( s3_file_path ) )
 
 def csv_to_dict(csv_string):

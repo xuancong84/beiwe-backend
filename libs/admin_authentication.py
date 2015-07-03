@@ -4,7 +4,6 @@ from flask import session, redirect
 from db.user_models import Admin, Admins
 from libs.security import generate_easy_alphanumeric_string
 from db.study_models import Studies
-from werkzeug.exceptions import abort
 
 ################################################################################
 ############################ Existence Modifiers ###############################
@@ -52,9 +51,9 @@ def is_logged_in():
 
 class ArgumentMissingException(Exception): pass
 
-#TODO: test survey editing wrapper.
-#todo: permission denied page
-#TODO: do we want a survey does not exist page?
+#TODO: Eli. test survey editing wrapper.
+#TODO: Josh/Alvin. permission denied page
+#TODO: Josh/Alvin. (low priority) we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
     """ This authentication decorator checks whether the user has permission to
         to access the study/survey they are accessing.
@@ -89,8 +88,8 @@ def authenticate_admin_study_access(some_function):
 ########################## System Administrator ################################
 ################################################################################
 
-# TODO: test sysadmin wrapper
-#TODO: permission denied page.
+# TODO: Eli/Josh/Alvin. test sysadmin wrapper
+#TODO: Josh/Alvin. (low priority) we need a permission denied page.
 def authenticate_sysadmin(some_function):
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):

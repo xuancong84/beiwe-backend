@@ -5,6 +5,7 @@ from libs.admin_authentication import authenticate_admin_login
 from db.user_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.encryption import encrypt_for_server
+from db.study_models import Study
 
 admin = Blueprint('admin', __name__)
 
@@ -46,7 +47,6 @@ def login():
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
-#TODO: is this linked to anywhere?
 @admin.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
 def reset_admin_password():
@@ -65,25 +65,38 @@ def reset_admin_password():
 ################################################################################
 ############################# The Admin Page ###################################
 ################################################################################
-#TODO: this probably can be swapped for the new render_surveys():
+#TODO: josh/alvin: replace use of this function/url with the new implementation, see the todo below.
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @authenticate_admin_login
 def render_main():
     """ Method responsible rendering admin template"""
     patients = {user['_id']: patient_dict(user) for user in Users()}
     return render_template('admin_panel.html', patients = patients)
-
-#TODO: document
-#TODO: does this need updated for new db schema? removed? only used in render_main.
+ 
 def patient_dict(patient):
     return {'placeholder_field': 'placeholder field for future data',
             'has_device': patient['device_id'] is not None }
+
+"""TODO: josh/alvin: this function provides the admin with users in the studies
+they have access to, it is not used anywhere. Probably this can be on the front 
+page for the site. """
+#@admin.route('admin_panel') #maybe.
+@authenticate_admin_login
+def render_surveys():
+    """Provides a dict of studies that the current admin has access to by study
+    to a flask template."""
+    studies = Study.get_studies_for_admin(session['admin_username'])
+    users_by_study = {}
+    for study in studies:
+        users_by_study[study.name] = study.get_participants_in_study()
+    return render_template('SOME_PAGE.PROBABLY_HTML', users_by_study=users_by_study)
+
 
 
 ################################################################################
 ######################### Actual Functionality #################################
 ################################################################################
-#TODO: does this need update for new db schema?
+#TODO: Eli. does this need update for new db schema?
 @admin.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin_login
 def reset_user_password():
@@ -96,7 +109,7 @@ def reset_user_password():
         return new_password
     return "that patient id does not exist"
 
-#TODO: does this need update for new db schema?
+#TODO: Eli. does this need update for new db schema?
 @admin.route('/reset_device', methods=["POST"])
 @authenticate_admin_login
 def reset_device():
@@ -109,7 +122,7 @@ def reset_device():
         return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
-#TODO: update to new db schema
+#TODO: Eli. update this to create new user and add to them to a specific study.
 @admin.route('/create_new_patient', methods=["POST"])
 @authenticate_admin_login
 def create_new_patient():
@@ -130,10 +143,10 @@ def download():
     """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
-#TODO: rewrite for new encryption and db schema
-@admin.route("/user_list")
-def get_user_list():
-    all_users = ""
-    for user in Users():
-        all_users += user['_id'] + ','
-    return encrypt_for_server( all_users[:-1] )
+#TODO: Eli. this is part of the download script (maybe), find and purge.
+# @admin.route("/user_list")
+# def get_user_list():
+#     all_users = ""
+#     for user in Users():
+#         all_users += user['_id'] + ','
+#     return encrypt_for_server( all_users[:-1] )

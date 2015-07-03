@@ -19,7 +19,7 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
 SURVEY_ANSWERS_TAG = 'surveyAnswers'
 SURVEY_TIMINGS_TAG = 'surveyTimings'
 
-#TODO: get rid of these.
+#TODO: Eli. get rid of these.
 DAILY_SURVEY_NAME = 'Daily'
 WEEKLY_SURVEY_NAME = 'Weekly'
 

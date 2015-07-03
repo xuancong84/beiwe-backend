@@ -10,7 +10,7 @@ except ImportError as e:
     print e.message, "\n\n\n"
     raise e
 
-#TODO: the download script needs to be either rewritten to grab only relevant user ids,
+#TODO: Eli. the download script needs to be either rewritten to grab only relevant user ids,
 # or it needs to not grab user ids at all. 
 
 print "\n\n...\n"

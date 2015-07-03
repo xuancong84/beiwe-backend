@@ -10,7 +10,7 @@ from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
-from db.study_models import Studies
+from db.study_models import Studies, Surveys
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -27,10 +27,10 @@ def download_surveys():
     patient_id = request.values['patient_id']
     study = Studies(participants=patient_id).first() #is first() even valid mongolia?
     surveys = study.get_surveys()
-    #TODO: there is no way this is valid, there is always something wrong with json dumps.
+    #TODO: Eli/Josh/Alvin there is no way this is valid, there is always something wrong with json dumps.
     return json.dumps(surveys)
 
-#TODO: find all locations in the app that contain these two urls, point them at the new downloader
+#TODO: Eli. find and purge all instances in the app that contain these two urls, point them at the new downloader
 # @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
 # @authenticate_user
 # def download_daily_survey():
@@ -130,7 +130,7 @@ def upload():
 ############################## Registration ####################################
 ################################################################################
 
-#TODO: add which study a user is being registered for
+#TODO: Eli. add which study a user is being registered for
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
 def register_user():
@@ -237,3 +237,31 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
             survey_frequency + '/' +
             questions_created_timestamp + '/' +
             timestamp )
+
+
+################################################################################
+########################### Device Survey Getters ##############################
+################################################################################
+
+#TODO: Eli. make sure that this url is pointed at correctly by the app
+#TODO: Eli. check that the authenticate_user decorator is correctly used.
+@mobile_api.route('/<string:survey_id>/download/', methods=['GET', 'POST'])
+@authenticate_user
+def get_latest_survey(survey_id):
+    #TODO: Eli. Check how timings are sent to the app, if they need to be sent inside of this function (probably yes)
+    return Surveys(survey_id)['content']
+
+#TODO: Eli. Purge any use of the commented urls below, both app and server.
+# @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
+# def get_latest_weekly():
+#     """ Method responsible for fetching latest created weekly survey
+#         (frequency 1) """
+#     return get_latest_survey('weekly')
+
+# @survey_designer.route('/get_daily_survey', methods=['GET', 'POST'])
+# def get_latest_daily():
+#     """ Method responsible for fetching latest created daily survey (frequency 1) """
+#     return get_latest_survey('daily')
+# def get_surveys(prefix):
+#     surveys = s3_list_files(prefix)
+#     return [survey_file for survey_file in surveys]
