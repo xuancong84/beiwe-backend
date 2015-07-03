@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, session
+from flask import Blueprint, request, render_template, session, redirect
 from libs.admin_authentication import authenticate_admin_login, authenticate_admin_study_access
 from flask.helpers import make_response
 from db.study_models import Surveys, Study, Studies, Survey
@@ -11,23 +11,34 @@ survey_designer = Blueprint('survey_designer', __name__)
 #TODO: implement "survey does not exist" page.
 
 ################################################################################
-############################# Setters and Editers ##############################
+############################# Creation/Deletion ##############################
 ################################################################################
 
-#TODO: implement new survey creation
-@survey_designer.route('/create_survey/<string:study_id>', methods=['POST'])
+#TODO: build create survey page, point it at this
+@survey_designer.route('/create_survey/<string:study_id>', methods=['GET','POST'])
 @authenticate_admin_study_access
 def create_new_survey(study_id=None):
-    study = Studies(_id=study_id)
-    new_survey = Survey.create_default_survey( request.values['survey_type'] )
-    study.add_survey(new_survey._id)
+    if request.method == 'POST':
+        study = Studies(_id=study_id)
+        new_survey = Survey.create_default_survey( request.values['survey_type'] )
+        study.add_survey(new_survey._id)
+        return redirect('edit_survey/' + new_survey._id)
+    if request.method == 'GET':
+        return render_template("create_survey.html")
 
-
-#TODO: implement delete survey
-@survey_designer.route('/delete_survey/<string:survey_id>')
+#TODO: return redirect to the study page or /
+@survey_designer.route('/delete_survey/<string:survey_id>', methods=['POST'])
 @authenticate_admin_study_access
 def delete_survey(survey_id=None):
-    pass
+    survey = Surveys(_id=survey_id)
+    survey.remove()
+    study=Study(surveys=survey_id)
+    study.remove_survey(survey_id)
+    #return redirect()
+
+################################################################################
+############################# Setters and Editers ##############################
+################################################################################
 
 #TODO: redirect any urls in javascript to point at the arbitrarily typed survey.
 # @survey_designer.route('/update_daily_survey', methods=['GET', 'POST'])
@@ -78,7 +89,7 @@ def render_surveys():
     return render_template('surveys.html', users_by_study)
 
 #TODO: purge any usage of weekly and daily urls (below), use this instead.
-@survey_designer.route('/<string:survey_id>/weekly_survey')
+@survey_designer.route('edit_survey/<string:survey_id>/')
 @authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
     return render_template('edit_survey.html', survey=Surveys(survey_id) )
@@ -98,6 +109,7 @@ def render_edit_survey(survey_id=None):
 ########################### Device Survey Getters ##############################
 ################################################################################
 
+#TODO: move this to mobile api
 #TODO: make sure that this url is pointed at correctly by the app
 #TODO: check that the authenticate_user decorator is correctly used.
 @survey_designer.route('/<string:survey_id>/download/', methods=['GET', 'POST'])
