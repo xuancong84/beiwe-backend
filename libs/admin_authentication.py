@@ -77,14 +77,13 @@ def authenticate_admin_study_access(some_function):
             study = Studies(surveys=survey_id, admins=admin_name)
             if not study: #if the admin is not authorized for this survey, fail.
                 return redirect("/")
-            return authenticate_and_call
         if "study_id" in kwargs:
             study_id = kwargs['study_id']
             study = Studies(_id=study_id, admins=admin_name)
             if not study: #if the admin is not authorized for this study, fail.
                 return redirect("/")
-            return authenticate_and_call
-        return abort(500)  #this should be unreachable code.
+        return some_function(*args, **kwargs)
+    return authenticate_and_call
 
 ################################################################################
 ########################## System Administrator ################################
