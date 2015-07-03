@@ -89,7 +89,7 @@ def render_surveys():
     return render_template('surveys.html', users_by_study)
 
 #TODO: purge any usage of weekly and daily urls (below), use this instead.
-@survey_designer.route('edit_survey/<string:survey_id>/')
+@survey_designer.route('/edit_survey/<string:survey_id>/')
 @authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
     return render_template('edit_survey.html', survey=Surveys(survey_id) )
