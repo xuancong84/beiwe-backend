@@ -3,6 +3,8 @@ from db.user_models import Users
 from data.constants import SURVEY_TYPES
 
 class Study( DatabaseObject ):
+    PATH = "database.studies"
+    
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
@@ -39,6 +41,8 @@ class DeviceSettings( DatabaseObject ):
 
 
 class Survey( DatabaseCollection ):
+    PATH = "database.surveys"
+    
     DEFAULTS = {"content": REQUIRED,
                 "timings": REQUIRED,
                 "survey_type": REQUIRED }
