@@ -8,7 +8,7 @@ class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
-                 "surveys": set(),      #the surveys pushed in this study.
+                 "surveys": [],      #the surveys pushed in this study.
                  "settings": REQUIRED,  #the device settings for the study.
                  "participants": [],
                  "encryption_key": REQUIRED }
