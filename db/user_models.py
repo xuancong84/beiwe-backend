@@ -5,9 +5,9 @@ from libs.security import (generate_admin_hash_and_salt,
                            generate_user_password_and_salt,
                            generate_easy_alphanumeric_string,)
 
-################################################################################
+"""#############################################################################
 ################################### USER STUFF #################################
-################################################################################
+#############################################################################"""
 
 class User( DatabaseObject ):
     """ The User database object contains the password hashes and unique user names
@@ -19,8 +19,7 @@ class User( DatabaseObject ):
         random number generator.  The sha256 check duplicates the storage of the
         password on the mobile device, so that the user's password is never stored
         in a reversible manner. """
-        
-    PATH = "database.users"
+    PATH = "beiwe.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
     # We are using the patient's assigned ID as a unique Id.
@@ -77,12 +76,12 @@ class Users( DatabaseCollection ):
     """ The Users database."""
     OBJTYPE = User
     
-################################################################################
+"""#############################################################################
 ################################### ADMIN STUFF ################################
-################################################################################
+#############################################################################"""
 
 class Admin( DatabaseObject ):
-    PATH = "database.admins"
+    PATH = "beiwe.admins"
     
     DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED, "system_admin":REQUIRED }
     
