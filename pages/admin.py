@@ -5,7 +5,7 @@ from libs.admin_authentication import authenticate_admin_login
 from db.user_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.encryption import encrypt_for_server
-from db.study_models import Study
+from db.study_models import Study, Studies
 
 admin = Blueprint('admin', __name__)
 
@@ -71,7 +71,10 @@ def reset_admin_password():
 def render_main():
     """ Method responsible rendering admin template"""
     patients = {user['_id']: patient_dict(user) for user in Users()}
-    return render_template('admin_panel.html', patients = patients)
+    #TODO: Josh, make it use a real study; don't hardwire this.
+    main_study = Studies()[0]
+    survey_ids = main_study.list_survey_ids_for_study()
+    return render_template('admin_panel.html', patients=patients, survey_ids=survey_ids)
  
 def patient_dict(patient):
     return {'placeholder_field': 'placeholder field for future data',

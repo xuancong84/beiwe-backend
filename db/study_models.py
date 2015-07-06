@@ -19,6 +19,7 @@ class Study( DatabaseObject ):
     
     def add_survey(self, survey):
         self["surveys"].append(survey._id)
+        self.save()
     
     def remove_survey(self, survey_id):
 #         if survey_id not in self['surveys']:
@@ -31,6 +32,12 @@ class Study( DatabaseObject ):
     
     def get_surveys_for_study(self):
         return [Surveys(survey_id) for survey_id in self['surveys'] ]
+    
+    def list_survey_ids_for_study(self):
+        list_of_survey_ids = []
+        for survey in self['surveys']:
+            list_of_survey_ids.append(str(survey))
+        return list_of_survey_ids
 
 
 class DeviceSettings( DatabaseObject ):
