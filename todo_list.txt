@@ -3,6 +3,7 @@ eli: Put a PATH variable in the new db models
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
+app: when downloading new surveys, handle survey deletion, and identification-persistance (when a person has a notification for survey 2 the survey does not get deleted.)
 
 Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
 	-this looks like it is a component of the surveyscheduler.java class. rewrite to fully drop daily/weekly distinction.
@@ -11,6 +12,7 @@ check that app-side file handling to only upload retired files is activated for 
 
 Admin/Access control:
 -There should be 2 levels of control: a regular researcher, and a super-admin.  A super-admin can create new researchers, reset researchers' passwords, edit which studies researchers are attached to, delete researchers, and create studies.  Only JP (and maybe Jeanette) should be super-admins.
+-regular admins should be able to have full survey modification rights to surveys on studies they are assigned to.
 -The data download script should only only enable a researcher to download data from a study that researcher is authorized to view.
 
 --Survey modifications--
