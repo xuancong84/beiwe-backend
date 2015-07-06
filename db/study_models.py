@@ -53,11 +53,11 @@ class Survey( DatabaseObject ):
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
-        survey = {'content:':"",
+        survey = {'content':"",
                   'timings': [False, False, False, False, False, False, False],
                   "survey_type": survey_type }
-        cls.create(**survey)
-        
+        return super(Survey, cls).create(survey, random_id=True)
+
     """TODO: Eli define a valid date-time schema
         list: days of week, starting on a sunday? (check implementation on android)
             of integers, in android we check day of the week and set that alarm.
