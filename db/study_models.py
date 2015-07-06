@@ -14,7 +14,7 @@ class Study( DatabaseObject ):
                  "encryption_key": REQUIRED }
     
     @classmethod
-    def get_studies_for_admin(admin_id):
+    def get_studies_for_admin(cls, admin_id):
         return [Studies(study_id) for study_id in Studies(admins=admin_id)]
     
     def add_survey(self, survey):
