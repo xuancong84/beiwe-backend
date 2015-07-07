@@ -70,28 +70,36 @@ class DeviceSettings( DatabaseObject ):
 
 
 class Survey( DatabaseObject ):
+    """ Surveys contain all information the app needs to display the survey
+        correctly to a user, and when it should push the notifications to take
+        the survey.
+        
+        Surveys must have a 'survey_type', which is a string declaring the type of
+        survey it contains, which the app uses to display the correct interface. 
+        
+        Surveys contain 'content', which is a json string that is unpacked on the
+        app and displayed to the user in the form indicated by the survey_type.
+        
+        Timings schema: a survey must indicate the day of week and time of day
+        on which to trigger, by default it contains no values.
+        The timings schema mimics the Java.util.Calendar.DayOfWeek specification,
+        i.e. it is zero-indexed with day 0 of Sunday.  'timings' is a list of 7
+        inner-lists, each inner list contains any number of times of the day,
+        times of day are integer values indicating the "seconds past 12am". """
+        
+    #TODO: Josh. define / document the survey json survey format you created.
+    # it doesn't need to be in this document, but this should say where to find it.
     PATH = "database.surveys"
-    
-    DEFAULTS = {"content": REQUIRED,
-                "timings": REQUIRED,
+    DEFAULTS = {"content": "",
+                "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED }
     
-    #TODO: Eli. probably should have some kind of survey type check here
     @classmethod
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
-        survey = {'content':"",
-                  'timings': [False, False, False, False, False, False, False],
-                  "survey_type": survey_type }
+        survey = { "survey_type": survey_type }
         return super(Survey, cls).create(survey, random_id=True)
-
-    """TODO: Eli define a valid date-time schema
-        list: days of week, starting on a sunday? (check implementation on android)
-            of integers, in android we check day of the week and set that alarm.
-            (check the app, I think sunday is 0 index)"""
-    """TODO: Eli. determine exactly what data goes into a survey (I think it is already
-        # a json string), and dump it in.  implement the appropriate create method."""
 
 """############################ Collections #################################"""
 class Studies( DatabaseCollection ):
