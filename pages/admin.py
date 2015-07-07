@@ -1,17 +1,16 @@
 from flask import (Blueprint, redirect, render_template, request, send_file,
                    session)
 from libs import admin_authentication
-from libs.admin_authentication import authenticate_admin_login
+from libs.admin_authentication import authenticate_admin_login,\
+    authenticate_admin_study_access
 from db.user_models import User, Users, Admin
 from libs.s3 import s3_upload, create_client_key_pair
-from libs.encryption import encrypt_for_server
 from db.study_models import Study, Studies
+from bson.objectid import ObjectId
 
 admin = Blueprint('admin', __name__)
 
-################################################################################
-############################# Login/Logoff #####################################
-################################################################################
+"""########################## Login/Logoff ##################################"""
 
 @admin.route('/')
 @admin.route('/admin')
@@ -62,9 +61,8 @@ def reset_admin_password():
     return redirect('/')
 
 
-################################################################################
-############################# The Admin Page ###################################
-################################################################################
+"""########################## The Admin Page ################################"""
+
 """TODO: Josh/Alvin: move this whole function to a render_study() function or
 something, and make a new post-login homepage that shows an admin the studies
 they have permissions on.  If an admin has permissions on only one page, they
@@ -74,9 +72,9 @@ should be automatically redirected to that page upon login."""
 def render_main():
     """ Method responsible rendering admin template"""
     patients = {user['_id']: patient_dict(user) for user in Users()}
-    #TODO: Josh, make it use a real study; don't hardwire this.
+    #TODO: Josh, make it use a real study; don't hard-code this.
     main_study = Studies()[0]
-    survey_ids = main_study.list_survey_ids_for_study()
+    survey_ids = main_study.get_survey_ids_for_study()
     return render_template('admin_panel.html', patients=patients, survey_ids=survey_ids)
  
 def patient_dict(patient):
@@ -98,10 +96,8 @@ def render_surveys():
     return render_template('SOME_PAGE.PROBABLY_HTML', users_by_study=users_by_study)
 
 
+"""###################### Actual Functionality ##############################"""
 
-################################################################################
-######################### Actual Functionality #################################
-################################################################################
 #TODO: Eli. does this need update for new db schema?
 @admin.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin_login
@@ -128,21 +124,24 @@ def reset_device():
         return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
+""""TODO: Alvin/Josh. redirect any url in html or javascript that points at 
+/create_new_patient to point at create_new_patient/*study id* """
 #TODO: Eli. update this to create new user and add to them to a specific study.
-@admin.route('/create_new_patient', methods=["POST"])
-@authenticate_admin_login
-def create_new_patient():
+#TODO: Eli. add which study a user is being registered for
+@admin.route('/create_new_patient/<string:study_id>', methods=["POST"])
+@authenticate_admin_study_access
+def create_new_patient(study_id=None):
     """ Creates a new user, generates a password and keys, pushes data to s3
-    and user database, returns a string containing password and patient id"""
+    and user database, adds user to the study they are supposed to be attached
+    to, returns a string containing password and patient id. """
     patient_id, password = User.create()
+    Study(ObjectId(study_id)).add_participant(patient_id)
     s3_upload(patient_id, "")
     create_client_key_pair(patient_id)
     return "patient_id: " + patient_id + "\npassword: " + password
 
 
-################################################################################
-############################# Other Stuff ######################################
-################################################################################
+"""########################## Other Stuff ###################################"""
 
 @admin.route("/download")
 def download():

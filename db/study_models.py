@@ -1,6 +1,7 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from db.user_models import Users
 from data.constants import SURVEY_TYPES
+from bson.objectid import ObjectId
 
 class Study( DatabaseObject ):
     PATH = "beiwe.studies"
@@ -8,35 +9,60 @@ class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
-                 "surveys": [],      #the surveys pushed in this study.
-                 "settings": REQUIRED,  #the device settings for the study.
-                 "participants": [],
-                 "encryption_key": REQUIRED }
+                 "surveys": [],         #the surveys pushed in this study.
+                 "device_settings": REQUIRED,  #the device settings for the study.
+                 "participants": [],    #paticipants (user ids) in the study
+                 "encryption_key": REQUIRED #the study's data encryption key. 
+                }
+    #Editors
+    def add_participant(self, user_id):
+        """ Note: participant ids (user ids) are strings, not ObjectIds. """
+        self["participants"].append(user_id)
     
+    def remove_participant(self, user_id):
+        """ Note: participant ids (user ids) are strings, not ObjectIds. """
+        if user_id not in self['participants']:
+            raise UserDoesNotExistError
+        self["participants"].remove(user_id)
+    
+    def add_admin(self, admin_id):
+        """ Note: admin ids are strings, not ObjectIds. """
+        self["admins"].append(admin_id)
+    
+    def remove_admin(self, admin_id):
+        """ Note: admin ids are strings, not ObjectIds. """
+        if admin_id not in self['participants']:
+            raise UserDoesNotExistError
+        self["admins"].remove(admin_id)
+    
+    def add_survey(self, survey):
+        """ Note: this takes survey objects, not survey ids."""
+        self["surveys"].append(survey._id)
+        self.save()
+    
+    def remove_survey(self, survey):
+        """ Note: this takes survey objects, not survey ids."""
+        if survey._id not in self['surveys']:
+            raise SurveyDoesNotExistError
+        self["surveys"].remove(survey._id)
+    
+    #Accessors, class methods
     @classmethod
     def get_studies_for_admin(cls, admin_id):
         return [Studies(study_id) for study_id in Studies(admins=admin_id)]
     
-    def add_survey(self, survey):
-        self["surveys"].append(survey._id)
-        self.save()
-    
-    def remove_survey(self, survey_id):
-        if survey_id not in self['surveys']:
-            raise SurveyDoesNotExistError
-        self["surveys"].remove(survey_id)
-    
+    #Accessors, instance methods
     def get_participants_in_study(self):
-        [ Users(participants) for participants in self.participants ]
+        [ Users(ObjectId(user_id)) for user_id in self.participants ]
     
     def get_surveys_for_study(self):
         return [Surveys(survey_id) for survey_id in self['surveys'] ]
     
-    def list_survey_ids_for_study(self):
+    def get_survey_ids_for_study(self):
         return [str(survey) for survey in self['surveys']]
+    
 
-
-class DeviceSettings( DatabaseObject ):
+class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
     PATH = "beiwe.device_settings"
@@ -114,3 +140,4 @@ class Surveys( DatabaseCollection ):
 """############################# Exceptions #################################"""
 class SurveyDoesNotExistError(Exception): pass
 class SurveyTypeError(Exception): pass
+class UserDoesNotExistError(Exception): pass

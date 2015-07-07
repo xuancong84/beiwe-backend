@@ -35,7 +35,7 @@ def delete_survey(survey_id=None):
     survey = Surveys(_id=survey_id)
     survey.remove()
     study=Study(surveys=survey_id)
-    study.remove_survey(survey_id)
+    study.remove_survey(survey)
     #return redirect()
 
 ################################################################################
