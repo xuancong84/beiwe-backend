@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask import Blueprint, request, render_template, session, redirect
 from libs.admin_authentication import authenticate_admin_login, authenticate_admin_study_access
 from flask.helpers import make_response
@@ -13,8 +14,8 @@ survey_designer = Blueprint('survey_designer', __name__)
 ############################# Creation/Deletion ##############################
 ################################################################################
 
-#TODO: josh/alvin. in javascript, point a post request with a 'survey_type' parameter.
-#TODO: josh/alvin. make the create survey page a real page.
+#TODO: Josh. in javascript, point a post request with a 'survey_type' parameter.
+#TODO: Josh. make the create survey page a real page.
 @survey_designer.route('/create_survey/<string:study_id>', methods=['GET','POST'])
 @authenticate_admin_study_access
 def create_new_survey(study_id=None):
@@ -26,7 +27,7 @@ def create_new_survey(study_id=None):
     if request.method == 'GET':
         return render_template("create_survey.html")
 
-#TODO: josh/alvin. make a... button... somewhere that points to this function, suppling a survey id in the url
+#TODO: Josh. make a... button... somewhere that points to this function, suppling a survey id in the url
 #TODO: Eli. return redirect to the study page or /
 @survey_designer.route('/delete_survey/<string:survey_id>', methods=['POST'])
 @authenticate_admin_study_access
@@ -52,7 +53,7 @@ def delete_survey(survey_id=None):
 #     return update_survey('weekly', request)
 
 #TODO: Everyone. test.
-""""TODO: josh/alvin. redirect any urls in javascript and html that point to
+""""TODO: Josh. redirect any urls in javascript and html that point to
 update_daily_survey or update_weekly_survey to instead point at this url, supplying
 a survey_ID. """
 @survey_designer.route('/update_survey/<string:survey_id>', methods=['GET', 'POST'])
@@ -79,13 +80,14 @@ def update_survey(survey_id=None):
         return make_response(error_msg, 400)
 
 
-""""TODO: josh/alvin. any hardcoded instance of the edit survey functions
+""""TODO: Josh. any hardcoded instance of the edit survey functions
 (weekly_survey and daily_survey) should point at edit_survey/survey_id instead.
 we no longer have a distinction between weekly and daily"""
-@survey_designer.route('/edit_survey/<string:survey_id>/')
-@authenticate_admin_study_access
+@survey_designer.route('/edit_survey/<string:survey_id>')
+#@authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
-    return render_template('edit_survey.html', survey=Surveys(survey_id) )
+    return render_template('edit_survey.html', survey=Survey(ObjectId(survey_id)))
+
 
 # @survey_designer.route('/weekly_survey')
 # @authenticate_admin_login

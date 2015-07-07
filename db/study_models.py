@@ -34,10 +34,7 @@ class Study( DatabaseObject ):
         return [Surveys(survey_id) for survey_id in self['surveys'] ]
     
     def list_survey_ids_for_study(self):
-        list_of_survey_ids = []
-        for survey in self['surveys']:
-            list_of_survey_ids.append(str(survey))
-        return list_of_survey_ids
+        return [str(survey) for survey in self['surveys']]
 
 
 class DeviceSettings( DatabaseObject ):

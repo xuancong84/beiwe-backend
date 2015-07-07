@@ -9,12 +9,10 @@ $(document).ready(function() {
     // Determine if it's a daily or weekly survey
     var surveyType = document.getElementById("surveyType").title;
 
-    // Get the correct URL to pull the current copy of the daily or weekly survey
-    var current_survey_url = "https://beiwe.org/get_daily_survey";
-    if (surveyType.localeCompare("weekly") == 0) {
-        current_survey_url = "https://beiwe.org/get_weekly_survey";
-    }
+    console.log("Survey ID = " + survey_id);
+    console.log("Survey content = " + survey_content);
 
+    // TODO: Josh, scrap the current functions, and make the survey load properly
     // Get the current survey's JSON, and render it as a list of questions
     $.getJSON(current_survey_url, function(data) {
         questions = data["questions"];
@@ -45,6 +43,7 @@ function getDayOfWeek() {
     return parseInt(dayPicker.value);
 }
 
+// TODO: Josh, make this update the survey properly
 // On end(), export the survey as a JSON object
 function end() {
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter

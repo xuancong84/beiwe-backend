@@ -65,7 +65,10 @@ def reset_admin_password():
 ################################################################################
 ############################# The Admin Page ###################################
 ################################################################################
-#TODO: josh/alvin: replace use of this function/url with the new implementation, see the todo below.
+"""TODO: Josh/Alvin: move this whole function to a render_study() function or
+something, and make a new post-login homepage that shows an admin the studies
+they have permissions on.  If an admin has permissions on only one page, they
+should be automatically redirected to that page upon login."""
 @admin.route('/admin_panel', methods=["GET", "POST"])
 @authenticate_admin_login
 def render_main():
@@ -81,9 +84,9 @@ def patient_dict(patient):
             'has_device': patient['device_id'] is not None }
 
 """TODO: josh/alvin: this function provides the admin with users in the studies
-they have access to, it is not used anywhere. Probably this can be on the front 
-page for the site. """
-#@admin.route('admin_panel') #maybe.
+they have access to, it is not used anywhere. Maybe this can be on the front 
+page for the site, but it's not necessary to use this. """
+#@admin.route('/admin_panel') #maybe.
 @authenticate_admin_login
 def render_surveys():
     """Provides a dict of studies that the current admin has access to by study
