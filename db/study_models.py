@@ -41,8 +41,32 @@ class DeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
     PATH = "beiwe.device_settings"
-    DEFAULTS = {}
-    #TODO: Eli/Josh. fill this with all the toggles.
+    #TODO: Eli/Josh. sensor and timer variables here, names possibly subject to change,
+    # ensure that any changes here are well defined and enforced in frontend
+    # and on the app.
+    DEFAULTS = {#sensors:
+                "accelerometer":False,
+                "gps":False,
+                "calls":False,
+                "texts":False,
+                "wifi":False,
+                "bluetooth":False,
+                "power_state":False,
+                #timer variables
+                "accelerometer_off_duration_seconds": 300,
+                "accelerometer_on_duration_seconds": 300,
+                "bluetooth_on_duration_seconds": 300,
+                "bluetooth_total_duration_seconds": 300, #TODO: Eli, change this to off duration in app and here.
+                "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this. 
+                "check_for_new_surveys_frequency_seconds": 3600 * 6,
+                "create_new_data_files_frequency_seconds": 15 * 60,
+                "gps_off_duration_seconds": 300,
+                "gps_on_duration_seconds": 300,
+                "seconds_before_auto_logout": 300,
+                "upload_data_files_frequency_seconds": 3600,
+                "voice_recording_max_time_length_seconds": 300,
+                "wifi_log_frequency_seconds": 300
+                }
 
 
 class Survey( DatabaseObject ):
