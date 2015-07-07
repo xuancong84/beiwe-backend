@@ -26,7 +26,8 @@ surveys must be able to be scheduled:
 	once a day,
 	multiple times per day
 
-random subset of questions:
+-Ask JP if he wants the option to make surveys display questions in randomized order...
+if so:
 	surveys should be able to randomize their order
 	surveys should be able to display a subset ("ask only 10 questions")
 	-surveys should (optionally) be able to present questions totally at random
@@ -39,9 +40,6 @@ random subset of questions:
 		if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
 			solution: no overlapping runs.
 
-	A survey can include all the questions or a random subset of the questions.  For example, the research administrator could create a 31 question survey, and either set the survey to display all 31 questions every time, or set it to display 5 questions at random from the 31.
--Ask JP if he wants the option to make surveys display questions in randomized order
-
 Data Stream Toggles, customizable from the admin panel at the time of study creation:
 -Accelerometer
 -GPS
@@ -49,7 +47,7 @@ Data Stream Toggles, customizable from the admin panel at the time of study crea
 -SMS and MMS (both sent and received)
 -WiFi
 -Bluetooth
--PowerStateListener (Screen on/off, Power connected/disconnected, shutdown/restart/boot)- should the three of these be one toggle, or three separate toggles?  One toggle is easier, engineering-wise.
+-PowerStateListener (Screen on/off, Power connected/disconnected, shutdown/restart/boot) - should the three of these be one toggle, or three separate toggles?  One toggle is easier, engineering-wise.
 
 Customizable Times, customizable from the admin panel at the time of study creation:
 all of the time constants at the top of Timer.java:
