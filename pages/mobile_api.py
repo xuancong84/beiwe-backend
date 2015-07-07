@@ -132,7 +132,6 @@ def upload():
 ############################## Registration ####################################
 ################################################################################
 
-#TODO: Eli. add which study a user is being registered for
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @authenticate_user_registration
 def register_user():
