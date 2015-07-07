@@ -22,11 +22,10 @@ class Study( DatabaseObject ):
         self.save()
     
     def remove_survey(self, survey_id):
-#         if survey_id not in self['surveys']:
-#             raise SurveyDoesNotExistError
-        self["surveys"].remove()
+        if survey_id not in self['surveys']:
+            raise SurveyDoesNotExistError
+        self["surveys"].remove(survey_id)
     
-    #TODO: Eli. test that this works and is not a cyclic import (it shouldn't be...)
     def get_participants_in_study(self):
         [ Users(participants) for participants in self.participants ]
     
