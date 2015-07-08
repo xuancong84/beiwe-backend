@@ -9,3 +9,4 @@ secure.py
 data/passwords.py
 config/passwords.py
 mongodb
+.idea/
