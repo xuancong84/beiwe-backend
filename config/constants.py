@@ -1,10 +1,10 @@
 # This file contains values used throughout the codebase.
 # Don't change values if you don't know what they do.
 
-# the name of the s3 bucket that will be used to store data
+# the name of the s3 bucket that will be used to store config
 S3_BUCKET = "zagaran-beiwe"
 
-#the length of the public/private keys used in encrypting user data on their device
+#the length of the public/private keys used in encrypting user config on their device
 ASYMMETRIC_KEY_LENGTH = 2048
 
 #the number of iterations used in password hashing.

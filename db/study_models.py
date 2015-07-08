@@ -1,6 +1,6 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from db.user_models import Users
-from data.constants import SURVEY_TYPES
+from config.constants import SURVEY_TYPES
 from bson.objectid import ObjectId
 
 class Study( DatabaseObject ):
@@ -12,7 +12,7 @@ class Study( DatabaseObject ):
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
                  "participants": [],    #paticipants (user ids) in the study
-                 "encryption_key": REQUIRED #the study's data encryption key. 
+                 "encryption_key": REQUIRED #the study's config encryption key. 
                 }
     #Editors
     def add_participant(self, user_id):

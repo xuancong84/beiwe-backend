@@ -1,7 +1,7 @@
 import base64, hashlib, re
 
-from data.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
-from data.constants import ITERATIONS
+from config.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
+from config.constants import ITERATIONS
 from os import urandom
 from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
@@ -28,7 +28,7 @@ def pymongo():
 ################################## HASHING #####################################
 ################################################################################
 
-# Mongo does not like strings with invalid binary data, so we store binary data
+# Mongo does not like strings with invalid binary config, so we store binary config
 # using url safe base64 encoding.
 
 def device_hash( data ):
@@ -45,7 +45,7 @@ def encode_base64(data):
 
 def decode_base64(data):
     """ unpacks url safe base64 encoded string. """
-    #there seemed to be some problems with inserting a data.encode('utf-8') here,
+    #there seemed to be some problems with inserting a config.encode('utf-8') here,
     # never determined why.
     return base64.urlsafe_b64decode(data)
 

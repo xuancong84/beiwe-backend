@@ -2,7 +2,7 @@ import calendar, time
 
 from flask import Blueprint, request, abort, render_template, json
 
-from data.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
+from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from libs import data_manipulations
 from db.user_models import User
@@ -43,38 +43,6 @@ def download_surveys():
 # def download_weekly_survey():
 #     return get_latest_survey('weekly')
 
-################################################################################
-############################# graph data #######################################
-################################################################################
-
-@mobile_api.route('/graph', methods=['GET', 'POST'])
-@authenticate_user
-def fetch_graph():
-    """ Fetches the patient's answers to the most recent survey, marked by
-        survey ID. The results are dumped into a jinja template and pushed
-        to the device."""
-    patient_id = request.values['patient_id']
-
-    #see docs in data manipulations for details.
-    daily_data = data_manipulations.get_survey_results(username=patient_id,
-                                 survey_type=DAILY_SURVEY_NAME, number_points=7)
-    
-    weekly_data = data_manipulations.get_survey_results(username=patient_id,
-                                 survey_type=WEEKLY_SURVEY_NAME, number_points=7)
-    
-    return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
-
-# this is a debugging function, it displays the user graph for a given user.
-@mobile_api.route("/fake", methods=["GET"] )
-def fake_survey():
-    patient_id = request.values['patient_id']
-    daily_data = data_manipulations.get_survey_results(username=patient_id,
-                                 survey_type=DAILY_SURVEY_NAME, number_points=7)
-    
-    weekly_data = data_manipulations.get_survey_results(username=patient_id,
-                                 survey_type=WEEKLY_SURVEY_NAME, number_points=7)
-    
-    return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
 
 ################################################################################
 ################################ UPLOADS #######################################
@@ -218,7 +186,7 @@ def contains_valid_extension(file_name):
 
 
 def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
-    """ The survey data files is in the name of the file, this function processes
+    """ The survey config files is in the name of the file, this function processes
         the supplied information and returns the correct file path string."""
     survey_data_type, questions_created_timestamp = parse_filetype( data_type )
 #     print "survey_data_type", survey_data_type

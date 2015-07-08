@@ -1,5 +1,5 @@
 from flask import json
-from data.constants import DAILY_SURVEY_NAME
+from config.constants import DAILY_SURVEY_NAME
 from libs.s3 import s3_list_files, s3_retrieve
 from libs.logging import log_error
 
@@ -13,7 +13,7 @@ def s3_csv_to_dict(s3_file_path):
 
 def csv_to_dict(csv_string):
     """ Converts a string formatted as a csv into a dictionary with the format
-        {Column Name: [list of data points] }. Data are in their original order,
+        {Column Name: [list of config points] }. Data are in their original order,
         any empty entries are dropped."""
     #grab a list of every line in the file, strips off trailing whitespace.
     lines = [ line for line in csv_string.splitlines() ]
@@ -23,7 +23,7 @@ def csv_to_dict(csv_string):
 
     for line in lines[1:]:
         data = line.split(',')
-        #creates a dict of {column name: data point, ...}, strips empty strings
+        #creates a dict of {column name: config point, ...}, strips empty strings
         list_of_entries.append( { header_list[i]: entry for i, entry in enumerate(data) if entry != ''} )
     return list_of_entries
 
@@ -66,21 +66,21 @@ def compile_question_data(surveys):
 
 
 def get_survey_results( username="", survey_type=DAILY_SURVEY_NAME, number_points=7 ):
-    """ Compiles 2 weeks (14 points) of data from s3 for a given patient into
-        data points for displaying on the device.
+    """ Compiles 2 weeks (14 points) of config from s3 for a given patient into
+        config points for displaying on the device.
         result is a list of lists, inner list[0] is the title/question text,
         inner list[1] is a list of y coordinates."""
     
     if not username:
         log_error (Exception("failed to provide username"),
-                   "while compiling graph data.")
+                   "while compiling graph config.")
     
     # path pointing to the correct survey type
     file_path = username + '/surveyAnswers/' + survey_type + '/'
     survey_id = str( get_most_recent_id( file_path ) )
     files = grab_file_names( file_path, survey_id, number_points)
     
-    # Convert each csv_file to a useful list of data
+    # Convert each csv_file to a useful list of config
     surveys = [ s3_csv_to_dict(file_name) for file_name in files ]
     # grab the questions that answers correspond to
     ordered_question_ids, all_answers = compile_question_data(surveys)

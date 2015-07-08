@@ -1,6 +1,9 @@
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
-from pages import mobile_api, admin, survey_designer
+from pages import admin, survey_designer
+from api import mobile_api
+from api import survey_api
+from api import admin_api
 from libs.logging import log_error
 from libs.security import set_secret_key
 
@@ -17,8 +20,10 @@ def subdomain(directory):
 app = subdomain("frontend")
 app.register_blueprint(mobile_api.mobile_api)
 app.register_blueprint(admin.admin)
+app.register_blueprint(admin.admin)
 app.register_blueprint(survey_designer.survey_designer)
-
+app.register_blueprint(admin_api.admin_api)
+app.register_blueprint(survey_api.survey_api)
 
 @app.route("/<page>.html")
 def strip_dot_html(page):
@@ -46,7 +51,7 @@ def e500_text(e):
 
 def test_passwords():
     try:
-        from data.passwords import PASSWORD
+        from config.passwords import PASSWORD
     except ImportError as e:
         if e.message != "No module named passwords":
             log_error(e)

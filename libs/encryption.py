@@ -2,7 +2,7 @@ from os import urandom
 
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
-from data.constants import ASYMMETRIC_KEY_LENGTH
+from config.constants import ASYMMETRIC_KEY_LENGTH
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Studies
@@ -21,7 +21,7 @@ def generate_key_pairing():
 
 def prepare_X509_key_for_java( exported_key ):
     # This may actually be a PKCS8 Key specification.
-    """ Removes all extraneous data (new lines and labels from a formatted key
+    """ Removes all extraneous config (new lines and labels from a formatted key
         string, because this is how Java likes its key files to be formatted.
         Y'know, not according to the specification.  Because Java. """
     return "".join( exported_key.split('\n')[1:-1] )
@@ -41,7 +41,7 @@ def import_RSA_key( key ):
 #TODO: Eli. make a version of the decryption function that takes an encryption key directly, for use in download script.
 
 def encrypt_for_server(input_string, study_id):
-    """ encrypts data using the ENCRYPTION_KEY, prepends the generated
+    """ encrypts config using the ENCRYPTION_KEY, prepends the generated
         initialization vector.
         Use this function on an entire file (as a string)."""
     encryption_key = Studies(_id=study_id)['encryption_key']
@@ -49,7 +49,7 @@ def encrypt_for_server(input_string, study_id):
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
 def decrypt_server(input_string, study_id):
-    """ Decrypts data encrypted by the encrypt_for_server function."""
+    """ Decrypts config encrypted by the encrypt_for_server function."""
     encryption_key = Studies(_id=study_id)['encryption_key']
     iv = input_string[:16]
     return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
@@ -80,9 +80,9 @@ def decrypt_device_file(patient_id, data, private_key):
             error_message = "There was an error in user decryption: "
             ################### skip these errors ##############################
             if "unpack" in e.message:
-                error_message += "malformed line of data, dropping it and continuing."
+                error_message += "malformed line of config, dropping it and continuing."
                 log_error(e, error_message)
-                #the data is not colon separated correctly, this is a single
+                #the config is not colon separated correctly, this is a single
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
                 continue
@@ -92,7 +92,7 @@ def decrypt_device_file(patient_id, data, private_key):
             elif 'IV must be' in e.message:
                 error_message += "iv has bad length."
             elif 'Incorrect padding' in e.message:
-                error_message += "base64 padding error, data is truncated."
+                error_message += "base64 padding error, config is truncated."
                 # this is only seen in mp4 files. possibilities:
                 #TODO: Eli. check that app-side file handling to only upload retired files is activated for the voice recording
                 #  upload during write operation.
@@ -104,10 +104,10 @@ def decrypt_device_file(patient_id, data, private_key):
 
 # provide a key by running get_client_private_key(patient_id)
 def decrypt_device_line(patient_id, key, data):
-    """ data is expected to be 3 colon separated values.
+    """ config is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.
         value 2 is the initialization vector for the AES CBC cipher.
-        value 3 is the data, encrypted using AES CBC, with the provided key and iv. """
+        value 3 is the config, encrypted using AES CBC, with the provided key and iv. """
     iv, data = data.split(":")
     #this nonsense is because we appear to accasionally get ascii encoding errors.
     iv = decode_base64( iv.encode( "utf-8" ) )
@@ -122,6 +122,6 @@ def decrypt_device_line(patient_id, key, data):
 ################################################################################
 
 def remove_PKCS5_padding(data):
-    """ Unpacks encrypted data from the device that was encypted using the
+    """ Unpacks encrypted config from the device that was encypted using the
         PKCS5 padding scheme (which is the ordinal value of the last byte). """
     return  data[0: -ord( data[-1] ) ]

@@ -19,7 +19,7 @@ MONGO_USERNAME = "beiwe"
 MONGO_PASSWORD = "PhWY9uFaXScfU4uZeQXd"
 
 # This is the secret key for the website, it is used in securing the website
-# and data stored for each user.
+# and config stored for each user.
 # Do not use the example provided in this document
 FLASK_SECRET_KEY = "abcdefghijklmnopqrstuvwxyz012345"
 

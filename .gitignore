@@ -7,4 +7,5 @@ secure.py
 .project
 *.pem
 data/passwords.py
+config/passwords.py
 mongodb
