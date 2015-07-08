@@ -23,7 +23,6 @@ mobile_api = Blueprint('mobile_api', __name__)
 @mobile_api.route("/download_surveys", methods=['GET', 'POST']) 
 @authenticate_user
 def download_surveys():
-    # TODO: Eli/Josh. include the _id for each study.
     # TODO: Eli. handle survey deletion in the app correctly.
     patient_id = request.values['patient_id']
     study = Studies(participants=patient_id)[0]

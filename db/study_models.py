@@ -56,7 +56,8 @@ class Study( DatabaseObject ):
         [ Users(ObjectId(user_id)) for user_id in self.participants ]
     
     def get_surveys_for_study(self):
-        return [Surveys(survey_id) for survey_id in self['surveys'] ]
+        """ Returns a dict of survey_id strings paired with their survey data. """
+        return {str(survey_id): Surveys(survey_id) for survey_id in self['surveys'] }
     
     def get_survey_ids_for_study(self):
         return [str(survey) for survey in self['surveys']]
