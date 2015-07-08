@@ -1,11 +1,75 @@
 from flask import Blueprint, redirect, render_template, request, session
 from libs import admin_authentication
-from libs.admin_authentication import authenticate_admin_login
+from libs.admin_authentication import authenticate_admin_login,\
+    authenticate_sysadmin, authenticate_admin_study_access
 from db.user_models import Users, Admin
-from db.study_models import Study, Studies
-
+from db.study_models import Study, Studies, StudyDeviceSettings,\
+    StudyDeviceSettingsCollection
+from bson.objectid import ObjectId
 
 admin = Blueprint('admin', __name__)
+
+""" TODO: Eli+Josh.  The following 3 functions have overlapping/duplicated
+functionality.  Resolve this. """
+
+#TODO: Josh.  could you please look at this and determine where it should be placed, or even if it is necessary.
+"""TODO: josh/alvin: this function provides the admin with users in the studies
+they have access to, it is not used anywhere. Maybe this can be on the front 
+page for the site, but it's not necessary to use this. """
+#@admin.route('/admin_panel') #maybe.
+@authenticate_admin_login
+def render_surveys():
+    """Provides a dict of studies that the current admin has access to by study
+    to a flask template."""
+    studies = Study.get_studies_for_admin(session['admin_username'])
+    users_by_study = {}
+    for study in studies:
+        users_by_study[study.name] = study.get_participants_in_study()
+    return render_template('SOME_PAGE.PROBABLY_HTML', users_by_study=users_by_study)
+
+
+"""TODO: Josh/Alvin: move this whole function to a render_study() function or
+something, and make a new post-login homepage that shows an admin the studies
+they have permissions on.  If an admin has permissions on only one page, they
+should be automatically redirected to that page upon login."""
+@admin.route('/admin_panel', methods=["GET", "POST"])
+@authenticate_admin_login
+def render_main():
+    """ Method responsible rendering admin template"""
+    patients = {user['_id']: patient_dict(user) for user in Users()}
+    #TODO: Josh, make it use a real study; don't hard-code this.
+    main_study = Studies()[0]
+    survey_ids = main_study.get_survey_ids_for_study()
+    return render_template('admin_panel.html', patients=patients, survey_ids=survey_ids)
+ 
+def patient_dict(patient):
+    return {'placeholder_field': 'placeholder field for future data',
+            'has_device': patient['device_id'] is not None }
+
+
+"""########################### Study Pages ##################################"""
+""""TODO: Alvin/Josh. implement this page, point the post function at /create_new_survey,
+see the create_new_survey function in admin_api for details.
+Page should include a paraphrase of "enter encryption key here for the study, all
+user data stored by server will require this password, strongly recommend you use a
+true random source, for instance random.org"""
+@admin.route('/new_study', methods=["GET"])
+@authenticate_sysadmin
+def render_make_new_study():
+    return render_template("fill_me_in_:D")
+
+"""TODO: Alvin/Josh. build the edit device settings page.  for post parameters
+look at the DEFAULTS dictionary in the StudyDeviceSettings DB model.
+Please make sure current values are displayed."""
+@admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
+#TODO: Eli. confirm that we have both decorators.  do we need a 4th decorator that does exactly this?
+#@authenticate_sysadmin
+@authenticate_admin_study_access
+def render_edit_study_device_settings(study_id=None):
+    study = Studies(_id=ObjectId(study_id))
+    settings = study.get_study_device_settings()
+    return render_template("fill_me_in_:D", settings=settings)
+
 
 """########################## Login/Logoff ##################################"""
 
@@ -43,6 +107,7 @@ def login():
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
+
 @admin.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
 def reset_admin_password():
@@ -56,39 +121,4 @@ def reset_admin_password():
         return 'New Password does not match Confirm New Password'
     Admin(username).set_password(new_password)
     return redirect('/')
-
-
-"""########################## The Admin Page ################################"""
-
-"""TODO: Josh/Alvin: move this whole function to a render_study() function or
-something, and make a new post-login homepage that shows an admin the studies
-they have permissions on.  If an admin has permissions on only one page, they
-should be automatically redirected to that page upon login."""
-@admin.route('/admin_panel', methods=["GET", "POST"])
-@authenticate_admin_login
-def render_main():
-    """ Method responsible rendering admin template"""
-    patients = {user['_id']: patient_dict(user) for user in Users()}
-    #TODO: Josh, make it use a real study; don't hard-code this.
-    main_study = Studies()[0]
-    survey_ids = main_study.get_survey_ids_for_study()
-    return render_template('admin_panel.html', patients=patients, survey_ids=survey_ids)
- 
-def patient_dict(patient):
-    return {'placeholder_field': 'placeholder field for future data',
-            'has_device': patient['device_id'] is not None }
-
-"""TODO: josh/alvin: this function provides the admin with users in the studies
-they have access to, it is not used anywhere. Maybe this can be on the front 
-page for the site, but it's not necessary to use this. """
-#@admin.route('/admin_panel') #maybe.
-@authenticate_admin_login
-def render_surveys():
-    """Provides a dict of studies that the current admin has access to by study
-    to a flask template."""
-    studies = Study.get_studies_for_admin(session['admin_username'])
-    users_by_study = {}
-    for study in studies:
-        users_by_study[study.name] = study.get_participants_in_study()
-    return render_template('SOME_PAGE.PROBABLY_HTML', users_by_study=users_by_study)
 

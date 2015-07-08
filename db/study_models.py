@@ -2,6 +2,7 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID
 from db.user_models import Users
 from config.constants import SURVEY_TYPES
 from bson.objectid import ObjectId
+from __builtin__ import classmethod
 
 class Study( DatabaseObject ):
     PATH = "beiwe.studies"
@@ -14,6 +15,19 @@ class Study( DatabaseObject ):
                  "participants": [],    #paticipants (user ids) in the study
                  "encryption_key": REQUIRED #the study's config encryption key. 
                 }
+    @classmethod
+    def create_default_study(cls, name, encryption_key):
+        if Studies(name=name):
+            raise StudyAlreadyExistsError("a study named %s already exists" % name)
+        if len(encryption_key) != 32:
+            raise InvalidEncryptionKeyError("the encryption key must be 32 characters.")
+        device_settings = StudyDeviceSettings.create_default()
+        study = { "name":name,
+                 "encryption_key":encryption_key,
+                 "device_settings":device_settings._id
+                 }
+        return super(Study, cls).create(study, random_id=True)
+        
     #Editors
     def add_participant(self, user_id):
         """ Note: participant ids (user ids) are strings, not ObjectIds. """
@@ -62,6 +76,9 @@ class Study( DatabaseObject ):
     def get_survey_ids_for_study(self):
         return [str(survey) for survey in self['surveys']]
     
+    def get_study_device_settings(self):
+        return StudyDeviceSettingsCollection(self['device_settings'])
+
 
 class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
@@ -93,8 +110,9 @@ class StudyDeviceSettings( DatabaseObject ):
                 "voice_recording_max_time_length_seconds": 300,
                 "wifi_log_frequency_seconds": 300
             }
-
-
+    @classmethod
+    def create_default(cls):
+        return StudyDeviceSettings.create({}, random_id=True)
 class Survey( DatabaseObject ):
     """ Surveys contain all information the app needs to display the survey
         correctly to a user, and when it should push the notifications to take
@@ -142,3 +160,5 @@ class Surveys( DatabaseCollection ):
 class SurveyDoesNotExistError(Exception): pass
 class SurveyTypeError(Exception): pass
 class UserDoesNotExistError(Exception): pass
+class StudyAlreadyExistsError(Exception): pass
+class InvalidEncryptionKeyError(Exception): pass

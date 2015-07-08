@@ -1,16 +1,45 @@
 from flask import request
 from libs.admin_authentication import authenticate_admin_study_access,\
-    authenticate_admin_login
+    authenticate_admin_login, authenticate_sysadmin
 from flask.blueprints import Blueprint
 from db.user_models import User
-from db.study_models import Study
+from db.study_models import Study, InvalidEncryptionKeyError, Studies,\
+    StudyAlreadyExistsError
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
 from flask.helpers import send_file
+from flask.templating import render_template
+from django.shortcuts import redirect
 
 admin_api = Blueprint('admin_api', __name__)
 """###################### Actual Functionality ##############################"""
 
+""" TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password."""
+
+@admin_api.route('/create_new_study', methods=["POST"])
+@authenticate_sysadmin
+def create_new_study():
+    try:
+        study = Study.create_new_survey(request["name"], request["encryption_key"])
+    except InvalidEncryptionKeyError:
+        return render_template("some error display for invalid encryption key")
+    except StudyAlreadyExistsError:
+        return render_template("some error display for study of that name already exists")
+    #survey created! redirect to study device settings? sure.
+    return redirect("/edit_study_device_settings/" + str(study._id))
+
+@admin_api.route('/submit_device_settings/<string:study_id>', methods=["POST"])
+#TODO: Eli. ensure we can use both decorators...
+@authenticate_sysadmin
+@authenticate_admin_study_access
+def submit_edit_device_settings(study_id=None):
+    study = Studies(_id=ObjectId(study_id))
+    settings = study.get_study_device_settings()
+    #TODO: Eli/Josh. it is Exceedingly unlikely this little hack will work correctly... test.  :D
+    settings.update(**request.values)
+    settings.save() #TODO: Eli. is this even necessary?
+    #reload page? sure.
+    return redirect("/edit_study_device_settings/" + study._id)
 
 #TODO: Eli. does this need update for new db schema?
 @admin_api.route('/reset_patient_password', methods=["POST"])
@@ -25,7 +54,7 @@ def reset_user_password():
         return new_password
     return "that patient id does not exist"
 
-#TODO: Eli. does this need update for new db schema?
+#TODO: Eli. does this need updates for new db schema?
 @admin_api.route('/reset_device', methods=["POST"])
 @authenticate_admin_login
 def reset_device():
