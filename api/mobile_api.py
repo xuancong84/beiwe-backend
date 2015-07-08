@@ -26,7 +26,7 @@ def download_surveys():
     # TODO: Eli/Josh. include the _id for each study.
     # TODO: Eli. handle survey deletion in the app correctly.
     patient_id = request.values['patient_id']
-    study = Studies(participants=patient_id).first() #is first() even valid mongolia?
+    study = Studies(participants=patient_id)[0]
     surveys = study.get_surveys_for_study()
     #TODO: Eli/Josh/Alvin there is no way this is valid, there is always something wrong with json dumps.
     return json.dumps(surveys)
