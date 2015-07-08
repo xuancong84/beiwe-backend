@@ -32,22 +32,26 @@ class Study( DatabaseObject ):
     def add_participant(self, user_id):
         """ Note: participant ids (user ids) are strings, not ObjectIds. """
         self["participants"].append(user_id)
+        self.save()
     
     def remove_participant(self, user_id):
         """ Note: participant ids (user ids) are strings, not ObjectIds. """
         if user_id not in self['participants']:
             raise UserDoesNotExistError
         self["participants"].remove(user_id)
+        self.save()
     
     def add_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """
         self["admins"].append(admin_id)
+        self.save()
     
     def remove_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """
         if admin_id not in self['participants']:
             raise UserDoesNotExistError
         self["admins"].remove(admin_id)
+        self.save()
     
     def add_survey(self, survey):
         """ Note: this takes survey objects, not survey ids."""
@@ -59,6 +63,7 @@ class Study( DatabaseObject ):
         if survey._id not in self['surveys']:
             raise SurveyDoesNotExistError
         self["surveys"].remove(survey._id)
+        self.save()
     
     #Accessors, class methods
     @classmethod
@@ -67,7 +72,7 @@ class Study( DatabaseObject ):
     
     #Accessors, instance methods
     def get_participants_in_study(self):
-        [ Users(ObjectId(user_id)) for user_id in self.participants ]
+        return [ Users(ObjectId(user_id)) for user_id in self.participants ]
     
     def get_surveys_for_study(self):
         """ Returns a dict of survey_id strings paired with their survey data. """
@@ -77,7 +82,8 @@ class Study( DatabaseObject ):
         return [str(survey) for survey in self['surveys']]
     
     def get_study_device_settings(self):
-        return StudyDeviceSettingsCollection(self['device_settings'])
+        return StudyDeviceSettingsCollection(_id=self['device_settings'])
+    
 
 
 class StudyDeviceSettings( DatabaseObject ):
@@ -113,6 +119,8 @@ class StudyDeviceSettings( DatabaseObject ):
     @classmethod
     def create_default(cls):
         return StudyDeviceSettings.create({}, random_id=True)
+    
+    
 class Survey( DatabaseObject ):
     """ Surveys contain all information the app needs to display the survey
         correctly to a user, and when it should push the notifications to take
