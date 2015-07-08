@@ -3,6 +3,8 @@ eli: Put a PATH variable in the new db models
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
+utility: modify the authenticate_study_access to transform the study or survey id into an ObjectId
+
 app: when downloading new surveys, handle survey deletion, and identification-persistance (when a person has a notification for survey 2 the survey does not get deleted.)
 
 Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
@@ -82,13 +84,13 @@ we need to create the following pages for admins:
     add survey to study
     error page for admin permission denied (put in decorator)
     create new study
-		CHECK THE "PASSWORDS.PY.EXAMPLE", *NOT* GLOBAL_PASSWORDS, FILE FOR DETAILS ON REQUIREMENTS FOR THE ENCRYPTION KEY PASSWORDS.
     	page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
+    	Error displays on bad input for a new survey
     create new survey (inside a study)
     	-pass in a study id
     each survey needs a delete-this-survey button
     	-pass in a survey id
-
+    edit device settings for study
 
 
 Graph stuff
