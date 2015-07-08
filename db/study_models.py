@@ -91,7 +91,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "upload_data_files_frequency_seconds": 3600,
                 "voice_recording_max_time_length_seconds": 300,
                 "wifi_log_frequency_seconds": 300
-                }
+            }
 
 
 class Survey( DatabaseObject ):
@@ -130,9 +130,9 @@ class Survey( DatabaseObject ):
 class Studies( DatabaseCollection ):
     """ The Studies database."""
     OBJTYPE = Study
-class StudyDeviceSettings( DatabaseCollection ):
+class StudyDeviceSettingsCollection( DatabaseCollection ):
     """ The per-study device settings. """
-    OBJTYPE = DeviceSettings
+    OBJTYPE = StudyDeviceSettings
 class Surveys( DatabaseCollection ):
     """ The Surveys database."""
     OBJTYPE = Survey
