@@ -4,7 +4,6 @@ from flask import Blueprint, request, abort, render_template, json
 
 from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
-from libs import data_manipulations
 from db.user_models import User
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
