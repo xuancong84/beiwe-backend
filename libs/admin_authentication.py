@@ -4,6 +4,7 @@ from flask import session, redirect
 from db.user_models import Admin, Admins
 from libs.security import generate_easy_alphanumeric_string
 from db.study_models import Studies
+from bson.objectid import ObjectId
 
 ################################################################################
 ############################ Existence Modifiers ###############################
@@ -63,6 +64,7 @@ def authenticate_admin_study_access(some_function):
         value. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
+        
         if not is_logged_in(): #check for regular login requirement
             return redirect("/")
         admin_name = session["admin_username"]
@@ -71,15 +73,17 @@ def authenticate_admin_study_access(some_function):
             raise ArgumentMissingException()
         #We want the survey_id check to execute first if both args are supplied. 
         if "survey_id" in kwargs:
-            survey_id = kwargs["survey_id"]
+            survey_id = ObjectId(kwargs["survey_id"])
             #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
             study = Studies(surveys=survey_id, admins=admin_name)
             if not study: #if the admin is not authorized for this survey, fail.
+                print 'survey id invalid', survey_id
                 return redirect("/")
         if "study_id" in kwargs:
-            study_id = kwargs['study_id']
+            study_id = ObjectId(kwargs['study_id'])
             study = Studies(_id=study_id, admins=admin_name)
             if not study: #if the admin is not authorized for this study, fail.
+                print 'study id invalid', study
                 return redirect("/")
         return some_function(*args, **kwargs)
     return authenticate_and_call

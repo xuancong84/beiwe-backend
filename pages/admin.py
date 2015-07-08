@@ -66,7 +66,7 @@ Please make sure current values are displayed."""
 #@authenticate_sysadmin
 @authenticate_admin_study_access
 def render_edit_study_device_settings(study_id=None):
-    study = Studies(_id=ObjectId(study_id))
+    study = Studies(_id=ObjectId(study_id))[0]
     settings = study.get_study_device_settings()
     return render_template("fill_me_in_:D", settings=settings)
 
