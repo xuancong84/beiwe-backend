@@ -162,6 +162,8 @@ def set_password():
 ########################## FILE NAME FUNCTIONALITY #############################
 ################################################################################
 
+#TODO: Eli/Josh: redo file naming.
+
 def parse_filename(filename):
     """ Splits filename into user-id, file-type, unix-timestamp. """
     name = filename.split("_")

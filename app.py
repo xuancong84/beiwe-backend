@@ -1,9 +1,7 @@
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
 from pages import admin, survey_designer
-from api import mobile_api
-from api import survey_api
-from api import admin_api
+from api import mobile_api, survey_api, admin_api
 from libs.logging import log_error
 from libs.security import set_secret_key
 
