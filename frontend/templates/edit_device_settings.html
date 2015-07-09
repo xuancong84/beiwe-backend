@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Edit Device Settings:</h2>
+<form action="/submit_device_settings/{{ study_id }}" class="form-horizontal" method="POST">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="accelerometer" class="col-xs-8 control-label">Accelerometer:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="accelerometer" type="checkbox" {{ "checked" if settings["accelerometer"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gps" class="col-xs-8 control-label">GPS:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="gps" type="checkbox" {{ "checked" if settings["gps"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="calls" class="col-xs-8 control-label">Calls:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="calls" type="checkbox" {{ "checked" if settings["calls"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="texts" class="col-xs-8 control-label">Texts:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="texts" type="checkbox" {{ "checked" if settings["texts"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="wifi" class="col-xs-8 control-label">WiFi:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="wifi" type="checkbox" {{ "checked" if settings["wifi"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bluetooth" class="col-xs-8 control-label">Bluetooth:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="bluetooth" type="checkbox" {{ "checked" if settings["bluetooth"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="power_state" class="col-xs-8 control-label">Power state:</label>
+                <div class="col-xs-4 checkbox">
+                    <label>
+                        <input id="power_state" type="checkbox" {{ "checked" if settings["power_state"] }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="check-for-new-surveys-frequency-seconds" class="col-xs-8 control-label">Check for new surveys frequency:</label>
+                <div class="col-xs-4">
+                    <input id="check-for-new-surveys-frequency-seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['check_for_new_surveys_frequency_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="create-new-data-files-frequency-seconds" class="col-xs-8 control-label">Create new data files frequency:</label>
+                <div class="col-xs-4">
+                    <input id="create-new-data-files-frequency-seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['create_new_data_files_frequency_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="upload-data-files-frequency-seconds" class="col-xs-8 control-label">Upload data files frequency:</label>
+                <div class="col-xs-4">
+                    <input id="upload-data-files-frequency-seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['upload_data_files_frequency_seconds'] }}">
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="accelerometer-on-duration-seconds" class="col-xs-8 control-label">Accelerometer <b>on</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="accelerometer-on-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['accelerometer_on_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="accelerometer-off-duration-seconds" class="col-xs-8 control-label">Accelerometer <b>off</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="accelerometer-off-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['accelerometer_off_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gps-on-duration-seconds" class="col-xs-8 control-label">GPS <b>on</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="gps-on-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['gps_on_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gps-off-duration-seconds" class="col-xs-8 control-label">GPS <b>off</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="gps-off-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['gps_off_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bluetooth-on-duration-seconds" class="col-xs-8 control-label">Bluetooth <b>on</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="bluetooth-on-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['bluetooth_on_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bluetooth-total-duration-seconds" class="col-xs-8 control-label">Bluetooth <b>total</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="bluetooth-total-duration-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['bluetooth_total_duration_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bluetooth-global-offset-seconds" class="col-xs-8 control-label">Bluetooth global offset:</label>
+                <div class="col-xs-4">
+                    <input id="bluetooth-global-offset-seconds" class="form-control" type="number" placeholder="Enter offset here (seconds)" value="{{ settings['bluetooth_global_offset_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="wifi-log-frequency-seconds" class="col-xs-8 control-label">WiFi log frequency:</label>
+                <div class="col-xs-4">
+                    <input id="wifi-log-frequency-seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['wifi_log_frequency_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="voice-recording-max-time-length-seconds" class="col-xs-8 control-label">Voice recording max time duration:</label>
+                <div class="col-xs-4">
+                    <input id="voice-recording-max-time-length-seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['voice_recording_max_time_length_seconds'] }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="seconds-before-auto-logout" class="col-xs-8 control-label">Duration before auto-logout:</label>
+                <div class="col-xs-4">
+                    <input id="seconds-before-auto-logout" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['seconds_before_auto_logout'] }}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Submit</button>
+</form>
+{% endblock %}
