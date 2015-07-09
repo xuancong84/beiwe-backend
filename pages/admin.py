@@ -58,7 +58,8 @@ true random source, for instance random.org"""
 def render_make_new_study():
     return render_template("fill_me_in_:D")
 
-"""TODO: Alvin/Josh. build the edit device settings page.  for post parameters
+
+"""TODO: Alvin. build the edit device settings page.  for post parameters
 look at the DEFAULTS dictionary in the StudyDeviceSettings DB model.
 Please make sure current values are displayed."""
 @admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
