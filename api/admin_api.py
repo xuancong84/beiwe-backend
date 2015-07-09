@@ -37,7 +37,9 @@ def create_new_study():
 def submit_edit_device_settings(study_id=None):
     study = Studies(_id=ObjectId(study_id))
     settings = study.get_study_device_settings()
-    #TODO: Eli/Josh. it is Exceedingly unlikely this little hack will work correctly... test.  :D
+    """TODO: Eli/Josh. it is Exceedingly unlikely this little hack will work correctly... test.  :D
+           Alvin update: yup, doesn't work, sorry!
+           Exception: invalid path "USERNAME"; database paths must be of the form "database.collection"""""
     settings.update(**request.values)
     settings.save() #TODO: Eli. is this even necessary?
     #reload page? sure.

@@ -8,7 +8,7 @@ utility: modify the authenticate_study_access to transform the study or survey i
 app: when downloading new surveys, handle survey deletion, and identification-persistance (when a person has a notification for survey 2 the survey does not get deleted.)
 
 Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
-	-this looks like it is a component of the surveyscheduler.java class. rewrite to fully drop daily/weekly distinction.
+    -this looks like it is a component of the surveyscheduler.java class. rewrite to fully drop daily/weekly distinction.
 
 check that app-side file handling to only upload retired files is activated for the voice recording
 
@@ -19,28 +19,28 @@ Admin/Access control:
 
 --Survey modifications--
 Have separate surveys for each study
-	-we probably don't need a survey to be shared among multiple studies
+    -we probably don't need a survey to be shared among multiple studies
 
 Support an arbitrary number of surveys for each study
 
 surveys must be able to be scheduled:
-	once a week
-	once a day,
-	multiple times per day
+    once a week
+    once a day,
+    multiple times per day
 
 -Ask JP if he wants the option to make surveys display questions in randomized order...
 if so:
-	surveys should be able to randomize their order
-	surveys should be able to display a subset ("ask only 10 questions")
-	-surveys should (optionally) be able to present questions totally at random
-	-surveys should (optionally) be able to present a subset that guarantees all questions are asked
-		permutation problems:
-		Q = number of questions
-		N = number of questions per run
-		R = number of runs = Q/N
-		X = extra questions need to fill out the final run to satisfy N
-		if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
-			solution: no overlapping runs.
+    surveys should be able to randomize their order
+    surveys should be able to display a subset ("ask only 10 questions")
+    -surveys should (optionally) be able to present questions totally at random
+    -surveys should (optionally) be able to present a subset that guarantees all questions are asked
+        permutation problems:
+        Q = number of questions
+        N = number of questions per run
+        R = number of runs = Q/N
+        X = extra questions need to fill out the final run to satisfy N
+        if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
+            solution: no overlapping runs.
 
 Data Stream Toggles, customizable from the admin panel at the time of study creation:
 -Accelerometer
@@ -84,18 +84,18 @@ we need to create the following pages for admins:
     add survey to study
     error page for admin permission denied (put in decorator)
     create new study
-    	page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
-    	Error displays on bad input for a new survey
+        page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
+        Error displays on bad input for a new survey
     create new survey (inside a study)
-    	-pass in a study id
+        -pass in a study id
     each survey needs a delete-this-survey button
-    	-pass in a survey id
-    edit device settings for study
+        -pass in a survey id
+    (DONE) edit device settings for study
 
 
 Graph stuff
-	-Make it look pretty for all the different types of survey questions
-	-Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
+    -Make it look pretty for all the different types of survey questions
+    -Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
 
 ###############################################################
 ####################### REFACTOR THINGS #######################
@@ -109,18 +109,18 @@ the backgroundprocess should be backgroundservice
 ####################### ADMINISTRATIVE TASKS #######################
 ####################################################################
 remove old data from s3:
-	It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
-	If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below (these are what Matt is using, all others can go):
-		7rzzd3
-		6sod84
-		ahhv9h
-		c7hze5
-		66f1zz
-		qrsmla
-		fwgs3q
-		g7s4zv
-		yi279c
-		v26kw2
+    It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
+    If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below (these are what Matt is using, all others can go):
+        7rzzd3
+        6sod84
+        ahhv9h
+        c7hze5
+        66f1zz
+        qrsmla
+        fwgs3q
+        g7s4zv
+        yi279c
+        v26kw2
 
 implement mongobackups of the mongo db on the server
 
@@ -143,17 +143,17 @@ since studies will have arbitrary time triggers, frequency triggers, and no long
 Known unknown bug: if the logout timer is less than the max voice recording time period
 
 MMS logging:
-	-When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
-	-Triple Logging of at least MMS messages:
-		Eli tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
-			Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
-				we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
-				MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
-	-Josh tried tracking this down as well, there is a comment is smssentreceiver
+    -When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
+    -Triple Logging of at least MMS messages:
+        Eli tried tracking this behavior down, I'm not positive about it but the best data and answer I have is this:
+            Messages live in different "boxes" (inbox, outbox, sent-box, draft-box) and the ContentObserver triggers on various types of updates related to these boxes. We filter out messages that are not in sent-box, this is the behavior I see:
+                we get an update when a message moves from one box to another box, however, I swear that messages that are supposed to be in the draft-box frequently claim they are in the sent-box.  buh?  this must be false, I don't know how to filter the data to remove these false updates.
+                MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
+    -Josh tried tracking this down as well, there is a comment is smssentreceiver
 
 if the background process is not running and a user presses a notification to take a survey, the app crashes.  This is probably due to the rendering of a dynamic page requiring access to the survey's json file, which it accesses through the file manager, which has not been instantiated.
-	probably the best solution is to make the unencrypted files have their own reader?  that just creates more chances for conflicts....
-	TODO: check order of instantiation of for the dynamically rendered pages. (uhg)
+    probably the best solution is to make the unencrypted files have their own reader?  that just creates more chances for conflicts....
+    TODO: check order of instantiation of for the dynamically rendered pages. (uhg)
 
 Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
 
@@ -162,34 +162,34 @@ Look at the number input box in the survey, and see if changing android:inputTyp
 ####################################################################
 
 Admin Panel UI
-	-Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
-	-(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
-	-Make the page reload after they create a new patient or remove a device
+    -Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
+    -(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
+    -Make the page reload after they create a new patient or remove a device
 
 
 re-analyze whether the following is true:
-	In RegistrationActivity: don't set username and password on the device UNTIL they've been validated by the server.  This would require substantial changes to PostRequest.java.  Leaving this as-is does not actually present any serious security flaws.
+    In RegistrationActivity: don't set username and password on the device UNTIL they've been validated by the server.  This would require substantial changes to PostRequest.java.  Leaving this as-is does not actually present any serious security flaws.
 
 ####################################################################
 ############################## FUTURE ##############################
 ####################################################################
 
 App UI
-	-define a style and prettify the UI
-	-Get an app icon
+    -define a style and prettify the UI
+    -Get an app icon
 
 add in more user device info, specifically I am thinking of android version, sdk version for debugging
 
 Add crash logging:
-	http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
-	http://www.acra.ch/
-	http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
+    http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+    http://www.acra.ch/
+    http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
 Improve uploading: Build a listener for WiFi connected, then try to upload files and download surveys
 
 Timers & data upload
-	-Add an alert if the phone hasn't been able to upload in a long time?
-	-Add a server-side alert if a patient hasn't uploaded data in a long time? - unlikely to be useful...
+    -Add an alert if the phone hasn't been able to upload in a long time?
+    -Add a server-side alert if a patient hasn't uploaded data in a long time? - unlikely to be useful...
 
 ########################################################################################
 ####################### ideas (these do not need to be acted on) #######################
@@ -206,4 +206,4 @@ if we restart the background service occasionally we can get around the user-dis
 There is no way to inform the user that the encryption key is corrupted.
 
 we may be able to reduce some HTTPS overhead using the following stackoverflow
-	http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient
+    http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient

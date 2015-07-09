@@ -59,9 +59,6 @@ def render_make_new_study():
     return render_template("fill_me_in_:D")
 
 
-"""TODO: Alvin. build the edit device settings page.  for post parameters
-look at the DEFAULTS dictionary in the StudyDeviceSettings DB model.
-Please make sure current values are displayed."""
 @admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
 #TODO: Eli. confirm that we have both decorators.  do we need a 4th decorator that does exactly this?
 #@authenticate_system_admin
@@ -69,7 +66,9 @@ Please make sure current values are displayed."""
 def render_edit_study_device_settings(study_id=None):
     study = Studies(_id=ObjectId(study_id))[0]
     settings = study.get_study_device_settings()
-    return render_template("edit_device_settings.html", settings=settings[0])
+    return render_template("edit_device_settings.html",
+                           settings=settings[0],
+                           study_id=study_id)
 
 
 """########################## Login/Logoff ##################################"""
