@@ -1,4 +1,4 @@
-from flask import request
+from flask import redirect, request
 from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_admin_login, authenticate_system_admin
 from flask.blueprints import Blueprint
@@ -9,7 +9,6 @@ from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
 from flask.helpers import send_file
 from flask.templating import render_template
-from django.shortcuts import redirect
 
 admin_api = Blueprint('admin_api', __name__)
 
