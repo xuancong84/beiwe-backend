@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, session
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
-    authenticate_sysadmin, authenticate_admin_study_access
+    authenticate_system_admin, authenticate_admin_study_access
 from db.user_models import Users, Admin
 from db.study_models import Study, Studies, StudyDeviceSettings,\
     StudyDeviceSettingsCollection
@@ -54,7 +54,7 @@ Page should include a paraphrase of "enter encryption key here for the study, al
 user data stored by server will require this password, strongly recommend you use a
 true random source, for instance random.org"""
 @admin.route('/new_study', methods=["GET"])
-@authenticate_sysadmin
+@authenticate_system_admin
 def render_make_new_study():
     return render_template("fill_me_in_:D")
 
@@ -64,12 +64,12 @@ look at the DEFAULTS dictionary in the StudyDeviceSettings DB model.
 Please make sure current values are displayed."""
 @admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
 #TODO: Eli. confirm that we have both decorators.  do we need a 4th decorator that does exactly this?
-#@authenticate_sysadmin
+#@authenticate_system_admin
 @authenticate_admin_study_access
 def render_edit_study_device_settings(study_id=None):
     study = Studies(_id=ObjectId(study_id))[0]
     settings = study.get_study_device_settings()
-    return render_template("fill_me_in_:D", settings=settings)
+    return render_template("edit_device_settings.html", settings=settings)
 
 
 """########################## Login/Logoff ##################################"""

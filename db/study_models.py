@@ -20,7 +20,9 @@ class Study( DatabaseObject ):
         if Studies(name=name):
             raise StudyAlreadyExistsError("a study named %s already exists" % name)
         if len(encryption_key) != 32:
-            raise InvalidEncryptionKeyError("the encryption key must be 32 characters.")
+            error_text = "the encryption key must be 32 characters, you only " +\
+                         "inputted %d characters" % len(encryption_key)
+            raise InvalidEncryptionKeyError(error_text)
         device_settings = StudyDeviceSettings.create_default()
         study = { "name":name,
                  "encryption_key":encryption_key,

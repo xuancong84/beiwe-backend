@@ -92,13 +92,16 @@ def authenticate_admin_study_access(some_function):
 ########################## System Administrator ################################
 ################################################################################
 
-# TODO: Eli/Josh/Alvin. test sysadmin wrapper
+# TODO: Eli/Josh/Alvin. test system_admin wrapper
 #TODO: Josh/Alvin. (low priority) we need a permission denied page.
-def authenticate_sysadmin(some_function):
+def authenticate_system_admin(some_function):
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         admin = Admins(session['admin_username'])
+        print "good"
         if not admin["system_admin"]:
+            print "not good nooooo"
             return redirect("/")
+    print "fwew"
     return authenticate_and_call
 

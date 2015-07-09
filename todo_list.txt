@@ -77,8 +77,8 @@ change the front page from a view of all device-users to a view of device-users 
 Each researcher should have a drop-down menu of studies he/she is authorized to view, and be able to go to the homepage for any of those studies.
 
 we need to create the following pages for admins:
-    sysadmin: change password of other user
-    elevate to sysadmin?
+    system_admin: change password of other user
+    elevate to system_admin?
     create new admin
     add admin to study
     add survey to study

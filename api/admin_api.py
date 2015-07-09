@@ -1,6 +1,6 @@
 from flask import request
 from libs.admin_authentication import authenticate_admin_study_access,\
-    authenticate_admin_login, authenticate_sysadmin
+    authenticate_admin_login, authenticate_system_admin
 from flask.blueprints import Blueprint
 from db.user_models import User
 from db.study_models import Study, InvalidEncryptionKeyError, Studies,\
@@ -17,7 +17,7 @@ admin_api = Blueprint('admin_api', __name__)
 """ TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password."""
 
 @admin_api.route('/create_new_study', methods=["POST"])
-@authenticate_sysadmin
+@authenticate_system_admin
 def create_new_study():
     try:
         study = Study.create_new_survey(request["name"], request["encryption_key"])
@@ -30,7 +30,7 @@ def create_new_study():
 
 @admin_api.route('/submit_device_settings/<string:study_id>', methods=["POST"])
 #TODO: Eli. ensure we can use both decorators...
-@authenticate_sysadmin
+@authenticate_system_admin
 @authenticate_admin_study_access
 def submit_edit_device_settings(study_id=None):
     study = Studies(_id=ObjectId(study_id))

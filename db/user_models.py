@@ -113,9 +113,9 @@ class Admin( DatabaseObject ):
         self['salt'] = salt
         self.save()
     
-    def elevate_to_sysadmin(self):
-        """Makes the admin a sysadmin."""
-        self['sysadmin'] = True
+    def elevate_to_system_admin(self):
+        """Makes the admin a system_admin."""
+        self['system_admin'] = True
         self.save()
     
 class Admins( DatabaseCollection ):
