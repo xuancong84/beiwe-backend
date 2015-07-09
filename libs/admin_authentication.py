@@ -83,7 +83,7 @@ def authenticate_admin_study_access(some_function):
             study_id = ObjectId(kwargs['study_id'])
             study = Studies(_id=study_id, admins=admin_name)
             if not study: #if the admin is not authorized for this study, fail.
-                print 'study id invalid', study
+                print 'study id invalid', study_id
                 return redirect("/")
         return some_function(*args, **kwargs)
     return authenticate_and_call
