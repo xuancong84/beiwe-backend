@@ -98,10 +98,7 @@ def authenticate_system_admin(some_function):
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         admin = Admins(session['admin_username'])
-        print "good"
         if not admin["system_admin"]:
-            print "not good nooooo"
             return redirect("/")
-    print "fwew"
     return authenticate_and_call
 

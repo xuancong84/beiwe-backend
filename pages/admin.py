@@ -69,7 +69,7 @@ Please make sure current values are displayed."""
 def render_edit_study_device_settings(study_id=None):
     study = Studies(_id=ObjectId(study_id))[0]
     settings = study.get_study_device_settings()
-    return render_template("edit_device_settings.html", settings=settings)
+    return render_template("edit_device_settings.html", settings=settings[0])
 
 
 """########################## Login/Logoff ##################################"""
