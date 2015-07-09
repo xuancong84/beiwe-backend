@@ -12,9 +12,10 @@ from flask.templating import render_template
 from django.shortcuts import redirect
 
 admin_api = Blueprint('admin_api', __name__)
-"""###################### Actual Functionality ##############################"""
 
-""" TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password."""
+#TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password.
+
+"""###################### Actual Functionality ##############################"""
 
 @admin_api.route('/create_new_study', methods=["POST"])
 @authenticate_system_admin
@@ -28,8 +29,9 @@ def create_new_study():
     #survey created! redirect to study device settings? sure.
     return redirect("/edit_study_device_settings/" + str(study._id))
 
+
 @admin_api.route('/submit_device_settings/<string:study_id>', methods=["POST"])
-#TODO: Eli. ensure we can use both decorators...
+#TODO: Eli. Architecture. Ensure we can use both decorators at the same time.
 @authenticate_system_admin
 @authenticate_admin_study_access
 def submit_edit_device_settings(study_id=None):
@@ -41,7 +43,7 @@ def submit_edit_device_settings(study_id=None):
     #reload page? sure.
     return redirect("/edit_study_device_settings/" + study._id)
 
-#TODO: Eli. does this need update for new db schema?
+
 @admin_api.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin_login
 def reset_user_password():
@@ -54,7 +56,7 @@ def reset_user_password():
         return new_password
     return "that patient id does not exist"
 
-#TODO: Eli. does this need updates for new db schema?
+
 @admin_api.route('/reset_device', methods=["POST"])
 @authenticate_admin_login
 def reset_device():
@@ -67,10 +69,9 @@ def reset_device():
         return "device has been reset, password is untouched."
     return "that patient id does not exist"
 
+
 """"TODO: Alvin/Josh. redirect any url in html or javascript that points at 
 /create_new_patient to point at create_new_patient/*study id* """
-#TODO: Eli. update this to create new user and add to them to a specific study.
-#TODO: Eli. add which study a user is being registered for
 @admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])
 @authenticate_admin_study_access
 def create_new_patient(study_id=None):
