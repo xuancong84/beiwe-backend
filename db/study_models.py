@@ -141,7 +141,7 @@ class Survey( DatabaseObject ):
         
     #TODO: Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
-    PATH = "database.surveys"
+    PATH = "beiwe.surveys"
     DEFAULTS = {"content": "",
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED }
