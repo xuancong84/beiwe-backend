@@ -1,7 +1,8 @@
-from flask import request, redirect, render_template
+from bson import ObjectId
+from flask import request, redirect
 from flask.blueprints import Blueprint
 from libs.admin_authentication import authenticate_admin_study_access
-from db.study_models import Survey, Studies, Surveys, Study
+from db.study_models import Survey, Surveys, Study
 from flask.helpers import make_response
 
 survey_api = Blueprint('survey_api', __name__)
@@ -10,18 +11,13 @@ survey_api = Blueprint('survey_api', __name__)
 ############################# Creation/Deletion ##############################
 ################################################################################
 
-#TODO: Josh. in javascript, point a post request with a 'survey_type' parameter.
-#TODO: Josh. make the create survey page a real page.
 @survey_api.route('/create_survey/<string:study_id>', methods=['GET','POST'])
-@authenticate_admin_study_access
+#@authenticate_admin_study_access
 def create_new_survey(study_id=None):
-    if request.method == 'POST':
-        study = Studies(_id=study_id)
-        new_survey = Survey.create_default_survey( request.values['survey_type'] )
-        study.add_survey(new_survey._id)
-        return redirect('edit_survey/' + new_survey._id)
-    if request.method == 'GET':
-        return render_template("create_survey.html")
+    study = Study(_id=ObjectId(study_id))
+    new_survey = Survey.create_default_survey('android_survey')
+    study.add_survey(new_survey)
+    return redirect('edit_survey/' + str(new_survey._id))
 
 #TODO: Josh. make a... button... somewhere that points to this function, suppling a survey id in the url
 #TODO: Eli. return redirect to the study page or /

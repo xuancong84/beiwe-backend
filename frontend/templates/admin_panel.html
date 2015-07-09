@@ -67,9 +67,11 @@
         <button type="button" class="btn btn-primary" onclick="create_new_patient()">Add New Patient</button>
 
         </br></br>
+
         <div class="row">
           <h3>Surveys</h3>
         </div>
+
         <div class="list-group">
           {# If there are surveys attached to this study, list them #}
           {% if survey_ids %}
@@ -78,9 +80,15 @@
             {% endfor %}
           {# If there aren't surveys attached to this study, show a message saying "no surveys" #}
           {% else %}
-            <p><b>There are no surveys for this study.</b></p>
+            <p><b>This study does not have any surveys.</b></p>
           {% endif %}
         </div>
+
+        <div class="row">
+          {# TODO: Josh, make this pass in the study ID #}
+          <a href="/create_survey/" class="btn btn-info">Create new survey</a>
+        </div>
+
       </div>
     </div>
     <footer class="section">
