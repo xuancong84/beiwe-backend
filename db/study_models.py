@@ -70,7 +70,12 @@ class Study( DatabaseObject ):
     #Accessors, class methods
     @classmethod
     def get_studies_for_admin(cls, admin_id):
-        return [Studies(study_id) for study_id in Studies(admins=admin_id)]
+        return [Studies(_id=study_id) for study_id in Studies(admins=admin_id)]
+    
+    @classmethod
+    def get_study_for_user(cls, user_id):
+        #TODO: Eli. Test this.
+        return Studies(participants=ObjectId(user_id))
     
     #Accessors, instance methods
     def get_participants_in_study(self):
@@ -86,7 +91,7 @@ class Study( DatabaseObject ):
     def get_study_device_settings(self):
         return StudyDeviceSettingsCollection(_id=self['device_settings'])
     
-
+    
 
 class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
