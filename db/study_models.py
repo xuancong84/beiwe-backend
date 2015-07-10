@@ -70,7 +70,7 @@ class Study( DatabaseObject ):
     #Accessors, class methods
     @classmethod
     def get_studies_for_admin(cls, admin_id):
-        return [Studies(study_id) for study_id in Studies(admins=admin_id)]
+        return [study._id for study in Studies(admins=admin_id)]
     
     #Accessors, instance methods
     def get_participants_in_study(self):
