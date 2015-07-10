@@ -1,12 +1,8 @@
+import functools
 from flask import request, abort
 from db.user_models import User
-import functools
 from db.study_models import Study
 
-#TODO: Eli. add to the authenticate user function 
-def get_user_study(some_function):
-    @functools.wraps(some_function)
-    def add_study(*args, **kwargs):
 
 def authenticate_user(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
@@ -23,9 +19,22 @@ def authenticate_user(some_function):
     return authenticate_and_call
 
 
+def authenticate_user_and_get_study(some_function):
+    """ Identical to the authenticate_user decorator, but adds a kwarg named
+    "study", containing the study that the user is part of, to the parameters. """ 
+    @functools.wraps(some_function)
+    def authenticate_and_call(*args, **kwargs):
+        is_this_user_valid = validate_post( *args, **kwargs )
+        if is_this_user_valid:
+            study = Study.get_studies_for_admin(request.values['patient_id'])
+            kwargs['study'] = study
+            return some_function(*args, **kwargs)
+        return abort(403)
+    return authenticate_and_call
+
+
 def validate_post( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match."""
-
     #print "user info:  ", request.values.items()
     #print "file info:  ", request.files.items()
     if ("patient_id" not in request.values
@@ -40,6 +49,7 @@ def validate_post( *args, **kwargs ):
     return True
 
 
+#TODO: Eli. probably grab the study for this variable
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
@@ -57,7 +67,6 @@ def validate_registration( *args, **kwargs ):
     if ("patient_id" not in request.values or "password" not in request.values
         or "device_id" not in request.values):
         return False
-
     if not User.exists(request.values['patient_id']): return False
     user = User( request.values['patient_id'] )
     if not user.validate_password( request.values['password'] ): return False
