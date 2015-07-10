@@ -14,11 +14,11 @@ $(document).ready(function() {
 
     // TODO: Josh, scrap the current functions, and make the survey load properly
     // Get the current survey's JSON, and render it as a list of questions
-    $.getJSON(current_survey_url, function(data) {
+    /*$.getJSON(current_survey_url, function(data) {
         questions = data["questions"];
         renderQuestionsList();
         displayScheduledTime(data["hour_of_day"], data["day_of_week"]);
-    })
+    })*/
 });
 
 // Return the hour number (in 24-hour time) that the user selected in the form
@@ -47,8 +47,9 @@ function getDayOfWeek() {
 // On end(), export the survey as a JSON object
 function end() {
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
-    var postRequestContent = "JSONstring=" + JSON.stringify(createJsonSurveyObject());
-    var xhr = new XMLHttpRequest();
+    var postRequestContent = "JSONstring=" + jsonifySurveyQuestions();
+    console.log("questions = " + jsonifySurveyQuestions());
+    /*var xhr = new XMLHttpRequest();
     // If you're editing the weekly survey, update the weekly survey
     var surveyType = document.getElementById("surveyType").title;
     // Handle the response and show the user either "it worked" or "error!"
@@ -71,7 +72,7 @@ function end() {
         xhr.open("POST", "https://beiwe.org/update_daily_survey", true);
     }
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-    xhr.send(postRequestContent);
+    xhr.send(postRequestContent);*/
 }
 
 // Turn the survey into a JSON object with an array of questions and other attributes
@@ -93,8 +94,16 @@ function createJsonSurveyObject() {
     if (getDayOfWeek() != null) {
         surveyObject.day_of_week = getDayOfWeek();
     }
+    console.log("surveyObject = ");
+    console.log(surveyObject);
     return surveyObject;
 }
+
+
+function jsonifySurveyQuestions() {
+    return JSON.stringify(questions);
+}
+
 
 // Render a list of the current questions
 function renderQuestionsList() {
