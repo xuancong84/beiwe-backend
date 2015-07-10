@@ -3,45 +3,37 @@ from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
     authenticate_system_admin, authenticate_admin_study_access
 from db.user_models import Users, Admin
-from db.study_models import Study, Studies, StudyDeviceSettings,\
-    StudyDeviceSettingsCollection
+from db.study_models import Study, Studies
 from bson.objectid import ObjectId
 
 admin = Blueprint('admin', __name__)
 
-""" TODO: Eli+Josh.  The following 3 functions have overlapping/duplicated
-functionality.  Resolve this. """
 
-#TODO: Josh.  could you please look at this and determine where it should be placed, or even if it is necessary.
-"""TODO: josh/alvin: this function provides the admin with users in the studies
-they have access to, it is not used anywhere. Maybe this can be on the front 
-page for the site, but it's not necessary to use this. """
-#@admin.route('/admin_panel') #maybe.
+@admin.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
-def render_surveys():
-    """Provides a dict of studies that the current admin has access to by study
-    to a flask template."""
-    studies = Study.get_studies_for_admin(session['admin_username'])
-    users_by_study = {}
-    for study in studies:
-        users_by_study[study.name] = study.get_participants_in_study()
-    return render_template('SOME_PAGE.PROBABLY_HTML', users_by_study=users_by_study)
+def choose_study():
+    admin = Admin(session['admin_username'])
+    authorized_studies = Studies(admins=admin._id)
+    # If the admin is authorized to view exactly 1 study, redirect to that study
+    if len(authorized_studies) == 1:
+        return redirect('/view_study/' + str(authorized_studies[0]._id))
+    # Otherwise, show the "Choose Study" page
+    return render_template('choose_study.html',
+                           authorized_studies=authorized_studies)
 
 
-"""TODO: Josh/Alvin: move this whole function to a render_study() function or
-something, and make a new post-login homepage that shows an admin the studies
-they have permissions on.  If an admin has permissions on only one page, they
-should be automatically redirected to that page upon login."""
-@admin.route('/admin_panel', methods=["GET", "POST"])
+@admin.route('/view_study/<string:study_id>', methods=['GET'])
 @authenticate_admin_login
-def render_main():
-    """ Method responsible rendering admin template"""
+def view_study(study_id):
+    study = Study(ObjectId(study_id))
+    # TODO: Josh, get patients just for this study, not ALL the patients
     patients = {user['_id']: patient_dict(user) for user in Users()}
-    #TODO: Josh, make it use a real study; don't hard-code this.
-    main_study = Studies()[0]
-    survey_ids = main_study.get_survey_ids_for_study()
-    return render_template('admin_panel.html', patients=patients, survey_ids=survey_ids)
- 
+    survey_ids = study.get_survey_ids_for_study()
+    return render_template('view_study.html', study=study, patients=patients,
+                           survey_ids=survey_ids)
+    # TODO: Josh, pass a list of studies into the dropdown
+
+
 def patient_dict(patient):
     return {'placeholder_field': 'placeholder field for future data',
             'has_device': patient['device_id'] is not None }
@@ -77,7 +69,7 @@ def render_edit_study_device_settings(study_id=None):
 @admin.route('/admin')
 def render_login_page():
     if admin_authentication.is_logged_in():
-        return redirect("/admin_panel")
+        return redirect("/choose_study")
     return render_template('admin_login.html')
 
 
@@ -96,7 +88,7 @@ def login():
         password = request.values["password"]
         if Admin.check_password(username, password):
             admin_authentication.log_in_admin(username)
-            return redirect("/admin_panel")
+            return redirect("/choose_study")
         return "Username password combination is incorrect. Try again."
     else:
         return redirect("/admin")
