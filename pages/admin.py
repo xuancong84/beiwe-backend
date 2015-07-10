@@ -29,8 +29,11 @@ def view_study(study_id):
     # TODO: Josh, get patients just for this study, not ALL the patients
     patients = {user['_id']: patient_dict(user) for user in Users()}
     survey_ids = study.get_survey_ids_for_study()
+    admin = Admin(session['admin_username'])
+    authorized_studies = Studies(admins=admin._id)
     return render_template('view_study.html', study=study, patients=patients,
-                           survey_ids=survey_ids)
+                           survey_ids=survey_ids, study_name=study.name,
+                           authorized_studies=authorized_studies)
     # TODO: Josh, pass a list of studies into the dropdown
 
 
