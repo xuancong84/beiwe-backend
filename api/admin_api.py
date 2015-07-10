@@ -14,7 +14,7 @@ admin_api = Blueprint('admin_api', __name__)
 
 #TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password.
 
-"""###################### Actual Functionality ##############################"""
+"""######################### Study Administration ###########################"""
 
 @admin_api.route('/create_new_study', methods=["POST"])
 @authenticate_system_admin
@@ -44,6 +44,8 @@ def submit_edit_device_settings(study_id=None):
     #reload page? sure.
     return redirect("/edit_study_device_settings/" + study._id)
 
+
+"""########################## User Administration ###########################"""
 
 @admin_api.route('/reset_patient_password', methods=["POST"])
 @authenticate_admin_login
