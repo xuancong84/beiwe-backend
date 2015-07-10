@@ -7,9 +7,10 @@ from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIM
 from db.user_models import User
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
-from libs.user_authentication import authenticate_user, authenticate_user_registration
+from libs.user_authentication import authenticate_user, authenticate_user_registration,\
+    authenticate_user_and_get_study
 from libs.logging import log_error
-from db.study_models import Studies, Surveys
+from db.study_models import Studies
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -78,6 +79,7 @@ def upload():
     
     #error cases, (self documenting)
     else:
+        #TODO: Eli.  This should probably send an email if it fails.
         error_message ="an upload has failed: " + file_name + ", "
         if not uploaded_file:
             error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
@@ -214,11 +216,11 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
 
 #TODO: Eli. make sure that this url is pointed at correctly by the app
 #TODO: Eli. check that the authenticate_user decorator is correctly used.
-@mobile_api.route('/<string:survey_id>/download/', methods=['GET', 'POST'])
-@authenticate_user
-def get_latest_survey(survey_id):
+@mobile_api.route('/download', methods=['GET', 'POST'])
+@authenticate_user_and_get_study
+def get_latest_survey(study=None):
     #TODO: Eli. Check how timings are sent to the app, if they need to be sent inside of this function (probably yes)
-    return Surveys(survey_id)['content']
+    return study.get_surveys_for_study()
 
 #TODO: Eli. Purge any use of the commented urls below, both app and server.
 # @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])

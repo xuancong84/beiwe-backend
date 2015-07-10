@@ -1,7 +1,12 @@
 from flask import request, abort
 from db.user_models import User
 import functools
+from db.study_models import Study
 
+#TODO: Eli. add to the authenticate user function 
+def get_user_study(some_function):
+    @functools.wraps(some_function)
+    def add_study(*args, **kwargs):
 
 def authenticate_user(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
@@ -10,7 +15,10 @@ def authenticate_user(some_function):
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_post( *args, **kwargs )
-        if is_this_user_valid: return some_function(*args, **kwargs)
+        if is_this_user_valid:
+            study = Study.get_studies_for_admin(request.values['patient_id'])
+            kwargs['study_id'] = study
+            return some_function(*args, **kwargs)
         return abort(403)
     return authenticate_and_call
 
@@ -20,7 +28,8 @@ def validate_post( *args, **kwargs ):
 
     #print "user info:  ", request.values.items()
     #print "file info:  ", request.files.items()
-    if ("patient_id" not in request.values or "password" not in request.values
+    if ("patient_id" not in request.values
+        or "password" not in request.values
         or "device_id" not in request.values):
         return False
     if not User.exists(request.values['patient_id']): return False
