@@ -1,5 +1,6 @@
 from mongolia import (connect_to_database, authenticate_connection, ID_KEY,
-    REQUIRED, UPDATE, CHILD_TEMPLATE, DatabaseObject, DatabaseCollection)
+    REQUIRED, UPDATE, CHILD_TEMPLATE, DatabaseObject, DatabaseCollection,
+    set_defaults_handling, set_type_checking, AlertLevel)
 
 from mongolia.errors import MalformedObjectError, DatabaseConflictError
 from config.passwords import MONGO_USERNAME, MONGO_PASSWORD
@@ -9,3 +10,5 @@ from config.passwords import MONGO_USERNAME, MONGO_PASSWORD
 
 connect_to_database()
 authenticate_connection(MONGO_USERNAME, MONGO_PASSWORD)
+set_defaults_handling(AlertLevel.error)
+set_type_checking(AlertLevel.error)
