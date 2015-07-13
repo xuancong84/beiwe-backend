@@ -161,7 +161,7 @@ class Survey( DatabaseObject ):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
         survey = { "survey_type": survey_type }
-        return Study.create(survey, random_id=True)
+        return Survey.create(survey, random_id=True)
 
 """############################ Collections #################################"""
 class Studies( DatabaseCollection ):
