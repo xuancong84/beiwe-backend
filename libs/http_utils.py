@@ -1,6 +1,3 @@
-from pprint import pprint
-
-
 def checkbox_to_boolean(list_checkbox_params, dict_all_params):
     """ Takes a list of strings that are to be processed as checkboxes on a post
         parameter, (checkboxes supply some arbitrary value in a post if they are
@@ -17,4 +14,5 @@ def checkbox_to_boolean(list_checkbox_params, dict_all_params):
 
 
 def combined_multi_dict_to_dict(cmd):
+    """ converts an ImmutableMultiDict to a mutable python Dict. """
     return { key: value for key, value in cmd.items() }
