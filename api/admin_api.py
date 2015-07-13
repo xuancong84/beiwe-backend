@@ -13,7 +13,7 @@ from config.constants import CHECKBOX_TOGGLES
 
 admin_api = Blueprint('admin_api', __name__)
 
-#TODO: Josh/Alvin. New studies need an error display page, i.e. invalid password.
+
 
 """######################### Study Administration ###########################"""
 
@@ -23,15 +23,15 @@ def create_new_study():
     try:
         study = Study.create_new_survey(request["name"], request["encryption_key"])
     except InvalidEncryptionKeyError:
+        #TODO: Josh/Alvin.  create an error display/page for the following
         return render_template("some error display for invalid encryption key")
     except StudyAlreadyExistsError:
+        #TODO: Josh/Alvin.  create an error display/page for the following
         return render_template("some error display for study of that name already exists")
-    #survey created! redirect to study device settings? sure.
     return redirect("/edit_study_device_settings/" + str(study._id))
 
 
 @admin_api.route('/submit_device_settings/<string:study_id>', methods=["POST"])
-#TODO: Eli. Architecture. Ensure we can use both decorators at the same time.
 @authenticate_system_admin
 @authenticate_admin_study_access
 def submit_device_settings(study_id=None):
@@ -40,7 +40,7 @@ def submit_device_settings(study_id=None):
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
     settings.update(**params)
-    #TODO: alvin.  make this do something more user friendly than reload the page
+    #TODO: Alvin.  make this do something more user friendly than reload the page
     return redirect("/edit_study_device_settings/" + str(study._id) )
 
 
