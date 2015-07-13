@@ -1,7 +1,6 @@
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
-from pages import survey_designer
-from pages import admin_pages
+from pages import admin_pages, mobile_pages, survey_designer
 from api import mobile_api, survey_api, admin_api
 from libs.logging import log_error
 from libs.security import set_secret_key
@@ -19,7 +18,7 @@ def subdomain(directory):
 app = subdomain("frontend")
 app.register_blueprint(mobile_api.mobile_api)
 app.register_blueprint(admin_pages.admin_pages)
-app.register_blueprint(admin_pages.admin_pages)
+app.register_blueprint(mobile_pages.mobile_pages)
 app.register_blueprint(survey_designer.survey_designer)
 app.register_blueprint(admin_api.admin_api)
 app.register_blueprint(survey_api.survey_api)

@@ -6,10 +6,10 @@ from db.user_models import Users, Admin
 from db.study_models import Study, Studies
 from bson.objectid import ObjectId
 
-admin = Blueprint('admin', __name__)
+admin_pages = Blueprint('admin_pages', __name__)
 
 
-@admin.route('/choose_study', methods=['GET'])
+@admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
     admin = Admin(session['admin_username'])
@@ -22,7 +22,7 @@ def choose_study():
                            authorized_studies=authorized_studies)
 
 
-@admin.route('/view_study/<string:study_id>', methods=['GET'])
+@admin_pages.route('/view_study/<string:study_id>', methods=['GET'])
 @authenticate_admin_login
 def view_study(study_id):
     study = Study(ObjectId(study_id))
@@ -47,13 +47,13 @@ see the create_new_study function in admin_api for details.
 Page should include a paraphrase of "enter encryption key here for the study, all
 user data stored by server will require this password, strongly recommend you use a
 true random source, for instance random.org"""
-@admin.route('/new_study', methods=["GET"])
+@admin_pages.route('/new_study', methods=["GET"])
 @authenticate_system_admin
 def render_make_new_study():
     return render_template("fill_me_in_:D")
 
 
-@admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
+@admin_pages.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
 #TODO: Eli. confirm that we have both decorators.  do we need a 4th decorator that does exactly this?
 @authenticate_system_admin
 @authenticate_admin_study_access
@@ -67,21 +67,21 @@ def render_edit_study_device_settings(study_id=None):
 
 """########################## Login/Logoff ##################################"""
 
-@admin.route('/')
-@admin.route('/admin')
+@admin_pages.route('/')
+@admin_pages.route('/admin')
 def render_login_page():
     if admin_authentication.is_logged_in():
         return redirect("/choose_study")
     return render_template('admin_login.html')
 
 
-@admin.route("/logout")
+@admin_pages.route("/logout")
 def logout():
     admin_authentication.logout_loggedin_admin()
     return redirect("/")
 
 
-@admin.route("/validate_login", methods=["GET", "POST"])
+@admin_pages.route("/validate_login", methods=["GET", "POST"])
 def login():
     """ Authenticates administrator login, redirects to login page
         if authentication fails."""
@@ -96,13 +96,13 @@ def login():
         return redirect("/admin")
 
 
-@admin.route('/reset_admin_password_form')
+@admin_pages.route('/reset_admin_password_form')
 @authenticate_admin_login
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
 
-@admin.route('/reset_admin_password', methods=['POST'])
+@admin_pages.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
 def reset_admin_password():
     username = session['admin_username']
