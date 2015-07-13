@@ -14,7 +14,6 @@ from config.constants import CHECKBOX_TOGGLES
 admin_api = Blueprint('admin_api', __name__)
 
 
-
 """######################### Study Administration ###########################"""
 
 @admin_api.route('/create_new_study', methods=["POST"])
