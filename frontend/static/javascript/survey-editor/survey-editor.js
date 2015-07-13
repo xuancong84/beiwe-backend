@@ -9,17 +9,10 @@ $(document).ready(function() {
     // Determine if it's a daily or weekly survey
     var surveyType = document.getElementById("surveyType").title;
 
-    console.log("Survey ID = " + survey_id);
-    console.log("Survey content = " + survey_content);
-
-    // TODO: Josh, scrap the current functions, and make the survey load properly
-    // Get the current survey's JSON, and render it as a list of questions
-    /*$.getJSON(current_survey_url, function(data) {
-        questions = data["questions"];
-        renderQuestionsList();
-        displayScheduledTime(data["hour_of_day"], data["day_of_week"]);
-    })*/
+    questions = JSON.parse(survey_content);
+    renderQuestionsList();
 });
+
 
 // Return the hour number (in 24-hour time) that the user selected in the form
 function getHour() {
@@ -47,32 +40,18 @@ function getDayOfWeek() {
 // On end(), export the survey as a JSON object
 function end() {
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
-    var postRequestContent = "JSONstring=" + jsonifySurveyQuestions();
-    console.log("questions = " + jsonifySurveyQuestions());
-    /*var xhr = new XMLHttpRequest();
-    // If you're editing the weekly survey, update the weekly survey
-    var surveyType = document.getElementById("surveyType").title;
-    // Handle the response and show the user either "it worked" or "error!"
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            alert("Survey results sent successfully :)");
+    $.ajax({
+        type: 'POST',
+        url: '/update_survey/' + survey_id,
+        data: {
+            questions: jsonifySurveyQuestions()
         }
-        else if (xhr.readyState == 4 && xhr.status == 400) {
-            alert("Error: " + xhr.responseText);
-        }
-        else if (xhr.readyState == 4) {
-            alert("Error: unknown error. Sorry, your questions could not be submitted.");
-        }
-    }
-    if (surveyType.localeCompare("weekly") == 0) {
-        xhr.open("POST", "https://beiwe.org/update_weekly_survey", true);
-    }
-    // Otherwise, you're editing the daily survey
-    else {
-        xhr.open("POST", "https://beiwe.org/update_daily_survey", true);
-    }
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-    xhr.send(postRequestContent);*/
+    }).done(function() {
+        alert("Survey saved and submitted successfully!");
+        location.reload();
+    }).fail(function() {
+        alert("There was a problem with updating the survey, sorry!");
+    })
 }
 
 // Turn the survey into a JSON object with an array of questions and other attributes
@@ -103,7 +82,6 @@ function createJsonSurveyObject() {
 function jsonifySurveyQuestions() {
     return JSON.stringify(questions);
 }
-
 
 // Render a list of the current questions
 function renderQuestionsList() {

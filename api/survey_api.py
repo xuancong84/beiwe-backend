@@ -1,9 +1,7 @@
 from bson import ObjectId
-from flask import request, redirect
-from flask.blueprints import Blueprint
+from flask import abort, Blueprint, request, redirect
 from libs.admin_authentication import authenticate_admin_study_access
 from db.study_models import Survey, Surveys, Study
-from flask.helpers import make_response
 
 survey_api = Blueprint('survey_api', __name__)
 
@@ -31,42 +29,19 @@ def delete_survey(survey_id=None):
     #return redirect()
 
 ################################################################################
-############################# Setters and Editers ##############################
+############################# Setters and Editors ##############################
 ################################################################################
 
-# @survey_api.route('/update_daily_survey', methods=['GET', 'POST'])
-# @authenticate_admin_login
-# def update_daily():
-#     return update_survey('daily', request)
-
-# @survey_api.route('/update_weekly_survey', methods=['GET', 'POST'])
-# @authenticate_admin_login
-# def update_weekly():
-#     return update_survey('weekly', request)
-
 #TODO: Everyone. test.
-""""TODO: Josh. redirect any urls in javascript and html that point to
-update_daily_survey or update_weekly_survey to instead point at this url, supplying
-a survey_ID. """
 @survey_api.route('/update_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def update_survey(survey_id=None):
-    """TODO: Eli. the original code inside the try statement was:
-        survey_name = 'all_surveys/' + survey_type + '/'  # set filepath
-        survey_name += datetime.now().isoformat() + '.json'  # set filename
-        new_quiz = request.values['JSONstring']
-        s3_upload( survey_name, new_quiz )
-    We don't know where the error occurred in those lines. We have entirely
-    different code now, I don't know if/where a unicode error can occur. """
-    try:
-        new_content = request.values['JSONstring']
-        survey = Surveys(survey_id)
-        survey['content'] = new_content
-        #TODO: Eli. investigate how timings are sent to the device.
-        return '200'
-    except UnicodeEncodeError as e:
-        print "UnicodeEncodeError in update_survey().\nError:\n", e
-        error_msg = ("There is a Unicode character in the text of one of the "
-                     "questions you submitted. Make sure the question text "
-                     "includes only ASCII characters.")
-        return make_response(error_msg, 400)
+    survey = Survey(ObjectId(survey_id))
+    if not survey:
+        return abort(404)
+    survey.update({'content': request.values['questions']})
+    #TODO: Eli. investigate how timings are sent to the device.
+    return '200'
+    """TODO: Eli/Josh: UnicodeEncodeErrors no longer happen, but we don't know
+    if the Android app will support Unicode. If it doesn't, we need to warn the
+    admin here if the admin tries to use Unicode.""" 
