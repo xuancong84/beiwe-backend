@@ -32,6 +32,7 @@ class Study( DatabaseObject ):
         
     #Editors
     def add_participant(self, user_id):
+        # TODO: Eli, make "study" a field on user; get rid of participants.
         """ Note: participant ids (user ids) are strings, not ObjectIds. """
         self["participants"].append(user_id)
         self.save()

@@ -34,7 +34,6 @@ def view_study(study_id):
     return render_template('view_study.html', study=study, patients=patients,
                            survey_ids=survey_ids, study_name=study.name,
                            authorized_studies=authorized_studies)
-    # TODO: Josh, pass a list of studies into the dropdown
 
 
 def patient_dict(patient):
