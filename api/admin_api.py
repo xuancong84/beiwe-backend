@@ -3,16 +3,17 @@ from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_admin_login, authenticate_system_admin
 from flask.blueprints import Blueprint
 from db.user_models import User
-from db.study_models import Study, InvalidEncryptionKeyError, Studies,\
-    StudyAlreadyExistsError
+from db.study_models import Study, InvalidEncryptionKeyError, StudyAlreadyExistsError
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
 from flask.helpers import send_file
 from flask.templating import render_template
+from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
+from config.constants import CHECKBOX_TOGGLES
 
 admin_api = Blueprint('admin_api', __name__)
 
-#TODO: Josh/Alvin. New studies need an error display function, i.e. invalid password.
+#TODO: Josh/Alvin. New studies need an error display page, i.e. invalid password.
 
 """######################### Study Administration ###########################"""
 
@@ -33,16 +34,14 @@ def create_new_study():
 #TODO: Eli. Architecture. Ensure we can use both decorators at the same time.
 @authenticate_system_admin
 @authenticate_admin_study_access
-def submit_edit_device_settings(study_id=None):
-    study = Studies(_id=ObjectId(study_id))
+def submit_device_settings(study_id=None):
+    study = Study(ObjectId(study_id))
     settings = study.get_study_device_settings()
-    """TODO: Eli/Josh. it is Exceedingly unlikely this little hack will work correctly... test.  :D
-           Alvin update: yup, doesn't work, sorry!
-           Exception: invalid path "USERNAME"; database paths must be of the form "database.collection"""""
-    settings.update(**request.values)
-    settings.save() #TODO: Eli. is this even necessary?
-    #reload page? sure.
-    return redirect("/edit_study_device_settings/" + study._id)
+    params = combined_multi_dict_to_dict( request.values )
+    params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
+    settings.update(**params)
+    #TODO: alvin.  make this do something more user friendly than reload the page
+    return redirect("/edit_study_device_settings/" + str(study._id) )
 
 
 """########################## User Administration ###########################"""

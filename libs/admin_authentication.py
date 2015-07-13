@@ -52,7 +52,6 @@ def is_logged_in():
 
 class ArgumentMissingException(Exception): pass
 
-#TODO: Eli. test survey editing wrapper.
 #TODO: Josh/Alvin. permission denied page
 #TODO: Josh/Alvin. (low priority) we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
@@ -64,8 +63,8 @@ def authenticate_admin_study_access(some_function):
         value. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        
         if not is_logged_in(): #check for regular login requirement
+            print 2
             return redirect("/")
         admin_name = session["admin_username"]
         #check proper syntax usage.
@@ -73,6 +72,7 @@ def authenticate_admin_study_access(some_function):
             raise ArgumentMissingException()
         #We want the survey_id check to execute first if both args are supplied. 
         if "survey_id" in kwargs:
+            print 3
             survey_id = ObjectId(kwargs["survey_id"])
             #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
             study = Studies(surveys=survey_id, admins=admin_name)
@@ -80,6 +80,7 @@ def authenticate_admin_study_access(some_function):
                 print 'survey id invalid', survey_id
                 return redirect("/")
         if "study_id" in kwargs:
+            print 4
             study_id = ObjectId(kwargs['study_id'])
             study = Studies(_id=study_id, admins=admin_name)
             if not study: #if the admin is not authorized for this study, fail.
@@ -92,13 +93,14 @@ def authenticate_admin_study_access(some_function):
 ########################## System Administrator ################################
 ################################################################################
 
-# TODO: Eli/Josh/Alvin. test system_admin wrapper
 #TODO: Josh/Alvin. (low priority) we need a permission denied page.
 def authenticate_system_admin(some_function):
+#     print "\n\n doees this even run\n\n\n"
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        admin = Admins(session['admin_username'])
+        admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
-            return redirect("/")
+            return redirect("permission_denied.html")
+        return some_function(*args, **kwargs)
     return authenticate_and_call
 

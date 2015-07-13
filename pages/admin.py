@@ -56,13 +56,13 @@ def render_make_new_study():
 
 @admin.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
 #TODO: Eli. confirm that we have both decorators.  do we need a 4th decorator that does exactly this?
-#@authenticate_system_admin
+@authenticate_system_admin
 @authenticate_admin_study_access
 def render_edit_study_device_settings(study_id=None):
-    study = Studies(_id=ObjectId(study_id))[0]
+    study = Study(ObjectId(study_id))
     settings = study.get_study_device_settings()
     return render_template("edit_device_settings.html",
-                           settings=settings[0],
+                           settings=settings,
                            study_id=study_id)
 
 

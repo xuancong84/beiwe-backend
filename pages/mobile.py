@@ -1,5 +1,5 @@
 from flask import request
-from libs import data_manipulations
+from libs import graph_data
 from flask.blueprints import Blueprint
 from libs.user_authentication import authenticate_user
 from flask.templating import render_template
@@ -16,10 +16,10 @@ def fetch_graph():
     patient_id = request.values['patient_id']
 
     #see docs in config manipulations for details.
-    daily_data = data_manipulations.get_survey_results(username=patient_id,
+    daily_data = graph_data.get_survey_results(username=patient_id,
                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
     
-    weekly_data = data_manipulations.get_survey_results(username=patient_id,
+    weekly_data = graph_data.get_survey_results(username=patient_id,
                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
     
     return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
@@ -29,10 +29,10 @@ def fetch_graph():
 @mobile_pages.route("/fake", methods=["GET"] )
 def fake_survey():
     patient_id = request.values['patient_id']
-    daily_data = data_manipulations.get_survey_results(username=patient_id,
+    daily_data = graph_data.get_survey_results(username=patient_id,
                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
     
-    weekly_data = data_manipulations.get_survey_results(username=patient_id,
+    weekly_data = graph_data.get_survey_results(username=patient_id,
                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
     
     return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)

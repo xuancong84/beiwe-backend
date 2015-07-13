@@ -28,7 +28,7 @@ class Study( DatabaseObject ):
                  "encryption_key":encryption_key,
                  "device_settings":device_settings._id
                  }
-        return super(Study, cls).create(study, random_id=True)
+        return Study.create(study, random_id=True)
         
     #Editors
     def add_participant(self, user_id):
@@ -89,7 +89,7 @@ class Study( DatabaseObject ):
         return [str(survey) for survey in self['surveys']]
     
     def get_study_device_settings(self):
-        return StudyDeviceSettingsCollection(_id=self['device_settings'])
+        return StudyDeviceSettings(self['device_settings'])
     
     
 
@@ -100,7 +100,9 @@ class StudyDeviceSettings( DatabaseObject ):
     #TODO: Eli/Josh. sensor and timer variables here, names possibly subject to change,
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
-    DEFAULTS = {#sensors:
+    #VERY IMPORTANT: ensure that any toggles displayed on the website using
+    # CHECKBOXES are enumerated in CHECKBOX_TOGGLES in constants.
+    DEFAULTS = {#device sensors (listeners)
                 "accelerometer":False,
                 "gps":False,
                 "calls":False,
@@ -125,7 +127,7 @@ class StudyDeviceSettings( DatabaseObject ):
             }
     @classmethod
     def create_default(cls):
-        return StudyDeviceSettings.create({}, random_id=True)
+        return StudyDeviceSettings.create(cls.DEFAULTS, random_id=True)
     
     
 class Survey( DatabaseObject ):
@@ -158,7 +160,7 @@ class Survey( DatabaseObject ):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
         survey = { "survey_type": survey_type }
-        return super(Survey, cls).create(survey, random_id=True)
+        return Study.create(survey, random_id=True)
 
 """############################ Collections #################################"""
 class Studies( DatabaseCollection ):

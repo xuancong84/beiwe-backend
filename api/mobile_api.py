@@ -215,7 +215,7 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
 ################################################################################
 
 #TODO: Eli. make sure that this url is pointed at correctly by the app
-#TODO: Eli. check that the authenticate_user decorator is correctly used.
+#TODO: Eli. check that this authenticate_user decorator is correctly used.
 @mobile_api.route('/download', methods=['GET', 'POST'])
 @authenticate_user_and_get_study
 def get_latest_survey(study=None):

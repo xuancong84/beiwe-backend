@@ -8,5 +8,5 @@ secure.py
 *.pem
 data/passwords.py
 config/passwords.py
-mongodb
+.mongodb
 .idea/

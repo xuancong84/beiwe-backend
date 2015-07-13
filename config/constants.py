@@ -29,3 +29,13 @@ SURVEY_TYPES = ['audio', 'android_survey']
 # class SURVEY_TYPES(object):
 #     audio = "audio"
 #     android_survey = "android_survey"
+
+CHECKBOX_TOGGLES = ["accelerometer",
+                  "gps",
+                  "calls",
+                  "texts",
+                  "wifi",
+                  "bluetooth",
+                  "power_state"
+                ]
+
