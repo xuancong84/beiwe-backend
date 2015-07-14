@@ -1,31 +1,32 @@
-eli: Put a PATH variable in the new db models
-
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
 utility: modify the authenticate_study_access to transform the study or survey id into an ObjectId
 
-app: when downloading new surveys, handle survey deletion, and identification-persistance (when a person has a notification for survey 2 the survey does not get deleted.)
+app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
 
 Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
     -this looks like it is a component of the surveyscheduler.java class. rewrite to fully drop daily/weekly distinction.
 
-check that app-side file handling to only upload retired files is activated for the voice recording
+check that the app-side file handling for only uploading retired files is actually functional for audio recordings.
 
 Admin/Access control:
--There should be 2 levels of control: a regular researcher, and a super-admin.  A super-admin can create new researchers, reset researchers' passwords, edit which studies researchers are attached to, delete researchers, and create studies.  Only JP (and maybe Jeanette) should be super-admins.
--regular admins should be able to have full survey modification rights to surveys on studies they are assigned to.
--The data download script should only only enable a researcher to download data from a study that researcher is authorized to view.
+	2 levels of users: a researcher admins, and super admins.
+	super-admins
+		can create new researchers,
+		reset researchers' passwords
+		edit which studies researchers are attached to
+		delete researchers
+		create studies.
+	admins should only have survey modification rights to on surveys in studies they are assigned to.
 
 --Survey modifications--
 Have separate surveys for each study
-    -we probably don't need a survey to be shared among multiple studies
-
-Support an arbitrary number of surveys for each study
+    we probably don't need a survey to be shared among multiple studies
 
 surveys must be able to be scheduled:
     once a week
-    once a day,
+    once a day
     multiple times per day
 
 -Ask JP if he wants the option to make surveys display questions in randomized order...
@@ -42,56 +43,43 @@ if so:
         if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
             solution: no overlapping runs.
 
-Data Stream Toggles, customizable from the admin panel at the time of study creation:
--Accelerometer
--GPS
--Phone calls
--SMS and MMS (both sent and received)
--WiFi
--Bluetooth
--PowerStateListener (Screen on/off, Power connected/disconnected, shutdown/restart/boot) - should the three of these be one toggle, or three separate toggles?  One toggle is easier, engineering-wise.
+Customizable Times:
+	-an option that can be editted on the edit survey page (not just survey creation)
+	-error-checking (this isn't mentioned in the change order)
+		for example, BLUETOOTH_ON_DURATION must be no longer than BLUETOOTH_PERIOD minus BLUETOOTH_START_TIME_IN_PERIOD.
+ 	-This is likely to be modified by the email thread about timers and data streams.
 
-Customizable Times, customizable from the admin panel at the time of study creation:
-all of the time constants at the top of Timer.java:
-UPLOAD_DATA_FILES_PERIOD, CREATE_NEW_DATA_FILES_PERIOD, CHECK_FOR_NEW_SURVEYS_PERIOD, WIFI_LOG_PERIOD, BLUETOOTH_ON_DURATION, BLUETOOTH_PERIOD, BLUETOOTH_START_TIME_IN_PERIOD (this one isn't listed in the change order because it would be hard to explain, but it is one of the constants that should be adjustable), ACCELEROMETER_ON_DURATION, ACCELEROMETER_OFF_MINIMUM_DURATION, GPS_ON_DURATION, GPS_OFF_MINIMUM_DURATION, VOICE_RECORDING_HOUR_OF_DAY, VOICE_RECORDING_MAX_TIME_LENGTH, MILLISECONDS_BEFORE_AUTO_LOGOUT
--There should also be default values for these, so that the researcher doesn't have to set all new values from scratch at the start of the study.
--We might also want to include error-checking (this isn't mentioned in the change order) so that, for example, BLUETOOTH_ON_DURATION must be no longer than BLUETOOTH_PERIOD minus BLUETOOTH_START_TIME_IN_PERIOD.
- -This todo is likely to be modified by the email thread about timers and data streams.
 
 Customizable wording, customizable from the admin panel at the time of study creation:
--Text on the "Call Clinician" buttons throughout the app
--Main body text on Voice Recording screen
--About page text
--Text in the Toast that pops up after a user submits a completed survey
--Text in the Toast that pops up after a user submits a completed voice recording
-We should probably limit text inputs to ASCII-only, not Unicode characters. The survey editor interface currently (June 29, 2015) has a check for Unicode characters in survey_designer.py/update_survey().
+	-Text on the "Call Clinician" buttons throughout the app.
+	-Main body text on Voice Recording screen
+	-About page text
+	-Text in the Toast that pops up after a user submits a completed survey
+	-Text in the Toast that pops up after a user submits a completed voice recording
+	(We should probably limit text inputs to ASCII-only, not Unicode characters. The survey editor interface currently (June 29, 2015) has a check for Unicode characters in survey_designer.py/update_survey().)
 
 ############################################################
 ######################### FRONT END ########################
 ############################################################
 
-change days of week to checkboxes instead of dropdown.
-
-change the front page from a view of all device-users to a view of device-users and the study they are enrolled in, and only visible to studies the admin has access rights to
+implement completely new day-of-week and time(s) picker.
 
 Each researcher should have a drop-down menu of studies he/she is authorized to view, and be able to go to the homepage for any of those studies.
 
-we need to create the following pages for admins:
+--this could be a good thing for Alvin to work on--
+we need to create the following functionality for admins:
     system_admin: change password of other user
-    elevate to system_admin?
     create new admin
+    delete admin
     add admin to study
     add survey to study
-    error page for admin permission denied (put in decorator)
     create new study
         page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
         Error displays on bad input for a new survey
     create new survey (inside a study)
         -pass in a study id
-    each survey needs a delete-this-survey button
-        -pass in a survey id
-    (DONE) edit device settings for study
 
+error page for admin permission denied (put in decorator)
 
 Graph stuff
     -Make it look pretty for all the different types of survey questions
@@ -111,26 +99,17 @@ the backgroundprocess should be backgroundservice
 remove old data from s3:
     It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
     If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below (these are what Matt is using, all others can go):
-        7rzzd3
-        6sod84
-        ahhv9h
-        c7hze5
-        66f1zz
-        qrsmla
-        fwgs3q
-        g7s4zv
-        yi279c
-        v26kw2
+        7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
 
 implement mongobackups of the mongo db on the server
-
-setup new server
 
 SSL on the new server
 
 ####################################################################
 ########################## GENERAL TASKS ###########################
 ####################################################################
+
+check behavior of generating unique device IDs and how that interacts with devices that are not phones.
 
 UHOH, I don't think we have any code for downloading user mac addresses/hashes of them.
 
@@ -140,7 +119,7 @@ since studies will have arbitrary time triggers, frequency triggers, and no long
 ############################ KNOWN BUGS ############################
 ####################################################################
 
-Known unknown bug: if the logout timer is less than the max voice recording time period
+Known unknown bug: if the logout timer is less than the max voice recording time period.
 
 MMS logging:
     -When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
@@ -194,6 +173,7 @@ Timers & data upload
 ########################################################################################
 ####################### ideas (these do not need to be acted on) #######################
 ########################################################################################
+handle leap second bugs :D  (this is a joke.  don't actually do this.)
 
 infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
