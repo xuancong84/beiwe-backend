@@ -9,9 +9,6 @@ survey_designer = Blueprint('survey_designer', __name__)
 #TODO: josh/alvin. implement "study does not exist" page.
 #TODO: josh/alvin. implement "survey does not exist" page.
 
-""""TODO: Josh. any hardcoded instance of the edit survey functions
-(weekly_survey and daily_survey) should point at edit_survey/survey_id instead.
-we no longer have a distinction between weekly and daily"""
 @survey_designer.route('/edit_survey/<string:survey_id>')
 @authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
