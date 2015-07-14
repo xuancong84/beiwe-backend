@@ -1,3 +1,6 @@
+
+Make a new s3 bucket for the beiwe2, make new access credentials for myself and josh and the server.
+
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
