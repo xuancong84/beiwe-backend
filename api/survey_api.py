@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask import abort, Blueprint, request, redirect
 from libs.admin_authentication import authenticate_admin_study_access
-from db.study_models import Survey, Surveys, Study
+from db.study_models import Survey, Study
 
 survey_api = Blueprint('survey_api', __name__)
 
@@ -17,16 +17,16 @@ def create_new_survey(study_id=None):
     study.add_survey(new_survey)
     return redirect('edit_survey/' + str(new_survey._id))
 
-#TODO: Josh. make a... button... somewhere that points to this function, suppling a survey id in the url
-#TODO: Eli. return redirect to the study page or /
-@survey_api.route('/delete_survey/<string:survey_id>', methods=['POST'])
+@survey_api.route('/delete_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def delete_survey(survey_id=None):
-    survey = Surveys(_id=survey_id)
-    survey.remove()
-    study=Study(surveys=survey_id)
+    survey = Survey(ObjectId(survey_id))
+    if not survey:
+        return abort(404)
+    study = Study(surveys=ObjectId(survey_id))
     study.remove_survey(survey)
-    #return redirect()
+    survey.remove()
+    return redirect('/view_study/' + str(study._id))
 
 ################################################################################
 ############################# Setters and Editors ##############################
@@ -41,6 +41,7 @@ def update_survey(survey_id=None):
         return abort(404)
     survey.update({'content': request.values['questions']})
     #TODO: Eli. investigate how timings are sent to the device.
+    #TODO: Josh, consider making this NOT AJAX; just make it a regular submit
     return '200'
     """TODO: Eli/Josh: UnicodeEncodeErrors no longer happen, but we don't know
     if the Android app will support Unicode. If it doesn't, we need to warn the

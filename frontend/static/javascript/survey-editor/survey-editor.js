@@ -5,10 +5,6 @@
 var questions = [];
 
 $(document).ready(function() {
-
-    // Determine if it's a daily or weekly survey
-    var surveyType = document.getElementById("surveyType").title;
-
     questions = JSON.parse(survey_content);
     renderQuestionsList();
 });
@@ -57,13 +53,7 @@ function end() {
 // Turn the survey into a JSON object with an array of questions and other attributes
 function createJsonSurveyObject() {
     var survey_id_string;
-    var surveyType = document.getElementById("surveyType").title;
-    if (surveyType.localeCompare("weekly") == 0) {
-        survey_id_string = "WeeklySurveyCreatedAt" + new Date().getTime();
-    }
-    else {
-        survey_id_string = "DailySurveyCreatedAt" + new Date().getTime();
-    }
+    survey_id_string = "WeeklySurveyCreatedAt" + new Date().getTime();
     var surveyObject = {
         hour_of_day: getHour(),
         questions: questions,
