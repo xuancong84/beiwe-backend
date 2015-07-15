@@ -1,9 +1,10 @@
 from flask import Blueprint, redirect, render_template, request, session
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
-    authenticate_system_admin, authenticate_admin_study_access
+    authenticate_system_admin, authenticate_admin_study_access,\
+    get_admins_allowed_studies
 from db.user_models import Users, Admin
-from db.study_models import Study, Studies
+from db.study_models import Study
 from bson.objectid import ObjectId
 
 admin_pages = Blueprint('admin_pages', __name__)
@@ -12,14 +13,13 @@ admin_pages = Blueprint('admin_pages', __name__)
 @admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
-    admin = Admin(session['admin_username'])
-    authorized_studies = Studies(admins=admin._id)
+    allowed_studies = get_admins_allowed_studies()
     # If the admin is authorized to view exactly 1 study, redirect to that study
-    if len(authorized_studies) == 1:
-        return redirect('/view_study/' + str(authorized_studies[0]._id))
+    if len(allowed_studies) == 1:
+        return redirect('/view_study/' + str(allowed_studies[0]._id))
     # Otherwise, show the "Choose Study" page
     return render_template('choose_study.html',
-                           authorized_studies=authorized_studies)
+                           allowed_studies=allowed_studies)
 
 
 @admin_pages.route('/view_study/<string:study_id>', methods=['GET'])
@@ -29,11 +29,9 @@ def view_study(study_id):
     # TODO: Josh, get patients just for this study, not ALL the patients
     patients = {user['_id']: patient_dict(user) for user in Users()}
     survey_ids = study.get_survey_ids_for_study()
-    admin = Admin(session['admin_username'])
-    authorized_studies = Studies(admins=admin._id)
     return render_template('view_study.html', study=study, patients=patients,
                            survey_ids=survey_ids, study_name=study.name,
-                           authorized_studies=authorized_studies)
+                           allowed_studies=get_admins_allowed_studies())
 
 
 def patient_dict(patient):
