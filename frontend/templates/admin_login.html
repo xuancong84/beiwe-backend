@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Log In</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css"  type="text/css"/>
-  </head>
-  <body>
+{% extends "base.html" %}
+
+{% block title %}Log In{% endblock %}
+
+{# TOOD: make this page not include the navigation block #}
+
+{% block content %}
+
     <div class="container">
       <br><br>
       <div class="span4">
@@ -17,5 +17,5 @@
         </form>
       </div>
     </div>
-  </body>
-</html>
+
+{% endblock %}
