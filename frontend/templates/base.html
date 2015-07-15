@@ -28,6 +28,25 @@
 		<div class="row">
 			{% block navbar %}
 				<ul class="nav nav-pills navbar-right">
+
+	                {# If the current admin is authorized to view more than one study, give them a drop-down menu to switch studies #}
+                    {% if allowed_studies and (allowed_studies|count > 1) %}
+			        <li class="dropdown" role="presentation">
+			            <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+			              View another study
+			            <span class="caret"></span>
+			            </a>
+			            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+			            {% for study in allowed_studies %}
+			                <li><a href="/view_study/{{ study._id }}">{{ study.name }}</a></li>
+			            {% endfor %}
+			            </ul>
+			        </li>
+			        {# If the current admin is authorized to view only one study, give them a "Home" button to view that study #}
+			        {% else %}
+			        	<li role="presentation"><a href="/choose_study">Home</a></li>
+			        {% endif %}
+
 	        		<li role="presentation"><a href="/reset_admin_password_form">Change password</a></li>
 	      			<li role="presentation"><a href="/logout">Log out</a></li>
 	    		</ul>

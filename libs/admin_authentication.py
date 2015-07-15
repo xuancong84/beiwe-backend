@@ -89,6 +89,13 @@ def authenticate_admin_study_access(some_function):
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
+def get_admins_allowed_studies():
+    """ Return a list of studies which the currently logged-in admin is autho-
+    rized to view and edit """
+    admin = Admin(session['admin_username'])
+    return Studies(admins=admin._id)
+
+
 ################################################################################
 ########################## System Administrator ################################
 ################################################################################

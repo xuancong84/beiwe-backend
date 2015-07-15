@@ -4,11 +4,11 @@
 
 {% block content %}
     {# If this admin is authorized to view studies, list the studies #}
-    {% if authorized_studies %}
+    {% if allowed_studies %}
         <h4>You are authorized to view and edit multiple studies.  Please choose one:</h4>
         <br>
         <div class="list-group">
-            {% for study in authorized_studies %}
+            {% for study in allowed_studies %}
                 <h4><a href="/view_study/{{ study._id }}" class="list-group-item">{{ study.name }}</a></h4>
             {% endfor %}
         </div>

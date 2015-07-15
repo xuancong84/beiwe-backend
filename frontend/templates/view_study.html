@@ -11,21 +11,6 @@
         <div class="row">
           <h2>{{ study_name }}</h2>
 
-      {# If the current admin is authorized to view more than one study, give them a drop-down menu to switch studies #}
-      {% if authorized_studies|count > 1 %}
-        <div class="dropdown">
-          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-              View another study
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            {% for study in authorized_studies %}
-              <li><a href="/view_study/{{ study._id }}">{{ study.name }}</a></li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
         </div>
       </div>
 
