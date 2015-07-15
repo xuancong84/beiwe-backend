@@ -71,8 +71,6 @@ def reset_device():
     return "that patient id does not exist"
 
 
-""""TODO: Alvin/Josh. redirect any url in html or javascript that points at 
-/create_new_patient to point at create_new_patient/*study id* """
 @admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])
 @authenticate_admin_study_access
 def create_new_patient(study_id=None):
@@ -81,7 +79,7 @@ def create_new_patient(study_id=None):
     to, returns a string containing password and patient id. """
     patient_id, password = User.create()
     Study(ObjectId(study_id)).add_participant(patient_id)
-    s3_upload(patient_id, "")
+    s3_upload(patient_id, "", study_id)
     create_client_key_pair(patient_id)
     return "patient_id: " + patient_id + "\npassword: " + password
 

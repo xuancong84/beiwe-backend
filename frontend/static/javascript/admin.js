@@ -8,11 +8,11 @@ function logout() {
     window.location.href="/logout";
 }
 
-function create_new_patient() {
-    $.post('/create_new_patient', function(response) {
+function create_new_patient(study_id) {
+    $.post('/create_new_patient/' + study_id, function(response) {
         alert("Created a new patient!\n" + response);
     });
-    // TODO: reload page
+    // TODO: reload page; try using location.reload() somewhere
 }
 
 function reset_device(patient_id) {
