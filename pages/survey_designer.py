@@ -3,7 +3,7 @@ from flask import abort, Blueprint, render_template
 
 from db.study_models import Survey
 from libs.admin_authentication import authenticate_admin_study_access,\
-    get_admins_allowed_studies
+    get_admins_allowed_studies, admin_is_system_admin
 
 survey_designer = Blueprint('survey_designer', __name__)
 
@@ -17,4 +17,5 @@ def render_edit_survey(survey_id=None):
     if not survey:
         return abort(404)
     return render_template('edit_survey.html', survey=survey,
-                           allowed_studies=get_admins_allowed_studies())
+                           allowed_studies=get_admins_allowed_studies(),
+                           system_admin=admin_is_system_admin())

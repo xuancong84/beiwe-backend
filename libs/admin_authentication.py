@@ -95,6 +95,11 @@ def get_admins_allowed_studies():
     admin = Admin(session['admin_username'])
     return Studies(admins=admin._id)
 
+def admin_is_system_admin():
+    # TODO: Josh, find a more efficient way of checking this and "allowed_studies" than passing it to every render_template
+    admin = Admin(session['admin_username'])
+    return admin.system_admin
+
 
 ################################################################################
 ########################## System Administrator ################################

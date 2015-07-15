@@ -47,6 +47,11 @@
 			        	<li role="presentation"><a href="/choose_study">Home</a></li>
 			        {% endif %}
 
+			        {# Give the System Admin an extra link here to manage researchers #}
+			        {% if system_admin %}
+			        	<li role="presentation"><a href="/manage_admins">Manage Researchers</a></li>
+			        {% endif %}
+
 	        		<li role="presentation"><a href="/reset_admin_password_form">Change password</a></li>
 	      			<li role="presentation"><a href="/logout">Log out</a></li>
 	    		</ul>

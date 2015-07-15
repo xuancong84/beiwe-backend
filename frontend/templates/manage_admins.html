@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Choose Study{% endblock %}
+
+{% block content %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Authorized Studies</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in admins %}
+            <tr>
+                <td><b>{{ admin[0] }}</b></td>
+                <td>
+                    {% if admin[1]|length == 0 %}
+                        <i>This user is not authorized to view/edit any studies</i>
+                    {% else %}
+                        {% for study_name in admin[1] %}
+                            {{ study_name }} &nbsp; &nbsp;
+                        {% endfor %}
+                    {% endif %}
+                </td>
+                <td><a href="#">edit user</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
