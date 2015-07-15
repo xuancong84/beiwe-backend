@@ -1,9 +1,13 @@
 
 Make a new s3 bucket for the beiwe2, make new access credentials for myself and josh and the server.
+add survey notification to the things that can be set remotely.
 
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
+
+ensure that json is parsed only once whenever it is needed, so that if surveys are updated the currently running code does not suddenly fail.
+
 utility: modify the authenticate_study_access to transform the study or survey id into an ObjectId
 
 app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
