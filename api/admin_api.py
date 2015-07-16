@@ -66,7 +66,7 @@ def delete_researcher(admin_id):
     if not admin:
         return abort(404)
     for study in Studies():
-        study.remove_admin(admin)
+        study.remove_admin(admin_id)
     admin.remove()
     return redirect('/manage_admins')
 

@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, render_template, request
 
 from db.study_models import Study, Studies
 from db.user_models import Admin, Admins
@@ -31,6 +31,23 @@ def edit_admin(admin_id):
                            all_studies=Studies(),
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
+
+
+@system_admin_pages.route('/create_new_researcher', methods=['GET', 'POST'])
+@authenticate_system_admin
+def create_new_researcher():
+    if request.method == 'GET':
+        return render_template('create_new_researcher.html',
+                               allowed_studies=get_admins_allowed_studies(),
+                               system_admin=admin_is_system_admin())
+    admin_id = request.form.get('admin_id')
+    password = request.form.get('password')
+    if Admins(_id=admin_id):
+        #TODO: Josh, flash() a warning
+        return redirect('/manage_admins')
+    else:
+        admin = Admin.create(admin_id, password)
+        return redirect('/edit_admin/' + admin._id)
 
 
 """########################### Study Pages ##################################"""

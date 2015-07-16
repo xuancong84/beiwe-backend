@@ -48,7 +48,11 @@
 		<br><br><br>
 
 		<div class="row">
-			<a href="/delete_researcher/{{ admin._id }}" class="btn btn-danger" onclick="confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')">Delete {{ admin._id }}</a>
+			<a href="/manage_admins" class="btn btn-success">Back to all researchers</a>
+
+			{% if not admin.system_admin %}
+				<a href="/delete_researcher/{{ admin._id }}" class="btn btn-danger pull-right" onclick="confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')">Delete {{ admin._id }}</a>
+			{% endif %}
 		</div>
 	</div>
 

@@ -4,31 +4,45 @@
 
 {% block content %}
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Authorized Studies</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for admin in admins %}
-            <tr>
-                <td><b>{{ admin[0] }}</b></td>
-                <td>
-                    {% if admin[1]|length == 0 %}
-                        <i>This user is not authorized to view/edit any studies</i>
-                    {% else %}
-                        {% for study_name in admin[1] %}
-                            {{ study_name }} &nbsp; &nbsp;
-                        {% endfor %}
-                    {% endif %}
-                </td>
-                <td><a href="/edit_admin/{{ admin[0] }}">edit researcher</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="row">
+        <h3>All Researchers</h3>
+    </div>
+
+    <br>
+
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Authorized Studies</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in admins %}
+                <tr>
+                    <td><b>{{ admin[0] }}</b></td>
+                    <td>
+                        {% if admin[1]|length == 0 %}
+                            <i>This user is not authorized to view/edit any studies</i>
+                        {% else %}
+                            {% for study_name in admin[1] %}
+                                {{ study_name }} &nbsp; &nbsp;
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td><a href="/edit_admin/{{ admin[0] }}">edit researcher</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br><br>
+
+    <div class="row">
+        <a href="/create_new_researcher" class="btn btn-success">Add new researcher</a>
+    </div>
 
 {% endblock %}

@@ -74,7 +74,6 @@ implement completely new day-of-week and time(s) picker.
 --this could be a good thing for Alvin to work on--
 we need to create the following functionality for admins:
     system_admin: change password of other user
-    create new admin
     create new study
         page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
         Error displays on bad input for a new survey
