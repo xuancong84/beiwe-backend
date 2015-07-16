@@ -2,7 +2,7 @@ from bson import ObjectId
 from flask import Blueprint, render_template
 
 from db.study_models import Study, Studies
-from db.user_models import Admins
+from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin
 
@@ -20,6 +20,16 @@ def manage_admins():
     return render_template('manage_admins.html', admins=admins,
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
+
+
+@system_admin_pages.route('/edit_admin/<string:admin_id>', methods=['GET','POST'])
+@authenticate_system_admin
+def edit_admin(admin_id):
+    admin = Admin(admin_id)
+    allowed_studies = Studies(admins=admin._id)
+    return render_template('edit_admin.html', admin=admin,
+                           allowed_studies=allowed_studies,
+                           all_studies=Studies())
 
 
 """########################### Study Pages ##################################"""

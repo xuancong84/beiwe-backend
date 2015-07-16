@@ -46,8 +46,9 @@ class Study( DatabaseObject ):
     
     def add_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """
-        self["admins"].append(admin_id)
-        self.save()
+        if not (admin_id in self["admins"]):
+            self["admins"].append(admin_id)
+            self.save()
     
     def remove_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """

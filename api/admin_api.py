@@ -1,13 +1,10 @@
-from flask import redirect, request
+from flask import Blueprint, redirect, render_template, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_admin_login, authenticate_system_admin
-from flask.blueprints import Blueprint
-from db.user_models import User
+from db.user_models import User, Admin
 from db.study_models import Study, InvalidEncryptionKeyError, StudyAlreadyExistsError
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
-from flask.helpers import send_file
-from flask.templating import render_template
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
 from config.constants import CHECKBOX_TOGGLES
 
@@ -41,6 +38,16 @@ def submit_device_settings(study_id=None):
     settings.update(**params)
     #TODO: Alvin.  make this do something more user friendly than reload the page
     return redirect("/edit_study_device_settings/" + str(study._id) )
+
+
+@admin_api.route('/add_researcher_to_study', methods=['GET', 'POST'])
+@authenticate_system_admin
+def add_researcher_to_study():
+    # TODO: Josh, handle errors in parameters, in studies not existing, etc.
+    admin = Admin(request.args.get('admin_id'))
+    study = Study(ObjectId(request.args.get('study_id')))
+    study.add_admin(admin._id)
+    return redirect('/edit_admin/' + admin._id)
 
 
 """########################## User Administration ###########################"""

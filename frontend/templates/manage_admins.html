@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Choose Study{% endblock %}
+{% block title %}Manage Researchers{% endblock %}
 
 {% block content %}
 
@@ -25,7 +25,7 @@
                         {% endfor %}
                     {% endif %}
                 </td>
-                <td><a href="#">edit user</a></td>
+                <td><a href="/edit_admin/{{ admin[0] }}">edit researcher</a></td>
             </tr>
             {% endfor %}
         </tbody>

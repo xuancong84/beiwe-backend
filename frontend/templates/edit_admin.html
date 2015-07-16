@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Researcher {{ admin._id }}{% endblock %}
+
+{% block content %}
+
+	<h3>Researcher "{{ admin._id }}"</h3>
+
+	<br>
+
+	<div class="col-md-6">
+
+		<h4>Authorized studies:</h4>
+
+		<div class="list-group">
+			{% for study in allowed_studies %}
+				<div class="list-group-item">
+					<b>{{ study.name }}</b>
+					<a href="#" class="pull-right">remove authorization</a>
+				</div>
+			{% endfor %}
+		</div>
+
+		<br>
+
+		<h4>Authorize this researcher on an additional study:</h4>
+
+		<form action="/add_researcher_to_study">
+			<select class="form-control" name="study_id">
+				{% for study in all_studies %}
+				<option value="{{ study._id }}">{{ study.name }}</option>
+				{% endfor %}
+			</select>
+
+			<input type="hidden" name="admin_id" value="{{ admin._id }}">
+
+			<input type="submit" class="btn btn-info" value="Add researcher to study">
+		</form>
+
+	</div>
+
+{% endblock %}
