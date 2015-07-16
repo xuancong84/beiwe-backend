@@ -43,11 +43,14 @@ def submit_device_settings(study_id=None):
 @admin_api.route('/add_researcher_to_study', methods=['GET', 'POST'])
 @authenticate_system_admin
 def add_researcher_to_study():
-    # TODO: Josh, handle errors in parameters, in studies not existing, etc.
     admin = Admin(request.args.get('admin_id'))
     study = Study(ObjectId(request.args.get('study_id')))
-    study.add_admin(admin._id)
-    return redirect('/edit_admin/' + admin._id)
+    if (admin and study):
+        study.add_admin(admin._id)
+        return redirect('/edit_admin/' + admin._id)
+    else:
+        # TODO: Josh, flash a warning here saying "Admin or Study didn't exist"
+        return redirect('/manage_admins')
 
 
 """########################## User Administration ###########################"""

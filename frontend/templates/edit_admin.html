@@ -26,15 +26,20 @@
 		<h4>Authorize this researcher on an additional study:</h4>
 
 		<form action="/add_researcher_to_study">
-			<select class="form-control" name="study_id">
-				{% for study in all_studies %}
-				<option value="{{ study._id }}">{{ study.name }}</option>
-				{% endfor %}
-			</select>
 
-			<input type="hidden" name="admin_id" value="{{ admin._id }}">
+			<div class="col-md-8">
+				<select class="form-control" name="study_id">
+					{% for study in all_studies %}
+					<option value="{{ study._id }}">{{ study.name }}</option>
+					{% endfor %}
+				</select>
+				<input type="hidden" name="admin_id" value="{{ admin._id }}">
+			</div>
 
-			<input type="submit" class="btn btn-info" value="Add researcher to study">
+			<div class="col-md-4">
+				<input type="submit" class="btn btn-info" value="Add researcher to study">
+			</div>
+
 		</form>
 
 	</div>
