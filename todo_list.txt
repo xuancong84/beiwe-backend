@@ -71,12 +71,10 @@ Customizable wording, customizable from the admin panel at the time of study cre
 
 implement completely new day-of-week and time(s) picker.
 
---this could be a good thing for Alvin to work on--
-we need to create the following functionality for admins:
-    system_admin: change password of other user
-    create new study
-        page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
-        Error displays on bad input for a new survey
+system_admin: change password of other user
+create new study
+    page must include a paraphrase of "enter encryption key here for the study, all user data stored by server will include require this password, recommend you use a totally random source like random.org"
+    Error displays on bad input for a new survey
 
 See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
