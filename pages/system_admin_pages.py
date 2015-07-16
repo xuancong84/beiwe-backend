@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request
 
 from db.study_models import Study, Studies
 from db.user_models import Admin, Admins
@@ -43,8 +43,8 @@ def create_new_researcher():
     admin_id = request.form.get('admin_id')
     password = request.form.get('password')
     if Admins(_id=admin_id):
-        #TODO: Josh, flash() a warning
-        return redirect('/manage_admins')
+        flash("There is already a researcher with username " + admin_id, 'danger')
+        return redirect('/create_new_researcher')
     else:
         admin = Admin.create(admin_id, password)
         return redirect('/edit_admin/' + admin._id)
