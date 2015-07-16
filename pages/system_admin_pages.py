@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Blueprint, flash, redirect, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request, session
 
 from db.study_models import Study, Studies
 from db.user_models import Admin, Admins
@@ -26,10 +26,12 @@ def manage_admins():
 @authenticate_system_admin
 def edit_admin(admin_id):
     admin = Admin(admin_id)
+    admin_is_current_user = (admin._id == session['admin_username'])
     return render_template('edit_admin.html', admin=admin,
                            current_studies=Studies(admins=admin._id),
                            all_studies=Studies(),
                            allowed_studies=get_admins_allowed_studies(),
+                           admin_is_current_user=admin_is_current_user,
                            system_admin=admin_is_system_admin())
 
 

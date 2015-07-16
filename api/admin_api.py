@@ -71,6 +71,15 @@ def delete_researcher(admin_id):
     return redirect('/manage_admins')
 
 
+@admin_api.route('/set_researcher_password', methods=['POST'])
+@authenticate_system_admin
+def set_researcher_password():
+    admin = Admin(request.form.get('admin_id'))
+    new_password = request.form.get('password')
+    admin.set_password(new_password)
+    return redirect('/edit_admin/' + admin._id)
+
+
 """########################## User Administration ###########################"""
 
 @admin_api.route('/reset_patient_password', methods=["POST"])
