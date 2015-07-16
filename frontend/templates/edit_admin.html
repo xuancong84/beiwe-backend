@@ -9,43 +9,47 @@
 	<br>
 
 	<div class="col-md-6">
+		<div class="row">
+			<h4>Authorized studies:</h4>
+			<div class="list-group">
+				{% if not current_studies %}
+					<p><i>This researcher is not authorized on any studies.</i></p>
+				{% endif %}
 
-		<h4>Authorized studies:</h4>
-
-		<div class="list-group">
-			{% if not current_studies %}
-				<p><i>This researcher is not authorized on any studies.</i></p>
-			{% endif %}
-
-			{% for study in current_studies %}
-				<div class="list-group-item">
-					<b>{{ study.name }}</b>
-					<a href="/remove_researcher_from_study?admin_id={{ admin._id }}&study_id={{ study._id }}" class="pull-right">remove authorization</a>
-				</div>
-			{% endfor %}
+				{% for study in current_studies %}
+					<div class="list-group-item">
+						<b>{{ study.name }}</b>
+						<a href="/remove_researcher_from_study?admin_id={{ admin._id }}&study_id={{ study._id }}" class="pull-right">remove authorization</a>
+					</div>
+				{% endfor %}
+			</div>
 		</div>
 
 		<br>
 
-		<h4>Authorize this researcher on an additional study:</h4>
+		<div class="row">
+			<h4>Authorize this researcher on an additional study:</h4>
+			<form action="/add_researcher_to_study">
+				<div class="col-md-8">
+					<select class="form-control" name="study_id">
+						{% for study in all_studies %}
+						<option value="{{ study._id }}">{{ study.name }}</option>
+						{% endfor %}
+					</select>
+					<input type="hidden" name="admin_id" value="{{ admin._id }}">
+				</div>
 
-		<form action="/add_researcher_to_study">
+				<div class="col-md-4">
+					<input type="submit" class="btn btn-info" value="Add researcher to study">
+				</div>
+			</form>
+		</div>
 
-			<div class="col-md-8">
-				<select class="form-control" name="study_id">
-					{% for study in all_studies %}
-					<option value="{{ study._id }}">{{ study.name }}</option>
-					{% endfor %}
-				</select>
-				<input type="hidden" name="admin_id" value="{{ admin._id }}">
-			</div>
+		<br><br><br>
 
-			<div class="col-md-4">
-				<input type="submit" class="btn btn-info" value="Add researcher to study">
-			</div>
-
-		</form>
-
+		<div class="row">
+			<a href="/delete_researcher/{{ admin._id }}" class="btn btn-danger" onclick="confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')">Delete {{ admin._id }}</a>
+		</div>
 	</div>
 
 {% endblock %}
