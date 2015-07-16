@@ -45,12 +45,17 @@ def submit_device_settings(study_id=None):
 def add_researcher_to_study():
     admin = Admin(request.args.get('admin_id'))
     study = Study(ObjectId(request.args.get('study_id')))
-    if (admin and study):
-        study.add_admin(admin._id)
-        return redirect('/edit_admin/' + admin._id)
-    else:
-        # TODO: Josh, flash a warning here saying "Admin or Study didn't exist"
-        return redirect('/manage_admins')
+    study.add_admin(admin._id)
+    return redirect('/edit_admin/' + admin._id)
+
+
+@admin_api.route('/remove_researcher_from_study', methods=['GET', 'POST'])
+@authenticate_system_admin
+def remove_researcher_from_study():
+    admin = Admin(request.args.get('admin_id'))
+    study = Study(ObjectId(request.args.get('study_id')))
+    study.remove_admin(admin._id)
+    return redirect('/edit_admin/' + admin._id)
 
 
 """########################## User Administration ###########################"""

@@ -52,7 +52,7 @@ class Study( DatabaseObject ):
     
     def remove_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """
-        if admin_id not in self['participants']:
+        if admin_id not in self['admins']:
             raise UserDoesNotExistError
         self["admins"].remove(admin_id)
         self.save()

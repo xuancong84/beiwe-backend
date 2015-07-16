@@ -26,10 +26,11 @@ def manage_admins():
 @authenticate_system_admin
 def edit_admin(admin_id):
     admin = Admin(admin_id)
-    allowed_studies = Studies(admins=admin._id)
     return render_template('edit_admin.html', admin=admin,
-                           allowed_studies=allowed_studies,
-                           all_studies=Studies())
+                           current_studies=Studies(admins=admin._id),
+                           all_studies=Studies(),
+                           allowed_studies=get_admins_allowed_studies(),
+                           system_admin=admin_is_system_admin())
 
 
 """########################### Study Pages ##################################"""

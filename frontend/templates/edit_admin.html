@@ -13,10 +13,14 @@
 		<h4>Authorized studies:</h4>
 
 		<div class="list-group">
-			{% for study in allowed_studies %}
+			{% if not current_studies %}
+				<p><i>This researcher is not authorized on any studies.</i></p>
+			{% endif %}
+
+			{% for study in current_studies %}
 				<div class="list-group-item">
 					<b>{{ study.name }}</b>
-					<a href="#" class="pull-right">remove authorization</a>
+					<a href="/remove_researcher_from_study?admin_id={{ admin._id }}&study_id={{ study._id }}" class="pull-right">remove authorization</a>
 				</div>
 			{% endfor %}
 		</div>
