@@ -2,6 +2,7 @@ import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages
 from api import mobile_api, survey_api, admin_api
+from libs.admin_authentication import is_logged_in
 from libs.logging import log_error
 from libs.security import set_secret_key
 
@@ -34,7 +35,7 @@ def strip_dot_html(page):
 # (note, function name is irrelevant, it is the
 @app.errorhandler(404)
 def e404(e):
-    return render_template("404.html")
+    return render_template("404.html",is_logged_in=is_logged_in())
 
 
 # Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
@@ -46,6 +47,8 @@ def e500_text(e):
     except Exception as e:
         log_error(e)
     return abort(500)
+# TODO: Eli, determine if we should load the 500 Error page instead of showing the user a stack trace
+#    return render_template("500.html",is_logged_in=is_logged_in())
 
 
 def test_passwords():
