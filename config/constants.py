@@ -2,7 +2,7 @@
 # Don't change values if you don't know what they do.
 
 # the name of the s3 bucket that will be used to store config
-S3_BUCKET = "zagaran-beiwe"
+S3_BUCKET = "edit_me"
 
 #the length of the public/private keys used in encrypting user config on their device
 ASYMMETRIC_KEY_LENGTH = 2048
