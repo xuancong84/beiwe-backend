@@ -58,6 +58,24 @@ see the create_new_study function in admin_api for details.
 Page should include a paraphrase of "enter encryption key here for the study, all
 user data stored by server will require this password, strongly recommend you use a
 true random source, for instance random.org"""
+
+@system_admin_pages.route('/manage_studies', methods=['GET'])
+@authenticate_system_admin
+def manage_studies():
+    return render_template('manage_studies.html', studies=Studies(),
+                           allowed_studies=get_admins_allowed_studies(),
+                           system_admin=admin_is_system_admin())
+
+
+@system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
+@authenticate_system_admin
+def edit_study(study_id):
+    return render_template('edit_study.html', study=Study(ObjectId(study_id)),
+                           all_admins=Admins(),
+                           allowed_studies=get_admins_allowed_studies(),
+                           system_admin=admin_is_system_admin())
+
+
 @system_admin_pages.route('/new_study', methods=["GET"])
 @authenticate_system_admin
 def render_make_new_study():

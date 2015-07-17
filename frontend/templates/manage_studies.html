@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Studies{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h3>All Studies</h3>
+    </div>
+
+    <br>
+
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Study Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for study in studies %}
+                <tr>
+                    <td><b>{{ study.name }}</b></td>
+                    <td><a href="/edit_study/{{ study._id }}">edit study</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br><br>
+
+    <div class="row">
+        <a href="/create_new_researcher" class="btn btn-success">Create new study</a>
+    </div>
+
+{% endblock %}

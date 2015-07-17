@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Study {{ study.name }}{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h3>{{ study.name }}</h3>
+    </div>
+
+    <br>
+
+    <div class="col-md-6">
+        <div class="row">
+            <h4>Authorized researchers on this study</h4>
+            <div class="list-group">
+                {% if not study.admins %}
+                    <p><i>No researchers are authorized to view or edit this study.</i></p>
+                {% endif %}
+
+                {% for admin in study.admins %}
+                    <div class="list-group-item">
+                        <b>{{ admin }}</b>
+                        <a href="#" onclick="remove_admin_from_study('{{ admin }}', '{{ study._id }}');return false;" class="pull-right">remove authorization</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row">
+            <h5>Authorize an additional researcher on this study:</h5>
+
+            <div class="col-md-8">
+                <select class="form-control" id="admin_id">
+                    {% for admin in all_admins %}
+                    <option value="{{ admin._id }}">{{ admin._id }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" id="study_id" value="{{ study._id }}">
+            </div>
+
+            <div class="col-md-4">
+                <button onclick="add_admin_to_study()" class="btn btn-info">Add researcher to study</button>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

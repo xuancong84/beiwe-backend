@@ -41,22 +41,22 @@ def submit_device_settings(study_id=None):
     return redirect("/edit_study_device_settings/" + str(study._id) )
 
 
-@admin_api.route('/add_researcher_to_study', methods=['GET', 'POST'])
+@admin_api.route('/add_admin_to_study', methods=['POST'])
 @authenticate_system_admin
-def add_researcher_to_study():
-    admin = Admin(request.args.get('admin_id'))
-    study = Study(ObjectId(request.args.get('study_id')))
+def add_admin_to_study():
+    admin = Admin(request.form.get('admin_id'))
+    study = Study(ObjectId(request.form.get('study_id')))
     study.add_admin(admin._id)
-    return redirect('/edit_admin/' + admin._id)
+    return '200'
 
 
-@admin_api.route('/remove_researcher_from_study', methods=['GET', 'POST'])
+@admin_api.route('/remove_admin_from_study', methods=['POST'])
 @authenticate_system_admin
-def remove_researcher_from_study():
-    admin = Admin(request.args.get('admin_id'))
-    study = Study(ObjectId(request.args.get('study_id')))
+def remove_admin_from_study():
+    admin = Admin(request.form.get('admin_id'))
+    study = Study(ObjectId(request.form.get('study_id')))
     study.remove_admin(admin._id)
-    return redirect('/edit_admin/' + admin._id)
+    return '200'
 
 
 @admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
