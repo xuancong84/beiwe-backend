@@ -51,23 +51,5 @@ def e500_text(e):
 #    return render_template("500.html",is_logged_in=is_logged_in())
 
 
-def test_passwords():
-    try:
-        from config.passwords import PASSWORD
-    except ImportError as e:
-        if e.message != "No module named passwords":
-            log_error(e)
-            raise
-        else:
-            print "\nYou have not provided a passwords.py file.\n"
-            exit()
-    
-    if len( PASSWORD ) != 32:
-        print "Your key is not 32 characters. The key must be exactly 32 charcters long."
-        exit()
-
-
-test_passwords()
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
