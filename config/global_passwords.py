@@ -15,8 +15,8 @@
 # These are the credentials used to access the MongoDB that contains website
 # usernames and passwords.  If you are configuring your server see the comment
 # at the end of this document.
-MONGO_USERNAME = "beiwe"
-MONGO_PASSWORD = "PhWY9uFaXScfU4uZeQXd"
+MONGO_USERNAME = "default"
+MONGO_PASSWORD = "default"
 
 # This is the secret key for the website, it is used in securing the website
 # and config stored for each user.
@@ -37,9 +37,9 @@ otherwise cd to /etc, edit mongodb.conf using superuser privilages.
 find the line #auth=true and remove the comment (the #)
 run: sudo service mongod restart
 
-in a python terminal:
+in a python terminal, enter:
 import mongolia
-mongolia.add_user( "beiwe", "PhWY9uFaXScfU4uZeQXd" )
-mongolia.authenticate_connection( "beiwe", "PhWY9uFaXScfU4uZeQXd" )
+mongolia.add_user( "username_in_quotes", "password_in_quotes" )
+mongolia.authenticate_connection( "username_in_quotes", "password_in_quotes" )
 exit()
 """

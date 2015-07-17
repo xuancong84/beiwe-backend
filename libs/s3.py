@@ -4,7 +4,7 @@ from boto.s3.key import Key
 from config.constants import S3_BUCKET
 from libs import encryption, logging
 
-from config.passwords import aws_secret_access_key, aws_access_key_id
+from config.global_passwords import aws_secret_access_key, aws_access_key_id
 
 CONN = connect_s3(aws_access_key_id=aws_access_key_id,
                   aws_secret_access_key=aws_secret_access_key)
