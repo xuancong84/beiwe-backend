@@ -1,10 +1,13 @@
 from bson import ObjectId
 from flask import Blueprint, flash, redirect, render_template, request, session
 
-from db.study_models import Study, Studies
+from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
+    StudyAlreadyExistsError
 from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin
+from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
+from config.constants import CHECKBOX_TOGGLES
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 
@@ -76,17 +79,33 @@ def edit_study(study_id):
                            system_admin=admin_is_system_admin())
 
 
-@system_admin_pages.route('/new_study', methods=["GET"])
+@system_admin_pages.route('/create_study', methods=['GET', 'POST'])
 @authenticate_system_admin
-def render_make_new_study():
-    return render_template("fill_me_in_:D")
+def create_study():
+    if request.method == 'GET':
+        return render_template('create_study.html')
+    name = request.form.get('name')
+    encryption_key = request.form.get('encryption_key')
+    try:
+        study = Study.create_default_study(name, encryption_key)
+        flash("Successfully created a new study.", 'success')
+        return redirect('/device_settings/' + str(study._id))
+    except (InvalidEncryptionKeyError, StudyAlreadyExistsError) as e:
+        flash(e.message, 'danger')
+        return redirect('/create_study')
 
 
-@system_admin_pages.route('/edit_study_device_settings/<string:study_id>', methods=["GET"])
+@system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
 @authenticate_system_admin
-def render_edit_study_device_settings(study_id=None):
+def device_settings(study_id=None):
+    if request.method == 'GET':
+        study = Study(ObjectId(study_id))
+        settings = study.get_study_device_settings()
+        return render_template("device_settings.html", settings=settings,
+                               study_id=study_id)
     study = Study(ObjectId(study_id))
     settings = study.get_study_device_settings()
-    return render_template("edit_device_settings.html",
-                           settings=settings,
-                           study_id=study_id)
+    params = combined_multi_dict_to_dict( request.values )
+    params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
+    settings.update(**params)
+    return redirect('/edit_study/' + str(study._id))

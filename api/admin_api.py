@@ -1,45 +1,15 @@
-from flask import abort, Blueprint, redirect, render_template, request, send_file
+from flask import abort, Blueprint, redirect, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_admin_login, authenticate_system_admin
 from db.user_models import User, Admin
-from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
-    StudyAlreadyExistsError
+from db.study_models import Study, Studies
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
-from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
-from config.constants import CHECKBOX_TOGGLES
 
 admin_api = Blueprint('admin_api', __name__)
 
 
 """######################### Study Administration ###########################"""
-
-@admin_api.route('/create_new_study', methods=["POST"])
-@authenticate_system_admin
-def create_new_study():
-    try:
-        study = Study.create_new_survey(request["name"], request["encryption_key"])
-    except InvalidEncryptionKeyError:
-        #TODO: Josh/Alvin.  create an error display/page for the following
-        return render_template("some error display for invalid encryption key")
-    except StudyAlreadyExistsError:
-        #TODO: Josh/Alvin.  create an error display/page for the following
-        return render_template("some error display for study of that name already exists")
-    return redirect("/edit_study_device_settings/" + str(study._id))
-
-
-@admin_api.route('/submit_device_settings/<string:study_id>', methods=["POST"])
-@authenticate_system_admin
-@authenticate_admin_study_access
-def submit_device_settings(study_id=None):
-    study = Study(ObjectId(study_id))
-    settings = study.get_study_device_settings()
-    params = combined_multi_dict_to_dict( request.values )
-    params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
-    settings.update(**params)
-    #TODO: Alvin.  make this do something more user friendly than reload the page
-    return redirect("/edit_study_device_settings/" + str(study._id) )
-
 
 @admin_api.route('/add_admin_to_study', methods=['POST'])
 @authenticate_system_admin

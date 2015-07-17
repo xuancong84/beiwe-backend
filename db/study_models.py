@@ -21,7 +21,7 @@ class Study( DatabaseObject ):
             raise StudyAlreadyExistsError("a study named %s already exists" % name)
         if len(encryption_key) != 32:
             error_text = "the encryption key must be 32 characters, you only " +\
-                         "inputted %d characters" % len(encryption_key)
+                         "entered %d characters" % len(encryption_key)
             raise InvalidEncryptionKeyError(error_text)
         device_settings = StudyDeviceSettings.create_default()
         study = { "name":name,
@@ -125,6 +125,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "upload_data_files_frequency_seconds": 3600,
                 "voice_recording_max_time_length_seconds": 300,
                 "wifi_log_frequency_seconds": 300
+                # TODO: Josh, add text strings that need customizing
             }
     @classmethod
     def create_default(cls):
