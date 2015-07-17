@@ -1,6 +1,6 @@
 import base64, hashlib, re
 
-from config.passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
+from config.global_passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
 from config.constants import ITERATIONS
 from os import urandom
 from pbkdf2 import PBKDF2
