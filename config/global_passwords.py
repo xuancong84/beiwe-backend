@@ -1,6 +1,4 @@
-# Create a "passwords.py" file, put it only on your production server right next
-# to this passwords.py.example file.  Add to it the passwords and usernames detailed
-# in this file.
+# To change passwords and credentials used by this code edit the variables in this document.
 
 # Store your passwords.  Do so somewhere that is secure, and in a way that will
 # be accessible to you in the future.
