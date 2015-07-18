@@ -60,31 +60,32 @@ def authenticate_admin_study_access(some_function):
         This decorator requires the specific keywords "survey_id" or "study_id"
         be provided as keywords to the function, and will error if one is not.
         The pattern is for a url with <string:survey/study_id> to pass in this
-        value. """
+        value.
+        A system admin is always able to access a study or survey. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         if not is_logged_in(): #check for regular login requirement
-            print 2
             return redirect("/")
         admin_name = session["admin_username"]
+        admin = Admin(admin_name)
         #check proper syntax usage.
         if "survey_id" not in kwargs and "study_id" not in kwargs:
             raise ArgumentMissingException()
         #We want the survey_id check to execute first if both args are supplied. 
         if "survey_id" in kwargs:
-            print 3
             survey_id = ObjectId(kwargs["survey_id"])
+            kwargs['survey_id'] = survey_id
             #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
             study = Studies(surveys=survey_id, admins=admin_name)
-            if not study: #if the admin is not authorized for this survey, fail.
-                print 'survey id invalid', survey_id
+            if not study and not admin.system_admin:
+                #if the admin is not authorized for this survey, fail.
                 return redirect("/")
         if "study_id" in kwargs:
-            print 4
             study_id = ObjectId(kwargs['study_id'])
+            kwargs['study_id'] = study_id
             study = Studies(_id=study_id, admins=admin_name)
-            if not study: #if the admin is not authorized for this study, fail.
-                print 'study id invalid', study_id
+            #if the admin is not authorized for this study, fail.
+            if not study and not admin.system_admin:
                 return redirect("/")
         return some_function(*args, **kwargs)
     return authenticate_and_call

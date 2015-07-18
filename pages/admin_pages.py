@@ -5,7 +5,6 @@ from libs.admin_authentication import authenticate_admin_login,\
     get_admins_allowed_studies, admin_is_system_admin
 from db.user_models import Users, Admin
 from db.study_models import Study
-from bson.objectid import ObjectId
 
 admin_pages = Blueprint('admin_pages', __name__)
 
@@ -24,9 +23,9 @@ def choose_study():
 
 
 @admin_pages.route('/view_study/<string:study_id>', methods=['GET'])
-@authenticate_admin_login
-def view_study(study_id):
-    study = Study(ObjectId(study_id))
+@authenticate_admin_study_access
+def view_study(study_id=None):
+    study = Study(study_id)
     # TODO: Josh, get patients just for this study, not ALL the patients
     patients = {user['_id']: patient_dict(user) for user in Users()}
     survey_ids = study.get_survey_ids_for_study()

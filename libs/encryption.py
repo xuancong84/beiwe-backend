@@ -50,7 +50,7 @@ def encrypt_for_server(input_string, study_id):
 
 def decrypt_server(input_string, study_id):
     """ Decrypts config encrypted by the encrypt_for_server function."""
-    encryption_key = Studies(_id=study_id)['encryption_key']
+    encryption_key = Study(study_id)['encryption_key']
     iv = input_string[:16]
     return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
 

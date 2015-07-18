@@ -1,11 +1,11 @@
-from bson import ObjectId
 from flask import Blueprint, flash, redirect, render_template, request, session
 
 from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
     StudyAlreadyExistsError
 from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
-    get_admins_allowed_studies, admin_is_system_admin
+    get_admins_allowed_studies, admin_is_system_admin,\
+    authenticate_admin_study_access
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
 from config.constants import CHECKBOX_TOGGLES
 
@@ -73,7 +73,7 @@ def manage_studies():
 @system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
 @authenticate_system_admin
 def edit_study(study_id):
-    return render_template('edit_study.html', study=Study(ObjectId(study_id)),
+    return render_template('edit_study.html', study=Study(study_id),
                            all_admins=Admins(),
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
@@ -96,14 +96,14 @@ def create_study():
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
+@authenticate_admin_study_access
 @authenticate_system_admin
 def device_settings(study_id=None):
+    study = Study(study_id)
     if request.method == 'GET':
-        study = Study(ObjectId(study_id))
         settings = study.get_study_device_settings()
         return render_template("device_settings.html", settings=settings,
-                               study_id=study_id)
-    study = Study(ObjectId(study_id))
+                               study_id=str(study_id) )
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)

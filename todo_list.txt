@@ -8,8 +8,6 @@ add survey notification to the things that can be set remotely.
 
 ensure that json is parsed only once whenever it is needed, so that if surveys are updated the currently running code does not suddenly fail.
 
-utility: modify the authenticate_study_access to transform the study or survey id into an ObjectId
-
 app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
 
 Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
