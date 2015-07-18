@@ -87,7 +87,7 @@ def create_new_patient(study_id=None):
     patient_id, password = User.create()
     Study(study_id).add_participant(patient_id)
     s3_upload(patient_id, "", study_id)
-    create_client_key_pair(patient_id)
+    create_client_key_pair(patient_id, study_id)
     return "patient_id: " + patient_id + "\npassword: " + password
 
 
