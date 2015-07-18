@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 from config.constants import ASYMMETRIC_KEY_LENGTH
 from libs.logging import log_error
 from security import decode_base64
-from db.study_models import Studies
+from db.study_models import Study
 
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
@@ -44,7 +44,7 @@ def encrypt_for_server(input_string, study_id):
     """ encrypts config using the ENCRYPTION_KEY, prepends the generated
         initialization vector.
         Use this function on an entire file (as a string)."""
-    encryption_key = Studies(_id=study_id)['encryption_key']
+    encryption_key = Study(study_id)['encryption_key']
     iv = urandom(16)
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
