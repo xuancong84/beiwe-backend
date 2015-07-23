@@ -6,6 +6,6 @@
 secure.py
 .project
 *.pem
-data/passwords.py
+data/global_passwords.py
 .mongodb
 .idea/
