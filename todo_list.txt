@@ -6,6 +6,8 @@ add survey notification to the things that can be set remotely.
 ####################### ARCHITECTURE #######################
 ############################################################
 
+bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
+
 ensure that json is parsed only once whenever it is needed, so that if surveys are updated the currently running code does not suddenly fail.
 
 app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
