@@ -115,6 +115,7 @@ def register_user():
     phone_number = request.values['phone_number']
     device_id = request.values['device_id']
     user = User(patient_id)
+    study_id = user['study_id']
 #     print "REGISTERING:", patient_id, phone_number, mac_address, device_id
     
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
@@ -138,11 +139,11 @@ def register_user():
     file_name = patient_id + '/identifiers_' + unix_time + ".csv"
     file_contents = ("patient_id, MAC, phone_number, device_id\n" +
                      patient_id+","+mac_address+","+phone_number+","+device_id )
-    s3_upload( file_name, file_contents, user['study_id'] )
+    s3_upload( file_name, file_contents, study_id )
     # set up device.
     user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
-    return get_client_public_key_string(patient_id), 200
+    return get_client_public_key_string(patient_id, study_id), 200
 
 
 ################################################################################
