@@ -25,10 +25,11 @@ def _get_bucket(name):
 #     key = bucket.new_key(key_name)
 #     key.set_contents_from_string(some_string)
 
-def s3_upload( key_name, some_string, study_id ):
+def s3_upload( key_name, data_string, study_id ):
     bucket = _get_bucket(S3_BUCKET)
-    key = bucket.new_key(key_name)
-    data = encryption.encrypt_for_server(some_string, study_id)
+    prefix = str(study_id + "/")
+    key = bucket.new_key(prefix + key_name)
+    data = encryption.encrypt_for_server(data_string, study_id)
     key.set_contents_from_string(data)
 
 # def s3_retrieve_raw( key_name ):
@@ -37,7 +38,8 @@ def s3_upload( key_name, some_string, study_id ):
 #     return key.read()
 
 def s3_retrieve(key_name, study_id):
-    key = Key(_get_bucket(S3_BUCKET), key_name)
+    prefix = str(study_id + "/")
+    key = Key(_get_bucket(S3_BUCKET), prefix + key_name)
     return encryption.decrypt_server( key.read(), study_id )
 
 
