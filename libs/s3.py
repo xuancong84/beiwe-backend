@@ -73,9 +73,9 @@ def create_client_key_pair(patient_id, study_id):
     s3_upload( "keys/" + patient_id + "_public", public, study_id )
 
 
-def get_client_public_key_string(patient_id):
+def get_client_public_key_string(patient_id, study_id):
     """Grabs a user's public key string from s3."""
-    key_string = s3_retrieve( "keys/" + patient_id +"_public" )
+    key_string = s3_retrieve( "keys/" + patient_id +"_public" , study_id)
     return encryption.prepare_X509_key_for_java( key_string )
 
 
