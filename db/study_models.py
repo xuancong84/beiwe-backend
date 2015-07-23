@@ -12,7 +12,6 @@ class Study( DatabaseObject ):
                  "super_admins":[],     #admins that can add admins.
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
-                 "participants": [],    #paticipants (user ids) in the study
                  "encryption_key": REQUIRED #the study's config encryption key. 
                 }
     @classmethod
@@ -31,19 +30,6 @@ class Study( DatabaseObject ):
         return Study.create(study, random_id=True)
         
     #Editors
-    def add_participant(self, user_id):
-        # TODO: Eli, make "study" a field on user; get rid of participants.
-        """ Note: participant ids (user ids) are strings, not ObjectIds. """
-        self["participants"].append(user_id)
-        self.save()
-    
-    def remove_participant(self, user_id):
-        """ Note: participant ids (user ids) are strings, not ObjectIds. """
-        if user_id not in self['participants']:
-            raise UserDoesNotExistError
-        self["participants"].remove(user_id)
-        self.save()
-    
     def add_admin(self, admin_id):
         """ Note: admin ids are strings, not ObjectIds. """
         if not (admin_id in self["admins"]):
@@ -72,15 +58,6 @@ class Study( DatabaseObject ):
     @classmethod
     def get_studies_for_admin(cls, admin_id):
         return [Studies(_id=study_id) for study_id in Studies(admins=admin_id)]
-    
-    @classmethod
-    def get_study_for_user(cls, user_id):
-        #TODO: Eli. Test this.
-        return Studies(participants=ObjectId(user_id))
-    
-    #Accessors, instance methods
-    def get_participants_in_study(self):
-        return [ Users(ObjectId(user_id)) for user_id in self.participants ]
     
     def get_surveys_for_study(self):
         """ Returns a dict of survey_id strings paired with their survey data. """

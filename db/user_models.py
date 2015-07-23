@@ -23,17 +23,20 @@ class User( DatabaseObject ):
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
     # We are using the patient's assigned ID as a unique Id.
-    DEFAULTS = { "password":REQUIRED, 'device_id':None, 'salt':REQUIRED }
+    DEFAULTS = { "password":REQUIRED,
+                'device_id':None,
+                'salt':REQUIRED,
+                'study_id': REQUIRED }
     
     @classmethod
-    def create(cls):
+    def create(cls, study_id):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
         if User(patient_id): return User.create()
         
         password, password_hash, salt = generate_user_password_and_salt()
-        new_client = {ID_KEY: patient_id, "password":password_hash,
-                      'device_id':None, "salt":salt }
+        new_client = { ID_KEY: patient_id, "password":password_hash,
+                      'device_id':None, "salt":salt, 'study_id':study_id }
         super(User, cls).create(new_client)
         return patient_id, password
     

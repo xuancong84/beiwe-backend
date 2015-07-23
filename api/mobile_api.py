@@ -5,12 +5,12 @@ from flask import Blueprint, request, abort, render_template, json
 from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG,
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from db.user_models import User
+from db.study_models import Study
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration,\
     authenticate_user_and_get_study
 from libs.logging import log_error
-from db.study_models import Studies
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -26,7 +26,8 @@ mobile_api = Blueprint('mobile_api', __name__)
 def download_surveys():
     # TODO: Eli. handle survey deletion in the app correctly.
     patient_id = request.values['patient_id']
-    study = Studies(participants=patient_id)[0]
+    user = User(patient_id)
+    study = Study(user.study_id)
     surveys = study.get_surveys_for_study()
     #TODO: Eli/Josh/Alvin there is no way this is valid, there is always something wrong with json dumps.
     return json.dumps(surveys)
@@ -132,20 +133,16 @@ def register_user():
     # and return 500 codes
     # the final return will be the encryption key associated with this user.
     
-    upload_device_ids(patient_id, mac_address, phone_number, device_id)
-    user.set_device( device_id )
-    User(patient_id).set_password(request.values['new_password'])
-    return get_client_public_key_string(patient_id), 200
-
-
-# do not incorporate into register_user function.
-def upload_device_ids( patient_id, mac_address, phone_number, device_id ):
-    """ Uploads the user's various identifiers. """
+    #Upload the user's various identifiers.
     unix_time = str(calendar.timegm(time.gmtime() ) )
     file_name = patient_id + '/identifiers_' + unix_time + ".csv"
     file_contents = ("patient_id, MAC, phone_number, device_id\n" +
                      patient_id+","+mac_address+","+phone_number+","+device_id )
-    s3_upload( file_name, file_contents )
+    s3_upload( file_name, file_contents, user['study_id'] )
+    # set up device.
+    user.set_device( device_id )
+    User(patient_id).set_password(request.values['new_password'])
+    return get_client_public_key_string(patient_id), 200
 
 
 ################################################################################

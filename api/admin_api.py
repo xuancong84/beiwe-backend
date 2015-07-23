@@ -84,8 +84,7 @@ def create_new_patient(study_id=None):
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, adds user to the study they are supposed to be attached
     to, returns a string containing password and patient id. """
-    patient_id, password = User.create()
-    Study(study_id).add_participant(patient_id)
+    patient_id, password = User.create(study_id)
     s3_upload(patient_id, "", study_id)
     create_client_key_pair(patient_id, study_id)
     return "patient_id: " + patient_id + "\npassword: " + password
