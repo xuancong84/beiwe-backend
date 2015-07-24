@@ -79,13 +79,13 @@ def get_client_public_key_string(patient_id, study_id):
     return encryption.prepare_X509_key_for_java( key_string )
 
 
-def get_client_public_key(patient_id):
+def get_client_public_key(patient_id, study_id):
     """Grabs a user's public key file from s3."""
-    key = s3_retrieve( "keys/" + patient_id +"_public" )
+    key = s3_retrieve( "keys/" + patient_id +"_public", study_id )
     return encryption.import_RSA_key( key )
 
 
-def get_client_private_key(patient_id):
+def get_client_private_key(patient_id, study_id):
     """Grabs a user's private key file from s3."""
-    key = s3_retrieve( "keys/" + patient_id +"_private" )
+    key = s3_retrieve( "keys/" + patient_id +"_private", study_id)
     return encryption.import_RSA_key( key )

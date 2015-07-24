@@ -102,7 +102,6 @@ def decrypt_device_file(patient_id, data, private_key):
             raise
     return return_data
 
-# provide a key by running get_client_private_key(patient_id)
 def decrypt_device_line(patient_id, key, data):
     """ config is expected to be 3 colon separated values.
         value 1 is the symmetric key, encrypted with the patient's public key.

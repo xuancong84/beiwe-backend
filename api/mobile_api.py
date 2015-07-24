@@ -53,10 +53,11 @@ def upload():
     """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, Survey Response, and debugging files to s3"""
     patient_id = request.values['patient_id']
+    user = User(patient_id)
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
-    client_private_key = get_client_private_key(patient_id)
+    client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
     except Exception as e:
