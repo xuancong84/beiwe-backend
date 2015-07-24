@@ -12,8 +12,6 @@ def authenticate_user(some_function):
     def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_post( *args, **kwargs )
         if is_this_user_valid:
-            study = Study.get_studies_for_admin(request.values['patient_id'])
-            kwargs['study_id'] = study
             return some_function(*args, **kwargs)
         return abort(403)
     return authenticate_and_call
