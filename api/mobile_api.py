@@ -74,7 +74,7 @@ def upload():
         if SURVEY_ANSWERS_TAG in data_type  or SURVEY_TIMINGS_TAG in data_type:
             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
             
-        s3_upload( file_name.replace("_", "/") , uploaded_file )
+        s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
 #         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
