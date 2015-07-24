@@ -19,20 +19,6 @@ def authenticate_user(some_function):
     return authenticate_and_call
 
 
-def authenticate_user_and_get_study(some_function):
-    """ Identical to the authenticate_user decorator, but adds a kwarg named
-    "study", containing the study that the user is part of, to the parameters. """ 
-    @functools.wraps(some_function)
-    def authenticate_and_call(*args, **kwargs):
-        is_this_user_valid = validate_post( *args, **kwargs )
-        if is_this_user_valid:
-            study = Study.get_studies_for_admin(request.values['patient_id'])
-            kwargs['study'] = study
-            return some_function(*args, **kwargs)
-        return abort(403)
-    return authenticate_and_call
-
-
 def validate_post( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match."""
     #print "user info:  ", request.values.items()

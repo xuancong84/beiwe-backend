@@ -8,8 +8,7 @@ from db.user_models import User
 from db.study_models import Study
 from libs.encryption import decrypt_device_file
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
-from libs.user_authentication import authenticate_user, authenticate_user_registration,\
-    authenticate_user_and_get_study
+from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 
 ################################################################################
@@ -215,8 +214,10 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
 #TODO: Eli. make sure that this url is pointed at correctly by the app
 #TODO: Eli. check that this authenticate_user decorator is correctly used.
 @mobile_api.route('/download', methods=['GET', 'POST'])
-@authenticate_user_and_get_study
-def get_latest_survey(study=None):
+@authenticate_user
+def get_latest_survey():
+    user = User(request.values['patient_id'])
+    study = Study(user.study_id)
     #TODO: Eli. Check how timings are sent to the app, if they need to be sent inside of this function (probably yes)
     return study.get_surveys_for_study()
 
