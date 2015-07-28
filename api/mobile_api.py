@@ -216,11 +216,11 @@ def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
 #TODO: Eli. check that this authenticate_user decorator is correctly used.
 @mobile_api.route('/download', methods=['GET', 'POST'])
 @authenticate_user
-def get_latest_survey():
+def get_latest_surveys():
     user = User(request.values['patient_id'])
     study = Study(user.study_id)
     #TODO: Eli. Check how timings are sent to the app, if they need to be sent inside of this function (probably yes)
-    return study.get_surveys_for_study()
+    return json.dumps(study.get_surveys_for_study())
 
 #TODO: Eli. Purge any use of the commented urls below, both app and server.
 # @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
