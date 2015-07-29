@@ -1,7 +1,6 @@
+from flask import json
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
-from db.user_models import Users
 from config.constants import SURVEY_TYPES
-from bson.objectid import ObjectId
 from __builtin__ import classmethod
 
 class Study( DatabaseObject ):
@@ -64,6 +63,10 @@ class Study( DatabaseObject ):
         ret = [ dict(Survey(survey_id)) for survey_id in self['surveys'] ]
         for x in ret:
             x['_id'] = str(x['_id'])
+            #TODO: Eli/josh. track down the code that sets this json, and run json.loads(content) on it, change in schema, update template rendering to match.
+            #the following is hacky, but it requires changing code in db schema, html rendering, and survey api
+            if x['content']:
+                x['content'] = json.loads(x['content'])
         return ret
     
     def get_survey_ids_for_study(self):
