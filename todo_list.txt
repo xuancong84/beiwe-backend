@@ -6,6 +6,8 @@ add survey notification to the things that can be set remotely.
 ####################### ARCHITECTURE #######################
 ############################################################
 
+Eli: double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
+
 bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
 
 ensure that json is parsed only once whenever it is needed, so that if surveys are updated the currently running code does not suddenly fail.
