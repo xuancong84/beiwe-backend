@@ -13,6 +13,12 @@ def checkbox_to_boolean(list_checkbox_params, dict_all_params):
     return dict_all_params
 
 
+def string_to_int(list_int_params, dict_all_params):
+    for key in list_int_params:
+        dict_all_params[key] = int(dict_all_params[key])
+    return dict_all_params
+
+
 def combined_multi_dict_to_dict(cmd):
     """ converts an ImmutableMultiDict to a mutable python Dict. """
     return { key: value for key, value in cmd.items() }

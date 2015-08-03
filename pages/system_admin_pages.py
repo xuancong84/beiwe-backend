@@ -6,8 +6,9 @@ from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
-from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict
-from config.constants import CHECKBOX_TOGGLES
+from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
+    string_to_int
+from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 
@@ -107,5 +108,6 @@ def device_settings(study_id=None):
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
+    params = string_to_int(TIMER_VALUES, params)
     settings.update(**params)
     return redirect('/edit_study/' + str(study._id))
