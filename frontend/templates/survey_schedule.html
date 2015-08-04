@@ -1,0 +1,17 @@
+{% raw %}
+<script id="schedule-template" type="text/x-handlebars-template">
+  {{#each times}}
+
+    <h4>Day Name</h4>
+    {{#each this}}
+    <div class="row">
+      <h4><span class="label label-info">
+        {{this}}
+        <i class="remove glyphicon glyphicon-remove" onclick="console.log('clicked!');"></i>
+      </span></h4>
+    </div>
+    {{/each}}
+
+  {{/each}}
+  </script>
+{% endraw %}

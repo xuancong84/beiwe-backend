@@ -7,6 +7,7 @@ var questions = [];
 $(document).ready(function() {
     questions = JSON.parse(survey_content);
     renderQuestionsList();
+    renderSchedule();
 
     $('.schedule-timepicker').timepicker();
 });
@@ -87,6 +88,18 @@ function renderQuestionsList() {
 
     // Insert the template into the page's HTML
     $("#listOfCurrentQuestions").html(htmlQuestion);
+}
+
+function renderSchedule() {
+    var source = $("#schedule-template").html();
+    var template = Handlebars.compile(source);
+
+    survey_times = [[2, 3, 5], [6, 9, 13]];
+    var dataList = { times: survey_times };
+//    var dataList = { times: [{time: 2}, {time: 3}, {time: 4}] };
+    var htmlSchedule = template(dataList);
+
+    $('#surveySchedule').html(htmlSchedule);
 }
 
 // Display the survey's scheduled time in the drop-down menus at the top
