@@ -77,7 +77,7 @@ implement completely new day-of-week and time(s) picker.
 
 When your login session times out and you try to do a user action, it prints an HTML error message.  The problem is in JavaScript somewhere... solve it.
 
-Make Edit Study's Device Parameters page work.  Right now it submits bogus data.
+Make Edit Study's Device Parameters page include the editable text strings
 
 See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 

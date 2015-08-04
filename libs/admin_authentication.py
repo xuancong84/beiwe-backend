@@ -32,7 +32,7 @@ def authenticate_admin_login(some_function):
 
 def log_in_admin(username):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
-    session['expiry'] = datetime.now() + timedelta(hours=6)
+    session['expiry'] = datetime.now() + timedelta(hours=1)
     session['admin_username'] = username
 
 
@@ -76,7 +76,9 @@ def authenticate_admin_study_access(some_function):
             survey_id = ObjectId(kwargs["survey_id"])
             kwargs['survey_id'] = survey_id
             #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
+            # TODO: Eli, is this supposed to be Surveys() instead of Studies()?
             study = Studies(surveys=survey_id, admins=admin_name)
+            # TODO: Eli, is this supposed to be "or not" instead of "and not"?
             if not study and not admin.system_admin:
                 #if the admin is not authorized for this survey, fail.
                 return redirect("/")
@@ -85,6 +87,7 @@ def authenticate_admin_study_access(some_function):
             kwargs['study_id'] = study_id
             study = Studies(_id=study_id, admins=admin_name)
             #if the admin is not authorized for this study, fail.
+            # TODO: Eli, is this supposed to be "or not" instead of "and not"?
             if not study and not admin.system_admin:
                 return redirect("/")
         return some_function(*args, **kwargs)
@@ -101,7 +104,6 @@ def admin_is_system_admin():
     admin = Admin(session['admin_username'])
     return admin.system_admin
 
-
 ################################################################################
 ########################## System Administrator ################################
 ################################################################################
@@ -113,7 +115,15 @@ def authenticate_system_admin(some_function):
     def authenticate_and_call(*args, **kwargs):
         admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
+            # TODO: Josh, redirect to a URL, not a template file
             return redirect("permission_denied.html")
+        # TODO: Josh, avoid this code duplication with the decorator above
+        if 'study_id' in kwargs:
+            study_id = ObjectId(kwargs['study_id'])
+            kwargs['study_id'] = study_id
+            study = Studies(_id=study_id)
+            if not study:
+                return redirect("/")
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
