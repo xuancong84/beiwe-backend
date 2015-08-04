@@ -32,7 +32,7 @@ def authenticate_admin_login(some_function):
 
 def log_in_admin(username):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
-    session['expiry'] = datetime.now() + timedelta(hours=6)
+    session['expiry'] = datetime.now() + timedelta(hours=1)
     session['admin_username'] = username
 
 
