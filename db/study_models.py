@@ -1,7 +1,9 @@
 from flask import json
+from datetime import datetime, timedelta
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from config.constants import SURVEY_TYPES
 from __builtin__ import classmethod
+
 
 class Study( DatabaseObject ):
     PATH = "beiwe.studies"
@@ -146,6 +148,20 @@ class Survey( DatabaseObject ):
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
         survey = { "survey_type": survey_type }
         return Survey.create(survey, random_id=True)
+    
+    #debugging function
+    def set_alarms_thirty_seconds(self):
+        now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
+        start_of_day = datetime(now.year, now.month, now.day)
+        time_diff = int((now - start_of_day).total_seconds() + 30)
+        self['timings'] =[ [time_diff],
+                             [time_diff],
+                             [time_diff],
+                             [time_diff],
+                             [time_diff],
+                             [time_diff],
+                             [time_diff] ]
+        self.save()
 
 """############################ Collections #################################"""
 class Studies( DatabaseCollection ):
