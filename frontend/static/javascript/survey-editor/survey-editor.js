@@ -7,6 +7,8 @@ var questions = [];
 $(document).ready(function() {
     questions = JSON.parse(survey_content);
     renderQuestionsList();
+
+    $('.schedule-timepicker').timepicker();
 });
 
 
