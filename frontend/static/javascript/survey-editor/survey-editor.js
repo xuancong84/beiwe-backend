@@ -90,18 +90,6 @@ function renderQuestionsList() {
     $("#listOfCurrentQuestions").html(htmlQuestion);
 }
 
-function renderSchedule() {
-    var source = $("#schedule-template").html();
-    var template = Handlebars.compile(source);
-
-    survey_times = [[2, 3, 5], [6, 9, 13]];
-    var dataList = { times: survey_times };
-//    var dataList = { times: [{time: 2}, {time: 3}, {time: 4}] };
-    var htmlSchedule = template(dataList);
-
-    $('#surveySchedule').html(htmlSchedule);
-}
-
 // Display the survey's scheduled time in the drop-down menus at the top
 function displayScheduledTime(hour, day) {
     // Translate 24-hr time to 12-hr time with a.m./p.m. labels
