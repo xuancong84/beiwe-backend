@@ -65,10 +65,6 @@ class Study( DatabaseObject ):
         ret = [ dict(Survey(survey_id)) for survey_id in self['surveys'] ]
         for x in ret:
             x['_id'] = str(x['_id'])
-            #TODO: Eli/josh. track down the code that sets this json, and run json.loads(content) on it, change in schema, update template rendering to match.
-            #the following is hacky, but it requires changing code in db schema, html rendering, and survey api
-            if x['content']:
-                x['content'] = json.loads(x['content'])
         return ret
     
     def get_survey_ids_for_study(self):
@@ -138,7 +134,7 @@ class Survey( DatabaseObject ):
     #TODO: Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
     PATH = "beiwe.surveys"
-    DEFAULTS = {"content": "",
+    DEFAULTS = {"content": [],
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED }
     
