@@ -60,7 +60,7 @@ def upload():
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
-        except DecryptionKeyError as e:
+    except DecryptionKeyError as e:
         #documenting behavior change for production 1:
         # when decryption fails, regardless of why, we rely on the decryption code
         # to log it correctly and return 200 OK to get the device to delete the file.
