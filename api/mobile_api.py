@@ -2,7 +2,7 @@ import calendar, time
 
 from flask import Blueprint, request, abort, render_template, json
 
-from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIMINGS_TAG)
+from config.constants import ALLOWED_EXTENSIONS
 from db.user_models import User
 from db.study_models import Study
 from libs.encryption import decrypt_device_file, DecryptionKeyError
@@ -69,15 +69,7 @@ def upload():
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension( file_name ):
-        """ user-id, file-type, unix-timestamp, survey id """
-#         _, data_type, timestamp, survey_id  = parse_filename( file_name )
-        
-        #survey files have special file names and need some extra parsing logic
-#         if survey_id is not None:
-#             file_name = get_s3_filepath_for_survey_data(data_type, patient_id, timestamp)
-            
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
-#         print "upload success: ", file_name
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
@@ -165,24 +157,6 @@ def set_password():
 ########################## FILE NAME FUNCTIONALITY #############################
 ################################################################################
 
-#TODO: Eli/Josh: redo file naming.
-
-def parse_filename(filename):
-    """  user-id, file-type, unix-timestamp, survey id """
-    name = filename.split("_")
-    
-    if len(name) == 3:
-        return name[0], name[1], name[2], None
-    
-    if len(name) == 4:
-        return name[0], name[1], name[3], name[2]
-# 
-# def parse_filetype(file_type):
-#     """ Separates alphabetical characters from digits for parsing."""
-#     questions_created_timestamp = filter(str.isdigit, str(file_type))
-#     survey_data_type = filter(str.isalpha, str(file_type))
-#     return survey_data_type, questions_created_timestamp
-
 def grab_file_extension(file_name):
     """ grabs the chunk of text after the final period. """
     return file_name.rsplit('.', 1)[1]
@@ -192,60 +166,13 @@ def contains_valid_extension(file_name):
         limited to 4 characters."""
     return '.' in file_name and grab_file_extension(file_name) in ALLOWED_EXTENSIONS
 
-
-# def get_s3_filepath_for_survey_data( data_type, patient_id, timestamp ):
-#     """ The survey config files is in the name of the file, this function processes
-#         the supplied information and returns the correct file path string."""
-#         
-#     survey_data_type, questions_created_timestamp = parse_filetype( data_type )
-# #     print "survey_data_type", survey_data_type
-# #     print "questions_created_timestamp", questions_created_timestamp
-#     
-#     #cijtik_surveyAnswers55a9a35897013e062717cf31_1438892725431.csv
-#     
-#     survey_frequency = 'UNKNOWN_TYPE'
-#     if DAILY_SURVEY_NAME in survey_data_type: survey_frequency = DAILY_SURVEY_NAME
-#     if WEEKLY_SURVEY_NAME in survey_data_type: survey_frequency = WEEKLY_SURVEY_NAME
-#     
-#     if SURVEY_ANSWERS_TAG in survey_data_type:
-#         survey_data_type = SURVEY_ANSWERS_TAG
-#     if SURVEY_TIMINGS_TAG in survey_data_type:
-#         survey_data_type = SURVEY_TIMINGS_TAG
-#     
-#     survey_id = 
-#     
-#     return (patient_id + '/' +
-#             survey_data_type + '/' +
-#             survey_frequency + '/' +
-#             questions_created_timestamp + '/' +
-#             timestamp )
-
-
 ################################################################################
 ########################### Device Survey Getters ##############################
 ################################################################################
 
-#TODO: Eli. make sure that this url is pointed at correctly by the app
-#TODO: Eli. check that this authenticate_user decorator is correctly used.
 @mobile_api.route('/download', methods=['GET', 'POST'])
 @authenticate_user
 def get_latest_surveys():
     user = User(request.values['patient_id'])
     study = Study(user.study_id)
-    #TODO: Eli. Check how timings are sent to the app, if they need to be sent inside of this function (probably yes)
     return json.dumps(study.get_surveys_for_study())
-
-#TODO: Eli. Purge any use of the commented urls below, both app and server.
-# @survey_designer.route('/get_weekly_survey', methods=['GET', 'POST'])
-# def get_latest_weekly():
-#     """ Method responsible for fetching latest created weekly survey
-#         (frequency 1) """
-#     return get_latest_survey('weekly')
-
-# @survey_designer.route('/get_daily_survey', methods=['GET', 'POST'])
-# def get_latest_daily():
-#     """ Method responsible for fetching latest created daily survey (frequency 1) """
-#     return get_latest_survey('daily')
-# def get_surveys(prefix):
-#     surveys = s3_list_files(prefix)
-#     return [survey_file for survey_file in surveys]

@@ -15,16 +15,8 @@ ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
-#these strings are tags used in identifying files created by the surveys.
-SURVEY_ANSWERS_TAG = 'surveyAnswers'
-SURVEY_TIMINGS_TAG = 'surveyTimings'
-
 #Survey types
 SURVEY_TYPES = ['audio', 'android_survey']
-
-# class SURVEY_TYPES(object):
-#     audio = "audio"
-#     android_survey = "android_survey"
 
 CHECKBOX_TOGGLES = ["accelerometer",
                   "gps",
@@ -34,4 +26,3 @@ CHECKBOX_TOGGLES = ["accelerometer",
                   "bluetooth",
                   "power_state"
                 ]
-
