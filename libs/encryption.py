@@ -7,6 +7,8 @@ from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study
 
+class DecryptionKeyError(Exception): pass
+
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
 ################################################################################
@@ -62,10 +64,16 @@ def decrypt_device_file(patient_id, data, private_key):
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     
-    decoded_key = decode_base64( data[0].encode( "utf-8" ) )
-    decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
-    #We may have an inefficiency in this encryption process, this might not need
-    # to be doubly encoded in base64.
+    try:
+        decoded_key = decode_base64( data[0].encode( "utf-8" ) )
+        decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
+    except TypeError as e:
+        raise DecryptionKeyError("invalid decryption key. %s" % e.message)
+    except IndexError as e:
+        raise DecryptionKeyError("invalid decryption key. %s" % e.message)
+    
+    #(we have an inefficiency in this encryption process, this might not need
+    # to be doubly encoded in base64.  It works, not fixing it.)
     #The following is all error catching code for bugs we encountered (and solved)
     # in development.  ANY of these errors showing up EVER is a CRITICAL FAILURE
     # and we should be informed.
@@ -96,7 +104,7 @@ def decrypt_device_file(patient_id, data, private_key):
                 # this is only seen in mp4 files. possibilities:
                 #TODO: Eli. check that app-side file handling to only upload retired files is activated for the voice recording
                 #  upload during write operation.
-                #  broken base64 conversion in the app
+                #  broken ba    se64 conversion in the app
                 #  some unanticipated error in the file upload
             log_error(e, error_message)
             raise

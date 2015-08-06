@@ -6,7 +6,7 @@ from config.constants import (ALLOWED_EXTENSIONS, SURVEY_ANSWERS_TAG, SURVEY_TIM
                             DAILY_SURVEY_NAME, WEEKLY_SURVEY_NAME)
 from db.user_models import User
 from db.study_models import Study
-from libs.encryption import decrypt_device_file
+from libs.encryption import decrypt_device_file, DecryptionKeyError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
@@ -60,14 +60,16 @@ def upload():
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
-    except Exception as e:
-        if not e.message == "there was an error in decryption":
-            raise
-        return abort(406)
+        except DecryptionKeyError as e:
+        #documenting behavior change for production 1:
+        # when decryption fails, regardless of why, we rely on the decryption code
+        # to log it correctly and return 200 OK to get the device to delete the file.
+        log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
+        return render_template('blank.html'), 200
         
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
-    if uploaded_file  and file_name and contains_valid_extension( file_name ):
+    if uploaded_file and file_name and contains_valid_extension( file_name ):
         data_type, timestamp  = parse_filename( file_name )
         
         #survey files have special file names and need some extra parsing logic
@@ -81,8 +83,10 @@ def upload():
     #error cases, (self documenting)
     else:
         #TODO: Eli.  This should probably send an email if it fails.
-        error_message ="an upload has failed: " + file_name + ", "
+        error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
+            #it appears that very occasionally the app creates some spurious files 
+            #with a name like "rList-org.beiwe.app.LoadingActivity"
             error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
             log_error( Exception("upload error"), error_message )
             return render_template('blank.html'), 200
