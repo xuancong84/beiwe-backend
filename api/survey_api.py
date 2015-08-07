@@ -38,6 +38,6 @@ def update_survey(survey_id=None):
     if not survey:
         return abort(404)
     questions = json.loads(request.values['questions'])
-    survey.update({'content': questions})
-    
+    timings = json.loads(request.values['timings'])
+    survey.update({'content': questions, 'timings': timings})
     return '200'

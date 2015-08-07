@@ -43,7 +43,8 @@ function end() {
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            questions: jsonifySurveyQuestions()
+            questions: JSON.stringify(questions),
+            timings: JSON.stringify(survey_times)
         }
     }).done(function() {
         alert("Survey saved and submitted successfully!");
@@ -69,11 +70,6 @@ function createJsonSurveyObject() {
     console.log("surveyObject = ");
     console.log(surveyObject);
     return surveyObject;
-}
-
-
-function jsonifySurveyQuestions() {
-    return JSON.stringify(questions);
 }
 
 // Render a list of the current questions
