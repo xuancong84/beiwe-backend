@@ -67,9 +67,6 @@ Customizable wording, customizable from the admin panel at the time of study cre
 ######################### FRONT END ########################
 ############################################################
 
-Eli, do the lists of survey times have to be ordered?
-    yes.
-
 double click protection on buttons?
 
 implement completely new day-of-week and time(s) picker.

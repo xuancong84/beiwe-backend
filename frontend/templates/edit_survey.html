@@ -6,8 +6,7 @@
     {{ super() }}
     <script type="text/javascript">
         var survey_id = '{{ survey._id }}';
-        var survey_schedule = '{{ survey.timings|length }}';
-        console.log(survey_schedule);
+        var survey_times = {{ survey.timings }};
         var survey_content = '{{ survey.content|tojson }}';
     </script>
     <script src="../static/javascript/survey-editor/handlebars-question-rendering.js"></script>
@@ -50,13 +49,13 @@
           </select>
           {% if (daily_or_weekly == 'weekly') %}
             <select id="day" name="day">
+              <option value=0>Sunday</option>
               <option value=1>Monday</option>
               <option value=2>Tuesday</option>
               <option value=3>Wednesday</option>
               <option value=4>Thursday</option>
               <option value=5>Friday</option>
               <option value=6>Saturday</option>
-              <option value=0>Sunday</option>
             </select>
           {% endif %}
           <br>

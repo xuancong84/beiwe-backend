@@ -31,8 +31,6 @@ function renderSchedule() {
     var source = $("#schedule-template").html();
     var template = Handlebars.compile(source);
 
-    survey_times = [[18780, 3, 5], [6, 9, 62040], [5, 4], [2], [4], [4], [19]];
-
     var schedule = [];
     for (var i=0; i<7; i++) {
     	day_schedule = {day_name: days_list[i], times: survey_times[i]};
