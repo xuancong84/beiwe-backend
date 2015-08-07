@@ -84,3 +84,9 @@ function add_time_to_day_index(time, day_index) {
     survey_times[day_index].sort();
     console.log(survey_times[day_index]);
 }
+
+
+function delete_time(day_index, time_index) {
+    survey_times[day_index].splice(time_index, 1);
+    renderSchedule();
+}
