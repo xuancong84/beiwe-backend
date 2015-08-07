@@ -27,7 +27,7 @@ def choose_study():
 def view_study(study_id=None):
     study = Study(study_id)
     # TODO: Josh, get patients just for this study, not ALL the patients
-    patients = {user['_id']: patient_dict(user) for user in Users()}
+    patients = {user['_id']: patient_dict(user) for user in Users( study_id = study_id )}
     survey_ids = study.get_survey_ids_for_study()
     return render_template('view_study.html', study=study, patients=patients,
                            survey_ids=survey_ids, study_name=study.name,
