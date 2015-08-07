@@ -1,41 +1,47 @@
-<div class="form-inline bootstrap-timepicker timepicker">
-  <input id="new_time_timepicker" type="text" class="form-control schedule-timepicker">
-  <i class="glyphicon glyphicon-time"></i>
+<div class="row">
+  <h3>Schedule</h3>
 
-  &nbsp;
-  <select id="day_index_select" name="day">
-    <option value=0>Sunday</option>
-    <option value=1>Monday</option>
-    <option value=2>Tuesday</option>
-    <option value=3>Wednesday</option>
-    <option value=4>Thursday</option>
-    <option value=5>Friday</option>
-    <option value=6>Saturday</option>
-    <option value="every_day">EVERY DAY</option>
-  </select>
+  <p>Add new scheduled time (type numbers into the pop-up time picker):</p>
 
-  &nbsp;&nbsp;&nbsp;
-  <button class="btn btn-success" onclick="add_time()">Add time</button>
+  <div class="form-inline bootstrap-timepicker timepicker">
+    <input id="new_time_timepicker" type="text" class="form-control schedule-timepicker">
+    <i class="glyphicon glyphicon-time"></i>
 
+    &nbsp;
+    <select id="day_index_select" name="day">
+      <option value="every_day">EVERY DAY</option>
+      <option value=0>Sunday</option>
+      <option value=1>Monday</option>
+      <option value=2>Tuesday</option>
+      <option value=3>Wednesday</option>
+      <option value=4>Thursday</option>
+      <option value=5>Friday</option>
+      <option value=6>Saturday</option>
+    </select>
+
+    &nbsp;&nbsp;&nbsp;
+    <button class="btn btn-info" onclick="add_time()"><span class="glyphicon glyphicon-plus"></span>Add time</button>
+  </div>
 </div>
-
 
 {% raw %}
 
 <script id="schedule-template" type="text/x-handlebars-template">
 <div class="row">
+  <br>
+  <p>Currently scheduled times:</p>
   <table>
     {{#each schedules}}
     <tr>
 
-      <th><h4>{{day_name}}</h4></th>
+      <th><b>{{day_name}}</b></th>
 
       {{#each times}}
       <td>
-        <h4><span class="label label-info">
+        <b><span class="label label-info time-label">
           {{int_to_time this}}
-          <i class="remove glyphicon glyphicon-remove" onclick="delete_time({{@../index}}, {{@index}})"></i>
-        </span></h4>
+          <i class="remove glyphicon glyphicon-remove" onclick="delete_time({{@../index}}, {{@index}})" title="Delete this time"></i>
+        </span></b>
       </td>
       {{/each}}
 

@@ -25,15 +25,24 @@
 
       <div class="span12">
         <div class="row">
-          <h1>Survey {{ survey._id }}</h1>
+          <h2>Edit Survey</h2>
+          <p>Survey ID #<b>{{ survey._id }}</b>. Your changes will not be saved until you click "Save and Deploy."</p>
+
+          <button type="submit" class="btn btn-success btn-lg" onclick="end(); return false;">
+            <span class="glyphicon glyphicon-upload"></span>Save & Deploy
+          </button>
+
         </div>
+        <hr>
 
         {% include 'survey_schedule.html' %}
         <div id="surveySchedule"></div>
 
-        <form name="survey">
+        <hr>
 
-          <br><br>
+        <div class="row">
+          <h3>Questions</h3>
+
           {% include 'question_summary.html' %}
           <div id="listOfCurrentQuestions"></div>
 
@@ -55,7 +64,7 @@
             <a class="btn btn-lg btn-danger pull-right" href="/delete_survey/{{ survey._id }}" onclick="return confirm('Are you sure you want to delete this survey? It will be lost forever, and if you want it back, you will have to re-create it from scratch.')">
             <span class="glyphicon glyphicon-trash"></span>Delete survey</a>
           </div>
-        </form>
+        </div>
       </div>
     </div>
 
