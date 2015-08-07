@@ -6,10 +6,14 @@ Handlebars.registerHelper("int_to_time", function(number_of_seconds) {
     var time_string = "";
 
     // Add hours (in 12-hour time)
-    time_string += Math.round(number_of_seconds / 3600) % 12 + ":";
+    var hours = Math.floor(number_of_seconds / 3600) % 12;
+    if (hours == 0) {
+        hours = 12;
+    }
+    time_string += hours + ":";
 
     // Add minutes
-    var minutes = Math.round((number_of_seconds % 3600) / 60);
+    var minutes = Math.floor((number_of_seconds % 3600) / 60);
     if (minutes < 10) {
         time_string += "0" + minutes;
     } else {
@@ -41,4 +45,42 @@ function renderSchedule() {
     var htmlSchedule = template(dataList);
 
     $('#surveySchedule').html(htmlSchedule);
+}
+
+
+function add_time() {
+    var time_string = $('#new_time_timepicker').val();
+    var hours = parseInt(time_string.split(':')[0]);
+    if (hours == 12) {
+        hours = 0;
+    }
+    var minutes = parseInt(time_string.split(':')[1]);
+    var am_pm = time_string.split(' ')[1];
+    var number_of_seconds = (hours * 3600) + (minutes * 60);
+    if (am_pm == 'PM') {
+        number_of_seconds += (12 * 3600);
+    };
+
+    var day_index = $('#day_index_select').val();
+
+    if (day_index == "every_day") {
+        // If they selected "every_day", add this time to all 7 days
+        for (var i = 0; i < 7; i++) {
+            add_time_to_day_index(number_of_seconds, i);
+        };
+    } else {
+        // Otherwise, just add this time to the selected day
+        add_time_to_day_index(number_of_seconds, day_index);
+    };
+
+    // Re-render the schedule
+    renderSchedule();
+}
+
+
+function add_time_to_day_index(time, day_index) {
+    console.log("time = " + time);
+    survey_times[day_index].push(time);
+    survey_times[day_index].sort();
+    console.log(survey_times[day_index]);
 }

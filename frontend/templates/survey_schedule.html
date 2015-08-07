@@ -1,4 +1,27 @@
+<div class="form-inline bootstrap-timepicker timepicker">
+  <input id="new_time_timepicker" type="text" class="form-control schedule-timepicker">
+  <i class="glyphicon glyphicon-time"></i>
+
+  &nbsp;
+  <select id="day_index_select" name="day">
+    <option value=0>Sunday</option>
+    <option value=1>Monday</option>
+    <option value=2>Tuesday</option>
+    <option value=3>Wednesday</option>
+    <option value=4>Thursday</option>
+    <option value=5>Friday</option>
+    <option value=6>Saturday</option>
+    <option value="every_day">EVERY DAY</option>
+  </select>
+
+  &nbsp;&nbsp;&nbsp;
+  <button class="btn btn-success" onclick="add_time()">Add time</button>
+
+</div>
+
+
 {% raw %}
+
 <script id="schedule-template" type="text/x-handlebars-template">
 <div class="row">
   <table>

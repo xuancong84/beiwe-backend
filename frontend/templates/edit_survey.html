@@ -28,37 +28,10 @@
           <h1>Survey {{ survey._id }}</h1>
         </div>
 
-        <div class="form-inline bootstrap-timepicker timepicker">
-          <input type="text" class="form-control schedule-timepicker">
-          <i class="glyphicon glyphicon-time"></i>
-        </div>
-
         {% include 'survey_schedule.html' %}
         <div id="surveySchedule"></div>
 
         <form name="survey">
-          Schedule Deployment Time:
-          <select id="hour" name="hour">
-            {% for i in range(1, 13) %}
-              <option value={{ i }}>{{ i }}:00</option>
-            {% endfor %}
-          </select>
-          <select id="ampm" name="ampm">
-            <option value="am">AM</option>
-            <option value="pm">PM</option>
-          </select>
-          {% if (daily_or_weekly == 'weekly') %}
-            <select id="day" name="day">
-              <option value=0>Sunday</option>
-              <option value=1>Monday</option>
-              <option value=2>Tuesday</option>
-              <option value=3>Wednesday</option>
-              <option value=4>Thursday</option>
-              <option value=5>Friday</option>
-              <option value=6>Saturday</option>
-            </select>
-          {% endif %}
-          <br>
 
           <br><br>
           {% include 'question_summary.html' %}
