@@ -10,6 +10,5 @@ from config.global_passwords import MONGO_USERNAME, MONGO_PASSWORD
 
 connect_to_database()
 authenticate_connection(MONGO_USERNAME, MONGO_PASSWORD)
-# FIXME: reenable defaults and type checking
-# set_defaults_handling(AlertLevel.error)
-# set_type_checking(AlertLevel.error)
+set_defaults_handling(AlertLevel.error)
+set_type_checking(AlertLevel.error)
