@@ -7,15 +7,11 @@ add survey notification to the things that can be set remotely.
 ############################################################
 
 Eli: double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
+    turning it on is exact, turning it off is fuzzy
 
 bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
 
-ensure that json is parsed only once whenever it is needed, so that if surveys are updated the currently running code does not suddenly fail.
-
 app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
-
-Eli. convert all surveys to one type with a list of days of the week.  no more daily-weekly typing for surveys.  (check in app what this day-indexing looks like)
-    -this looks like it is a component of the surveyscheduler.java class. rewrite to fully drop daily/weekly distinction.
 
 check that the app-side file handling for only uploading retired files is actually functional for audio recordings.
 
@@ -72,6 +68,7 @@ Customizable wording, customizable from the admin panel at the time of study cre
 ############################################################
 
 Eli, do the lists of survey times have to be ordered?
+    yes.
 
 double click protection on buttons?
 
