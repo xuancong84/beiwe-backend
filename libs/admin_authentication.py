@@ -103,7 +103,7 @@ def get_admins_allowed_studies():
     return Studies(admins=admin._id)
 
 def admin_is_system_admin():
-    # TODO: Josh, find a more efficient way of checking this and "allowed_studies" than passing it to every render_template
+    # TODO: Josh. find a more efficient way of checking this and "allowed_studies" than passing it to every render_template
     # talk with Eli about this, we can make a better solution.  maybe make a decorator?
     admin = Admin(session['admin_username'])
     return admin.system_admin
@@ -125,7 +125,7 @@ def authenticate_system_admin(some_function):
     def authenticate_and_call(*args, **kwargs):
         admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
-            # TODO: Josh, redirect to a URL, not a template file
+            # TODO: Josh. redirect to a URL, not a template file
             return redirect("permission_denied.html")
         if 'study_id' in kwargs:
             study_id = kwargs['study_id']

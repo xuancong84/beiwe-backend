@@ -47,7 +47,7 @@ def upload():
     
     #error cases, (self documenting)
     else:
-        #TODO: Eli.  This should probably send an email if it fails.
+        #TODO: Eli. This should probably send an email if it fails.
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
             #it appears that very occasionally the app creates some spurious files 

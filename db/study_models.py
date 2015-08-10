@@ -97,7 +97,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "accelerometer_off_duration_seconds": 300,
                 "accelerometer_on_duration_seconds": 300,
                 "bluetooth_on_duration_seconds": 300,
-                "bluetooth_total_duration_seconds": 300, #TODO: Eli, change this to off duration in app and here.
+                "bluetooth_total_duration_seconds": 300, #TODO: Eli. change this to off duration in app and here.
                 "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this parameter for bluetooth. 
                 "check_for_new_surveys_frequency_seconds": 3600 * 6,
                 "create_new_data_files_frequency_seconds": 15 * 60,
@@ -107,7 +107,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "upload_data_files_frequency_seconds": 3600,
                 "voice_recording_max_time_length_seconds": 300,
                 "wifi_log_frequency_seconds": 300
-                # TODO: Josh, add text strings that need customizing
+                # FIXME: Low priority. Feature. Eli/Josh. add any text strings that could use customizing
             }
     @classmethod
     def create_default(cls):
