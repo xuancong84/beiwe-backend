@@ -117,7 +117,10 @@ def authenticate_system_admin(some_function):
     """ Authenticate system admin checks whether a user is a system admin before
     allowing access to pages marked with this decorator.  If a study_id variable
     is supplied as a keyword argument, the decoator will automatically grab the
-    ObjectId in place of the string provided in a route. """
+    ObjectId in place of the string provided in a route.
+    NOTE: if you are using this function along with the authenticate_admin_study_access
+    decorator you must place this decorator below it, otherwise behavior is undefined
+    and probably causes a 500 error inside the authenticate_admin_study_access decorator."""
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         admin = Admin(session['admin_username'])
@@ -126,9 +129,9 @@ def authenticate_system_admin(some_function):
             return redirect("permission_denied.html")
         if 'study_id' in kwargs:
             study_id = kwargs['study_id']
-            if not isinstance(study_id, ObjectId):
-                study_id = ObjectId(study_id)
-                kwargs['study_id'] = study_id
+            if not isinstance(study_id, ObjectId):#make an extra check in case
+                study_id = ObjectId(study_id)     #authenticate_admin_study_access
+                kwargs['study_id'] = study_id     #has already converted the id.
             if not Studies(_id=study_id):
                 return redirect("/")
         return some_function(*args, **kwargs)

@@ -91,6 +91,14 @@ def create_study():
         return redirect('/create_study')
 
 
+#FIXME: Josh: I am getting the following error on access of the the device settings page on the server:
+# InvalidTypeError: value '21600' for key 'check_for_new_surveys_frequency_seconds' must be of type <type 'int'>
+#Can you track down any behavior that would cause the values in the StudyDeviceSettings to be converted to not-ints?
+# I don't know when this error could have occured.
+# It is possible that the data has actually always been incorrect, and we simply
+#  turned on type enforcement after data was added to the database.
+# (The stack trace is really ugly)
+
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 @authenticate_system_admin
