@@ -67,6 +67,9 @@ Customizable wording, customizable from the admin panel at the time of study cre
 ######################### FRONT END ########################
 ############################################################
 
+attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
+    -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
+
 Eli, do the lists of survey times have to be ordered?
     yes.
 
