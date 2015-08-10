@@ -57,11 +57,6 @@ def create_new_researcher():
 
 
 """########################### Study Pages ##################################"""
-""""TODO: Alvin/Josh. implement this page, point the post function at /create_new_study,
-see the create_new_study function in admin_api for details.
-Page should include a paraphrase of "enter encryption key here for the study, all
-user data stored by server will require this password, strongly recommend you use a
-true random source, for instance random.org"""
 
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
