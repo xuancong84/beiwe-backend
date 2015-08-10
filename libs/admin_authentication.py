@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 from flask import session, redirect
 from db.user_models import Admin, Admins
 from libs.security import generate_easy_alphanumeric_string
-from db.study_models import Studies
+from db.study_models import Studies, Study
 from bson.objectid import ObjectId
+from werkzeug.exceptions import abort
 
 ################################################################################
 ############################ Existence Modifiers ###############################
@@ -73,23 +74,24 @@ def authenticate_admin_study_access(some_function):
             raise ArgumentMissingException()
         #We want the survey_id check to execute first if both args are supplied. 
         if "survey_id" in kwargs:
-            survey_id = ObjectId(kwargs["survey_id"])
-            kwargs['survey_id'] = survey_id
-            #mongo's equality test evaluates for both = and 'in' for database elements containing json lists.
-            # TODO: Eli, is this supposed to be Surveys() instead of Studies()?
-            study = Studies(surveys=survey_id, admins=admin_name)
-            # TODO: Eli, is this supposed to be "or not" instead of "and not"?
-            if not study and not admin.system_admin:
-                #if the admin is not authorized for this survey, fail.
-                return redirect("/")
+            #turn the survey_id into a bson ObjectId.
+            survey_id = ObjectId(kwargs["survey_id"]) 
+            kwargs['survey_id'] = survey_id 
+            study = Studies(survey=survey_id)
+            if not study: #study does not exist.
+                return abort(404)
+            #check admin is allowed, allow system admins.
+            if not admin.system_admin:
+                if admin not in study.admins:
+                    return abort(403)
         if "study_id" in kwargs:
             study_id = ObjectId(kwargs['study_id'])
             kwargs['study_id'] = study_id
-            study = Studies(_id=study_id, admins=admin_name)
-            #if the admin is not authorized for this study, fail.
-            # TODO: Eli, is this supposed to be "or not" instead of "and not"?
-            if not study and not admin.system_admin:
-                return redirect("/")
+            study = Study(study_id)
+            if not study:
+                return abort(404)
+            if admin not in study.admins:
+                return abort(403)
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
@@ -101,6 +103,7 @@ def get_admins_allowed_studies():
 
 def admin_is_system_admin():
     # TODO: Josh, find a more efficient way of checking this and "allowed_studies" than passing it to every render_template
+    # talk with Eli about this, we can make a better solution.  maybe make a decorator?
     admin = Admin(session['admin_username'])
     return admin.system_admin
 
