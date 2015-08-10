@@ -11,6 +11,7 @@ class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
+                 #FIXME: Eli/Josh. we don't seem to have this kind of super admin used/have implemented pages?  please check.
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
                  "encryption_key": REQUIRED #the study's config encryption key. 
