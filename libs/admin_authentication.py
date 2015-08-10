@@ -82,7 +82,7 @@ def authenticate_admin_study_access(some_function):
                 return abort(404)
             #check admin is allowed, allow system admins.
             if not admin.system_admin:
-                if admin not in study.admins:
+                if admin['_id'] not in study.admins:
                     return abort(403)
         if "study_id" in kwargs:
             study_id = ObjectId(kwargs['study_id'])
@@ -90,8 +90,9 @@ def authenticate_admin_study_access(some_function):
             study = Study(study_id)
             if not study:
                 return abort(404)
-            if admin not in study.admins:
-                return abort(403)
+            if not admin.system_admin:
+                if admin['_id'] not in study.admins:
+                    return abort(403)
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
