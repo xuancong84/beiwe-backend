@@ -1,22 +1,54 @@
 
-Make a new s3 bucket for the beiwe2, make new access credentials for myself and josh and the server.
-add survey notification to the things that can be set remotely.
+############################################################
+################ ACTUALLY DO THESE THINGS ##################
+############################################################
+
+administrate: Make new access credentials for the beiwe2 bucket, so that it can be handed out without  myself and josh and the server.
+
+administrative: implement mongobackups of the mongo db on the server.
+
+administrative: SSL on the new server.
+    do we have a wildcard cert?
+
+architecture: add survey notification to the things that can be set remotely.
+
+app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
+
+app, bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
+
+app: check that the app's code for only uploading retired files is actually functional for audio recording files.
+
+!!!!!!
+app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
+!!!!!!
+
+website: attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
+    -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
+
+website: implement double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  (Basically use JS to make the buttons un-clickable until the network request finishes.)
+
+website: When the login session times out and you try to do a user action, it prints an HTML error message.  The problem is in JavaScript somewhere... solve it.
+
+backend/website: Check why automatic logout keeps happening
+
+website/backend: Make Edit Study's Device Parameters page include the editable text strings
+
+website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
+
+website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
+
+website: Add ability to delete users (patients, not admins)?
+website: add ability to delete studies?
+
 
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
-
-Eli: double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
-    turning it on is exact, turning it off is fuzzy
-
-bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
-
-app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
-
-check that the app-side file handling for only uploading retired files is actually functional for audio recordings.
-
+!!!!
+!!!! this might be incorrect, we may have a third level of admin. (the distinction between study administrators and system administrators.) !!!
+!!!!
 Admin/Access control:
-	2 levels of users: a researcher admins, and super admins.
+	2 levels of users: researcher admins, and super admins. (system admins?)
 	super-admins
 		can create new researchers,
 		reset researchers' passwords
@@ -25,15 +57,8 @@ Admin/Access control:
 		create studies.
 	admins should only have survey modification rights to on surveys in studies they are assigned to.
 
---Survey modifications--
-Have separate surveys for each study
-    we probably don't need a survey to be shared among multiple studies
 
-surveys must be able to be scheduled:
-    once a week
-    once a day
-    multiple times per day
-
+!!! not implemented !!!
 -Ask JP if he wants the option to make surveys display questions in randomized order...
 if so:
     surveys should be able to randomize their order
@@ -48,12 +73,20 @@ if so:
         if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
             solution: no overlapping runs.
 
+Surveys:
+    able to have separate surveys for each study
+    don't need a survey to be shared among multiple studies
+
+    surveys must be able to be scheduled:
+        once a week
+        once a day
+        multiple times per day
+
 Customizable Times:
 	-an option that can be editted on the edit survey page (not just survey creation)
 	-error-checking (this isn't mentioned in the change order)
 		for example, BLUETOOTH_ON_DURATION must be no longer than BLUETOOTH_PERIOD minus BLUETOOTH_START_TIME_IN_PERIOD.
  	-This is likely to be modified by the email thread about timers and data streams.
-
 
 Customizable wording, customizable from the admin panel at the time of study creation:
 	-Text on the "Call Clinician" buttons throughout the app.
@@ -62,37 +95,6 @@ Customizable wording, customizable from the admin panel at the time of study cre
 	-Text in the Toast that pops up after a user submits a completed survey
 	-Text in the Toast that pops up after a user submits a completed voice recording
 	(We should probably limit text inputs to ASCII-only, not Unicode characters. The survey editor interface currently (June 29, 2015) has a check for Unicode characters in survey_designer.py/update_survey().)
-
-############################################################
-######################### FRONT END ########################
-############################################################
-
-
-attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
-    -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
-
-Eli, do the lists of survey times have to be ordered?
-    yes.
-
-(Not really front-end, but it's here for Josh) Handle app registration, including app pulling a bunch of values from the server.  Make sure that we can, after the start of a study, stuff additional values into that JSON blob without crashing.  i.e., look for specific values, but don't crash if they aren't there.
-
-Double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  Basically use JS to make the buttons un-clickable until the network request finishes.
-
-When your login session times out and you try to do a user action, it prints an HTML error message.  The problem is in JavaScript somewhere... solve it.
-
-Check why automatic logout keeps happening
-
-Make Edit Study's Device Parameters page include the editable text strings
-
-See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
-
-error page for admin permission denied (put in decorator)
-
-Add ability to delete users?
-
-Graph stuff
-    -Make it look pretty for all the different types of survey questions
-    -Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
 
 ###############################################################
 ####################### REFACTOR THINGS #######################
@@ -105,30 +107,32 @@ the backgroundprocess should be backgroundservice
 ####################################################################
 ####################### ADMINISTRATIVE TASKS #######################
 ####################################################################
+
 remove old data from s3:
     It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
-    If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below (these are what Matt is using, all others can go):
+    If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below:
         7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
-
-implement mongobackups of the mongo db on the server
-
-SSL on the new server
 
 ####################################################################
 ########################## GENERAL TASKS ###########################
 ####################################################################
 
-check behavior of generating unique device IDs and how that interacts with devices that are not phones.
+check behavior of generating unique device IDs and how that interacts with devices that are not phones... do not know what the behavior of this is.
 
-UHOH, I don't think we have any code for downloading user mac addresses/hashes of them.
+UHOH, I don't think we have any code for downloading user mac addresses/hashes of them...
 
-since studies will have arbitrary time triggers, frequency triggers, and no longer have distinct names (daily, weekly, voice), and will instead be identified by some form of unique id, make sure that the timer data is included in the csv for survey answers.
+Eli: double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
+    turning it on is exact, turning it off is fuzzy
+
+Graph stuff
+    -Make it look pretty for all the different types of survey questions
+    -Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
 
 ####################################################################
 ############################ KNOWN BUGS ############################
 ####################################################################
 
-Known unknown bug: if the logout timer is less than the max voice recording time period.
+Known unknown bug: if the logout timer is less than the max voice recording time period... we have no idea what happens.
 
 MMS logging:
     -When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.
