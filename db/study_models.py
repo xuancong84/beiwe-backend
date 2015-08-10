@@ -98,7 +98,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "accelerometer_on_duration_seconds": 300,
                 "bluetooth_on_duration_seconds": 300,
                 "bluetooth_total_duration_seconds": 300, #TODO: Eli, change this to off duration in app and here.
-                "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this. 
+                "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this parameter for bluetooth. 
                 "check_for_new_surveys_frequency_seconds": 3600 * 6,
                 "create_new_data_files_frequency_seconds": 15 * 60,
                 "gps_off_duration_seconds": 300,
@@ -132,7 +132,7 @@ class Survey( DatabaseObject ):
         inner-lists, each inner list contains any number of times of the day,
         times of day are integer values indicating the "seconds past 12am". """
         
-    #TODO: Josh. define / document the survey json survey format you created.
+    #TODO: Low priority. Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
     PATH = "beiwe.surveys"
     DEFAULTS = {"content": [],

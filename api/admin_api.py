@@ -97,7 +97,7 @@ def download():
     """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
-#TODO: Eli. this is part of the download script (maybe), find and purge.
+#TODO: Low priority. Eli. this is part of the download script (maybe), find and purge.
 # @admin_api.route("/user_list")
 # def get_user_list():
 #     all_users = ""

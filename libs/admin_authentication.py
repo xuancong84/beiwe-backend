@@ -53,8 +53,8 @@ def is_logged_in():
 
 class ArgumentMissingException(Exception): pass
 
-#TODO: Josh/Alvin. permission denied page
-#TODO: Josh/Alvin. (low priority) we need a survey does not exist error page.
+#TODO: Low Priority. Josh/Alvin. permission denied page.
+#TODO: Low Priority. Josh/Alvin.  we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
     """ This authentication decorator checks whether the user has permission to
         to access the study/survey they are accessing.
@@ -114,19 +114,22 @@ def admin_is_system_admin():
 
 #TODO: Josh/Alvin. (low priority) we need a permission denied page.
 def authenticate_system_admin(some_function):
-#     print "\n\n doees this even run\n\n\n"
+    """ Authenticate system admin checks whether a user is a system admin before
+    allowing access to pages marked with this decorator.  If a study_id variable
+    is supplied as a keyword argument, the decoator will automatically grab the
+    ObjectId in place of the string provided in a route. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
             # TODO: Josh, redirect to a URL, not a template file
             return redirect("permission_denied.html")
-        # TODO: Josh, avoid this code duplication with the decorator above
         if 'study_id' in kwargs:
-            study_id = ObjectId(kwargs['study_id'])
-            kwargs['study_id'] = study_id
-            study = Studies(_id=study_id)
-            if not study:
+            study_id = kwargs['study_id']
+            if not isinstance(study_id, ObjectId):
+                study_id = ObjectId(study_id)
+                kwargs['study_id'] = study_id
+            if not Studies(_id=study_id):
                 return redirect("/")
         return some_function(*args, **kwargs)
     return authenticate_and_call

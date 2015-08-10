@@ -47,8 +47,6 @@ def e500_text(e):
     except Exception as e:
         log_error(e)
     return abort(500)
-# TODO: Eli, determine if we should load the 500 Error page instead of showing the user a stack trace
-#    return render_template("500.html",is_logged_in=is_logged_in())
 
 
 if __name__ == '__main__':

@@ -68,7 +68,7 @@ def manage_studies():
 
 @system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
 @authenticate_system_admin
-def edit_study(study_id):
+def edit_study(study_id=None):
     return render_template('edit_study.html', study=Study(study_id),
                            all_admins=Admins(),
                            allowed_studies=get_admins_allowed_studies(),

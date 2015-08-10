@@ -16,33 +16,6 @@ from libs.logging import log_error
 mobile_api = Blueprint('mobile_api', __name__)
 
 ################################################################################
-############################# DOWNLOADS ########################################
-################################################################################
-
-@mobile_api.route("/download_surveys", methods=['GET', 'POST']) 
-@authenticate_user
-def download_surveys():
-    # TODO: Eli. handle survey deletion in the app correctly.
-    patient_id = request.values['patient_id']
-    user = User(patient_id)
-    study = Study(user.study_id)
-    surveys = study.get_surveys_for_study()
-    #TODO: Eli/Josh/Alvin there is no way this is valid, there is always something wrong with json dumps.
-    return json.dumps(surveys)
-
-#TODO: Eli. find and purge all instances in the app that contain these two urls, point them at the new downloader
-# @mobile_api.route('/download_daily_survey', methods=['GET', 'POST'])
-# @authenticate_user
-# def download_daily_survey():
-#     return get_latest_survey('daily')
-# 
-# @mobile_api.route('/download_weekly_survey', methods=['GET', 'POST'])
-# @authenticate_user
-# def download_weekly_survey():
-#     return get_latest_survey('weekly')
-
-
-################################################################################
 ################################ UPLOADS #######################################
 ################################################################################
 
@@ -167,7 +140,7 @@ def contains_valid_extension(file_name):
     return '.' in file_name and grab_file_extension(file_name) in ALLOWED_EXTENSIONS
 
 ################################################################################
-########################### Device Survey Getters ##############################
+################################# Download #####################################
 ################################################################################
 
 @mobile_api.route('/download', methods=['GET', 'POST'])

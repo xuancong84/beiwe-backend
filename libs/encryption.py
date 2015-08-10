@@ -40,7 +40,7 @@ def import_RSA_key( key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-#TODO: Eli. make a version of the decryption function that takes an encryption key directly, for use in download script.
+#TODO: Low Priority. Eli. make a version of the decryption function that takes an encryption key directly, for use in download script.
 
 def encrypt_for_server(input_string, study_id):
     """ encrypts config using the ENCRYPTION_KEY, prepends the generated
@@ -102,7 +102,6 @@ def decrypt_device_file(patient_id, data, private_key):
             elif 'Incorrect padding' in e.message:
                 error_message += "base64 padding error, config is truncated."
                 # this is only seen in mp4 files. possibilities:
-                #TODO: Eli. check that app-side file handling to only upload retired files is activated for the voice recording
                 #  upload during write operation.
                 #  broken ba    se64 conversion in the app
                 #  some unanticipated error in the file upload

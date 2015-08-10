@@ -29,11 +29,9 @@ def validate_post( *args, **kwargs ):
     user = User( request.values['patient_id'] )
     if not user.validate_password( request.values['password'] ): return False
     if not user['device_id'] == request.values['device_id']: return False
-
     return True
 
 
-#TODO: Eli. probably grab the study for this variable
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords

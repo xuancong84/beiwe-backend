@@ -67,7 +67,6 @@ def s3_list_files( prefix ):
 
 def create_client_key_pair(patient_id, study_id):
     """Generate key pairing, push to database, return sanitized key for client."""
-    #TODO: Eli. file paths...
     public, private = encryption.generate_key_pairing()
     s3_upload( "keys/" + patient_id + "_private", private, study_id )
     s3_upload( "keys/" + patient_id + "_public", public, study_id )
