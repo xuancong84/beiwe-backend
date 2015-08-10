@@ -67,23 +67,28 @@ Customizable wording, customizable from the admin panel at the time of study cre
 ######################### FRONT END ########################
 ############################################################
 
+
 attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
     -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
 
 Eli, do the lists of survey times have to be ordered?
     yes.
 
-double click protection on buttons?
+(Not really front-end, but it's here for Josh) Handle app registration, including app pulling a bunch of values from the server.  Make sure that we can, after the start of a study, stuff additional values into that JSON blob without crashing.  i.e., look for specific values, but don't crash if they aren't there.
 
-implement completely new day-of-week and time(s) picker.
+Double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  Basically use JS to make the buttons un-clickable until the network request finishes.
 
 When your login session times out and you try to do a user action, it prints an HTML error message.  The problem is in JavaScript somewhere... solve it.
+
+Check why automatic logout keeps happening
 
 Make Edit Study's Device Parameters page include the editable text strings
 
 See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
 error page for admin permission denied (put in decorator)
+
+Add ability to delete users?
 
 Graph stuff
     -Make it look pretty for all the different types of survey questions
