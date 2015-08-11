@@ -76,8 +76,9 @@ def authenticate_admin_study_access(some_function):
         if "survey_id" in kwargs:
             #turn the survey_id into a bson ObjectId.
             survey_id = ObjectId(kwargs["survey_id"]) 
-            kwargs['survey_id'] = survey_id 
-            study = Studies(survey=survey_id)
+            kwargs['survey_id'] = survey_id
+            #MongoDB checks both equality and contains when you pass it a value.
+            study = Studies(surveys=survey_id)
             if not study: #study does not exist.
                 return abort(404)
             #check admin is allowed, allow system admins.
