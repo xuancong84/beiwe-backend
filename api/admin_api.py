@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, redirect, request, send_file
+from flask import abort, Blueprint, make_response, redirect, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_admin_login, authenticate_system_admin
 from db.user_models import User, Admin
@@ -53,6 +53,7 @@ def set_researcher_password():
 """########################## User Administration ###########################"""
 
 @admin_api.route('/reset_patient_password', methods=["POST"])
+#TODO: Josh, make this study-specific, and use @authenticate_admin_study_access
 @authenticate_admin_login
 def reset_user_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
@@ -61,11 +62,12 @@ def reset_user_password():
         user = User(patient_id)
         new_password = user.reset_password()
         user.set_password(new_password)
-        return new_password
-    return "that patient id does not exist"
+        return make_response(new_password, 201)
+    return make_response("that patient id does not exist", 404)
 
 
 @admin_api.route('/reset_device', methods=["POST"])
+#TODO: Josh, make this study-specific, and use @authenticate_admin_study_access
 @authenticate_admin_login
 def reset_device():
     """ Resets a patient's device.  The patient will not be able to connect
@@ -74,8 +76,8 @@ def reset_device():
     if User.exists(patient_id):
         user = User(patient_id)
         user.clear_device()
-        return "device has been reset, password is untouched."
-    return "that patient id does not exist"
+        return make_response("device was reset; password is untouched.", 201)
+    return make_response("that patient id does not exist", 404)
 
 
 @admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])
@@ -84,10 +86,12 @@ def create_new_patient(study_id=None):
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, adds user to the study they are supposed to be attached
     to, returns a string containing password and patient id. """
+    # TODO: Eli, return an error if creating a patient failed
     patient_id, password = User.create(study_id)
     s3_upload(patient_id, "", study_id)
     create_client_key_pair(patient_id, study_id)
-    return "patient_id: " + patient_id + "\npassword: " + password
+    response_string = "patient_id: " + patient_id + "\npassword: " + password
+    return make_response(response_string, 201)
 
 
 """########################## Other Stuff ###################################"""

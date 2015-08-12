@@ -22,12 +22,9 @@ app: check that the app's code for only uploading retired files is actually func
 app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
 !!!!!!
 
-website: attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
-    -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
+website: make reset_device() and reset_password() study-specific
 
 website: implement double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  (Basically use JS to make the buttons un-clickable until the network request finishes.)
-
-website: When the login session times out and you try to do a user action, it prints an HTML error message.  The problem is in JavaScript somewhere... solve it.
 
 backend/website: Check why automatic logout keeps happening
 
@@ -133,6 +130,7 @@ Graph stuff
 ####################################################################
 
 Known unknown bug: if the logout timer is less than the max voice recording time period... we have no idea what happens.
+[this is Josh:] To answer the above, I'm pretty sure that nothing bad happens: the app automatically logs out, which triggers OnPause in the AudioRecordingActivity, which stops the recording and saves it.  It's bad UX, because the user might be logged out before they've finished the recording, but nothing should actually BREAK.
 
 MMS logging:
     -When we receive MMS messages, we are not grabbing the message length or the "sent time" timestamp.

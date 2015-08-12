@@ -33,7 +33,7 @@ def authenticate_admin_login(some_function):
 
 def log_in_admin(username):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
-    session['expiry'] = datetime.now() + timedelta(hours=1)
+    session['expiry'] = datetime.now() + timedelta(hours=6)
     session['admin_username'] = username
 
 
@@ -124,6 +124,8 @@ def authenticate_system_admin(some_function):
     and probably causes a 500 error inside the authenticate_admin_study_access decorator."""
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
+        if not is_logged_in(): #check for regular login requirement
+            return redirect("/")
         admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
             # TODO: Josh. redirect to a URL, not a template file

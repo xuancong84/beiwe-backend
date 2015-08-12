@@ -9,24 +9,59 @@ function logout() {
 }
 
 function create_new_patient(study_id) {
-    $.post('/create_new_patient/' + study_id, function(response) {
-        alert("Created a new patient!\n" + response);
-    });
-    // TODO: reload page; try using location.reload() somewhere
+    $.ajax({
+        type: 'POST',
+        url: '/create_new_patient/' + study_id,
+        data: {
+        },
+        statusCode: {
+            201: function(response) {
+                alert("Created a new patient:\n" + response);
+            }
+        }
+    }).done(function() {
+        location.reload();
+    }).fail(function() {
+        alert("Something went wrong when trying to create a new patient, sorry!");
+    })
 }
 
 function reset_device(patient_id) {
-    $.post('/reset_device', { 'patient_id': patient_id }, function(response) {
-        alert("For patient " + patient_id + ", " + response);
-    });
-    // TODO: reload page
+    $.ajax({
+        type: 'POST',
+        url: '/reset_device',
+        data: {
+            'patient_id': patient_id
+        },
+        statusCode: {
+            201: function(response) {
+                alert("For patient " + patient_id + ", " + response);
+            }
+        }
+    }).done(function() {
+        location.reload();
+    }).fail(function() {
+        alert("Sorry, something went wrong when trying to reset the patient's device.");
+    })
 }
 
 function reset_patient_password(patient_id) {
-    $.post('/reset_patient_password', { 'patient_id': patient_id }, function(response) {
-        alert("Patient " + patient_id + "'s password has been reset to " + response);
-    });
-    // TODO: reload page
+    $.ajax({
+        type: 'POST',
+        url: '/reset_patient_password',
+        data: {
+            'patient_id': patient_id
+        },
+        statusCode: {
+            201: function(response) {
+                alert("Patient " + patient_id + "'s password has been reset to " + response);
+            }
+        }
+    }).done(function() {
+        // No need to reload the page, since no visible change is displayed
+    }).fail(function() {
+        alert("Sorry, something went wrong when trying to reset the patient's password.");
+    })
 }
 
 function remove_admin_from_study(admin_id, study_id) {

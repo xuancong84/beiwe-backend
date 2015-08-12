@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, request, redirect, json
+from flask import abort, Blueprint, make_response, request, redirect, json
 from libs.admin_authentication import authenticate_admin_study_access
 from db.study_models import Survey, Study
 
@@ -40,4 +40,4 @@ def update_survey(survey_id=None):
     questions = json.loads(request.values['questions'])
     timings = json.loads(request.values['timings'])
     survey.update({'content': questions, 'timings': timings})
-    return '200'
+    return make_response("", 201)

@@ -45,10 +45,19 @@ function end() {
         data: {
             questions: JSON.stringify(questions),
             timings: JSON.stringify(survey_times)
+        },
+        statusCode: {
+            200: function(response) {
+                // A redirect to the Login page will show up as a 200 redirect
+                alert("Your session may have expired. Open a new browser tab, log in to beiwe.org, and then click the 'Save and Deploy' button again on this tab.");
+            },
+            201: function(response) {
+                alert("Survey saved and submitted successfully!");
+                location.reload();
+            }
         }
     }).done(function() {
-        alert("Survey saved and submitted successfully!");
-        location.reload();
+        // Don't do anything; this actually gets called BEFORE the statusCode functions
     }).fail(function() {
         alert("There was a problem with updating the survey, sorry!");
     })
