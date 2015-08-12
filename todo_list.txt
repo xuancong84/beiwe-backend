@@ -1,4 +1,3 @@
-
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
@@ -18,11 +17,20 @@ app, bug: the app does not handle the 406 code, and the corrosponding error in t
 
 app: check that the app's code for only uploading retired files is actually functional for audio recording files.
 
+app: BIG FAT BUG: when you have two survey notifications... the second survey does not work. :D
+
 !!!!!!
 app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
 !!!!!!
 
 website: make reset_device() and reset_password() study-specific
+
+website: add to the delete survey confirmation that deleting a survey will remove any alert for a user to take that survey.
+
+website: attempting actions on the control panel after a session has timed out causes the error html of the error page to be printed to an error dialogue box.
+    -maybe check return codes, and have a standard error message for 500 and 403(?) errors.
+
+website: bug? related to the above and below, the time setting displays a success message even on a failure due to the logout period.
 
 website: implement double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  (Basically use JS to make the buttons un-clickable until the network request finishes.)
 
