@@ -36,20 +36,20 @@
                 </td>
                 <td>
                   {% if patients[patient]['has_device'] %}
-                    <button type="button" class="btn btn-warning btn-sm" onclick="reset_device('{{patient}}')" >Un-Register Smartphone</button>
+                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{patient}}')" >Un-Register Smartphone</button>
                   {% else %}
                     No smartphone registered
                   {% endif %}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm" onclick="reset_patient_password('{{patient}}')" >Reset Password</button>
+                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{patient}}')" >Reset Password</button>
                 </td>
               </tr>
             {% endfor %}
 
           </tbody>
         </table>
-        <button type="button" class="btn btn-primary" onclick="create_new_patient('{{ study._id }}')">Add New Patient</button>
+        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study._id }}')">Add New Patient</button>
 
         </br></br>
 

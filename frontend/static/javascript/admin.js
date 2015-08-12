@@ -9,6 +9,7 @@ function logout() {
 }
 
 function create_new_patient(study_id) {
+    $('.add_new_patient_button').prop('disabled', true);  // Disable the button
     $.ajax({
         type: 'POST',
         url: '/create_new_patient/' + study_id,
@@ -23,10 +24,12 @@ function create_new_patient(study_id) {
         location.reload();
     }).fail(function() {
         alert("Something went wrong when trying to create a new patient, sorry!");
-    })
+        $('#add_new_patient_button').prop('disabled', false);  // Re-enable the button
+    });
 }
 
 function reset_device(patient_id) {
+    $('.reset_device_button').prop('disabled', true);  // Disable all reset_device buttons
     $.ajax({
         type: 'POST',
         url: '/reset_device',
@@ -42,10 +45,12 @@ function reset_device(patient_id) {
         location.reload();
     }).fail(function() {
         alert("Sorry, something went wrong when trying to reset the patient's device.");
-    })
+        $('.reset_device_button').prop('disabled', false);  // Re-enable all reset_device buttons
+    });
 }
 
 function reset_patient_password(patient_id) {
+    $('.reset_password_button').prop('disabled', true);  // Disable all reset_password buttons
     $.ajax({
         type: 'POST',
         url: '/reset_patient_password',
@@ -59,12 +64,15 @@ function reset_patient_password(patient_id) {
         }
     }).done(function() {
         // No need to reload the page, since no visible change is displayed
+        $('.reset_password_button').prop('disabled', false);  // Re-enable all reset_password buttons
     }).fail(function() {
         alert("Sorry, something went wrong when trying to reset the patient's password.");
-    })
+        $('.reset_password_button').prop('disabled', false);  // Re-enable all reset_password buttons
+    });
 }
 
 function remove_admin_from_study(admin_id, study_id) {
+    $('.add_admin_to_study_button').prop('disabled', true);  // Disable the button
     $.ajax({
         type: 'POST',
         url: '/remove_admin_from_study',
@@ -76,10 +84,12 @@ function remove_admin_from_study(admin_id, study_id) {
         location.reload();
     }).fail(function() {
         alert("There was a problem with removing the admin, sorry!");
-    })
+        $('.add_admin_to_study_button').prop('disabled', false);  // Re-enable the button
+    });
 }
 
 function add_admin_to_study() {
+    $('.remove_admin_from_study_button').prop('disabled', true);  // Disable the link
     $.ajax({
         type: 'POST',
         url: '/add_admin_to_study',
@@ -91,5 +101,6 @@ function add_admin_to_study() {
         location.reload();
     }).fail(function() {
         alert("There was a problem with adding the admin, sorry!");
-    })
+        $('.remove_admin_from_study_button').prop('disabled', false);  // Re-enable the link
+    });
 }

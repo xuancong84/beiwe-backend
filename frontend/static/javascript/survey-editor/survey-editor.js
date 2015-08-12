@@ -35,9 +35,8 @@ function getDayOfWeek() {
     return parseInt(dayPicker.value);
 }
 
-// TODO: Josh, make this update the survey properly
-// On end(), export the survey as a JSON object
 function end() {
+    $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     $.ajax({
         type: 'POST',
@@ -58,9 +57,11 @@ function end() {
         }
     }).done(function() {
         // Don't do anything; this actually gets called BEFORE the statusCode functions
+        $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
     }).fail(function() {
         alert("There was a problem with updating the survey, sorry!");
-    })
+        $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
+    });
 }
 
 // Turn the survey into a JSON object with an array of questions and other attributes
