@@ -26,3 +26,17 @@ CHECKBOX_TOGGLES = ["accelerometer",
                   "bluetooth",
                   "power_state"
                 ]
+
+TIMER_VALUES = ["accelerometer_off_duration_seconds",
+                "accelerometer_on_duration_seconds",
+                "bluetooth_on_duration_seconds",
+                "bluetooth_total_duration_seconds",
+                "bluetooth_global_offset_seconds",
+                "check_for_new_surveys_frequency_seconds",
+                "create_new_data_files_frequency_seconds",
+                "gps_off_duration_seconds",
+                "gps_on_duration_seconds",
+                "seconds_before_auto_logout",
+                "upload_data_files_frequency_seconds",
+                "voice_recording_max_time_length_seconds",
+                "wifi_log_frequency_seconds"]
