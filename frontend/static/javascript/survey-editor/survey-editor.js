@@ -6,7 +6,9 @@ var questions = [];
 
 $(document).ready(function() {
     questions = JSON.parse(survey_content);
-    renderQuestionsList();
+    if (tracking_survey) {
+        renderQuestionsList();
+    };
     renderSchedule();
 
     $('.schedule-timepicker').timepicker();
@@ -35,15 +37,22 @@ function getDayOfWeek() {
     return parseInt(dayPicker.value);
 }
 
-// TODO: Josh, make this update the survey properly
-// On end(), export the survey as a JSON object
 function end() {
+    var content = "";
+    if (tracking_survey) {
+        content = JSON.stringify(questions);
+    } else {
+        content_list = [];
+        content_list.push($('#voice_recording_prompt_text_input').val());
+        content = JSON.stringify(content_list);
+    }
+    $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     $.ajax({
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            questions: JSON.stringify(questions),
+            content: content,
             timings: JSON.stringify(survey_times)
         },
         statusCode: {
@@ -58,9 +67,11 @@ function end() {
         }
     }).done(function() {
         // Don't do anything; this actually gets called BEFORE the statusCode functions
+        $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
     }).fail(function() {
         alert("There was a problem with updating the survey, sorry!");
-    })
+        $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
+    });
 }
 
 // Turn the survey into a JSON object with an array of questions and other attributes

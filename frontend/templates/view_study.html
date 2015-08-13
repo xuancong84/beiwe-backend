@@ -36,42 +36,59 @@
                 </td>
                 <td>
                   {% if patients[patient]['has_device'] %}
-                    <button type="button" class="btn btn-warning btn-sm" onclick="reset_device('{{patient}}')" >Un-Register Smartphone</button>
+                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{patient}}')" >Un-Register Smartphone</button>
                   {% else %}
                     No smartphone registered
                   {% endif %}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm" onclick="reset_patient_password('{{patient}}')" >Reset Password</button>
+                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{patient}}')" >Reset Password</button>
                 </td>
               </tr>
             {% endfor %}
 
           </tbody>
         </table>
-        <button type="button" class="btn btn-primary" onclick="create_new_patient('{{ study._id }}')">Add New Patient</button>
+        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study._id }}')">Add New Patient</button>
 
         </br></br>
 
         <div class="row">
           <h3>Surveys</h3>
-        </div>
 
-        <div class="list-group">
-          {# If there are surveys attached to this study, list them #}
-          {% if survey_ids %}
-            {% for survey_id in survey_ids %}
-              <h4><a href="/edit_survey/{{survey_id}}" class="list-group-item">Survey ID #{{survey_id}}</a></h4>
-            {% endfor %}
-          {# If there aren't surveys attached to this study, show a message saying "no surveys" #}
-          {% else %}
-            <p><b>This study does not have any surveys.</b></p>
-          {% endif %}
+          <div class="list-group">
+            {# If there are surveys attached to this study, list them #}
+            {% if tracking_survey_ids %}
+              {% for survey_id in tracking_survey_ids %}
+                <h4><a href="/edit_survey/{{survey_id}}" class="list-group-item">Survey ID #{{survey_id}}</a></h4>
+              {% endfor %}
+            {# If there aren't surveys attached to this study, show a message saying "no surveys" #}
+            {% else %}
+              <p><b>This study does not have any surveys.</b></p>
+            {% endif %}
+          </div>
+
+          {# TODO: Josh, make this pass in the study ID #}
+          <a href="/create_survey/{{ study._id }}/tracking_survey" class="btn btn-info">Create new survey</a>
         </div>
 
         <div class="row">
+          <h3>Audio Surveys</h3>
+
+          <div class="list-group">
+            {# If there are surveys attached to this study, list them #}
+            {% if audio_survey_ids %}
+              {% for survey_id in audio_survey_ids %}
+                <h4><a href="/edit_survey/{{survey_id}}" class="list-group-item">Audio Survey ID #{{survey_id}}</a></h4>
+              {% endfor %}
+            {# If there aren't surveys attached to this study, show a message saying "no surveys" #}
+            {% else %}
+              <p><b>This study does not have any audio surveys.</b></p>
+            {% endif %}
+          </div>
+
           {# TODO: Josh, make this pass in the study ID #}
-          <a href="/create_survey/{{ study._id }}" class="btn btn-info">Create new survey</a>
+          <a href="/create_survey/{{ study._id }}/audio_survey" class="btn btn-info">Create new <b>audio survey</b></a>
         </div>
 
       </div>

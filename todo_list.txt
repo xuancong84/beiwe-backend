@@ -31,8 +31,6 @@ website: make reset_device() and reset_password() study-specific
 
 website: add to the delete survey confirmation that deleting a survey will remove any alert for a user to take that survey.
 
-website: implement double click protection on buttons, specifically for the operations in the user management panel, like Create New User and Reset password, which are slow because they have long server/network operations.  (Basically use JS to make the buttons un-clickable until the network request finishes.)
-
 backend/website: Check why automatic logout keeps happening
 
 website/backend: Make Edit Study's Device Parameters page include the editable text strings

@@ -8,11 +8,12 @@ survey_api = Blueprint('survey_api', __name__)
 ############################# Creation/Deletion ##############################
 ################################################################################
 
-@survey_api.route('/create_survey/<string:study_id>', methods=['GET','POST'])
+@survey_api.route('/create_survey/<string:study_id>/<string:survey_type>',
+                  methods=['GET','POST'])
 @authenticate_admin_study_access
-def create_new_survey(study_id=None):
+def create_new_survey(study_id=None,survey_type='tracking_survey'):
     study = Study(study_id)
-    new_survey = Survey.create_default_survey('android_survey')
+    new_survey = Survey.create_default_survey(survey_type)
     study.add_survey(new_survey)
     return redirect('edit_survey/' + str(new_survey._id))
 
@@ -37,7 +38,7 @@ def update_survey(survey_id=None):
     survey = Survey(survey_id)
     if not survey:
         return abort(404)
-    questions = json.loads(request.values['questions'])
+    content = json.loads(request.values['content'])
     timings = json.loads(request.values['timings'])
-    survey.update({'content': questions, 'timings': timings})
+    survey.update({'content': content, 'timings': timings})
     return make_response("", 201)

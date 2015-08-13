@@ -16,7 +16,7 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
 #Survey types
-SURVEY_TYPES = ['audio', 'android_survey']
+SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
 CHECKBOX_TOGGLES = ["accelerometer",
                   "gps",

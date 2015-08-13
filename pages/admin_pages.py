@@ -27,9 +27,12 @@ def choose_study():
 def view_study(study_id=None):
     study = Study(study_id)
     patients = {user['_id']: patient_dict(user) for user in Users( study_id = study_id )}
-    survey_ids = study.get_survey_ids_for_study()
+    tracking_survey_ids = study.get_survey_ids_for_study('tracking_survey')
+    audio_survey_ids = study.get_survey_ids_for_study('audio_survey')
     return render_template('view_study.html', study=study, patients=patients,
-                           survey_ids=survey_ids, study_name=study.name,
+                           audio_survey_ids=audio_survey_ids,
+                           tracking_survey_ids=tracking_survey_ids,
+                           study_name=study.name,
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 

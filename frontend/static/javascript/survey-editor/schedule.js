@@ -79,10 +79,8 @@ function add_time() {
 
 
 function add_time_to_day_index(time, day_index) {
-    console.log("time = " + time);
     survey_times[day_index].push(time);
     survey_times[day_index].sort();
-    console.log(survey_times[day_index]);
 }
 
 
