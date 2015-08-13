@@ -20,6 +20,7 @@ app: when downloading new surveys, handle survey deletion, and identification-pe
 app, bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
 
 app: check that the app's code for only uploading retired files is actually functional for audio recording files.
+    !!!!CHECK FOR INTERACTIONS WITH NEW FILE DELETION LOGIC AND THE 406 STATUS CODE.
 
 app: Since HTTPAsync was refactored it has become unclear whether the httpAsync http request logic properly handle response codes.  Investigate, redoc, determine behavior.
 
