@@ -2,7 +2,7 @@ from os import urandom
 
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
-from config.constants import ASYMMETRIC_KEY_LENGTH
+from config.security import ASYMMETRIC_KEY_LENGTH
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study

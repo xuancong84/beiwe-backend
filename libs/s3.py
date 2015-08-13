@@ -1,13 +1,13 @@
 from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
-from config.constants import S3_BUCKET
+from config.security import S3_BUCKET
 from libs import encryption, logging
 
-from config.global_passwords import aws_secret_access_key, aws_access_key_id
+from config.security import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 
-CONN = connect_s3(aws_access_key_id=aws_access_key_id,
-                  aws_secret_access_key=aws_secret_access_key)
+CONN = connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
+                  aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
 
 def _get_bucket(name):

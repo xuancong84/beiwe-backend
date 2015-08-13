@@ -25,9 +25,18 @@ FLASK_SECRET_KEY = "abcdefghijklmnopqrstuvwxyz012345"
 
 # These are your AWS (Amazon Web Services) access credentials.
 # (Amazon provides you with these credentials, you do not generate them.)
+AWS_ACCESS_KEY_ID = "aws_access_credential"
+AWS_SECRET_ACCESS_KEY = "aws_secret_access_credential"
 
-aws_access_key_id = "aws_access_credential"
-aws_secret_access_key = "aws_access_credential"
+# the name of the s3 bucket that will be used to store config
+S3_BUCKET = "edit_me"
+
+# The length of the public/private keys used in encrypting user config on their device
+ASYMMETRIC_KEY_LENGTH = 2048
+
+# The number of iterations used in password hashing. You CANNOT change this
+# value once people have created passwords, because then the hashes won't match!
+ITERATIONS = 1000
 
 
 """            Setting up MongoDB and mongolia

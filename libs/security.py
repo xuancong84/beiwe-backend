@@ -1,7 +1,7 @@
 import base64, hashlib, re
 
-from config.global_passwords import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY
-from config.constants import ITERATIONS
+from config.security import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY,\
+                            ITERATIONS
 from os import urandom
 from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.

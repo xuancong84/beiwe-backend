@@ -3,10 +3,8 @@
 *~
 .settings
 .DS_Store
-secure.py
 .project
 *.pem
-config/global_passwords.py
-config/constants.py
+config/security.py
 .mongodb
 .idea/
