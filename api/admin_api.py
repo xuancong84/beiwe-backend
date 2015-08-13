@@ -1,6 +1,6 @@
 from flask import abort, Blueprint, make_response, redirect, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
-    authenticate_admin_login, authenticate_system_admin
+    authenticate_system_admin
 from db.user_models import User, Admin
 from db.study_models import Study, Studies
 from bson.objectid import ObjectId
@@ -52,13 +52,12 @@ def set_researcher_password():
 
 """########################## User Administration ###########################"""
 
-@admin_api.route('/reset_patient_password', methods=["POST"])
-#TODO: Josh, make this study-specific, and use @authenticate_admin_study_access
-@authenticate_admin_login
-def reset_user_password():
+@admin_api.route('/reset_patient_password/<string:study_id>', methods=["POST"])
+@authenticate_admin_study_access
+def reset_user_password(study_id=None):
     """ Takes a patient ID and resets its password. Returns the new random password."""
     patient_id = request.values["patient_id"]
-    if User.exists(patient_id):
+    if User.exists(patient_id) and User(patient_id).study_id == study_id:
         user = User(patient_id)
         new_password = user.reset_password()
         user.set_password(new_password)
@@ -66,14 +65,13 @@ def reset_user_password():
     return make_response("that patient id does not exist", 404)
 
 
-@admin_api.route('/reset_device', methods=["POST"])
-#TODO: Josh, make this study-specific, and use @authenticate_admin_study_access
-@authenticate_admin_login
-def reset_device():
+@admin_api.route('/reset_device/<string:study_id>', methods=["POST"])
+@authenticate_admin_study_access
+def reset_device(study_id=None):
     """ Resets a patient's device.  The patient will not be able to connect
         until expect to register a new device. """
     patient_id = request.values["patient_id"]
-    if User.exists(patient_id):
+    if User.exists(patient_id) and User(patient_id).study_id == study_id:
         user = User(patient_id)
         user.clear_device()
         return make_response("device was reset; password is untouched.", 201)

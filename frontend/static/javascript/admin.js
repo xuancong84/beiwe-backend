@@ -28,11 +28,11 @@ function create_new_patient(study_id) {
     });
 }
 
-function reset_device(patient_id) {
+function reset_device(study_id, patient_id) {
     $('.reset_device_button').prop('disabled', true);  // Disable all reset_device buttons
     $.ajax({
         type: 'POST',
-        url: '/reset_device',
+        url: '/reset_device/' + study_id,
         data: {
             'patient_id': patient_id
         },
@@ -49,11 +49,11 @@ function reset_device(patient_id) {
     });
 }
 
-function reset_patient_password(patient_id) {
+function reset_patient_password(study_id, patient_id) {
     $('.reset_password_button').prop('disabled', true);  // Disable all reset_password buttons
     $.ajax({
         type: 'POST',
-        url: '/reset_patient_password',
+        url: '/reset_patient_password/' + study_id,
         data: {
             'patient_id': patient_id
         },
