@@ -4,18 +4,15 @@
 
 !!!!!
 handle dev.beiwe.org server configuration for app.
+administrative: SSL on the new server.
+    do we have a wildcard cert?
 !!!!!
 
 administrate: Make new access credentials for the beiwe2 bucket, so that it can be handed out without  myself and josh and the server.
 
 administrative: implement mongobackups of the mongo db on the server.
 
-administrative: SSL on the new server.
-    do we have a wildcard cert?
-
-architecture: add survey notification to the things that can be set remotely.
-
-app: when downloading new surveys, handle survey deletion, and identification-persistence (when a person has a notification for survey 2 the survey does not get deleted.)
+architecture: add survey notification text to the things that can be set remotely.
 
 app, bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
 
@@ -28,8 +25,6 @@ app + backend: add device settings values values supplied during registration, m
 !!!!!!
 
 website: make reset_device() and reset_password() study-specific
-
-website: add to the delete survey confirmation that deleting a survey will remove any alert for a user to take that survey.
 
 backend/website: Check why automatic logout keeps happening
 
