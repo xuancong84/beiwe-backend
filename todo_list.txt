@@ -27,11 +27,10 @@ app + backend: add device settings values values supplied during registration, m
 
 website: make reset_device() and reset_password() study-specific
 
-backend/website: Check why automatic logout keeps happening
+backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
+website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
 website/backend: Make Edit Study's Device Parameters page include the editable text strings
-
-website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
 website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
 
