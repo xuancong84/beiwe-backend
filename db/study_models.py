@@ -68,8 +68,9 @@ class Study( DatabaseObject ):
             x['_id'] = str(x['_id'])
         return ret
     
-    def get_survey_ids_for_study(self):
-        return [str(survey) for survey in self['surveys']]
+    def get_survey_ids_for_study(self, survey_type='tracking_survey'):
+        return [Survey(survey_id)['_id'] for survey_id in self['surveys']
+                if Survey(survey_id)['survey_type'] == survey_type]
     
     def get_study_device_settings(self):
         return StudyDeviceSettings(self['device_settings'])

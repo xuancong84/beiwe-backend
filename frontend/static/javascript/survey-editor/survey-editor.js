@@ -6,7 +6,9 @@ var questions = [];
 
 $(document).ready(function() {
     questions = JSON.parse(survey_content);
-    renderQuestionsList();
+    if (tracking_survey) {
+        renderQuestionsList();
+    };
     renderSchedule();
 
     $('.schedule-timepicker').timepicker();
@@ -36,13 +38,21 @@ function getDayOfWeek() {
 }
 
 function end() {
+    var content = "";
+    if (tracking_survey) {
+        content = JSON.stringify(questions);
+    } else {
+        content_list = [];
+        content_list.push($('#voice_recording_prompt_text_input').val());
+        content = JSON.stringify(content_list);
+    }
     $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
     $.ajax({
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            questions: JSON.stringify(questions),
+            content: content,
             timings: JSON.stringify(survey_times)
         },
         statusCode: {
