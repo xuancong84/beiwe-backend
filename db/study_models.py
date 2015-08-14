@@ -74,9 +74,7 @@ class Study( DatabaseObject ):
                 if Survey(survey_id)['survey_type'] == survey_type]
     
     def get_study_device_settings(self):
-        device_settings = StudyDeviceSettings(self['device_settings'])
-        device_settings.pop('_id', None)
-        return device_settings
+        return StudyDeviceSettings(self['device_settings'])
     
     
 class StudyDeviceSettings( DatabaseObject ):

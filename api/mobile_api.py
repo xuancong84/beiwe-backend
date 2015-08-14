@@ -111,8 +111,10 @@ def register_user():
     # set up device.
     user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
+    device_settings = Study(study_id).get_study_device_settings()
+    device_settings.pop('_id', None)
     return_obj = {'client_public_key': get_client_public_key_string(patient_id, study_id),
-                  'device_settings': Study(study_id).get_study_device_settings()}
+                  'device_settings': device_settings}
     return json.dumps(return_obj), 200
 
 
