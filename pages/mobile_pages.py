@@ -24,15 +24,15 @@ def fetch_graph():
     
     return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
 
-
+#TODO: production. disable this page.
 # this is a debugging function, it displays the user graph for a given user.
-@mobile_pages.route("/fake", methods=["GET"] )
-def fake_survey():
-    patient_id = request.values['patient_id']
-    daily_data = graph_data.get_survey_results(username=patient_id,
-                                 survey_type=DAILY_SURVEY_NAME, number_points=7)
-    
-    weekly_data = graph_data.get_survey_results(username=patient_id,
-                                 survey_type=WEEKLY_SURVEY_NAME, number_points=7)
-    
-    return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)
+# @mobile_pages.route("/fake", methods=["GET"] )
+# def fake_survey():
+#     patient_id = request.values['patient_id']
+#     daily_data = graph_data.get_survey_results(username=patient_id,
+#                                  survey_type=DAILY_SURVEY_NAME, number_points=7)
+#     
+#     weekly_data = graph_data.get_survey_results(username=patient_id,
+#                                  survey_type=WEEKLY_SURVEY_NAME, number_points=7)
+#     
+#     return render_template("phone_graphs.html", weekly_data=weekly_data, daily_data=daily_data)

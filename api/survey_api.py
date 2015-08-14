@@ -5,7 +5,7 @@ from db.study_models import Survey, Study
 survey_api = Blueprint('survey_api', __name__)
 
 ################################################################################
-############################# Creation/Deletion ##############################
+############################## Creation/Deletion ###############################
 ################################################################################
 
 @survey_api.route('/create_survey/<string:study_id>/<string:survey_type>',
@@ -41,4 +41,7 @@ def update_survey(survey_id=None):
     content = json.loads(request.values['content'])
     timings = json.loads(request.values['timings'])
     survey.update({'content': content, 'timings': timings})
+    #TODO: Low priority. Eli/Josh. The following line is obviously the best way
+    # to return a response code, there are other places in the code base where
+    # we have stupid hacks, please find and replace.
     return make_response("", 201)

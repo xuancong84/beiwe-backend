@@ -97,17 +97,20 @@ def authenticate_admin_study_access(some_function):
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
+
+#TODO: Low priority. Josh.  Find a way to do these solely in the nav bar template. 
+def admin_is_system_admin():
+    # TODO: Low Priority. Josh. find a more efficient way of checking this and
+    # "allowed_studies" than passing it to every render_template.
+    admin = Admin(session['admin_username'])
+    return admin.system_admin
+
 def get_admins_allowed_studies():
     """ Return a list of studies which the currently logged-in admin is autho-
     rized to view and edit """
     admin = Admin(session['admin_username'])
     return Studies(admins=admin._id)
 
-def admin_is_system_admin():
-    # TODO: Low Priority. Josh. find a more efficient way of checking this and "allowed_studies" than passing it to every render_template
-    # talk with Eli about this, we can make a better solution.  maybe make a decorator?
-    admin = Admin(session['admin_username'])
-    return admin.system_admin
 
 ################################################################################
 ########################## System Administrator ################################

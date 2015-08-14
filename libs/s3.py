@@ -51,7 +51,7 @@ def s3_list_files( prefix ):
     results = bucket.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
 
-
+#unused file based upload function, not up to date with new upload file names.
 # def s3_upload_handler_file( key_name, file_obj ):
 #     """ Method uploads file object to bucket with key_name"""
 #     bucket = _get_bucket(S3_BUCKET)

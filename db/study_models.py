@@ -11,11 +11,12 @@ class Study( DatabaseObject ):
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
                  "super_admins":[],     #admins that can add admins.
-                 #TODO: Low Priority. Eli/Josh. we don't seem to have this kind of super admin used/have implemented pages?  please check.
+                 #TODO: Low Priority. Eli/Josh. the above variable will be used in the yet-to-be-implemented 3-tier user model.
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
                  "encryption_key": REQUIRED #the study's config encryption key. 
                 }
+    
     @classmethod
     def create_default_study(cls, name, encryption_key):
         if Studies(name=name):
@@ -76,7 +77,6 @@ class Study( DatabaseObject ):
         return StudyDeviceSettings(self['device_settings'])
     
     
-
 class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
@@ -148,18 +148,18 @@ class Survey( DatabaseObject ):
         return Survey.create(survey, random_id=True)
     
     #debugging function
-    def set_alarms_thirty_seconds(self):
-        now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
-        start_of_day = datetime(now.year, now.month, now.day)
-        time_diff = int((now - start_of_day).total_seconds() + 30)
-        self['timings'] =[ [time_diff],
-                             [time_diff],
-                             [time_diff],
-                             [time_diff],
-                             [time_diff],
-                             [time_diff],
-                             [time_diff] ]
-        self.save()
+#     def set_alarms_thirty_seconds(self):
+#         now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
+#         start_of_day = datetime(now.year, now.month, now.day)
+#         time_diff = int((now - start_of_day).total_seconds() + 30)
+#         self['timings'] =[ [time_diff],
+#                              [time_diff],
+#                              [time_diff],
+#                              [time_diff],
+#                              [time_diff],
+#                              [time_diff],
+#                              [time_diff] ]
+#         self.save()
 
 """############################ Collections #################################"""
 class Studies( DatabaseCollection ):

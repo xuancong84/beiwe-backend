@@ -1,7 +1,6 @@
 import calendar, time
 
 from flask import Blueprint, request, abort, render_template, json
-
 from config.constants import ALLOWED_EXTENSIONS
 from db.user_models import User
 from db.study_models import Study
@@ -112,6 +111,7 @@ def register_user():
     # set up device.
     user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
+    #FIXME: update to be in json, including additional keyword values
     return get_client_public_key_string(patient_id, study_id), 200
 
 

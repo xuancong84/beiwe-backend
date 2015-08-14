@@ -2,6 +2,11 @@
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
+Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't know up in liclipse todo, so I'm sticking a reminder here.
+
+Graph: at some point we need to update the graph, possibly rewrite? it does not currently work at all (causes 500 error)
+    we should make a temp page saying "this is not available right now"
+
 !!!!!
 handle dev.beiwe.org server configuration for app.
 administrative: SSL on the new server.
@@ -13,13 +18,6 @@ administrate: Make new access credentials for the beiwe2 bucket, so that it can 
 administrative: implement mongobackups of the mongo db on the server.
 
 architecture: add survey notification text to the things that can be set remotely.
-
-app, bug: the app does not handle the 406 code, and the corrosponding error in the upload logic has a failure mode.  see fix implemented on production1 and port it to master.
-
-app: check that the app's code for only uploading retired files is actually functional for audio recording files.
-    !!!!CHECK FOR INTERACTIONS WITH NEW FILE DELETION LOGIC AND THE 406 STATUS CODE.
-
-app: Since HTTPAsync was refactored it has become unclear whether the httpAsync http request logic properly handle response codes.  Investigate, redoc, determine behavior.
 
 !!!!!!
 app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
@@ -43,6 +41,7 @@ website: add a "confirm" field for the 32-character key that super-admins enter 
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
+
 !!!!
 !!!! this might be incorrect, we may have a third level of admin. (the distinction between study administrators and system administrators.) !!!
 !!!!

@@ -5,7 +5,7 @@ ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
-#TODO: Eli. get rid of these.
+#TODO: Eli/Josh. These values are still used in the graph, which needs to be rewritten anyway
 DAILY_SURVEY_NAME = 'Daily'
 WEEKLY_SURVEY_NAME = 'Weekly'
 
