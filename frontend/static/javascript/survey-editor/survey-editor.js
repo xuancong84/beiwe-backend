@@ -43,7 +43,7 @@ function end() {
         content = JSON.stringify(questions);
     } else {
         content_list = [];
-        content_list.push($('#voice_recording_prompt_text_input').val());
+        content_list.push( { prompt:$('#voice_recording_prompt_text_input').val() } );
         content = JSON.stringify(content_list);
     }
     $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons

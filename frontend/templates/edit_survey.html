@@ -60,7 +60,7 @@
         {% elif survey.survey_type == 'audio_survey' %}
           <div class="row">
             <h3>Voice Recording Prompt</h3>
-            <input id="voice_recording_prompt_text_input" type="text" class="form-control" value="{{survey.content[0]}}">
+            <input id="voice_recording_prompt_text_input" type="text" class="form-control" value="{{survey.content[0]['prompt']}}">
           </div>
         {% endif %}
 
