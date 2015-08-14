@@ -25,6 +25,8 @@ app: Since HTTPAsync was refactored it has become unclear whether the httpAsync 
 app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
 !!!!!!
 
+Add consent form text; can probably happen via the custom language/text
+
 backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
 website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
@@ -34,6 +36,8 @@ website/backend: implement error page for admin permission denied and survey not
 
 website: Add ability to delete users (patients, not admins)?
 website: add ability to delete studies?
+
+website: add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
 
 
 ############################################################
