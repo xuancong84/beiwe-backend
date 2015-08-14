@@ -143,7 +143,7 @@ def contains_valid_extension(file_name):
 ################################# Download #####################################
 ################################################################################
 
-@mobile_api.route('/download', methods=['GET', 'POST'])
+@mobile_api.route('/download_surveys', methods=['GET', 'POST'])
 @authenticate_user
 def get_latest_surveys():
     user = User(request.values['patient_id'])
