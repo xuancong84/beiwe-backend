@@ -23,6 +23,10 @@ architecture: add survey notification text to the things that can be set remotel
 app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
 !!!!!!
 
+Fix NPE crash in PersistentData; probably from a null appContext
+
+Change AudioSurvey prompt text to be a dict inside of a list
+
 Add consent form text; can probably happen via the custom language/text
 
 backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
