@@ -1,8 +1,9 @@
-from flask import Blueprint, flash, redirect, render_template, request, session
+from flask import Blueprint, flash, make_response, redirect, render_template,\
+    request, session
 
 from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
-    StudyAlreadyExistsError
-from db.user_models import Admin, Admins
+    StudyAlreadyExistsError, Survey
+from db.user_models import Admin, Admins, Users
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
@@ -89,6 +90,18 @@ def create_study():
     except (InvalidEncryptionKeyError, StudyAlreadyExistsError) as e:
         flash(e.message, 'danger')
         return redirect('/create_study')
+
+
+@system_admin_pages.route('/delete_study/<string:study_id>', methods=['POST'])
+@authenticate_system_admin
+def delete_study(study_id=None):
+    if request.form.get('confirmation') == 'true':
+        study = Study(study_id)
+        [study.get_study_device_settings().remove()]    # Delete device settings
+        [user.remove() for user in Users(study_id=study_id)]   # Delete patients
+        [Survey(s_id).remove() for s_id in study['surveys']]    # Delete surveys
+        study.remove()                                     # Delete study object
+    return make_response("", 200)
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])

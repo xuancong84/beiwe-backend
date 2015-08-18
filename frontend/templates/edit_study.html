@@ -48,6 +48,9 @@
 
         <div class="row">
             <a href="/device_settings/{{ study._id }}" class="btn btn-warning">Edit study's device settings</a>
+
+            <a class="btn btn-danger pull-right" onclick="confirm_delete_study('{{ study.name|replace("'", "")|replace('"', "") }}', '{{ study._id }}')">
+            <span class="glyphicon glyphicon-trash"></span>Delete study</a>
         </div>
 
         <br><br><br><br>

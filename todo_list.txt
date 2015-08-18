@@ -1,13 +1,7 @@
 
-Delete studies (with super confirmation, e.g. actually type out the word "yes")
-
-Ask JP and Jeanette for a default about page text
-
 Make a crude logo (just a capital letter "B" inside a square)
 
 Ask Jeanette if they want other customizable text strings
-
-Finish implementing data stream toggles
 
 Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
 
