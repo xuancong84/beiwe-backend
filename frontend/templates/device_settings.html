@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Edit Device Settings:</h2>
+<div class="row">
+    <h2>Edit Device Settings</h2>
+</div>
 <form action="/device_settings/{{ study_id }}" class="form-horizontal" method="POST">
     <div class="row">
         <div class="col-xs-6">
@@ -140,6 +142,43 @@
                 <label for="seconds_before_auto_logout" class="col-xs-8 control-label">Duration before auto-logout:</label>
                 <div class="col-xs-4">
                     <input id="seconds_before_auto_logout" name="seconds_before_auto_logout" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['seconds_before_auto_logout'] }}">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <div class="row">
+                    <label for="call_clinician_button_text">Text that appears on the app's "Call My Clinician" button:</label>
+                </div>
+                <div class="row">
+                    <input type="text" id="call_clinician_button_text" name="call_clinician_button_text" value="{{settings['call_clinician_button_text']}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label for="about_page_text">Text on the app's "About" page:</label>
+                </div>
+                <div class="row">
+                    <textarea rows="20" cols="120" id="about_page_text" name="about_page_text">{{settings['about_page_text']}}</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label for="consent_form_text">Text that appears in the app's consent form:</label>
+                </div>
+                <div class="row">
+                    <textarea rows="20" cols="120" id="consent_form_text" name="consent_form_text">{{settings['consent_form_text']}}</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label for="survey_submit_success_toast_text">Text that appears in the pop-up message (called an Android "Toast") when a survey is submitted:</label>
+                </div>
+                <div class="row">
+                    <textarea rows="3" cols="120" id="survey_submit_success_toast_text" name="survey_submit_success_toast_text">{{settings['survey_submit_success_toast_text']}}</textarea>
                 </div>
             </div>
         </div>
