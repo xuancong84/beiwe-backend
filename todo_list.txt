@@ -23,9 +23,6 @@ throw is storoge keyword for randomization in surveys
 when implementing randomization, do not roll over.
 
 
-
-
-
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################

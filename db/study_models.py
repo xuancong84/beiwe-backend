@@ -140,7 +140,8 @@ class Survey( DatabaseObject ):
     PATH = "beiwe.surveys"
     DEFAULTS = {"content": [],
                 "timings": [ [], [], [], [], [], [], [] ],
-                "survey_type": REQUIRED }
+                "survey_type": REQUIRED,
+                "settings":{} }
     
     @classmethod
     def create_default_survey(cls, survey_type):
