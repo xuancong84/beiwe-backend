@@ -1,3 +1,37 @@
+
+Delete studies (with super confirmation, e.g. actually type out the word "yes")
+
+Ask JP and Jeanette for a default about page text
+
+Make a crude logo (just a capital letter "B" inside a square)
+
+Ask Jeanette if they want other customizable text strings
+
+Finish implementing data stream toggles
+
+Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
+
+Build the new survey answers graph (and for now, just build a page that says "the graph is not yet available")
+
+Eli: investigate whether it is possible to even turn powerstate listener off.
+    don't initialize textfiles for toggles that are off
+    change access to nonexistant text files to fail silently
+    add additional logic to active sensor broadcast receiver.
+    ensure that the debug activity uses broadcasts to trigger things... without... breaking... everything....
+
+
+randomizing:
+throw is storoge keyword for randomization in surveys
+    implement as top level variable in survey database schema
+    disable strict enforcement of required keys
+    add app persistentdata storage function for survey randomness, default to false.
+
+when implementing randomization, do not roll over.
+
+
+
+
+
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
@@ -25,7 +59,7 @@ app + backend: add device settings values values supplied during registration, m
 
 Fix NPE crash in PersistentData; probably from a null appContext
 
-Change AudioSurvey prompt text to be a dict inside of a list
+Change AudioSurvey prompt text to be a dict inside of a listener
 
 Add consent form text; can probably happen via the custom language/text
 
