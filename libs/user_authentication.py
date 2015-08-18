@@ -1,7 +1,6 @@
 import functools
 from flask import request, abort
 from db.user_models import User
-from db.study_models import Study
 
 
 def authenticate_user(some_function):
@@ -32,7 +31,6 @@ def validate_post( *args, **kwargs ):
     return True
 
 
-#FIXME: Eli. Ensure that user registration authentication are still correct for new user registration.
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
