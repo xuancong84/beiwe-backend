@@ -94,6 +94,10 @@ def decrypt_device_file(patient_id, data, private_key):
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
                 continue
+            elif "Input strings must be a multiple of 16 in length" in e.message:
+                error_message += "Line was of incorrect length, dropping it and continuing."
+                log_error(e, error_message)
+                continue
             ##################### flip out on these errors #####################
             if 'AES key' in e.message:
                 error_message += "AES key has bad length."
@@ -121,7 +125,7 @@ def decrypt_device_line(patient_id, key, data):
     try:
         decrypted = AES.new(key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception:
-        print len(iv), len(data), len(key)
+        print "length iv: %s, length data: %s, length key: %s" % (len(iv), len(data), len(key))
         raise
     return remove_PKCS5_padding( decrypted )
 
