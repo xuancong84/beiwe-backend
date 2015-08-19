@@ -3,16 +3,7 @@ Make a crude logo (just a capital letter "B" inside a square)
 
 Ask Jeanette if they want other customizable text strings
 
-Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
-
 Build the new survey answers graph (and for now, just build a page that says "the graph is not yet available")
-
-Eli: investigate whether it is possible to even turn powerstate listener off.
-    don't initialize textfiles for toggles that are off
-    change access to nonexistant text files to fail silently
-    add additional logic to active sensor broadcast receiver.
-    ensure that the debug activity uses broadcasts to trigger things... without... breaking... everything....
-
 
 randomizing:
 throw is storoge keyword for randomization in surveys
@@ -21,6 +12,8 @@ throw is storoge keyword for randomization in surveys
     add app persistentdata storage function for survey randomness, default to false.
 
 when implementing randomization, do not roll over.
+
+Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
 
 
 ############################################################
@@ -32,47 +25,33 @@ Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are s
 Graph: at some point we need to update the graph, possibly rewrite? it does not currently work at all (causes 500 error)
     we should make a temp page saying "this is not available right now"
 
-!!!!!
-handle dev.beiwe.org server configuration for app.
-administrative: SSL on the new server.
-    do we have a wildcard cert?
-!!!!!
-
 administrate: Make new access credentials for the beiwe2 bucket, so that it can be handed out without  myself and josh and the server.
 
 administrative: implement mongobackups of the mongo db on the server.
 
 architecture: add survey notification text to the things that can be set remotely.
 
-!!!!!!
-app + backend: add device settings values values supplied during registration, make sure that we can (for the august 17 study) put additional values into that JSON blob without crashing the app.  (i.e., look for specific values, but don't crash if they aren't there.)
-!!!!!!
-
 Fix NPE crash in PersistentData; probably from a null appContext
-
-Change AudioSurvey prompt text to be a dict inside of a listener
-
-Add consent form text; can probably happen via the custom language/text
 
 backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
 website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
-website/backend: Make Edit Study's Device Parameters page include the editable text strings
-
 website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
 
 website: Add ability to delete users (patients, not admins)?
-website: add ability to delete studies?
 
 website: add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
 
+app: make function in backgroundservice that causes it to crash, link it to debuginterface button.
+
+website: remove bluetooth offset from website, in backend default it to 0.  do not remove from study settings schema.
 
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
 
 !!!!
-!!!! this might be incorrect, we may have a third level of admin. (the distinction between study administrators and system administrators.) !!!
+future proposal: add a third level of admins, study admiinistration
 !!!!
 Admin/Access control:
 	2 levels of users: researcher admins, and super admins. (system admins?)
@@ -85,7 +64,6 @@ Admin/Access control:
 	admins should only have survey modification rights to on surveys in studies they are assigned to.
 
 
-!!! not implemented !!!
 -Ask JP if he wants the option to make surveys display questions in randomized order...
 if so:
     surveys should be able to randomize their order
@@ -103,7 +81,6 @@ if so:
 Surveys:
     able to have separate surveys for each study
     don't need a survey to be shared among multiple studies
-
     surveys must be able to be scheduled:
         once a week
         once a day
@@ -129,8 +106,6 @@ Customizable wording, customizable from the admin panel at the time of study cre
 
 merge mms and sms sent receivers if possible.
 
-the backgroundprocess should be backgroundservice
-
 ####################################################################
 ####################### ADMINISTRATIVE TASKS #######################
 ####################################################################
@@ -148,11 +123,10 @@ check behavior of generating unique device IDs and how that interacts with devic
 
 UHOH, I don't think we have any code for downloading user mac addresses/hashes of them...
 
-Eli: double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
+double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
     turning it on is exact, turning it off is fuzzy
 
 Graph stuff
-    -Make it look pretty for all the different types of survey questions
     -Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
 
 ####################################################################
@@ -171,11 +145,14 @@ MMS logging:
                 MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
     -Josh tried tracking this down as well, there is a comment is smssentreceiver
 
+!!!! This can possibly be deprecated, need to attempt to replicate.
 if the background process is not running and a user presses a notification to take a survey, the app crashes.  This is probably due to the rendering of a dynamic page requiring access to the survey's json file, which it accesses through the file manager, which has not been instantiated.
     probably the best solution is to make the unencrypted files have their own reader?  that just creates more chances for conflicts....
     TODO: check order of instantiation of for the dynamically rendered pages. (uhg)
 
 Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
+
+website: remove bluetooth offset from website, in backend default it to 0.  do not remove from study settings schema.
 
 ####################################################################
 ######################## OPTIONAL THINGS ###########################
@@ -196,7 +173,6 @@ re-analyze whether the following is true:
 
 App UI
     -define a style and prettify the UI
-    -Get an app icon
 
 add in more user device info, specifically I am thinking of android version, sdk version for debugging
 
@@ -205,7 +181,7 @@ Add crash logging:
     http://www.acra.ch/
     http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
-Improve uploading: Build a listener for WiFi connected, then try to upload files and download surveys
+Improve uploading: Build a _listener_ for WiFi connected, then try to upload files and download surveys
 
 Timers & data upload
     -Add an alert if the phone hasn't been able to upload in a long time?
@@ -214,9 +190,6 @@ Timers & data upload
 ########################################################################################
 ####################### ideas (these do not need to be acted on) #######################
 ########################################################################################
-handle leap second bugs :D  (this is a joke.  don't actually do this.)
-
-infrastructure to test if the app is working and reporting data, once it's been installed and registered?
 
 implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number (or hash of) in order to check for changes.
 
