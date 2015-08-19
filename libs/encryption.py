@@ -107,7 +107,7 @@ def decrypt_device_file(patient_id, data, private_key):
                 error_message += "base64 padding error, config is truncated."
                 # this is only seen in mp4 files. possibilities:
                 #  upload during write operation.
-                #  broken ba    se64 conversion in the app
+                #  broken base64 conversion in the app
                 #  some unanticipated error in the file upload
             log_error(e, error_message)
             raise
