@@ -28,8 +28,14 @@ FLASK_SECRET_KEY = "abcdefghijklmnopqrstuvwxyz012345"
 AWS_ACCESS_KEY_ID = "aws_access_credential"
 AWS_SECRET_ACCESS_KEY = "aws_secret_access_credential"
 
-# the name of the s3 bucket that will be used to store config
+S3_BACKUPS_AWS_KEY_ID = "aws_creds_for_backups"
+S3_BACKUPS_AWS_SECRET_ACCESS_KEY = "aws_creds_for_backups"
+LOCAL_BACKUPS_DIRECTORY = "edit me"
+
+# the name of the s3 bucket that will be used to store user generated data, and
+# backups of local database information.
 S3_BUCKET = "edit_me"
+S3_BACKUPS_BUCKET = "edit_me"
 
 # The length of the public/private keys used in encrypting user config on their device
 ASYMMETRIC_KEY_LENGTH = 2048
