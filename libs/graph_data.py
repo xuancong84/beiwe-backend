@@ -1,26 +1,15 @@
 from flask import json
-from config.constants import DAILY_SURVEY_NAME
 from libs.s3 import s3_list_files, s3_retrieve
-from libs.logging import log_error
 
-################################################################################
 ################################ CSV HANDLER ###################################
-################################################################################
-
-def s3_csv_to_dict(s3_file_path):
-    #TODO: Low priority. Uhg, this is spaghetti.  It is probabaly better to refactor or even entirely rewrite this code, but if we don't: update this to use the new s3_retrieve function that requires a study id.
-    return csv_to_dict( s3_retrieve( s3_file_path ) )
-
 def csv_to_dict(csv_string):
     """ Converts a string formatted as a csv into a dictionary with the format
-        {Column Name: [list of config points] }. Data are in their original order,
-        any empty entries are dropped."""
+        {Column Name: [list of sequential points] }. Data are in their original
+        order, empty entries are dropped."""
     #grab a list of every line in the file, strips off trailing whitespace.
     lines = [ line for line in csv_string.splitlines() ]
-
     header_list = lines[0].split(',')
     list_of_entries = []
-
     for line in lines[1:]:
         data = line.split(',')
         #creates a dict of {column name: config point, ...}, strips empty strings
@@ -32,87 +21,67 @@ def csv_to_dict(csv_string):
 ############################### GRAPH DATA #####################################
 ################################################################################
 
-def grab_file_names(file_path, survey_id, number_points):
-    """ Takes a list, returns a list of the most recent 7 files."""
-    all_files = s3_list_files(file_path + survey_id + '/')
-    return sorted( all_files[ len(all_files) - number_points: ] )
-
-
-def get_most_recent_id(user_file_path):
-    """ Grabs the most recent survey id for a path of the form
-        username_/surveyAnswers/survey_type/ """
-    all_files = s3_list_files(user_file_path)
-    id_set = set()
-    for filename in all_files:
-        # (based on file name spec)
-        # assumes 3rd entry is always an integer, grab the survey_id.
-        survey_id = int( filename.split('/')[3] )
-        id_set.add( survey_id )
-    result_list = sorted( id_set )
-    # return the last entry, which is the most recent survey id.
-    if len(result_list) == 0: return []
-    return result_list[ -1 ]
-
+def grab_file_names(study_id, survey_id, user_id, number_points):
+    """ Takes a list, returns a list of those most recent files."""
+    all_files = s3_list_files("%s/%s/surveyAnswers/%s" %(str(study_id), str(user_id), str(survey_id)))
+    return sorted( all_files[ -number_points: ] )
 
 def compile_question_data(surveys):
-    """ Grabs all question ids, grabs all answers. """
-    ordered_question_ids = set()
-    all_answers = {}
-    if not surveys: return set(), {}
-    for question in surveys[0]:
-        ordered_question_ids.add( question['question id'] )
-        all_answers[ question['question id'] ] = { question['question text'] : [] }
-    return ordered_question_ids, all_answers
+    """ creates a double nested dict of question ids containing dict with
+    question text, and an empty list. """
+    #Note: we want to keep the question text around so it can be displayed on the page.
+    if not surveys:
+        return {}
+    all_questions = {}
+    for question in surveys[0]: # we only need to get the questions once
+        all_questions[ question['question id'] ] = { question['question text'] : [] }
+    return all_questions
 
-
-def get_survey_results( username="", survey_type=DAILY_SURVEY_NAME, number_points=7 ):
-    """ Compiles 2 weeks (14 points) of config from s3 for a given patient into
-        config points for displaying on the device.
-        result is a list of lists, inner list[0] is the title/question text,
-        inner list[1] is a list of y coordinates."""
-    
-    if not username:
-        log_error (Exception("failed to provide username"),
-                   "while compiling graph config.")
-    
-    # path pointing to the correct survey type
-    file_path = username + '/surveyAnswers/' + survey_type + '/'
-    survey_id = str( get_most_recent_id( file_path ) )
-    files = grab_file_names( file_path, survey_id, number_points)
-    
-    # Convert each csv_file to a useful list of config
-    surveys = [ s3_csv_to_dict(file_name) for file_name in files ]
-    # grab the questions that answers correspond to
-    ordered_question_ids, all_answers = compile_question_data(surveys)
-    #welp, that variable is not used!
-
-    # add responses that correspond to the given questions
+def pull_answers(surveys, all_questions):
+    """ Runs through questions and pull out answers, append them to the lists in
+        the container constructed by compile_question_data. """
     for survey in surveys:
         for question in survey:
-            current_id = question['question id']
+            question_id = question['question id']
             answer = question['answer']
             question_text = question['question text']
             try:
-                all_answers[current_id][question_text].append( int(answer) )
+                all_questions[question_id][question_text].append( int(answer) )
             except ValueError:
-                all_answers[current_id][question_text].append(None)
+                all_questions[question_id][question_text].append(None)
+    return all_questions
 
-    # turns the data into a list of lists that javascript can actually handle.
-    tuple_values = sorted( all_answers.values() )
+
+def get_survey_results( study_id, user_id, survey_id, number_points=7 ):
+    """ Compiles 2 weeks (14 points) of config from s3 for a given patient into
+        config points for displaying on the device.
+        result is a list of lists, inner list[0] is the title/question text,
+        inner list[1] is a list of y coordinates. """
+    # Get files from s3 for user answers, convert each csv_file to a list of dicts,
+    # pull the questions and corresponding answers.
+    files = grab_file_names( study_id, survey_id, user_id, number_points )
+    #note: we need to remove the prepended study id from file name strings,
+    # that string is always 24 characters + the slash.
+    surveys = [ csv_to_dict( s3_retrieve( file_name[25:], study_id ) ) for file_name in files ]
+    all_questions = compile_question_data(surveys)
+    all_answers = pull_answers(surveys, all_questions)
+    #all answers may be identical to all questions at this point.
+    # turn the data into a list of lists that javascript can actually handle.
+    questions_answers = sorted( all_answers.values() ) #pulls out question text and answers. 
     result = []
-    for value in tuple_values:
-        for question_num, corresponding_answers in value.items():
-            result.append( [question_num, corresponding_answers] )
-            
+    for question in questions_answers: #maps question answers to data points
+        for question_text, corresponding_answers in question.items():
+            result.append( [question_text, corresponding_answers] )
     return jsonify_survey_results(result)
 
 
 def jsonify_survey_results(results):
-    """transforms return from get_survey_results into a list that javascript can handle."""
+    """ Transforms output of get_survey_results into a list that javascript can
+        actually handle."""
     return_data = []
     for pair in results:
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]
         # javascript understands json null/none values but not python Nones,
-        # we must dump all variables individually.
+        # to handle this we must dump all variables individually
         return_data.append( [ json.dumps( pair[0] ), coordinates ] )
     return return_data

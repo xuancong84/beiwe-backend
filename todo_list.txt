@@ -1,39 +1,27 @@
+############################################################
+################ ACTUALLY DO THESE THINGS ##################
+############################################################
 
 Make a crude logo (just a capital letter "B" inside a square)
 
 Ask Jeanette if they want other customizable text strings
 
-Build the new survey answers graph (and for now, just build a page that says "the graph is not yet available")
-
-randomizing:
-throw is storoge keyword for randomization in surveys
-    implement as top level variable in survey database schema
-    disable strict enforcement of required keys
-    add app persistentdata storage function for survey randomness, default to false.
-
-when implementing randomization, do not roll over.
-
 Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
 
+Eli: It would be nice if there was some notification of which studies are currently live...
 
-############################################################
-################ ACTUALLY DO THESE THINGS ##################
-############################################################
+Eli/Josh: surveys do not have titles in the editor or on the graph display
 
 Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't know up in liclipse todo, so I'm sticking a reminder here.
 
-Graph: at some point we need to update the graph, possibly rewrite? it does not currently work at all (causes 500 error)
-    we should make a temp page saying "this is not available right now"
-
-administrate: Make new access credentials for the beiwe2 bucket, so that it can be handed out without  myself and josh and the server.
-
-administrative: implement mongobackups of the mongo db on the server.
+administrate: change access credentials for the beiwe2 bucket, create read-only creds and limit to one study.
 
 architecture: add survey notification text to the things that can be set remotely.
 
 Fix NPE crash in PersistentData; probably from a null appContext
 
 backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
+
 website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 
 website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
