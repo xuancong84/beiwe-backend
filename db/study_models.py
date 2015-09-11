@@ -96,7 +96,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "accelerometer_off_duration_seconds": 300,
                 "accelerometer_on_duration_seconds": 300,
                 "bluetooth_on_duration_seconds": 300,
-                "bluetooth_total_duration_seconds": 300, #TODO: Eli. change this to off duration in app and here.
+                "bluetooth_total_duration_seconds": 0, #TODO: Eli. change this to off duration in app and here.
                 "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this parameter for bluetooth. 
                 "check_for_new_surveys_frequency_seconds": 3600 * 6,
                 "create_new_data_files_frequency_seconds": 15 * 60,
@@ -110,7 +110,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "about_page_text": "The Beiwe application runs on your phone and helps researchers collect information about your behaviors. Beiwe may ask you to fill out short surveys or to record your voice. It may collect information about your location (using phone GPS) and how much you move (using phone accelerometer). Beiwe may also monitor how much you use your phone for calling and texting and keep track of the people you communicate with. Importantly, Beiwe never records the names or phone numbers of anyone you communicate with. While it can tell if you call the same person more than once, it does not know who that person is. Beiwe also does not record the content of your text messages or phone calls. Beiwe may keep track of the different Wi-Fi networks and Bluetooth devices around your phone, but the names of those networks are replaced with random codes.\n\nAlthough Beiwe collects large amounts of data, the data is processed to protect your privacy. This means that it does not know your name, your phone number, or anything else that could identify you. Beiwe only knows you by an identification number. Because Beiwe does not know who you are, it cannot communicate with your clinician if you are ill or in danger. Researchers will not review the data Beiwe collects until the end of the study. To make it easier for you to connect with your clinician, the 'Call my Clinician' button appears at the bottom of every page.\n\nBeiwe was conceived and designed by Dr. Jukka-Pekka 'JP' Onnela at the Harvard T.H. Chan School of Public Health. Development of the Beiwe smartphone application and data analysis software is funded by NIH grant 1DP2MH103909-01 to Dr. Onnela. The smartphone application was built by Zagaran, Inc., in Cambridge, Massachusetts.",
                 "call_clinician_button_text": "Call My Clinician",
                 "consent_form_text": " I have read and understood the information about the study and all of my questions about the study have been answered by the study researchers.",
-                "survey_submit_success_toast_text": "Thank you for completing the survey. A clinician will not see your answers immediately, so if you need help or you are thinking about harming yourself, please contact your clinician. You can also press the 'Call My Clinician' button to call your clinician."
+                "survey_submit_success_toast_text": """Thank you for completing the survey.  A clinician will not see your answers immediately, so if you need help or are thinking about harming yourself, please contact your clinician.  You can also press the "Call My Clinician" button."""
             }
     @classmethod
     def create_default(cls):

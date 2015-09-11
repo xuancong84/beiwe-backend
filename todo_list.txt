@@ -6,8 +6,6 @@ Make a crude logo (just a capital letter "B" inside a square)
 
 Ask Jeanette if they want other customizable text strings
 
-Give JP an estimate of how long it will take to do survey question randomization (both with- and without replacement)
-
 Eli: It would be nice if there was some notification of which studies are currently live...
 
 Eli/Josh: surveys do not have titles in the editor or on the graph display
@@ -51,10 +49,7 @@ Admin/Access control:
 		create studies.
 	admins should only have survey modification rights to on surveys in studies they are assigned to.
 
-
--Ask JP if he wants the option to make surveys display questions in randomized order...
-if so:
-    surveys should be able to randomize their order
+Randomized questions: surveys should be able to randomize their order
     surveys should be able to display a subset ("ask only 10 questions")
     -surveys should (optionally) be able to present questions totally at random
     -surveys should (optionally) be able to present a subset that guarantees all questions are asked
