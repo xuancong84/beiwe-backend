@@ -95,9 +95,22 @@ def create_new_patient(study_id=None):
 """########################## Other Stuff ###################################"""
 
 @admin_api.route("/download")
-def download():
+def download_current():
     """ Method responsible for distributing APK file of Android app"""
-    return send_file("Beiwe.apk", as_attachment=True)
+    return send_file("/Beiwe.apk", as_attachment=True)
+
+@admin_api.route("/download_debug")
+def download_current_debug():
+    return send_file("Beiwe_debug.apk", as_attachment=True)
+
+@admin_api.route("/download_beta")
+def download_beta():
+    return send_file("Beiwe_beta.apk", as_attachment=True)
+
+@admin_api.route("/download_beta_debug")
+def download_beta_debug():
+    return send_file("Beiwe_beta_debug.apk", as_attachment=True)
+
 
 #TODO: Low priority. Eli. this is part of the download script (maybe), find and purge.
 # @admin_api.route("/user_list")
