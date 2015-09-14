@@ -1,3 +1,7 @@
+
+there is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
+    (jeanette is working on replicating the issue, though it has been noticed by other researchers)
+
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
