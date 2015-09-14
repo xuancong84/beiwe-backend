@@ -97,7 +97,7 @@ def create_new_patient(study_id=None):
 @admin_api.route("/download")
 def download_current():
     """ Method responsible for distributing APK file of Android app"""
-    return send_file("/Beiwe.apk", as_attachment=True)
+    return send_file("Beiwe.apk", as_attachment=True)
 
 @admin_api.route("/download_debug")
 def download_current_debug():
