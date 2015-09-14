@@ -6,6 +6,11 @@ there is a bug on the survey editor page where sometimes after clicking save and
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
+Josh: test that the survey is passing survey.settings correcty from the web interface through to the app
+
+Josh: on the edit_survey webpage, make the inputs for randomize_with_memory and number_of_random_questions become invisible if the random checkbox is unchecked.
+Also, show the current total number of questions.
+
 Make a crude logo (just a capital letter "B" inside a square)
 
 Ask Jeanette if they want other customizable text strings
@@ -14,7 +19,7 @@ Eli: It would be nice if there was some notification of which studies are curren
 
 Eli/Josh: surveys do not have titles in the editor or on the graph display
 
-Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't know up in liclipse todo, so I'm sticking a reminder here.
+Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
 
 administrate: change access credentials for the beiwe2 bucket, create read-only creds and limit to one study.
 

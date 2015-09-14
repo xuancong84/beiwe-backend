@@ -37,14 +37,25 @@ function getDayOfWeek() {
     return parseInt(dayPicker.value);
 }
 
+function get_survey_settings() {
+    var trigger_on_first_download = document.getElementById('trigger_on_first_download').checked;
+    var randomize = document.getElementById('randomize').checked;
+    var randomize_with_memory = document.getElementById('randomize_with_memory').checked;
+    var number_of_random_questions = parseInt($('#number_of_random_questions').val());
+    return {'trigger_on_first_download': trigger_on_first_download,
+            'randomize': randomize,
+            'randomize_with_memory': randomize_with_memory,
+            'number_of_random_questions': number_of_random_questions}
+}
+
 function end() {
     var content = "";
     if (tracking_survey) {
-        content = JSON.stringify(questions);
+        content = questions;
     } else {
         content_list = [];
         content_list.push( { prompt:$('#voice_recording_prompt_text_input').val() } );
-        content = JSON.stringify(content_list);
+        content = content_list;
     }
     $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons
     // Send a POST request (using XMLHttpRequest) with the JSON survey object as a parameter
@@ -52,8 +63,9 @@ function end() {
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            content: content,
-            timings: JSON.stringify(survey_times)
+            content: JSON.stringify(content),
+            timings: JSON.stringify(survey_times),
+            settings: JSON.stringify(get_survey_settings())
         },
         statusCode: {
             200: function(response) {
@@ -104,25 +116,6 @@ function renderQuestionsList() {
 
     // Insert the template into the page's HTML
     $("#listOfCurrentQuestions").html(htmlQuestion);
-}
-
-// Display the survey's scheduled time in the drop-down menus at the top
-function displayScheduledTime(hour, day) {
-    // Translate 24-hr time to 12-hr time with a.m./p.m. labels
-    if (hour >= 12) {
-        document.getElementById("ampm").value = "pm";
-        hour -= 12;
-    }
-    else {
-        document.getElementById("ampm").value = "am";
-    }
-    // Translate 0:00 to 12:00am, and 12:00 to 12:00pm
-    if (hour == 0) {
-        hour = 12;
-    }
-    // Set the Hour and Day HTML <select> drop-downs
-    document.getElementById("hour").value = hour;
-    document.getElementById("day").value = day;
 }
 
 // Get the question object from the Edit Question modal, and append it to the questions array
