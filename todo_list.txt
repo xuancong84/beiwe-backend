@@ -1,10 +1,30 @@
+############################################################
+############ Questions / Investigate need for ##############
+############################################################
 
-there is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
-    (jeanette is working on replicating the issue, though it has been noticed by other researchers)
+get additional data from Jeanette:
+    There is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
+    (Jeanette is working on replicating the issue, though it has also been noticed by other researchers)
+
+additional customizable text strings:
+    the message on the survey's notification
+    text on the main screen of the beiwe app
+
+architecture: we probably need a retire study button on the website, possibly a delete study button too?
+
+Eli - investigate: there is a report from christian, he has a bunch of surveys scheduled, possibly receiving a survey when it wasn't scheduled? (need to email)
+
+make the duration of the toast-message customizable?  make it responsive to the length of the message? either way notate that on the settings page.
 
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
+
+possible bug: test letting the app sit at the consent screen for a long period before hitting "I consent", try forcing network failure.
+
+remove "THIS IS IN TESTING" warning when done testing.
+
+Eli: sent email to JP about credential needs for researchers, update and handle as information comes in
 
 Josh: test that the survey is passing survey.settings correcty from the web interface through to the app
 
@@ -13,19 +33,19 @@ Also, show the current total number of questions.
 
 Make a crude logo (just a capital letter "B" inside a square)
 
-Ask Jeanette if they want other customizable text strings
+Eli: investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
 
-Eli: It would be nice if there was some notification of which studies are currently live...
-
-Eli/Josh: surveys do not have titles in the editor or on the graph display
-
-Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
+Archituecture: survey names
 
 administrate: change access credentials for the beiwe2 bucket, create read-only creds and limit to one study.
 
+Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
+
 architecture: add survey notification text to the things that can be set remotely.
 
-Fix NPE crash in PersistentData; probably from a null appContext
+Fix/find NPE crash in PersistentData; probably from a null appContext.
+
+website: add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
 
 backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
 
@@ -33,13 +53,12 @@ website/backend: See if we can use flask_login and standardized parameters so th
 
 website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
 
-website: Add ability to delete users (patients, not admins)?
+############################################################
+########## Things to check in on in a few months ###########
+############################################################
 
-website: add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
-
-app: make function in backgroundservice that causes it to crash, link it to debuginterface button.
-
-website: remove bluetooth offset from website, in backend default it to 0.  do not remove from study settings schema.
+updates for data display: it is really low priority
+connected (sorta): surveys do not have titles
 
 ############################################################
 ####################### ARCHITECTURE #######################
@@ -111,15 +130,9 @@ remove old data from s3:
 ########################## GENERAL TASKS ###########################
 ####################################################################
 
-check behavior of generating unique device IDs and how that interacts with devices that are not phones... do not know what the behavior of this is.
+check behavior of the appgenerating unique device IDs and how that interacts with devices that are not phones... do not know what the behavior of this is.
 
 UHOH, I don't think we have any code for downloading user mac addresses/hashes of them...
-
-double check whether accelerometer timers are fuzzy, this came up in an email exchange, we probably (triple check) can change this behavior.
-    turning it on is exact, turning it off is fuzzy
-
-Graph stuff
-    -Fix crappy width scaling in the app; don't hard-code it to 200px wide or whatever it is
 
 ####################################################################
 ############################ KNOWN BUGS ############################
