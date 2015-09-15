@@ -109,12 +109,3 @@ def download_beta():
 @admin_api.route("/download_beta_debug")
 def download_beta_debug():
     return send_file("Beiwe_beta_debug.apk", as_attachment=True)
-
-
-#TODO: Low priority. Eli. this is part of the download script (maybe), find and purge.
-# @admin_api.route("/user_list")
-# def get_user_list():
-#     all_users = ""
-#     for user in Users():
-#         all_users += user['_id'] + ','
-#     return encrypt_for_server( all_users[:-1] )
