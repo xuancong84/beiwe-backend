@@ -92,11 +92,10 @@ def create_new_patient(study_id=None):
     return make_response(response_string, 201)
 
 
-"""########################## Other Stuff ###################################"""
+"""##### Methods responsible for distributing APK file of Android app. #####"""
 
 @admin_api.route("/download")
 def download_current():
-    """ Method responsible for distributing APK file of Android app"""
     return send_file("Beiwe.apk", as_attachment=True)
 
 @admin_api.route("/download_debug")
