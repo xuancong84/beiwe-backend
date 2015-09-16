@@ -39,9 +39,9 @@ if not _AWS_ACCESS_KEY_ID or not _AWS_SECRET_ACCESS_KEY:
     raise ImportError("you have empty AWS credentials")
 
 if not _STUDY_ID:
-    _STUDY_ID = input("Enter the study ID you will be downloading from:\n")
+    _STUDY_ID = raw_input("Enter the study ID you will be downloading from:\n")
 if not _STUDY_KEY:
-    _STUDY_KEY = input("Enter the decryption key for this study:\n")
+    _STUDY_KEY = raw_input("Enter the decryption key for this study:\n")
 
 _CONN = connect_s3(aws_access_key_id=_AWS_ACCESS_KEY_ID,
                    aws_secret_access_key=_AWS_SECRET_ACCESS_KEY)
