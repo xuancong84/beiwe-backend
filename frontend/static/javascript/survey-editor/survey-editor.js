@@ -39,13 +39,17 @@ function getDayOfWeek() {
 
 function get_survey_settings() {
     var trigger_on_first_download = document.getElementById('trigger_on_first_download').checked;
-    var randomize = document.getElementById('randomize').checked;
-    var randomize_with_memory = document.getElementById('randomize_with_memory').checked;
-    var number_of_random_questions = parseInt($('#number_of_random_questions').val());
-    return {'trigger_on_first_download': trigger_on_first_download,
-            'randomize': randomize,
-            'randomize_with_memory': randomize_with_memory,
-            'number_of_random_questions': number_of_random_questions}
+    if (tracking_survey) {
+        var randomize = document.getElementById('randomize').checked;
+        var randomize_with_memory = document.getElementById('randomize_with_memory').checked;
+        var number_of_random_questions = parseInt($('#number_of_random_questions').val());
+        return {'trigger_on_first_download': trigger_on_first_download,
+                'randomize': randomize,
+                'randomize_with_memory': randomize_with_memory,
+                'number_of_random_questions': number_of_random_questions};
+    } else {
+        return {'trigger_on_first_download': trigger_on_first_download};
+    };
 }
 
 function end() {
