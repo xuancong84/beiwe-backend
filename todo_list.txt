@@ -5,6 +5,7 @@
 get additional data from Jeanette:
     There is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
     (Jeanette is working on replicating the issue, though it has also been noticed by other researchers)
+    researcher says that they got the bug, and it saved schedule updates but not question updates... Jeanette says this is "bizarre" (not her experience)
 
 additional customizable text strings:
     the message on the survey's notification
@@ -16,11 +17,30 @@ Eli - investigate: there is a report from christian, he has a bunch of surveys s
 
 make the duration of the toast-message customizable?  make it responsive to the length of the message? either way notate that on the settings page.
 
+Investigate what the behavior of the background process being killed (due to memory pressure etc.) frequently is.
+
+implement (web side) error checking for invalid or problematic values for timers
+    maximum audio recording duration cannot be longer than the logout timer
+    bluetooth global offset should not be longer than the other bluetooth timers
+
+how would we set a maximum line count to the files.
+
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
-possible bug: test letting the app sit at the consent screen for a long period before hitting "I consent", try forcing network failure.
+REMOVE BETA COMMENT FOR TRIGGERED SURVEY
+
+COMMUNICATION:
+call Jeanette, check in about when McLean can start, whether they are waiting on our moving the app to the regular download link
+
+TESTING:
+test: adding randomize and trigger to an existing survey without those parameters
+
+WEBSITE:
+download landing page.
+
+Look into matt's biewedata repo
 
 remove "THIS IS IN TESTING" warning when done testing.
 
@@ -36,8 +56,6 @@ Make a crude logo (just a capital letter "B" inside a square)
 Eli: investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
 
 Archituecture: survey names
-
-administrate: change access credentials for the beiwe2 bucket, create read-only creds and limit to one study.
 
 Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
 
@@ -59,16 +77,14 @@ website/backend: implement error page for admin permission denied and survey not
 
 updates for data display: it is really low priority
 connected (sorta): surveys do not have titles
+feature proposal: add a third level of admins, study admiinistration
 
 ############################################################
 ####################### ARCHITECTURE #######################
 ############################################################
 
-!!!!
-future proposal: add a third level of admins, study admiinistration
-!!!!
 Admin/Access control:
-	2 levels of users: researcher admins, and super admins. (system admins?)
+	2 levels of users: researcher admins, and super admins.
 	super-admins
 		can create new researchers,
 		reset researchers' passwords
@@ -81,13 +97,6 @@ Randomized questions: surveys should be able to randomize their order
     surveys should be able to display a subset ("ask only 10 questions")
     -surveys should (optionally) be able to present questions totally at random
     -surveys should (optionally) be able to present a subset that guarantees all questions are asked
-        permutation problems:
-        Q = number of questions
-        N = number of questions per run
-        R = number of runs = Q/N
-        X = extra questions need to fill out the final run to satisfy N
-        if we enforce X != 0 while also enforcing no repeat questions, those questions that show up in the last run of the first permutation are counted for twice (once at end of permutation 1, once at beginning of permutation 2) then those last questions are "locked" into only appearing in these overlapping runs.
-            solution: no overlapping runs.
 
 Surveys:
     able to have separate surveys for each study
