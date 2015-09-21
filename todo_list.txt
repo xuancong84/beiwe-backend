@@ -18,9 +18,8 @@
 ############################################################
 
 Eli:
-1. backend testing - adding randomize and trigger to an existing survey without those parameters, see what raw data looks like
-2. build a download landing page.
-3. app debugging - the password prompt does not occur for surveys?
+1. build a download landing page.
+2. app debugging - the password prompt does not occur for surveys?
 3. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
 4. do we have any code for downloading the USERS mac address hashes?
 5. architecture change - implement survey names in backend.
