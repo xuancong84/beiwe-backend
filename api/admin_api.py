@@ -1,10 +1,11 @@
 from flask import abort, Blueprint, make_response, redirect, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
-    authenticate_system_admin
+    authenticate_system_admin, authenticate_admin_login
 from db.user_models import User, Admin
 from db.study_models import Study, Studies
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
+from flask.templating import render_template
 
 admin_api = Blueprint('admin_api', __name__)
 
@@ -94,18 +95,27 @@ def create_new_patient(study_id=None):
 
 """##### Methods responsible for distributing APK file of Android app. #####"""
 
+@admin_api.route("/downloads")
+@authenticate_admin_login
+def download_page():
+    return render_template("download_landing_page.html")
+
+
 @admin_api.route("/download")
 def download_current():
     return send_file("Beiwe.apk", as_attachment=True)
 
 @admin_api.route("/download_debug")
+@authenticate_admin_login
 def download_current_debug():
     return send_file("Beiwe_debug.apk", as_attachment=True)
 
 @admin_api.route("/download_beta")
+@authenticate_admin_login
 def download_beta():
     return send_file("Beiwe_beta.apk", as_attachment=True)
 
 @admin_api.route("/download_beta_debug")
+@authenticate_admin_login
 def download_beta_debug():
     return send_file("Beiwe_beta_debug.apk", as_attachment=True)
