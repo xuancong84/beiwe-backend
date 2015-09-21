@@ -1,147 +1,97 @@
-############################################################
-############ Questions / Investigate need for ##############
-############################################################
+##############################################################
+#################### Currently In Progress ###################
+##############################################################
 
-get additional data from Jeanette:
+1. get additional data from Jeanette:
     There is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
     (Jeanette is working on replicating the issue, though it has also been noticed by other researchers)
     researcher says that they got the bug, and it saved schedule updates but not question updates... Jeanette says this is "bizarre" (not her experience)
 
-additional customizable text strings:
-    the message on the survey's notification
-    text on the main screen of the beiwe app
+2. list of additional customizable text strings and parameters:
+    a. the message of a survey's notification
+    b. text on the main screen of the beiwe app
+    c. the duration of the toast message after completing a survey, or make it responsive to the length of the message.  include descriptive text about this on the ui
 
-architecture: we probably need a retire study button on the website, possibly a delete study button too?
-
-Eli - investigate: there is a report from christian, he has a bunch of surveys scheduled, possibly receiving a survey when it wasn't scheduled? (need to email)
-
-make the duration of the toast-message customizable?  make it responsive to the length of the message? either way notate that on the settings page.
-
-Investigate what the behavior of the background process being killed (due to memory pressure etc.) frequently is.
-
-implement (web side) error checking for invalid or problematic values for timers
-    maximum audio recording duration cannot be longer than the logout timer
-    bluetooth global offset should not be longer than the other bluetooth timers
-
-how would we set a maximum line count to the files.
 
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
-REMOVE BETA COMMENT FOR TRIGGERED SURVEY
+Eli:
+1. backend testing - adding randomize and trigger to an existing survey without those parameters, see what raw data looks like
+2. build a download landing page.
+3. app debugging - the password prompt does not occur for surveys?
+3. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+4. do we have any code for downloading the USERS mac address hashes?
+5. architecture change - implement survey names in backend.
+6. talk with zags about recommendations for database for beiwe, requires encryption and access control.
+7. check behavior of the app generating unique device IDs and how that interacts with devices that are not phones.
+8. remove old data from s3 (zagaran-beiwe bucket):
+    a. It's safe to wipe anything prior to 5/1/15. The data Matt is using is all more recent than that, collected later in May and June.
+    b. If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below: 7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
+9. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
+    a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
 
-COMMUNICATION:
-call Jeanette, check in about when McLean can start, whether they are waiting on our moving the app to the regular download link
 
-TESTING:
-test: adding randomize and trigger to an existing survey without those parameters
+Josh:
+1. app - run your own tests on randomization, confirm whether it is working
+2. Josh: on the edit_survey webpage, make the inputs for randomize_with_memory and number_of_random_questions become invisible if the random checkbox is unchecked; show the current total number of questions.
+3. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
+4. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
+5. website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
+6. website - implement error checking for invalid or problematic values for timers on the study settings page
+    a. maximum audio recording duration cannot be longer than the logout timer
+    b. bluetooth global offset should not be longer than the other bluetooth timer values
+7. website - error pages for admin permission denied, and survey not found (this redirect occurs in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
+8. website - I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
+9. Make a crude logo (just a capital letter "B" inside a square)
 
-WEBSITE:
-download landing page.
-
-Look into matt's biewedata repo
-
-remove "THIS IS IN TESTING" warning when done testing.
-
-Eli: sent email to JP about credential needs for researchers, update and handle as information comes in
-
-Josh: test that the survey is passing survey.settings correcty from the web interface through to the app
-
-Josh: on the edit_survey webpage, make the inputs for randomize_with_memory and number_of_random_questions become invisible if the random checkbox is unchecked.
-Also, show the current total number of questions.
-
-Make a crude logo (just a capital letter "B" inside a square)
-
-Eli: investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
-
-Archituecture: survey names
-
-Josh: I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
-
-architecture: add survey notification text to the things that can be set remotely.
-
-Fix/find NPE crash in PersistentData; probably from a null appContext.
-
-website: add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
-
-backend/website: Check why automatic logout keeps happening- it seems that the session expiration date does not get renewed on every pageload; only on login
-
-website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
-
-website/backend: implement error page for admin permission denied and survey not found (this would be the redirect to in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
 
 ############################################################
 ########## Things to check in on in a few months ###########
 ############################################################
 
-updates for data display: it is really low priority
-connected (sorta): surveys do not have titles
+updates for data display in the app: it is really low priority.
 feature proposal: add a third level of admins, study admiinistration
+feature proposal: retire a study. (make a study appear as inactive or something)
 
-############################################################
-####################### ARCHITECTURE #######################
-############################################################
+####################################################################
+######################## OPTIONAL THINGS ###########################
+####################################################################
 
-Admin/Access control:
-	2 levels of users: researcher admins, and super admins.
-	super-admins
-		can create new researchers,
-		reset researchers' passwords
-		edit which studies researchers are attached to
-		delete researchers
-		create studies.
-	admins should only have survey modification rights to on surveys in studies they are assigned to.
+Admin Panel UI
+    -Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
+    -Make the page reload after they create a new patient or remove a device
 
-Randomized questions: surveys should be able to randomize their order
-    surveys should be able to display a subset ("ask only 10 questions")
-    -surveys should (optionally) be able to present questions totally at random
-    -surveys should (optionally) be able to present a subset that guarantees all questions are asked
 
-Surveys:
-    able to have separate surveys for each study
-    don't need a survey to be shared among multiple studies
-    surveys must be able to be scheduled:
-        once a week
-        once a day
-        multiple times per day
+########################################################################
+######################### Future Improvements ##########################
+########################################################################
 
-Customizable Times:
-	-an option that can be editted on the edit survey page (not just survey creation)
-	-error-checking (this isn't mentioned in the change order)
-		for example, BLUETOOTH_ON_DURATION must be no longer than BLUETOOTH_PERIOD minus BLUETOOTH_START_TIME_IN_PERIOD.
- 	-This is likely to be modified by the email thread about timers and data streams.
+add in more user device info, specifically I am thinking of android version, sdk version for debugging
 
-Customizable wording, customizable from the admin panel at the time of study creation:
-	-Text on the "Call Clinician" buttons throughout the app.
-	-Main body text on Voice Recording screen
-	-About page text
-	-Text in the Toast that pops up after a user submits a completed survey
-	-Text in the Toast that pops up after a user submits a completed voice recording
-	(We should probably limit text inputs to ASCII-only, not Unicode characters. The survey editor interface currently (June 29, 2015) has a check for Unicode characters in survey_designer.py/update_survey().)
+Add crash logging:
+    http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
+    http://www.acra.ch/
+    http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
-###############################################################
-####################### REFACTOR THINGS #######################
-###############################################################
+Improve uploading: Build a _listener_ for WiFi connected, then try to upload files and download surveys
+
+Timers & data upload
+    -Add an alert if the phone hasn't been able to upload in a long time?
+    -Add a server-side alert if a patient hasn't uploaded data in a long time? - unlikely to be useful...
+
+Improve logging when the app was started
+    -We can't determine whether the app was started on boot or started by the user opening it.
+
+we may be able to reduce some HTTPS overhead using the following stackoverflow
+    http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient
+
+Yet more work on bluetooth:
+    ensure that phones running 5+ are broadcasting bluetooth beacons (does not work on 4.x)
 
 merge mms and sms sent receivers if possible.
 
-####################################################################
-####################### ADMINISTRATIVE TASKS #######################
-####################################################################
-
-remove old data from s3:
-    It's safe to wipe anything prior to 5/1/15.   The data Matt is using is all more recent than that, collected later in May and June.
-    If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below:
-        7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
-
-####################################################################
-########################## GENERAL TASKS ###########################
-####################################################################
-
-check behavior of the appgenerating unique device IDs and how that interacts with devices that are not phones... do not know what the behavior of this is.
-
-UHOH, I don't think we have any code for downloading user mac addresses/hashes of them...
 
 ####################################################################
 ############################ KNOWN BUGS ############################
@@ -159,59 +109,4 @@ MMS logging:
                 MMS messages in the sent box get updated when they get read receipts...  the data for these read receipts is always there and is always null.
     -Josh tried tracking this down as well, there is a comment is smssentreceiver
 
-!!!! This can possibly be deprecated, need to attempt to replicate.
-if the background process is not running and a user presses a notification to take a survey, the app crashes.  This is probably due to the rendering of a dynamic page requiring access to the survey's json file, which it accesses through the file manager, which has not been instantiated.
-    probably the best solution is to make the unencrypted files have their own reader?  that just creates more chances for conflicts....
-    TODO: check order of instantiation of for the dynamically rendered pages. (uhg)
-
 Look at the number input box in the survey, and see if changing android:inputType="number" to numberDecimal solves the problem of people putting more than one decimal point into the answer
-
-website: remove bluetooth offset from website, in backend default it to 0.  do not remove from study settings schema.
-
-####################################################################
-######################## OPTIONAL THINGS ###########################
-####################################################################
-
-Admin Panel UI
-    -Make user unable to hit "back" button after logout, and return to the admin panel http://stackoverflow.com/a/20652896/1789466
-    -(Josh) Throw in an Admin Panel warning message (don't use IE < 8!)
-    -Make the page reload after they create a new patient or remove a device
-
-
-re-analyze whether the following is true:
-    In RegistrationActivity: don't set username and password on the device UNTIL they've been validated by the server.  This would require substantial changes to PostRequest.java.  Leaving this as-is does not actually present any serious security flaws.
-
-####################################################################
-############################## FUTURE ##############################
-####################################################################
-
-App UI
-    -define a style and prettify the UI
-
-add in more user device info, specifically I am thinking of android version, sdk version for debugging
-
-Add crash logging:
-    http://stackoverflow.com/questions/19897628/need-to-handle-uncaught-exception-and-send-log-file
-    http://www.acra.ch/
-    http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
-
-Improve uploading: Build a _listener_ for WiFi connected, then try to upload files and download surveys
-
-Timers & data upload
-    -Add an alert if the phone hasn't been able to upload in a long time?
-    -Add a server-side alert if a patient hasn't uploaded data in a long time? - unlikely to be useful...
-
-########################################################################################
-####################### ideas (these do not need to be acted on) #######################
-########################################################################################
-
-implement a flask url function for a device's phone number changing. all it does is calls upload_device_ids(), add check to android... this means we have to store the phone number (or hash of) in order to check for changes.
-
-Trying to log when the app was started: We can't determine whether the app was started on boot or started by the user opening it.  Maybe we should just give up on this.
-
-if we restart the background service occasionally we can get around the user-disabled bluetooth "problem"
-
-There is no way to inform the user that the encryption key is corrupted.
-
-we may be able to reduce some HTTPS overhead using the following stackoverflow
-    http://stackoverflow.com/questions/5643704/reusing-ssl-sessions-in-android-with-httpclient
