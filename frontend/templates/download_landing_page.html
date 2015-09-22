@@ -3,38 +3,62 @@
 {% block title %} Download Page{% endblock %}
 
 {% block content %}
+  <div class="container">
+    <h2>Downloads </h2>
+    <div class="well">
+      <div class="row">
+        <div class="col-xs-12">
+          <a href="/download" class="btn btn-primary btn-block"> <b>Download The Beiwe App</b></a>
+          <div class="text-center">
+            You can also enter <b>studies.beiwe.org/download</b> directly into the browser of any device running the Android OS.
+          </div>
+        </div>
+      </div>
 
-  <div class="row">
-    <h2>Download Page</h2>
+
+      <h3> The Study Debugger </h3>
+      The Study Debugger is a special version of the Beiwe App that includes several useful features for debugging and testing your surveys.  You must be logged in to download the Study Debugger.
+      <div class="row">
+        <div class="col-xs-12">
+          <a href="/download_debug" class="btn btn-primary btn-block">Download Study Debugger </a>
+        </div>
+      </div>
+    </div>
+    <h2> Beiwe Betas </h2>
+    <div class="well">
+      The Beta versions of the Beiwe and Study Debugger apps are in-development and may change without warning.  They may contain updates and bug-fixes, or they may contain unfinished or undocumented features.  Make sure to read the description below of how the current beta differs from the production version, and what features in the app will require testing.
+    </div>
+    <div class="well">
+      If you encounter a problem with the app or a message stating that Beiwe has stopped working, please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using (Beta or Production, Study Debugger or Regular), the date you downloaded the app on, the version of Android OS on the device, and the full model name of the device you were using in addition to a description of your activity before the problem or crash occurred.
+    </div>
+    <h3> Beta Status: </h3>
+    
+    
+    {# this text is going to change whenever we upload a new version of the app, keep it simplo #}
+    <div class="well">
+      The current version of the Beiwe Betas are identical to the production version.  The following features are currently in development:
+      <p>&nbsp &nbsp Randomized surveys - randomized surveys are functional, but have not been thoroughly tested.</p>
+    </div>
+    
+
+    <div class="well">
+      <div class="row">
+        <div class="col-xs-12">
+          <a href="/download_beta" class="btn btn-primary btn-block">Download the BETA version of the Beiwe app </a>
+          <div class="text-center">
+            You must be logged in to download either of the Beta apps.
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <a href="/download_beta_debug" class="btn btn-primary btn-block">Download the BETA version of the Study Debugger </a>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <br>
-
-  <h4> Click the following link to download the most up-to-date version of the Beiwe app. </h4>
-  <a href="/download" class="btn">Download Beiwe App</a>
-  You can also enter studies.beiwe.org/download directly into the browser of any device running the Android OS.
-
-  <h4> Click the following to download the Study Debugger version of the Beiwe app. </h4>
-  <a href="/download_debug" class="btn">Download Debugger App </a>
-  You must be logged in to download the Study Debugger app.
-  <br><br>
-
-  <h2> Beiwe Betas </h2>
-  <p>The Beta versions of the Beiwe and Study Debugger apps are in-development and may change without warning.  They may contain updates and bug-fixes, or they may contain unfinished or undocumented features.  Make sure to read the description belov of how the current beta differs from the production version, and what features in the app will require testing. </p>
-
-  <p>If you encounter a problem with the app or a message stating that Beiwe has stopped working, please send us a bug report.  Remember to include the version of the app you were using (Beta or Production, Study Debugger or Regular), the date you downloaded the app on, the version of Android OS on the device, and the full model name of the device you were using in addition to a description of your activity before the problem or crash occurred. </p>
-
-  <h3> Beta Status: </h3>
-  <p> The current version of the Beiwe Betas are identical to the production version.  The following features are currently in development: </p>
-
-  <p>&nbsp &nbsp Randomized surveys - randomized surveys are functional, but have not been thoroughly tested.</p>
-  <br>
-  <h4> Click the following to download the BETA version of the Beiwe app. </h4>
-  <a href="/download_beta" class="btn">Download Beiwe Beta </a>
-
-  <h4> Click the following to download the BETA version of the Study Debugger app. </h4>
-  <a href="/download_beta_debug" class="btn">Download Study Debugger Beta </a>
-
+</div>
 </div>
 
 {% endblock %}
