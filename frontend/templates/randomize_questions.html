@@ -7,16 +7,18 @@
 >&nbsp; <b>Randomize</b> which questions are displayed each time the participant takes a survey
 <br>
 
-<input type="checkbox" name="randomize_with_memory" id="randomize_with_memory"
-  {% if survey.settings['randomize_with_memory'] %}
-    checked
-  {% endif %}
->&nbsp; <b>Randomize without replacement</b>, i.e., on each survey, only display questions that haven't appeared yet on a previous survey, until all questions have appeared in a survey, and then start over
-<br>
+<div id="additional_randomization_inputs">
+	<input type="checkbox" name="randomize_with_memory" id="randomize_with_memory"
+	  {% if survey.settings['randomize_with_memory'] %}
+	    checked
+	  {% endif %}
+	>&nbsp; <b>Randomize without replacement</b>, i.e., on each survey, only display questions that haven't appeared yet on a previous survey, until all questions have appeared in a survey, and then start over
+	<br>
 
-<input type="number" name="number_of_random_questions" id="number_of_random_questions"
-  {% if survey.settings['number_of_random_questions'] %}
-    value="{{ survey.settings['number_of_random_questions'] }}"
-  {% endif %}
->&nbsp; <b>How many questions</b> are displayed in each survey
-<br>
+	<input type="number" name="number_of_random_questions" id="number_of_random_questions"
+	  {% if survey.settings['number_of_random_questions'] %}
+	    value="{{ survey.settings['number_of_random_questions'] }}"
+	  {% endif %}
+	>&nbsp; <b>How many questions</b> are displayed in each survey
+	<br>
+</div>

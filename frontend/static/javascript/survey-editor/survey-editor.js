@@ -12,7 +12,19 @@ $(document).ready(function() {
     renderSchedule();
 
     $('.schedule-timepicker').timepicker();
+
+    toggle_randomize_inputs_visibility();
+    $('#randomize').change(toggle_randomize_inputs_visibility);
 });
+
+
+function toggle_randomize_inputs_visibility() {
+    if (document.getElementById('randomize').checked) {
+        $('#additional_randomization_inputs').show();
+    } else {
+        $('#additional_randomization_inputs').hide();
+    };
+}
 
 
 // Return the hour number (in 24-hour time) that the user selected in the form
