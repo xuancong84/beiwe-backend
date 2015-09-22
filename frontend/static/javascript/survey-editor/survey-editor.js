@@ -132,6 +132,8 @@ function renderQuestionsList() {
 
     // Insert the template into the page's HTML
     $("#listOfCurrentQuestions").html(htmlQuestion);
+
+    $('#number_of_total_questions').html(questions.length)
 }
 
 // Get the question object from the Edit Question modal, and append it to the questions array

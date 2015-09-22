@@ -34,7 +34,7 @@ Eli:
 Josh:
 0. check that the new key for app encryption does what we want it to do.
 1. app - run your own tests on randomization, confirm whether it is working
-2. show the current total number of questions on the survey page
+2. check Eli's download landing page code
 3. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
 4. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
 5. website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
