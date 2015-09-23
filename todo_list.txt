@@ -31,18 +31,20 @@ Eli:
 
 
 Josh:
+-Change the "password must be more than 6 characters" language to "password must be at least 6 characters"
+-Probably don't enforce that the temporary registration password is 6+ characters long
+-Figure out how to handle info text box questions in randomized surveys
 0. check that the new key for app encryption does what we want it to do.
 1. app - run your own tests on randomization, confirm whether it is working
-2. check Eli's download landing page code
-3. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
-4. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
-5. website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
-6. website - implement error checking for invalid or problematic values for timers on the study settings page
+2. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
+3. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
+4. website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
+5. website - implement error checking for invalid or problematic values for timers on the study settings page
     a. maximum audio recording duration cannot be longer than the logout timer
     b. bluetooth global offset should not be longer than the other bluetooth timer values
-7. website - error pages for admin permission denied, and survey not found (this redirect occurs in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
-8. website - I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
-9. Make a crude logo (just a capital letter "B" inside a square)
+6. website - error pages for admin permission denied, and survey not found (this redirect occurs in the survey/study access decorator, currently we just throw a 403 and 404, respectively)
+7. website - I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
+8. Make a crude logo (just a capital letter "B" inside a square)
 
 
 ############################################################
