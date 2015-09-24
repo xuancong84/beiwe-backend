@@ -2,11 +2,7 @@
 #################### Currently In Progress ###################
 ##############################################################
 
-1. There is a bug on the survey editor page where sometimes after clicking save and deploy it does not save, just reloads the page.
-    (Jeanette is working on replicating the issue, though it has also been noticed by other researchers)
-    researcher says that they got the bug, and it saved schedule updates but not question updates... Jeanette says this is "bizarre" (not her experience)
-
-2. list of additional customizable text strings and parameters:
+1. list of additional customizable text strings and parameters:
     a. the message of a survey's notification
     b. text on the main screen of the beiwe app
     c. the duration of the toast message after completing a survey, or make it responsive to the length of the message.  include descriptive text about this on the ui
