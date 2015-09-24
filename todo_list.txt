@@ -27,6 +27,10 @@ Eli:
 
 
 Josh:
+-Check per-study permissions; researchers can go straight to the URL of a study they're not authorized on
+-Fix the "Next" button in the in-app survey
+-Make some questions optional
+-Make the in-app survey input fields more obvious for open-response questions
 -Change the "password must be more than 6 characters" language to "password must be at least 6 characters"
 -Probably don't enforce that the temporary registration password is 6+ characters long
 -Figure out how to handle info text box questions in randomized surveys
