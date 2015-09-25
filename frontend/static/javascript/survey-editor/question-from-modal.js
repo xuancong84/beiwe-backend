@@ -20,11 +20,12 @@ function getQuestionObjectFromModal() {
         if (input.offsetParent !== null) {  // If the <input> element is not hidden
             /* Add a key-value pair to the questionObject, using the <input> element's "name"
             attribute as the key, and the <input>'s value as it's value */
+            sanitized_input_value = input.value.replace(/"/g, "\u201C");
             if (input.name.localeCompare("option") == 0) {
-                optionsArray.push({"text": input.value});
+                optionsArray.push({"text": sanitized_input_value});
             }
             else {
-                questionObject[input.name] = input.value;
+                questionObject[input.name] = sanitized_input_value;
             };
         }
     };
