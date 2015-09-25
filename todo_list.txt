@@ -17,16 +17,15 @@
 ############################################################
 
 Eli:
-1: do changes to timers break if the user changes time zones.
-2. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
-3. do we have any code for downloading the USERS mac address hashes?
-4. architecture change - implement survey names in backend.
-5. talk with zags about recommendations for database for beiwe, requires encryption and access control.
-6. check behavior of the app generating unique device IDs and how that interacts with devices that are not phones.
-7. remove old data from s3 (zagaran-beiwe bucket):
+1. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+2. change the "date" column in phone call logger to "timestamp"
+3. architecture change - implement survey names in backend.
+4. talk with zags about recommendations for database for beiwe, requires encryption and access control.
+5. check behavior of the app generating unique device IDs and how that interacts with devices that are not phones.
+6. remove old data from s3 (zagaran-beiwe bucket):
     a. It's safe to wipe anything prior to 5/1/15. The data Matt is using is all more recent than that, collected later in May and June.
     b. If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below: 7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
-8. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
+7. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
     a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
 
 
