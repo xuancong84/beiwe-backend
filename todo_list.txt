@@ -33,10 +33,9 @@ Josh:
 -Change the "password must be more than 6 characters" language to "password must be at least 6 characters"
 -Probably don't enforce that the temporary registration password is 6+ characters long
 -Figure out how to handle info text box questions in randomized surveys
-0. check that the new key for app encryption does what we want it to do.
-1. app - run your own tests on randomization, confirm whether it is working
-2. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
-3. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
+1. check that the new key for app encryption does what we want it to do.
+2. website - add a "confirm" field for the 32-character key that super-admins enter when they create a new study.
+3. website - Check why automatic logout keeps happening - it seems that the session expiration date does not get renewed on every pageload; only on login.
 4. website/backend: See if we can use flask_login and standardized parameters so that not every page needs to pass in information about the logged in user
 5. website - implement error checking for invalid or problematic values for timers on the study settings page
     a. maximum audio recording duration cannot be longer than the logout timer
