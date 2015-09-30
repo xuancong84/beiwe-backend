@@ -13,10 +13,10 @@
 ############################################################
 
 Eli:
-1. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
-2. change the "date" column in phone call logger to "timestamp"
-3. architecture change - implement survey names in backend.
-4. talk with zags about recommendations for database for beiwe, requires encryption and access control.
+1. talk with zags about recommendations for database for beiwe, requires encryption and access control.
+2. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+3. change the "date" column in phone call logger to "timestamp"
+4. architecture change - implement survey names in backend.
 5. check behavior of the app generating unique device IDs and how that interacts with devices that are not phones.
 6. remove old data from s3 (zagaran-beiwe bucket):
     a. It's safe to wipe anything prior to 5/1/15. The data Matt is using is all more recent than that, collected later in May and June.
