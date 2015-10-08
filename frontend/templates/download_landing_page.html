@@ -29,21 +29,17 @@
       If you encounter a problem with the app or a message stating that Beiwe has stopped working, please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using (Beta or Production, Study Debugger or Regular), the date you downloaded the app on, the version of Android OS on the device, and the full model name of the device you were using in addition to a description of your activity before the problem or crash occurred.
     </div>
 
-    <h3> Changelog: </h3>
-    <div class="well">
-      9/23/15 - The Beiwe app is now compatible with the Randomize Survey Questions feature.
-    </div>
-
     <h2> Beiwe Betas </h2>
     <div class="well">
       The Beta versions of the Beiwe and Study Debugger apps are in-development and may change without warning.  They may contain updates and bug-fixes, or they may contain unfinished or undocumented features.  Make sure to read the description below of how the current beta differs from the production version, and what features in the app will require testing.
     </div>
 
     <h3> Beta Status: </h3>
-    {# this text is going to change whenever we upload a new version of the app, keep it simplo #}
+    {# this text is going to change whenever we upload a new version of the app, keep it simple
+      <p><b> There are currently no features that require Beta testing. </b> </p> #}
     <div class="well">
       The following feature is ready for testing:
-      <p><b>New Scheduling Logic</b> - Some aspects of scheduling sensor recording sessions for the GPS, Accelerometer, and Wifi logging have been changed to more aggressively record data after situations where Beiwe was blocked from recording, for instance due to the phone being turned off.  Bluetooth scheduling has also been made more aggressive under similar conditions. </p>
+      <p><b> There are currently no features that require Beta testing. </b> </p>
     </div>
 
     <div class="well">
@@ -61,8 +57,14 @@
         </div>
       </div>
     </div>
+
+    <h3> Changelog: </h3>
+    <div class="well">
+      <p>10/8/15 - Bug fix: fixed issue where the device would fail to record GPS and Accelerometer data until the Beiwe service was reset.</p>
+      <p>10/8/15 - Scheduling logic for GPS, Accelerometer, and Wifi has been made more aggressive, especially when recovering from situations where the device is blocked from recording data streams. </p>
+      <p> 9/23/15 - Feature: the Beiwe app is now compatible with the Randomize Survey Questions feature.</p>
+    </div>
+
   </div>
-</div>
-</div>
 
 {% endblock %}
