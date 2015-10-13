@@ -12,12 +12,19 @@
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
+There appear to be incorrect types in StudyDeviceSettingsCollection entries...
+
+
 Eli:
-1. talk with zags about recommendations for database for beiwe, requires encryption and access control.
+1. iOS estimate.
 2. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
 3. change the "date" column in phone call logger to "timestamp"
 4. architecture change - implement survey names in backend.
-5. check behavior of the app generating unique device IDs and how that interacts with devices that are not phones.
+5.  updates for Marshmallow
+    new permissions - "To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans, your app must now have the ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permissions"
+    new alarm functions - setAndAllowWhileIdle and setExactAndAllowWhileIdle are new alarm functions that we will probably have to handle in the alarm manager code.
+    app standby - add isIgnoringBatteryOptimizations()
+    how-to for debugging this - http://developer.android.com/training/monitoring-device-state/doze-standby.html
 6. remove old data from s3 (zagaran-beiwe bucket):
     a. It's safe to wipe anything prior to 5/1/15. The data Matt is using is all more recent than that, collected later in May and June.
     b. If it's easier to go by participant ID's, do ____NOT_____ delete the participant ID's below: 7rzzd3, 6sod84, ahhv9h, c7hze5, 66f1zz, qrsmla, fwgs3q, g7s4zv, yi279c, v26kw2
