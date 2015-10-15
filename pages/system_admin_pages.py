@@ -62,7 +62,7 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
-    return render_template('manage_studies.html', studies=Studies(),
+    return render_template('manage_studies.html', studies=Studies(sort_by="name"),
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
