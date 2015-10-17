@@ -8,6 +8,7 @@ from libs.encryption import decrypt_device_file, DecryptionKeyError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
+from werkzeug.exceptions import BadRequestKeyError
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -82,9 +83,25 @@ def register_user():
     mac_address = request.values['bluetooth_id']
     phone_number = request.values['phone_number']
     device_id = request.values['device_id']
+    
+    #These values may not be returned by earlier versions of the beiwe app
+    try: device_os = request.values['device_os']
+    except BadRequestKeyError: device_os = "none"
+    try: os_version = request.values['os_version']
+    except BadRequestKeyError: os_version = "none"
+    try: product = request.values["product"]
+    except BadRequestKeyError: product = "none"
+    try: brand = request.values["brand"]
+    except BadRequestKeyError: brand = "none"
+    try: hardware_id = request.values["hardware_id"]
+    except BadRequestKeyError: hardware_id = "none"
+    try: manufacturer = request.values["manufacturer"]
+    except BadRequestKeyError: manufacturer = "none"
+    try: model = request.values["model"]
+    except BadRequestKeyError: model = "none"
+    
     user = User(patient_id)
     study_id = user['study_id']
-#     print "REGISTERING:", patient_id, phone_number, mac_address, device_id
     
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # CASE: this patient has a registered a device already and it does not
@@ -105,8 +122,12 @@ def register_user():
     #Upload the user's various identifiers.
     unix_time = str(calendar.timegm(time.gmtime() ) )
     file_name = patient_id + '/identifiers_' + unix_time + ".csv"
-    file_contents = ("patient_id, MAC, phone_number, device_id\n" +
-                     patient_id+","+mac_address+","+phone_number+","+device_id )
+    #construct a manual csv of the device attributes
+    header = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model\n"
+    file_contents = (header + "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" %
+                     (patient_id, mac_address, phone_number, device_id, device_os,
+                      os_version, product, brand, hardware_id, manufacturer, model) )
+    # print file_contents, "\n"
     s3_upload( file_name, file_contents, study_id )
     # set up device.
     user.set_device( device_id )
