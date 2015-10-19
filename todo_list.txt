@@ -41,8 +41,6 @@ add to notification popping a debug log statement... the point is to have data f
 
 
 Josh:
--0: send jp a (short, 4 sentence) email description explaining the "business purpose" of an AWS account so that he can forward that to finances.
-
 0: "Josh, go through the contract and send jeanette a thing on how we can get the final chunk of the contract payment."
 
 -Check per-study permissions; researchers can go straight to the URL of a study they're not authorized on
