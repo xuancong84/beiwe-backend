@@ -1,6 +1,5 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from config.constants import SURVEY_TYPES
-from __builtin__ import classmethod
 
 
 class Study( DatabaseObject ):
@@ -20,7 +19,7 @@ class Study( DatabaseObject ):
         if Studies(name=name):
             raise StudyAlreadyExistsError("a study named %s already exists" % name)
         if len(encryption_key) != 32:
-            error_text = "the encryption key must be 32 characters, you only " +\
+            error_text = "the encryption key must be 32 characters, you " +\
                          "entered %d characters" % len(encryption_key)
             raise InvalidEncryptionKeyError(error_text)
         device_settings = StudyDeviceSettings.create_default()
