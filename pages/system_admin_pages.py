@@ -39,7 +39,7 @@ def edit_admin(admin_id):
                            admin_is_current_user=admin_is_current_user,
                            system_admin=admin_is_system_admin())
 
-
+#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/create_new_researcher', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_new_researcher():
@@ -76,6 +76,7 @@ def edit_study(study_id=None):
                            system_admin=admin_is_system_admin())
 
 
+#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/create_study', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_study():
@@ -92,16 +93,19 @@ def create_study():
         return redirect('/create_study')
 
 
+#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/delete_study/<string:study_id>', methods=['POST'])
 @authenticate_system_admin
 def delete_study(study_id=None):
-    if request.form.get('confirmation') == 'true':
-        study = Study(study_id)
-        [study.get_study_device_settings().remove()]    # Delete device settings
-        [user.remove() for user in Users(study_id=study_id)]   # Delete patients
-        [Survey(s_id).remove() for s_id in study['surveys']]    # Delete surveys
-        study.remove()                                     # Delete study object
+    """ This functionality has been disabled pending testing and feature change."""
     return make_response("", 200)
+#     if request.form.get('confirmation') == 'true':
+#         study = Study(study_id)
+#         [study.get_study_device_settings().remove()]    # Delete device settings
+#         [user.remove() for user in Users(study_id=study_id)]   # Delete patients
+#         [Survey(s_id).remove() for s_id in study['surveys']]    # Delete surveys
+#         study.remove()                                     # Delete study object
+#     return make_response("", 200)
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
