@@ -11,33 +11,26 @@
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
+note: the existing credential system for data access will break when we transfer the s3 bucket.
+note: the old beiwe bucket is going to throw a wrench into... everything.
+
 Eli:
-1. for ios dev, an estimate for time and cost, and listing and comparison of feature sets between android and ios.
-    don't make this a detailed estimate, just a single number or range estimate
-2. an estimate for the researcher data-access system and transfer of AWS service *stuff*
-    don't make this a detailed estimate, just a single number or range estimate
-        note: the existing credential system for data access will break almost definitely break when we transfer the s3 bucket.
-        note: the old beiwe bucket is going to throw a wrench into... everything.
-3. the deeper iOS estimate and researcher data access estimates
-4. There appear to be incorrect types in StudyDeviceSettingsCollection entries...
-5. on the list of studies for in Manage Studies add study ID to that list for ease of credentials?
-6. add android os version to the user data.
-add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
-7. check whether we already have "entered survey taking activity" to the debug log
-8. document all the things that the app will dump into the debug log.
-9. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
-10. change the "date" column in phone call logger to "timestamp"
-11. check cascading delete with "McLean Baker" study
-12. architecture change - implement survey names in backend.
-13.  updates for Marshmallow
+1. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
+   check whether we already have "entered survey taking activity" to the debug log
+2. document all the things that the app will dump into thate debug log.
+3. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+4. change the "date" column in phone call logger to "timestamp"
+5. check cascading delete with "McLean Baker" study
+6. architecture change - implement survey names in backend.
+7.  updates for Marshmallow
     new permissions - "To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans, your app must now have the ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permissions"
     new alarm functions - setAndAllowWhileIdle and setExactAndAllowWhileIdle are new alarm functions that we will probably have to handle in the alarm manager code.
     app standby - add isIgnoringBatteryOptimizations()
     how-to for debugging this - http://developer.android.com/training/monitoring-device-state/doze-standby.html
     update docs or beiwedata about bluetooth ID in android 6.0
-14. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
+8. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
     a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
-15. add retire study functionality
+9. add retire study functionality
 
 
 Josh:
@@ -61,6 +54,81 @@ Josh:
 7. website - I see 4 todos in base.html, footer.html, and view_study.html.  These are super low priority, but they don't show up in liclipse todo, so I'm sticking a reminder here.
 8. Make a crude logo (just a capital letter "B" inside a square)
 
+
+
+
+################################################################
+################ Researcher Data Access System #################
+################################################################
+POST REQUEST:
+has a url.... /api/v1/get_datums
+    required: access key
+    required: access secret
+    data streams (json blob) - default to all
+    users (json blob) - defaults to all
+    required: study
+    date-start (define format)
+    date-end (define format)
+    top-up = a file (registry.dat)
+    this request gets logged, store the... return code of the request (i.e. store 403 errors for no access to study, 400 errors for bad user name...)
+
+return value:
+    a zip file
+    contains a folder structure probably matching the data streams on s3
+    a registry.dat file
+
+registry.dat file:
+    containing file paths of chunks
+    each chunk's md5 hash
+
+chunk:
+    a chunk is a processed csv of data of a stream of a user for 1 hour of time
+    ONLY DATA FROM THAT HOUR IS IN THAT CHUNK
+
+
+== mongo database collections ==
+
+ChunksRegistry:
+    study
+    user
+    datastream
+    datetime of chunk start
+    hash-o-chunk data
+    s3 file path
+
+list-o-raw-files-what-needs-processing:
+    s3 file path
+
+
+== end db nonsense ==
+
+periodic update job:
+    cron: hourly event
+    consume from list-o-raw-files-what-needs-processing the raw files
+        for each row find the appropriate chunk in s3, insert into chunk, sort the chunk, update hash, insert that file into that same s3 path.
+        (make the above not suck)
+    also: when a file is uploaded, add that file to the list-o-raw-files-what-needs-processing
+    if possible: pop things off of this database (retreive and delete as an atomic operation) to avoid race
+    IF THIS PROCESS TAKES MORE THAN... 40 MINUTES SEND AN ERROR EMAIL AND DONT START AGAIN AT AN HOUR
+        okay this is full of race conditions, consider an update to cron to get the name-o-process that is running and... provide options on what to do in that case.
+        maybe instead stick a key "LOCK ME" the collection, we can guarantee 1/hour runtime, only run if that value is not set... but if it breaks (the process dies leaving the lock in the db) we need to be sent an error email, so we can go fix it...
+
+
+updates to auth system:
+    on creating a user or at will...
+    create a set of creds and a way for a user to view their creds
+    when a user creates new creds invalidate old creds...
+    when users were issued credentials (because inevitably they will want cred retirement...)
+
+
+web form:
+    multiselection box of users and data streams...
+    download the zip...
+    display what I need to paste into python to get mah datums
+
+
+User python code:
+    TBD
 
 ############################################################
 ########## Things to check in on in a few months ###########
