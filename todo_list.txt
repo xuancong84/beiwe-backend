@@ -14,6 +14,9 @@
 note: the existing credential system for data access will break when we transfer the s3 bucket.
 note: the old beiwe bucket is going to throw a wrench into... everything.
 
+send email on upload failure
+add to website an obvious display of the study id
+
 Eli:
 1. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
    check whether we already have "entered survey taking activity" to the debug log
@@ -55,11 +58,10 @@ Josh:
 8. Make a crude logo (just a capital letter "B" inside a square)
 
 
-
-
 ################################################################
 ################ Researcher Data Access System #################
 ################################################################
+
 POST REQUEST:
 has a url.... /api/v1/get_datums
     required: access key
