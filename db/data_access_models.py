@@ -37,8 +37,6 @@ class FileProcessLock(DatabaseObject):
         for f in FileProcessLock(mark="marked"):
             f.remove()
 
-class FileProcessLockCollection():
-    OBJTYPE = FileProcessLock
 ################################################################################
 
 class ChunksRegistry(DatabaseCollection):
@@ -55,3 +53,5 @@ class ChunksRegistry(DatabaseCollection):
             
 class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess
+class FileProcessLockCollection(DatabaseCollection):
+    OBJTYPE = FileProcessLock
