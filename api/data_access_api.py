@@ -6,8 +6,7 @@ from collections import defaultdict
 
 data_access_api = Blueprint('data_access_api', __name__)
 
-from db.data_access_models import (FilesToProcess, ChunksRegistry,
-    FileProcessRunningCollection, FileProcessRunning)
+from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock
 from db.study_models import Studies
 from db.user_models import Admins
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload, s3_retreive_or_none_for_chunking, s3_upload_chunk
@@ -28,10 +27,6 @@ CSV_FILES_WITH_PROBLEMS = ["callLog"]
 CHUNK_TIMESLICE_QUANTUM = 3600 #each chunk represents 1 hour of data, and because unix time 0 is on an hour boundry our time codes will also be on nice, clean hour boundaries
 
 ALL_DATA_STREAMS = []
-
-class EverythingsGoneToHellException(Exception): pass
-
-
 
 # UNIX_EPOCH_START = datetime.fromtimestamp(0)
 # def get_unix_time(dt):
@@ -104,9 +99,7 @@ def grab_data():
 #TODO: Eli, for testing make this only run on a single user's data...
 
 def process_file_chunks():
-    if len(FileProcessRunningCollection()) != 0:
-        raise EverythingsGoneToHellException
-    file_process_running_flag = FileProcessRunning.create()  #TODO: Eli. Don't forget about this.
+    FileProcessLock.lock()  #TODO: Eli. Don't forget about this.
     error_handler = ErrorHandler()
     
     binified_data = defaultdict(list)

@@ -1,6 +1,5 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from datetime import datetime
-from bson.objectid import ObjectId
 
 class ChunkRegistry(DatabaseObject):
     PATH = "beiwe.chunk_registry"
@@ -22,12 +21,24 @@ class FileToProcess(DatabaseObject):
     def append_file_for_processing(cls, file_path, study_id, user_name): 
         FileToProcess.create( {"s3_file_path":file_path, "study_id":study_id, "user_name":user_name}, random_id=True)
 
-class FileProcessRunning(DatabaseObject):
+class FileProcessLock(DatabaseObject):
     PATH = "beiwe.file_process_running"
-    DEFAULTS = {"leave_empty":""}
+    DEFAULTS = {"mark":""}
+    
+    class EverythingsGoneToHellException(Exception): pass
+    
+    @classmethod
+    def lock(cls):
+        if len(FileProcessLockCollection) > 0: raise EverythingsGoneToHellException
+        FileProcessLock.create({"mark":"marked"})
+        
+    @classmethod
+    def unlock(cls):
+        for f in FileProcessLock(mark="marked"):
+            f.remove()
 
-class FileProcessRunningCollection():
-    OBJTYPE = FileProcessRunning
+class FileProcessLockCollection():
+    OBJTYPE = FileProcessLock
 ################################################################################
 
 class ChunksRegistry(DatabaseCollection):
