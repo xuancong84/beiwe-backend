@@ -28,7 +28,13 @@ def _get_bucket(name):
 def s3_upload( key_name, data_string, study_id ):
     bucket = _get_bucket(S3_BUCKET)
     prefix = str(study_id) + "/"
-    key = bucket.new_key(prefix + key_name)
+    data = encryption.encrypt_for_server(data_string, study_id)
+    key = bucket.new_key(prefix + key_name) #TODO: Eli. This construction is not consistent across s3 calls.
+    key.set_contents_from_string(data)
+
+def s3_upload_chunk( file_path, data_string, study_id ):
+    bucket = _get_bucket(S3_BUCKET)
+    key = bucket.new_key(file_path)
     data = encryption.encrypt_for_server(data_string, study_id)
     key.set_contents_from_string(data)
 
@@ -42,7 +48,11 @@ def s3_retrieve(key_name, study_id):
     key = Key(_get_bucket(S3_BUCKET), prefix + key_name)
     return encryption.decrypt_server( key.read(), study_id )
 
-
+def s3_retreive_or_none_for_chunking(full_path, study_id):
+    data = _get_bucket(S3_BUCKET).get_key(full_path)
+    if not data: return None
+    return encryption.decrypt_server(data, study_id)
+    
 def s3_list_files( prefix ):
     """ Method fetches a list of filenames with prefix.
         note: entering the empty string into this search without later calling
