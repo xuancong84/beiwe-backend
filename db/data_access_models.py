@@ -14,19 +14,17 @@ class ChunkRegistry(DatabaseObject):
 
 
 class FileToProcess(DatabaseObject):
-    PATH = "beiwe.chunks_to_process"
+    PATH = "beiwe.file_to_process"
     DEFAULTS = { "s3_file_path":"",
-                #TODO: ask about objectIds?
-                 "study_id": ObjectId(),
+                 "study_id": REQUIRED,
                  "user_name": "" }
     @classmethod
-    def append_file_for_processing(cls, file_path, study_id, user_name):
-        cls.create(s3_file_path=file_path, study_id=study_id, user_name=user_name)
-
+    def append_file_for_processing(cls, file_path, study_id, user_name): 
+        FileToProcess.create( {"s3_file_path":file_path, "study_id":study_id, "user_name":user_name}, random_id=True)
 
 class FileProcessRunning(DatabaseObject):
     PATH = "beiwe.file_process_running"
-    DFAULTS = {"leave_empty":""}
+    DEFAULTS = {"leave_empty":""}
 
 class FileProcessRunningCollection():
     OBJTYPE = FileProcessRunning
