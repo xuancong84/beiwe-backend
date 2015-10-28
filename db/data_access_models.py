@@ -1,6 +1,8 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from datetime import datetime
 
+class EverythingsGoneToHellException(Exception): pass
+
 class ChunkRegistry(DatabaseObject):
     PATH = "beiwe.chunk_registry"
     DEFAULTS = {"study":REQUIRED,
@@ -25,11 +27,9 @@ class FileProcessLock(DatabaseObject):
     PATH = "beiwe.file_process_running"
     DEFAULTS = {"mark":""}
     
-    class EverythingsGoneToHellException(Exception): pass
-    
     @classmethod
     def lock(cls):
-        if len(FileProcessLockCollection) > 0: raise EverythingsGoneToHellException
+        if len(FileProcessLockCollection()) > 0: raise EverythingsGoneToHellException
         FileProcessLock.create({"mark":"marked"})
         
     @classmethod
