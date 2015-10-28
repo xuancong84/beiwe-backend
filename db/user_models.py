@@ -1,9 +1,7 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
-from libs.security import (generate_admin_hash_and_salt,
-                           generate_user_hash_and_salt,
-                           compare_password, device_hash,
-                           generate_user_password_and_salt,
-                           generate_easy_alphanumeric_string,)
+from libs.security import (generate_hash_and_salt, generate_user_hash_and_salt,
+                           compare_password, device_hash, generate_user_password_and_salt,
+                           generate_easy_alphanumeric_string, generate_random_string)
 
 """#############################################################################
 ################################### USER STUFF #################################
@@ -32,7 +30,7 @@ class User( DatabaseObject ):
     def create(cls, study_id):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
-        if User(patient_id): return User.create()
+        if User(patient_id): return User.create() #TODO: Eli. check that this is correct? create a user if a user with that name (id) already exists?
         
         password, password_hash, salt = generate_user_password_and_salt()
         new_client = { ID_KEY: patient_id, "password":password_hash,
@@ -86,14 +84,16 @@ class Users( DatabaseCollection ):
 class Admin( DatabaseObject ):
     PATH = "beiwe.admins"
     
-    DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED, "system_admin":REQUIRED }
+    DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED, "system_admin":REQUIRED,
+                "access_key_id":None, "access_key_secret":None,
+                "access_key_secret_salt":None }
     
     @classmethod
     def create(cls, username, password):
         """ Creates a new Admin with provided password and user name."""
-        password, salt = generate_admin_hash_and_salt( password )
+        password, salt = generate_hash_and_salt( password )
         new_admin = {ID_KEY :username, 'password':password, 'salt':salt,
-                     "system_admin": False}
+                     "system_admin": False, "access_key_id":None, "access_key_secret":None}
         return super(Admin, cls).create(new_admin)
     
     @classmethod
@@ -111,7 +111,7 @@ class Admin( DatabaseObject ):
     
     def set_password(self, new_password):
         """Sets the instances password hash to match the provided password."""
-        password, salt = generate_admin_hash_and_salt( new_password )
+        password, salt = generate_hash_and_salt( new_password )
         self['password'] = password
         self['salt'] = salt
         self.save()
@@ -120,6 +120,22 @@ class Admin( DatabaseObject ):
         """Makes the admin a system_admin."""
         self['system_admin'] = True
         self.save()
+    
+    #TODO: Eli. Test.
+    #TODO: is there danger in reusing a salt
+    def validate_access_credentials(self, proposed_secret_key):
+        return compare_password(proposed_secret_key, self['salt'], self['access_key_secret'])
+    
+    #TODO: Eli. Test.
+    def reset_access_credentials(self):
+        access_key = generate_random_string()
+        secret_key = generate_random_string()
+        secret_hash, secret_salt = generate_hash_and_salt(secret_key)
+        self["access_key_id"] = access_key
+        self["access_key_secret"] = secret_hash
+        self["access_key_secret_salt"] = secret_salt
+        self.save()
+        return access_key, secret_key
     
 class Admins( DatabaseCollection ):
     """ The Admins Database."""
