@@ -12,6 +12,7 @@ admin_api = Blueprint('admin_api', __name__)
 
 """######################### Study Administration ###########################"""
 
+#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/add_admin_to_study', methods=['POST'])
 @authenticate_system_admin
 def add_admin_to_study():
@@ -21,6 +22,7 @@ def add_admin_to_study():
     return '200'
 
 
+#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/remove_admin_from_study', methods=['POST'])
 @authenticate_system_admin
 def remove_admin_from_study():
@@ -29,7 +31,7 @@ def remove_admin_from_study():
     study.remove_admin(admin._id)
     return '200'
 
-
+#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
 @authenticate_system_admin
 def delete_researcher(admin_id):
@@ -85,9 +87,9 @@ def create_new_patient(study_id=None):
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, adds user to the study they are supposed to be attached
     to, returns a string containing password and patient id. """
-    # TODO: Eli, if s3_upload/create_client_key_pair fails, delete the newly-created patient
+    # TODO: Eli, if s3_upload/create_client_key_pair fails, delete the newly-created patient.  also, double check that the comment below is correct.
     patient_id, password = User.create(study_id)
-    s3_upload(patient_id, "", study_id)
+    s3_upload(patient_id, "", study_id) #creates an empty file (folder?) on s3 indicating that this user exists
     create_client_key_pair(patient_id, study_id)
     response_string = "patient_id: " + patient_id + "\npassword: " + password
     return make_response(response_string, 201)
