@@ -9,6 +9,7 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from werkzeug.exceptions import BadRequestKeyError
+from db.data_access_models.FileToProcess import append_file_for_processing
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -43,6 +44,8 @@ def upload():
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
+        #TODO: Eli. Reenable this after successful testing of data access.
+        #append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
@@ -132,6 +135,7 @@ def register_user():
                       beiwe_version) )
     # print file_contents, "\n"
     s3_upload( file_name, file_contents, study_id )
+    
     # set up device.
     user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
