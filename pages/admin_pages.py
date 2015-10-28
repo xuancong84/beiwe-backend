@@ -78,7 +78,7 @@ def login():
 def render_reset_admin_password_form():
     return render_template('reset_admin_password.html')
 
-
+#TODO: Eli. Modify for use with data access system.
 @admin_pages.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
 def reset_admin_password():
