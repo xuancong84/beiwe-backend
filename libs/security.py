@@ -59,7 +59,7 @@ def generate_user_hash_and_salt( password ):
     return ( password_hashed, salt )
 
 
-def generate_admin_hash_and_salt( password ):
+def generate_hash_and_salt( password ):
     """ Generates a hash and salt that will match for a given input string.
         Input is anticipated to be any arbitrary string."""
     salt = encode_base64( urandom(16) )
@@ -92,7 +92,7 @@ def generate_admin_password_and_salt():
         The password is an uppercase alphanumeric string,
         the password hash and salt are base64 encoded strings. """
     password = generate_easy_alphanumeric_string()
-    password_hash, salt = generate_admin_hash_and_salt( password )
+    password_hash, salt = generate_hash_and_salt( password )
     return password, password_hash, salt
 
 
@@ -105,3 +105,6 @@ def generate_easy_alphanumeric_string():
         will not contain the number 0. """
     random_string = hashlib.md5( urandom(16) ).digest().encode('base64')
     return re.sub(r'[^A-Z1-9]', "", random_string)[:6].lower()
+
+def generate_random_string():
+    return hashlib.md5( urandom(16) ).digest().encode('base64')
