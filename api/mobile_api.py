@@ -99,6 +99,8 @@ def register_user():
     except BadRequestKeyError: manufacturer = "none"
     try: model = request.values["model"]
     except BadRequestKeyError: model = "none"
+    try: beiwe_version = request.values["beiwe_version"]
+    except BadRequestKeyError: beiwe_version = "none"
     
     user = User(patient_id)
     study_id = user['study_id']
@@ -123,10 +125,11 @@ def register_user():
     unix_time = str(calendar.timegm(time.gmtime() ) )
     file_name = patient_id + '/identifiers_' + unix_time + ".csv"
     #construct a manual csv of the device attributes
-    header = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model\n"
-    file_contents = (header + "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" %
+    header = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model,beiwe_version\n"
+    file_contents = (header + "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" %
                      (patient_id, mac_address, phone_number, device_id, device_os,
-                      os_version, product, brand, hardware_id, manufacturer, model) )
+                      os_version, product, brand, hardware_id, manufacturer, model,
+                      beiwe_version) )
     # print file_contents, "\n"
     s3_upload( file_name, file_contents, study_id )
     # set up device.
