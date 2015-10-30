@@ -3,6 +3,7 @@ from cronutils import ErrorHandler
 from datetime import datetime
 from flask import Blueprint, request, abort, json
 from collections import defaultdict
+from _collections import deque
 
 data_access_api = Blueprint('data_access_api', __name__)
 
@@ -10,6 +11,8 @@ from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock
 from db.study_models import Studies
 from db.user_models import Admins
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload, s3_retreive_or_none_for_chunking, s3_upload_chunk
+
+class HeaderMismatchException(Exception): pass
 
 # def binify():
 #    binifying is the process of separating elements into a predetermined bin
@@ -21,12 +24,14 @@ API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 CHUNKS_FOLDER = "CHUNKED_DATA"
 
-CSV_FILES = ["accel", "bluetoothLog", "callLog", "gps", "logFile", "powerState", "textsLog"]
+CSV_FILES = ["accel", "bluetoothLog", "callLog", "gps", "powerState", "textsLog"]
 CSV_FILES_WITH_PROBLEMS = ["callLog"]
 
 CHUNK_TIMESLICE_QUANTUM = 3600 #each chunk represents 1 hour of data, and because unix time 0 is on an hour boundry our time codes will also be on nice, clean hour boundaries
 
 ALL_DATA_STREAMS = []
+
+LENGTH_OF_STUDY_ID = 24
 
 # UNIX_EPOCH_START = datetime.fromtimestamp(0)
 # def get_unix_time(dt):
@@ -97,47 +102,47 @@ def grab_data():
 
 ################################ Hourly Update #################################
 #TODO: Eli, for testing make this only run on a single user's data...
-
+import sys
 def process_file_chunks():
     FileProcessLock.lock()  #TODO: Eli. Don't forget about this.
     error_handler = ErrorHandler()
-    
-    binified_data = defaultdict(list)
-    
-    for ftp in FilesToProcess():
-        with error_handler:
-            
-            data_type = file_path_to_data_type(ftp["file_path"])
-            file_contents = s3_retrieve(ftp["file_path"], ftp["study_id"])
-            
+    binified_data = defaultdict(deque)
+    for ftp in FilesToProcess()[:10]: #TODO: DON"T FORGET TO DELETE
+#         with error_handler:
+            data_type = file_path_to_data_type(ftp["s3_file_path"])
+#             file_contents = s3_retrieve(ftp["s3_file_path"][LENGTH_OF_STUDY_ID:], ftp["study_id"])
             if data_type in CSV_FILES:
-                newly_binified_data = handle_csv_data(ftp("study_id"),
+                file_contents = s3_retrieve(ftp["s3_file_path"][LENGTH_OF_STUDY_ID:], ftp["study_id"])
+                newly_binified_data = handle_csv_data(ftp["study_id"],
                                      ftp["user_name"], data_type, file_contents)
                 append_binified_csvs(binified_data, newly_binified_data)
+                print "working..."
                 continue
-                
 #             if data_type == "wifiLog": pass #requires file timestamp, redirect or bin?
 #             if data_type == "identifiers": pass #work out how to concat
 #             if data_type == "surveyAnswers": pass #redirect
 #             if data_type == "surveyTimings": pass #redirect
 #             if data_type == "voiceRecording": pass #redirect
 #             if data_type == "logFile": pass #I have literally no clue.
-    
-    for study_id, user_name, data_type, time_bin, header, rows in binified_data:  #TODO: pretty sure that rows var is not going to unpack correctly...
-        with error_handler:
-            s3_file_data = s3_retreive_or_none_for_chunking(
-                construct_s3_chunk_path(study_id, user_name, data_type, time_bin), study_id )
-            if not s3_file_data:
-                ensure_sorted_by_timestamp(rows)
-                s3_upload_chunk( construct_csv_string(header, rows), study_id ) #TODO: Eli. This study_id requires an ObjectId
-            else:
-                old_header, old_rows = csv_to_list(s3_file_data) 
-                if old_header != header: raise EverythingsGoneToHellException
-                #binified_old_rows = binify_csv_rows(old_rows, study_id, user_name, data_type) #TODO: THis is ... I.m pretty sure, not necessary.
-                old_rows.extend(rows)
-                ensure_sorted_by_timestamp(old_rows)
-                s3_upload_chunk( construct_csv_string(header, old_rows), study_id)
-    error_handler.raise_errors()
+    print "======== PART 2 ========"
+    for bin, deque_rows in binified_data.items():  #TODO: pretty sure that rows var is not going to unpack correctly...
+        study_id, user_name, data_type, time_bin, header = bin
+        rows = list(deque_rows)
+        file_path = construct_s3_chunk_path(study_id, user_name, data_type, time_bin) 
+#         with error_handler:
+        s3_file_data = s3_retreive_or_none_for_chunking( file_path, study_id )
+        if not s3_file_data:
+            ensure_sorted_by_timestamp(rows)
+            s3_upload_chunk( file_path, construct_csv_string(header, rows), study_id ) #TODO: Eli. This study_id requires an ObjectId
+        else:
+            old_header, old_rows = csv_to_list(s3_file_data) 
+            if old_header != header: raise HeaderMismatchException
+            #binified_old_rows = binify_csv_rows(old_rows, study_id, user_name, data_type) #TODO: THis is ... I.m pretty sure, not necessary.
+            old_rows.extend(rows)
+            ensure_sorted_by_timestamp(old_rows)
+            #TODO: check overwriting behavior when uploading this file to existing s3 path.
+            s3_upload_chunk( file_path, construct_csv_string(header, old_rows), study_id)
+#     error_handler.raise_errors()
     
 def construct_s3_chunk_path(study_id, user_name, data_type, time_bin):
     """ S3 file paths for chunks are of the form
@@ -160,15 +165,17 @@ def handle_csv_data(study_id, user_name, data_type, file_contents):
     # Binify!
     return binify_csv_rows(csv_rows_list, study_id, user_name, data_type, header)
 
-def binify_csv_rows(rows_list, study_id, user_name, data_type):
+def binify_csv_rows(rows_list, study_id, user_name, data_type, header):
     """ Assumes a clean csv with element 0 in the rows list as a unix(ish) timestamp.
         sorts data points into the appropriate bin based on the rounded down hour
         value of the entry's unix(ish) timestamp.
-        Returns a dict of form {(study_id, user_name, data_type, time_bin):rows_lists}. """
-    #reminder: (study_id, user_name, data_type, time_bin)
-    return {(study_id, user_name, data_type, binify_from_timecode(row[0])) : row
-            for row in rows_list }
-
+        Returns a dict of form {(study_id, user_name, data_type, time_bin, heeader):rows_lists}. """
+    ret = defaultdict(deque)
+    for row in rows_list:
+        ret[(study_id, user_name, data_type, #This does not really have a way to speed up the dict hashing...
+             binify_from_timecode(row[0]), header)].append(row)
+    return ret
+    
 # CSV fixes
 def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be
@@ -208,10 +215,11 @@ def file_path_to_data_type(file_path):
     if "/voiceRecording" in file_path: return "voiceRecording"
     raise TypeError("data type unknown: %s" % file_path)
 
+from operator import itemgetter
 def ensure_sorted_by_timestamp(l):
     """ According to the docs the sort method on a list is in place and should
         faster, this is how to declare a sort by the first column (timestamp). """
-    l.sort(l, key = lambda time_sort: int(l[0]))
+    l.sort(key = lambda x: int(x[0]))
 
 def binify_from_timecode(unix_ish_time_code):
     """ Takes a unix-ish time code (accepts unix millisecond), and returns an
@@ -223,5 +231,5 @@ def append_binified_csvs(old_binified_rows, new_binified_rows):
     """ Appends binified rows to an existing binified row data structure.
         Should be in-place. """
     #ignore the overwrite builtin namespace warning.
-    for bin, rows in new_binified_rows: #grab bins and rows
-        old_binified_rows[bin].extend(rows) #extend with new datums
+    for bin, rows in new_binified_rows.items():
+        old_binified_rows[bin].extend(rows)
