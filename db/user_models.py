@@ -121,15 +121,15 @@ class Admin( DatabaseObject ):
         self['system_admin'] = True
         self.save()
     
-    #TODO: Eli. Test.
-    #TODO: is there danger in reusing a salt
     def validate_access_credentials(self, proposed_secret_key):
-        return compare_password(proposed_secret_key, self['salt'], self['access_key_secret'])
+        """ Returns True/False if the provided secret key is correct for this user."""
+        return compare_password(proposed_secret_key,
+                                self['access_key_secret_salt'],
+                                self['access_key_secret'])
     
-    #TODO: Eli. Test.
     def reset_access_credentials(self):
-        access_key = generate_random_string()
-        secret_key = generate_random_string()
+        access_key = generate_random_string()[:64]
+        secret_key = generate_random_string()[:64]
         secret_hash, secret_salt = generate_hash_and_salt(secret_key)
         self["access_key_id"] = access_key
         self["access_key_secret"] = secret_hash

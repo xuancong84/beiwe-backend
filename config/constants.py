@@ -33,3 +33,35 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "upload_data_files_frequency_seconds",
                 "voice_recording_max_time_length_seconds",
                 "wifi_log_frequency_seconds"]
+
+API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+"""1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
+   human string is YYYY-MM-DDThh:mm:ss """
+CHUNK_TIMESLICE_QUANTUM = 3600
+
+CHUNKS_FOLDER = "CHUNKED_DATA"
+
+ACCELEROMETER = "accel"
+BLUETOOTH = "bluetoothLog"
+CALL_LOG = "callLog"
+GPS = "gps"
+IDENTIFIERS = "identifiers"
+LOG_FILE = "logFile"
+POWER_STATE = "powerState"
+SURVEY_ANSWERS = "surveyAnswers"
+SURVEY_TIMINGS = "surveyTimings"
+TEXTS_LOG = "textsLog"
+VOICE_RECORDING = "voiceRecording"
+WIFI = "wifiLog"
+
+ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
+                    LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
+                    TEXTS_LOG, VOICE_RECORDING, WIFI]
+CHUNKABLE_FILES = set( [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
+                  POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG] )
+# RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE, WIFI ])
+
+# each chunk represents 1 hour of data, and because unix time 0 is on an hour
+# boundry our time codes will also be on nice, clean hour boundaries.
+
+LENGTH_OF_STUDY_ID = 24
