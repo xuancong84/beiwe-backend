@@ -25,17 +25,14 @@ def _get_bucket(name):
 #     key = bucket.new_key(key_name)
 #     key.set_contents_from_string(some_string)
 
-def s3_upload( key_name, data_string, study_id ):
-    bucket = _get_bucket(S3_BUCKET)
-    prefix = str(study_id) + "/"
+def s3_upload( key_path, data_string, study_id, raw_path=False):
+    """ Uploads data to s3, ensures data is encrypted with the key from the
+        provided study.  Takes an optional argument, raw_path, which defaults to
+        false.  When false the study_id is prepended to the S3 file path (key_path),
+        placing the file in the appropriate study folder. """
+    if not raw_path: key_path = str(study_id) + "/" + key_path
     data = encryption.encrypt_for_server(data_string, study_id)
-    key = bucket.new_key(prefix + key_name) #TODO: Eli. This construction is not consistent across s3 calls.
-    key.set_contents_from_string(data)
-
-def s3_upload_chunk( file_path, data_string, study_id ):
-    bucket = _get_bucket(S3_BUCKET)
-    key = bucket.new_key(file_path)
-    data = encryption.encrypt_for_server(data_string, study_id)
+    key = _get_bucket(S3_BUCKET).new_key(key_path) #TODO: Eli. This construction is not consistent across s3 calls.
     key.set_contents_from_string(data)
 
 # def s3_retrieve_raw( key_name ):
@@ -43,15 +40,22 @@ def s3_upload_chunk( file_path, data_string, study_id ):
 #     key = Key(_get_bucket(S3_BUCKET), key_name)
 #     return key.read()
 
-def s3_retrieve(key_name, study_id):
-    prefix = str(study_id) + "/"
-    key = Key(_get_bucket(S3_BUCKET), prefix + key_name)
+def s3_retrieve(key_path, study_id, raw_path=False):
+    """ Takes an S3 file path (key_path), and a study ID.  Takes an optional
+        argument, raw_path, which defaults to false.  When set to false the 
+        path is prepended to place the file in the appropriate study_id  folder. """
+    if not raw_path: key_path = str(study_id) + "/" + key_path
+    key = Key(_get_bucket(S3_BUCKET), key_path)
     return encryption.decrypt_server( key.read(), study_id )
 
-def s3_retreive_or_none_for_chunking(full_path, study_id):
-    data = _get_bucket(S3_BUCKET).get_key(full_path)
-    if not data: return None
-    return encryption.decrypt_server(data, study_id)
+def s3_retrieve_or_none(key_path, study_id, raw_path=False):
+    """ Like s3_retreive except returns None if the key does not exist instead
+        of erroring.  This API makes an additional network request, increasing
+        cost and latency. """
+    if not raw_path: key_path = str(study_id) + "/" + key_path
+    key = _get_bucket(S3_BUCKET).get_key(key_path) #this line is the only difference.
+    if not key: return None
+    return encryption.decrypt_server(key.read(), study_id)
     
 def s3_list_files( prefix ):
     """ Method fetches a list of filenames with prefix.

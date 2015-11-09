@@ -9,7 +9,7 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from werkzeug.exceptions import BadRequestKeyError
-from db.data_access_models.FileToProcess import append_file_for_processing
+from db.data_access_models import FileToProcess
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -45,7 +45,7 @@ def upload():
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
         #TODO: Eli. Reenable this after successful testing of data access.
-        #append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
+        #FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)

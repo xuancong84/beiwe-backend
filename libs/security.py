@@ -32,6 +32,10 @@ def pymongo():
 # Mongo does not like strings with invalid binary config, so we store binary config
 # using url safe base64 encoding.
 
+def chunk_hash( data ):
+    """ We need to hash data in a data stream chunk and store the hash in mongo. """
+    return hashlib.md5( data ).digest().encode('base64')
+
 def device_hash( data ):
     """ Hashes an input string using the sha256 hash, mimicing the hash used on
     the devices.  Expects a string not in base64, returns a base64 string."""
@@ -51,13 +55,13 @@ def decode_base64(data):
     return base64.urlsafe_b64decode(data)
 
 def generate_user_hash_and_salt( password ):
-    """ Generates a hash and salt that will match a given input string.
+    """ Generates a hash and salt that will match a given input string, and also
+        matches the hashing that is done on a user's device. 
         Input is anticipated to be any arbitrary string."""
     salt = encode_base64( urandom(16) )
     password = device_hash(password)
     password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
     return ( password_hashed, salt )
-
 
 def generate_hash_and_salt( password ):
     """ Generates a hash and salt that will match for a given input string.
@@ -65,7 +69,6 @@ def generate_hash_and_salt( password ):
     salt = encode_base64( urandom(16) )
     password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
     return ( password_hashed, salt )
-
 
 def compare_password( proposed_password, salt, real_password_hash ):
     """ Compares a proposed password with a salt and a real password, returns
@@ -77,7 +80,6 @@ def compare_password( proposed_password, salt, real_password_hash ):
         return True
     return False
 
-
 def generate_user_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
         The password is an uppercase alphanumeric string,
@@ -85,7 +87,6 @@ def generate_user_password_and_salt():
     password = generate_easy_alphanumeric_string()
     password_hash, salt = generate_user_hash_and_salt( password )
     return password, password_hash, salt
-
 
 def generate_admin_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
@@ -107,4 +108,4 @@ def generate_easy_alphanumeric_string():
     return re.sub(r'[^A-Z1-9]', "", random_string)[:6].lower()
 
 def generate_random_string():
-    return hashlib.md5( urandom(16) ).digest().encode('base64')
+    return hashlib.sha512( urandom(16) ).digest().encode('base64')

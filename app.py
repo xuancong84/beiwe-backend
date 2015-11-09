@@ -32,13 +32,6 @@ def strip_dot_html(page):
     return redirect("/%s" % page)
 
 
-# Points our custom 404 page (in /frontend/templates) to display on a 404 error.
-# (note, function name is irrelevant, it is the
-@app.errorhandler(404)
-def e404(e):
-    return render_template("404.html",is_logged_in=is_logged_in())
-
-
 # Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
 @app.errorhandler(500)
 def e500_text(e):
@@ -50,5 +43,14 @@ def e500_text(e):
     return abort(500)
 
 
+#Extra Production settings
+if not __name__ == '__main__':
+# Points our custom 404 page (in /frontend/templates) to display on a 404 error.
+    @app.errorhandler(404)
+    def e404(e):
+        return render_template("404.html",is_logged_in=is_logged_in())
+
+#Extra Debugging settings
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
+
