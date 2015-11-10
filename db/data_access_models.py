@@ -29,7 +29,6 @@ class ChunkRegistry(DatabaseObject):
             "chunk_path": s3_file_path,
             "chunk_hash": chunk_hash(file_contents) if is_chunkable else None,
             "time_bin": datetime.fromtimestamp(time_bin),
-            #TODO: make sure this datetime matches with the code from chunksregistry collection
             "is_chunkable": is_chunkable },
             random_id=True )
 #         print "new chunk:", s3_file_path
@@ -81,12 +80,7 @@ class ChunksRegistry(DatabaseCollection):
         if end and not start: query["time_bin"] = { "$lt": end }
         print query
         return cls(query=query)
-#             {"time_bin": {"$gt": start, "$lt": end },
-#             "user_id":{"$in":user_ids },  #TODO: change behavior to just not filter by user if no users are supplied
-#             "study_id": study_id,
-#             "data_type":{"$in":data_types}
-#             } )
-            
+
 class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess
 class FileProcessLockCollection(DatabaseCollection):

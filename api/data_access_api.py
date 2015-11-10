@@ -22,7 +22,6 @@ from bson.errors import InvalidId
 # The Wifi and Identifiers have timestamp in the file name.
 # The debug log has many lines without timestamps.
 
-#TODO: determine whether time_stamps that cross an hour boundry are placed in the proper bin
 
 data_access_api = Blueprint('data_access_api', __name__)
 
@@ -74,7 +73,7 @@ def grab_data():
         return abort(403) #incorrect secret key
     query = {}
     #select data streams
-    if "data_streams" in request.values: #TODO: reconsider using "data streams" over "data types"
+    if "data_streams" in request.values: #note: researchers use the term "data streams" instead of "data types"
         query["data_types"] = json.loads(request.values["data_streams"])
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS:
@@ -114,12 +113,11 @@ def grab_data():
     default is controlled by the ``JSON_AS_ASCII`` configuration variable
     and can be overriden by the simplejson ``ensure_ascii`` parameter. """
     
-    #TODO: 
+    #TODO: implement top up  
 #     chunk_data = {}
 #     if "top_up" in request.values:
 #         top_up = json.loads(request.values["top_up"])
 
-#TODO: wifi is unusable
 
 """############################# Hourly Update ##############################"""
 
@@ -153,7 +151,6 @@ def do_process_file_chunks(count, error_handler, skip_count):
     
     Any errors are themselves concatenated using the passed in error handler.
     """
-    
     #this is how you declare a defaultdict containing a tuple of two deques.
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
@@ -210,7 +207,7 @@ def upload_binified_data(binified_data, error_handler):
                 old_header, old_rows = csv_to_list(s3_file_data) 
                 if old_header != header:
                     failed_ftps.update(ftp_deque)
-                    #TODO: this does not add to the delete queue due to the error
+                    #TODO: this does not add to the delete queue due to the error... is this correct? I think its fine, handling this using sets.... walk through logic anddetermin if this is correct...
                     raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
                                                   (old_header, header, chunk_path) )
                 old_rows.extend(rows)

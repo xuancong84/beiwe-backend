@@ -39,7 +39,6 @@ def edit_admin(admin_id):
                            admin_is_current_user=admin_is_current_user,
                            system_admin=admin_is_system_admin())
 
-#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/create_new_researcher', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_new_researcher():
@@ -75,8 +74,6 @@ def edit_study(study_id=None):
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
-
-#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/create_study', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_study():
@@ -92,8 +89,6 @@ def create_study():
         flash(e.message, 'danger')
         return redirect('/create_study')
 
-
-#TODO: Eli. Modify for use with data access system.
 @system_admin_pages.route('/delete_study/<string:study_id>', methods=['POST'])
 @authenticate_system_admin
 def delete_study(study_id=None):

@@ -79,11 +79,10 @@ class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
     PATH = "beiwe.device_settings"
-    #TODO: Eli/Josh. sensor and timer variables here, names possibly subject to change,
+    #If anything here changes...
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
-    #VERY IMPORTANT: ensure that any toggles displayed on the website using
-    # CHECKBOXES are enumerated in CHECKBOX_TOGGLES in constants.
+    # Ensure that any toggles displayed on the website using CHECKBOXES are enumerated in CHECKBOX_TOGGLES in constants.
     DEFAULTS = {#device sensors (listeners)
                 "accelerometer":False,
                 "gps":False,
@@ -96,8 +95,8 @@ class StudyDeviceSettings( DatabaseObject ):
                 "accelerometer_off_duration_seconds": 300,
                 "accelerometer_on_duration_seconds": 300,
                 "bluetooth_on_duration_seconds": 300,
-                "bluetooth_total_duration_seconds": 0, #TODO: Eli. change this to off duration in app and here.
-                "bluetooth_global_offset_seconds": 150, #TODO: Eli. determine whether we definitely need this parameter for bluetooth. 
+                "bluetooth_total_duration_seconds": 0,
+                "bluetooth_global_offset_seconds": 150, 
                 "check_for_new_surveys_frequency_seconds": 3600 * 6,
                 "create_new_data_files_frequency_seconds": 15 * 60,
                 "gps_off_duration_seconds": 300,

@@ -12,7 +12,6 @@ admin_api = Blueprint('admin_api', __name__)
 
 """######################### Study Administration ###########################"""
 
-#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/add_admin_to_study', methods=['POST'])
 @authenticate_system_admin
 def add_admin_to_study():
@@ -22,7 +21,6 @@ def add_admin_to_study():
     return '200'
 
 
-#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/remove_admin_from_study', methods=['POST'])
 @authenticate_system_admin
 def remove_admin_from_study():
@@ -31,7 +29,6 @@ def remove_admin_from_study():
     study.remove_admin(admin._id)
     return '200'
 
-#TODO: Eli. Modify for use with data access system.
 @admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
 @authenticate_system_admin
 def delete_researcher(admin_id):

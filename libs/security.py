@@ -17,7 +17,7 @@ def set_secret_key(app):
 def pymongo():
     import pymongo
     try:
-        #TODO: Low Priority.  Eli getting an ~undefined error on his machine for the next line.  investigate?
+        #ignore this error if you can see it, it is not correct.
         conn = pymongo.Connection()
     except (pymongo.errors.AutoReconnect, pymongo.errors.ConnectionFailure):
         raise DatabaseIsDownError("No mongod process is running.")

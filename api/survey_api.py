@@ -42,7 +42,4 @@ def update_survey(survey_id=None):
     timings = json.loads(request.values['timings'])
     settings = json.loads(request.values['settings'])
     survey.update({'content': content, 'timings': timings, 'settings': settings})
-    #TODO: Low priority. Eli/Josh. The following line is obviously the best way
-    # to return a response code, there are other places in the code base where
-    # we have stupid hacks, please find and replace.
     return make_response("", 201)

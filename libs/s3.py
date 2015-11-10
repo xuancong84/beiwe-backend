@@ -32,7 +32,7 @@ def s3_upload( key_path, data_string, study_id, raw_path=False):
         placing the file in the appropriate study folder. """
     if not raw_path: key_path = str(study_id) + "/" + key_path
     data = encryption.encrypt_for_server(data_string, study_id)
-    key = _get_bucket(S3_BUCKET).new_key(key_path) #TODO: Eli. This construction is not consistent across s3 calls.
+    key = _get_bucket(S3_BUCKET).new_key(key_path)
     key.set_contents_from_string(data)
 
 # def s3_retrieve_raw( key_name ):

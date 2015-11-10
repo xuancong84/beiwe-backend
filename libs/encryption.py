@@ -40,7 +40,6 @@ def import_RSA_key( key ):
 ################################################################################
 ################################# AES ##########################################
 ################################################################################
-#TODO: Low Priority. Eli. make a version of the decryption function that takes an encryption key directly, for use in download script.
 
 def encrypt_for_server(input_string, study_id):
     """ encrypts config using the ENCRYPTION_KEY, prepends the generated
@@ -79,7 +78,7 @@ def decrypt_device_file(patient_id, data, private_key):
     # and we should be informed.
     # As of the start of the first/pilot/FAS study we have not seen any of these
     # errors in many months.
-    #TODO: Eli/Josh/Alvin. make errors here email us if they happen.
+    #TODO: Eli. make errors here email us if they happen.
     # print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
         try:
