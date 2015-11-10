@@ -1,6 +1,7 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from config.constants import SURVEY_TYPES
 from db.user_models import Users
+from mongolia.constants import ID_KEY
 
 
 class Study( DatabaseObject ):
@@ -72,9 +73,6 @@ class Study( DatabaseObject ):
     
     def get_study_device_settings(self):
         return StudyDeviceSettings(self['device_settings'])
-    
-    def get_users_in_study(self):
-        return Users(study_id=self["_id"])
     
     
 class StudyDeviceSettings( DatabaseObject ):

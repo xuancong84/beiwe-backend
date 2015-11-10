@@ -6,8 +6,8 @@ from collections import defaultdict, deque
 
 from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock,\
     FileToProcess, ChunkRegistry
-from db.study_models import Studies, Study
-from db.user_models import Admins, Admin
+from db.study_models import Study
+from db.user_models import Admin
 from libs.s3 import s3_retrieve, s3_upload
 
 from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
@@ -79,12 +79,10 @@ def grab_data():
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS:
                 return abort(404)
-#     else: query["data_streams"] = ALL_DATA_STREAMS #turned into default value in get_chunks_time_range
     #select users
     print 5
     if "user_ids" in request.values:
         query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
-    else: query["user_ids"] = study_obj.get_users_in_study()
     #construct time ranges
     print 6
     if "date_start" in request.values:
@@ -101,13 +99,7 @@ def grab_data():
                       % (chunk["data_type"], chunk["time_bin"] ) )
         print file_name
         data[file_name] = s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True)
-    import locale
-    locale.setlocale(locale.LC_ALL, 'en_US')
-    print "total size:", locale.format("%d", sum(len(key) + len(item) for key, item in data.items() ), grouping=True)
     return json.dumps(data)
-    
-    
-    
     
     #TODO: test bytestrings in connection to voicerecording files
     """ "json.dumps?
@@ -127,22 +119,24 @@ def grab_data():
 #     if "top_up" in request.values:
 #         top_up = json.loads(request.values["top_up"])
 
+#TODO: wifi is unusable
+
 """############################# Hourly Update ##############################"""
 
 def process_file_chunks():
     FileProcessLock.lock()
     error_handler = ErrorHandler()
-#     error_handler = null_error_handler
+    number_bad_files = 0
     while True:
         starting_length = len(FilesToProcess())
         print starting_length
-        do_process_file_chunks(1000, error_handler)
+        number_bad_files += do_process_file_chunks(1000, error_handler, number_bad_files)
         if starting_length == len(FilesToProcess()): break
     FileProcessLock.unlock()
     print len(FilesToProcess())
     error_handler.raise_errors()
 
-def do_process_file_chunks(count, error_handler):
+def do_process_file_chunks(count, error_handler, skip_count):
     """
     Run through the files to process, pull their data, put it into s3 bins.
     Run the file through the appropriate logic path based on file type.
@@ -164,7 +158,7 @@ def do_process_file_chunks(count, error_handler):
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
     
-    for ftp in FilesToProcess()[:count]:
+    for ftp in FilesToProcess()[skip_count:count+skip_count]:
         with error_handler:
             s3_file_path = ftp["s3_file_path"]
 #             print s3_file_path
@@ -185,10 +179,11 @@ def do_process_file_chunks(count, error_handler):
                 ChunkRegistry.add_new_chunk(ftp["study_id"], ftp["user_id"],
                                             data_type, s3_file_path, timestamp)
                 ftps_to_remove.add(ftp._id)
-    more_ftps_to_remove = upload_binified_data(binified_data, error_handler)
+    more_ftps_to_remove, number_bad_files = upload_binified_data(binified_data, error_handler)
     ftps_to_remove.update(more_ftps_to_remove)
     for ftp_id in ftps_to_remove:
         FileToProcess(ftp_id).remove()
+    return number_bad_files
     
 def upload_binified_data(binified_data, error_handler):
     """ Takes in binified csv data and handles uploading/downloading+updating
@@ -224,7 +219,7 @@ def upload_binified_data(binified_data, error_handler):
                 s3_upload( chunk_path, new_contents, study_id, raw_path=True)
                 chunk.update_chunk_hash(new_contents)
             ftps_to_remove.update(ftp_deque)
-    return ftps_to_remove.difference(failed_ftps)
+    return ftps_to_remove.difference(failed_ftps), len(failed_ftps)
 
 
 """################################ S3 Stuff ################################"""
@@ -286,7 +281,7 @@ def handle_csv_data(study_id, user_id, data_type, file_contents, file_path):
     header, csv_rows_list = csv_to_list(file_contents)
     # INSERT more data fixes below as we encounter them.
     if data_type == CALL_LOG: fix_call_log_csv(header, csv_rows_list)
-#     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
+    if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
     # Binify!
     if csv_rows_list:
@@ -319,12 +314,6 @@ def fix_identifier_csv(header, rows_list, file_name):
     time_stamp = file_name.rsplit("_", 1)[-1][:-4]
     return insert_timestamp_single_row_csv(header, rows_list, time_stamp)
 
-""" fixing wifi requires inserting the same timestamp on EVERY ROW.  not worth it."""
-# def fix_wifi_csv(header, rows_list, file_name):
-#     """ The wifi file has its timestamp in the filename. """
-#     time_stamp = file_name.rsplit("/", 1)[-1][:-4]
-#     return insert_timestamp_single_row_csv(header, rows_list, time_stamp)
-
 def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     """ Inserts the timestamp field into the header of a csv, inserts the timestamp
         value provided into the first column.  Returns the new header string."""
@@ -332,6 +321,15 @@ def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     header_list.insert(0, "timestamp")
     rows_list[0].insert(0, time_stamp)
     return ",".join(header_list)
+
+""" Fixing wifi requires inserting the same timestamp on EVERY ROW. """
+def fix_wifi_csv(header, rows_list, file_name):
+    """ The wifi file has its timestamp in the filename. """
+    time_stamp = file_name.rsplit("/", 1)[-1][:-4]
+    for row in rows_list[:-1]: #uhg, the last row is a new line.
+        row = row.insert(0, time_stamp)
+    rows_list.pop(-1) #remove last row
+    return "timestamp," + header
 
 """ CSV transforms"""
 def csv_to_list(csv_string):

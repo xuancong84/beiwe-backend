@@ -68,16 +68,24 @@ class ChunksRegistry(DatabaseCollection):
     OBJTYPE = ChunkRegistry
     
     @classmethod
-    def get_chunks_time_range(cls, study_id, user_ids=[], data_types=ALL_DATA_STREAMS,
-                              start=datetime.fromtimestamp(0), end=datetime.utcnow()):
+    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None,
+                              start=None, end=None):
         """ This function uses mongo query syntax to provide datetimes and have
             mongo do the comparison operation, and the 'in' operator to have
             mongo only match the user list provided. """
-        return cls(query={"time_bin": {"$gt": start, "$lt": end },
-                          "user_id":{"$in":user_ids },
-                          "study_id": study_id,
-                          "data_type":{"$in":data_types}
-                           } )
+        query = {"study_id":study_id}
+        if user_ids: query["user_id"] = { "$in":user_ids }
+        if data_types: query["data_type"] = { "$in":data_types }
+        if start and end: query["time_bin"] = {"$gt": start, "$lt": end }
+        if start and not end: query["time_bin"] = { "$gt": start}
+        if end and not start: query["time_bin"] = { "$lt": end }
+        print query
+        return cls(query=query)
+#             {"time_bin": {"$gt": start, "$lt": end },
+#             "user_id":{"$in":user_ids },  #TODO: change behavior to just not filter by user if no users are supplied
+#             "study_id": study_id,
+#             "data_type":{"$in":data_types}
+#             } )
             
 class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess

@@ -58,8 +58,8 @@ ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
                     TEXTS_LOG, VOICE_RECORDING, WIFI]
 CHUNKABLE_FILES = set( [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
-                  POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG] )
-# RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE, WIFI ])
+                  POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI] )
+# RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE ])
 
 # each chunk represents 1 hour of data, and because unix time 0 is on an hour
 # boundry our time codes will also be on nice, clean hour boundaries.
