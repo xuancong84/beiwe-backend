@@ -1,8 +1,7 @@
 from datetime import datetime
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from libs.security import chunk_hash
-from config.constants import API_TIME_FORMAT, CHUNKABLE_FILES,\
-    CHUNK_TIMESLICE_QUANTUM, ALL_DATA_STREAMS
+from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
 from mongolia.constants import REQUIRED_STRING
 
 class EverythingsGoneToHellException(Exception): pass

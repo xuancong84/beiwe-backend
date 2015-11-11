@@ -36,22 +36,18 @@ def grab_data():
         admin creds are invalid 
         (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() ) """
-    print 0 #Case: bad study id
+    #Case: bad study id
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
     study_obj = Study(study_id)
-    print 1
     if not study_obj: return abort(404)
     #Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
-    print 2
     if not admin: return abort(403) #access key DNE
-    print 3
     if admin["_id"] not in study_obj['admins']:
         return abort(403) #admin is not credentialed for this study
-    print 4
     if not admin.validate_access_credentials(access_secret):
         return abort(403) #incorrect secret key
     query = {}
@@ -61,14 +57,12 @@ def grab_data():
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS: return abort(404)
     #select users
-    print 5
     if "user_ids" in request.values:
         query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
         for user_id in query["user_ids"]: #Case: one of the user ids was invalid
             print "\n\n\n", user_id, "\n\n\n"
             if not User(user_id): return abort(404)
     #construct time ranges
-    print 6
     if "date_start" in request.values: query["start"] = datetime.strptime(request.values["date_start"])
     if "date_end" in request.values: query["end"] = datetime.strptime(request.values["date_end"])
     #Do Query
