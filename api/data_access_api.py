@@ -63,8 +63,8 @@ def grab_data():
             print "\n\n\n", user_id, "\n\n\n"
             if not User(user_id): return abort(404)
     #construct time ranges
-    if "date_start" in request.values: query["start"] = datetime.strptime(request.values["date_start"])
-    if "date_end" in request.values: query["end"] = datetime.strptime(request.values["date_end"])
+    if "time_start" in request.values: query["start"] = str_to_datetime(request.values["time_start"])
+    if "time_end" in request.values: query["end"] = str_to_datetime(request.values["time_end"])
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
     data = {}
@@ -317,6 +317,12 @@ def csv_to_list(csv_string):
 def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv"""
     return header + "\n" + "\n".join( [",".join(row) for row in rows_list ] )
+
+""" Time Handling """
+def str_to_datetime(time_string):
+    try: return datetime.strptime(time_string, API_TIME_FORMAT)
+    except ValueError as e:
+        if "does not match format" in e.message: abort(400)
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
