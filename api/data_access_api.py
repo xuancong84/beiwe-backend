@@ -102,6 +102,9 @@ def grab_data():
 """############################# Hourly Update ##############################"""
 
 def process_file_chunks():
+    """ This is the function that is called from cron.  It runs through all new
+    files that have been uploaded and 'chunks' them. Handles logic for skipping
+    bad files, raising errors appropriately. """ 
     FileProcessLock.lock()
     error_handler = ErrorHandler()
     number_bad_files = 0
@@ -142,7 +145,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
             data_type = file_path_to_data_type(ftp["s3_file_path"])
             if data_type in CHUNKABLE_FILES:
                 file_contents = s3_retrieve(s3_file_path[LENGTH_OF_STUDY_ID:], ftp["study_id"])
-                newly_binified_data = handle_csv_data(ftp["study_id"],
+                newly_binified_data = process_csv_data(ftp["study_id"],
                                      ftp["user_id"], data_type, file_contents,
                                      s3_file_path)
                 if newly_binified_data:
@@ -165,8 +168,9 @@ def do_process_file_chunks(count, error_handler, skip_count):
 def upload_binified_data(binified_data, error_handler):
     """ Takes in binified csv data and handles uploading/downloading+updating
         older data to/from S3 for each chunk.
-        Returns a set of all failed concatenations, raises errors on the passed
-        in ErrorHandler."""
+        Returns a set of concatenations that have succeeded and can be removed.
+        Returns the number of failed FTPS so that we don't retry them.
+        Raises any errors on the passed in ErrorHandler."""
     failed_ftps = set([])
     ftps_to_remove = set([])
     for binn, values in binified_data.items():
@@ -196,6 +200,7 @@ def upload_binified_data(binified_data, error_handler):
                 s3_upload( chunk_path, new_contents, study_id, raw_path=True)
                 chunk.update_chunk_hash(new_contents)
             ftps_to_remove.update(ftp_deque)
+    #The things in ftps to removed that are not in failed ftps.
     return ftps_to_remove.difference(failed_ftps), len(failed_ftps)
 
 
@@ -226,7 +231,7 @@ def file_path_to_data_type(file_path):
     if "/textsLog/" in file_path: return TEXTS_LOG
     if "/voiceRecording" in file_path: return VOICE_RECORDING
     if "/wifiLog/" in file_path: return WIFI
-    raise TypeError("data type unknown: %s" % file_path)
+    raise Exception("data type unknown: %s" % file_path)
 
 def ensure_sorted_by_timestamp(l):
     """ According to the docs the sort method on a list is in place and should
@@ -240,7 +245,21 @@ def binify_from_timecode(unix_ish_time_code_string):
     return actually_a_timecode / CHUNK_TIMESLICE_QUANTUM #separate into nice, clean hourly chunks!
 
 def clean_java_timecode(java_time_code_string):
+    """ converts millisecond time (string) to an integer normal unix time. """
     return int(java_time_code_string[:10])
+
+"""############################## Standard CSVs #############################"""
+
+def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
+    """ Assumes a clean csv with element 0 in the rows column as a unix(ish) timestamp.
+        Sorts data points into the appropriate bin based on the rounded down hour
+        value of the entry's unix(ish) timestamp. (based CHUNK_TIMESLICE_QUANTUM)
+        Returns a dict of form {(study_id, user_id, data_type, time_bin, heeader):rows_lists}. """
+    ret = defaultdict(deque)
+    for row in rows_list:
+        ret[(study_id, user_id, data_type,
+             binify_from_timecode(row[0]), header)].append(row)
+    return ret
 
 def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
     """ Appends binified rows to an existing binified row data structure.
@@ -250,37 +269,22 @@ def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
         old_binified_rows[binn][0].extend(rows)  #Add data rows
         old_binified_rows[binn][1].append(file_to_process._id)  #add ftp id
 
-"""############################## Standard CSVs #############################"""
-
-def handle_csv_data(study_id, user_id, data_type, file_contents, file_path):
+def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     """ Constructs a binified dict of a given list of a csv rows,
-        catches csv files with known problems and runs the correct logic. """
+        catches csv files with known problems and runs the correct logic.
+        Returns None If the csv has no data in it. """
     header, csv_rows_list = csv_to_list(file_contents)
-    # INSERT more data fixes below as we encounter them.
     if data_type == CALL_LOG: fix_call_log_csv(header, csv_rows_list)
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
-    # Binify!
-    if csv_rows_list:
-        return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
-    else:
-        return None
-
-def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
-    """ Assumes a clean csv with element 0 in the rows list as a unix(ish) timestamp.
-        sorts data points into the appropriate bin based on the rounded down hour
-        value of the entry's unix(ish) timestamp.
-        Returns a dict of form {(study_id, user_id, data_type, time_bin, heeader):rows_lists}. """
-    ret = defaultdict(deque)
-    for row in rows_list:
-        ret[(study_id, user_id, data_type,
-             binify_from_timecode(row[0]), header)].append(row)
-    return ret
+    if csv_rows_list: return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
+    else: return None
 
 """ CSV Fixes """
 def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be
-        the timestamp, it has it in column 3. """
+        the timestamp, it has it in column 3.
+        Note: older versions of the app name the timestamp column "date". """
     header_list = header.split(",")
     header_list.insert(0, header_list.pop(2))
     header = ",".join(header_list)
@@ -299,16 +303,16 @@ def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     rows_list[0].insert(0, time_stamp)
     return ",".join(header_list)
 
-""" Fixing wifi requires inserting the same timestamp on EVERY ROW. """
 def fix_wifi_csv(header, rows_list, file_name):
-    """ The wifi file has its timestamp in the filename. """
+    """ Fixing wifi requires inserting the same timestamp on EVERY ROW.
+    The wifi file has its timestamp in the filename. """
     time_stamp = file_name.rsplit("/", 1)[-1][:-4]
     for row in rows_list[:-1]: #uhg, the last row is a new line.
         row = row.insert(0, time_stamp)
     rows_list.pop(-1) #remove last row
     return "timestamp," + header
 
-""" CSV transforms"""
+""" CSV Utils """
 def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header
@@ -320,5 +324,5 @@ def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv"""
     return header + "\n" + "\n".join( [",".join(row) for row in rows_list ] )
 
-""" Exceptions"""
+""" Exceptions """
 class HeaderMismatchException(Exception): pass

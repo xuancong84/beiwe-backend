@@ -7,6 +7,10 @@
     b. text on the main screen of the beiwe app
     c. the duration of the toast message after completing a survey, or make it responsive to the length of the message.  include descriptive text about this on the ui
 
+###############################
+metrics:
+with 4 concurrent requests that uses 30-40% cpu, so 7.5-10% cpu when waiting on network
+
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
@@ -20,8 +24,8 @@ add to website an obvious display of the study id
 Eli:
 1. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
    check whether we already have "entered survey taking activity" to the debug log
-2. document all the things that the app will dump into thate debug log.
-3. investigate whether it is possible to provide the string for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+2. document all the things that the app will dump into the debug log.
+3. investigate whether it is possible to provide the string prompt for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
 4. change the "date" column in phone call logger to "timestamp"
 5. check cascading delete with "McLean Baker" study
 6. architecture change - implement survey names in backend.

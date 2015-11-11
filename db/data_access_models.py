@@ -50,16 +50,18 @@ class FileToProcess(DatabaseObject):
 class FileProcessLock(DatabaseObject):
     PATH = "beiwe.file_process_running"
     DEFAULTS = {"mark":""}
-    
     @classmethod
     def lock(cls):
         if len(FileProcessLockCollection()) > 0: raise EverythingsGoneToHellException
         FileProcessLock.create({"mark":"marked"}, random_id=True)
-        
     @classmethod
     def unlock(cls):
         for f in FileProcessLockCollection(mark="marked"):
             f.remove()
+#     @classmethod
+#     def islocked(cls):
+#         if len(FileProcessLockCollection()) > 0: return False
+#         return True
 
 ################################################################################
 
