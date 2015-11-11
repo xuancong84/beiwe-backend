@@ -7,7 +7,7 @@ from collections import defaultdict, deque
 from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock,\
     FileToProcess, ChunkRegistry
 from db.study_models import Study
-from db.user_models import Admin
+from db.user_models import Admin, User
 from libs.s3 import s3_retrieve, s3_upload
 
 from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
@@ -22,7 +22,6 @@ from bson.errors import InvalidId
 # The Wifi and Identifiers have timestamp in the file name.
 # The debug log has many lines without timestamps.
 
-
 data_access_api = Blueprint('data_access_api', __name__)
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
@@ -34,40 +33,24 @@ def grab_data():
     optional: top-up = a file (registry.dat)
     cases handled: 
         missing creds or study, invalid admin or study, admin does not have access
-        admin creds are invalid """
-    
-    #Flask automatically returns a 400 response if a parameter does not exist in request.values()
-    #Case: missing creds or study_id
-#     if "access_key" not in request.values:
-#         print 1
-#         return abort(403)
-#     if "secret_key" not in request.values:
-#         print 2
-#         return abort(403)
-#     if "study_id" not in request.values:
-#         print 3
-#         return abort(400)
-    #Case: bad study id
-    
-    print "oh, y'know...."
-    
+        admin creds are invalid 
+        (Flask automatically returns a 400 response if a parameter is accessed
+        but does not exist in request.values() ) """
+    print 0 #Case: bad study id
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
     study_obj = Study(study_id)
     print 1
-    if not study_obj:
-        return abort(404)
-    #Case: invalid access creds
+    if not study_obj: return abort(404)
+    #Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
-    
     admin = Admin(access_key_id=access_key)
     print 2
-    if not admin:
-        return abort(403) #invalid admin (invalid access key)
+    if not admin: return abort(403) #access key DNE
     print 3
     if admin["_id"] not in study_obj['admins']:
-        return abort(403) #illegal admin
+        return abort(403) #admin is not credentialed for this study
     print 4
     if not admin.validate_access_credentials(access_secret):
         return abort(403) #incorrect secret key
@@ -76,22 +59,20 @@ def grab_data():
     if "data_streams" in request.values: #note: researchers use the term "data streams" instead of "data types"
         query["data_types"] = json.loads(request.values["data_streams"])
         for data_stream in query['data_types']:
-            if data_stream not in ALL_DATA_STREAMS:
-                return abort(404)
+            if data_stream not in ALL_DATA_STREAMS: return abort(404)
     #select users
     print 5
     if "user_ids" in request.values:
         query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
+        for user_id in query["user_ids"]: #Case: one of the user ids was invalid
+            print "\n\n\n", user_id, "\n\n\n"
+            if not User(user_id): return abort(404)
     #construct time ranges
     print 6
-    if "date_start" in request.values:
-        query["start"] = datetime.strptime(request.values["date_start"])
-    if "date_end" in request.values:
-        query["end"] = datetime.strptime(request.values["date_end"])
-    
+    if "date_start" in request.values: query["start"] = datetime.strptime(request.values["date_start"])
+    if "date_end" in request.values: query["end"] = datetime.strptime(request.values["date_end"])
+    #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    
-#     print "\n\n\n", query, "\n", chunks, "\n\n"
     data = {}
     for chunk in chunks:
         file_name = ( ("%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s.mp4")
@@ -101,9 +82,8 @@ def grab_data():
     return json.dumps(data)
     
     #TODO: test bytestrings in connection to voicerecording files
-    """ "json.dumps?
-    Signature: json.dumps(obj, **kwargs)
-    Docstring:
+    """
+    json.dumps(obj, **kwargs)
     Serialize ``obj`` to a JSON formatted ``str`` by using the application's
     configured encoder (:attr:`~flask.Flask.json_encoder`) if there is an
     application on the stack.
