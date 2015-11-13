@@ -1,21 +1,24 @@
+import pytz
+
 from bson import ObjectId
-from cronutils import ErrorHandler
+from bson.errors import InvalidId
+from collections import defaultdict, deque
+from cronutils import ErrorHandler, null_error_handler
 from datetime import datetime
 from flask import Blueprint, request, abort, json
-from collections import defaultdict, deque
 
 from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock,\
     FileToProcess, ChunkRegistry
 from db.study_models import Study
 from db.user_models import Admin, User
 from libs.s3 import s3_retrieve, s3_upload
-
 from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
     BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS, LOG_FILE, POWER_STATE,
     SURVEY_ANSWERS, SURVEY_TIMINGS, TEXTS_LOG, VOICE_RECORDING,
     WIFI, ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM,
     LENGTH_OF_STUDY_ID)
-from bson.errors import InvalidId
+
+
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -35,6 +38,7 @@ def grab_data():
         missing creds or study, invalid admin or study, admin does not have access
         admin creds are invalid 
         (Flask automatically returns a 400 response if a parameter is accessed
+        (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() ) """
     #Case: bad study id
     try: study_id = ObjectId(request.values["study_id"])
@@ -46,7 +50,7 @@ def grab_data():
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
     if not admin: return abort(403) #access key DNE
-    if admin["_id"] not in study_obj['admins']:
+    if admin._id not in study_obj['admins']:
         return abort(403) #admin is not credentialed for this study
     if not admin.validate_access_credentials(access_secret):
         return abort(403) #incorrect secret key
@@ -60,38 +64,33 @@ def grab_data():
     if "user_ids" in request.values:
         query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
         for user_id in query["user_ids"]: #Case: one of the user ids was invalid
-            print "\n\n\n", user_id, "\n\n\n"
             if not User(user_id): return abort(404)
     #construct time ranges
     if "time_start" in request.values: query["start"] = str_to_datetime(request.values["time_start"])
     if "time_end" in request.values: query["end"] = str_to_datetime(request.values["time_end"])
+    registry = {}
+    if "registry" in request.values:
+        registry = parse_registry(request.values["registry"]) 
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
     data = {}
     for chunk in chunks:
+        if (str(chunk._id) in registry and
+            registry[str(chunk._id)] == chunk["chunk_hash"]): continue
         file_name = ( ("%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s.mp4")
                       % (chunk["data_type"], chunk["time_bin"] ) )
         print file_name
-        data[file_name] = s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True)
+        data[file_name] = (s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True), chunk["chunk_hash"])
     return json.dumps(data)
-    
-    #TODO: test bytestrings in connection to voicerecording files
-    """
-    json.dumps(obj, **kwargs)
-    Serialize ``obj`` to a JSON formatted ``str`` by using the application's
-    configured encoder (:attr:`~flask.Flask.json_encoder`) if there is an
-    application on the stack.
-    
-    This function can return ``unicode`` strings or ascii-only bytestrings by
-    default which coerce into unicode strings automatically.  That behavior by
-    default is controlled by the ``JSON_AS_ASCII`` configuration variable
-    and can be overriden by the simplejson ``ensure_ascii`` parameter. """
-    
-    #TODO: implement top up  
-#     chunk_data = {}
-#     if "top_up" in request.values:
-#         top_up = json.loads(request.values["top_up"])
+#     return INSERT ZIP FILE BUILDER HERE
 
+
+
+def parse_registry(reg_dat):
+    """ Parses the provided registry.dat file and returns a dictionary of chunk
+    file names and hashes.  The registry file is a json dictionary containing a
+    list of file names and hashes""" 
+    return json.loads(reg_dat)
 
 """############################# Hourly Update ##############################"""
 
@@ -101,6 +100,7 @@ def process_file_chunks():
     bad files, raising errors appropriately. """ 
     FileProcessLock.lock()
     error_handler = ErrorHandler()
+#     error_handler = null_error_handler
     number_bad_files = 0
     while True:
         starting_length = len(FilesToProcess())
@@ -204,7 +204,7 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
     """ S3 file paths for chunks are of this form:
         CHUNKED_DATA/study_id/user_id/data_type/time_bin.csv """
     return "%s/%s/%s/%s/%s.csv" % (CHUNKS_FOLDER, study_id, user_id, data_type,
-        datetime.fromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM).strftime( API_TIME_FORMAT ) )
+        pytz.utc.localize(datetime.fromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM) ).strftime( API_TIME_FORMAT) )
 
 # def reverse_s3_chunk_path(path): 
 #     """" CHUNKS_FOLDER, study_id, user_id, data_type, time_bin. """
@@ -320,8 +320,9 @@ def construct_csv_string(header, rows_list):
 
 """ Time Handling """
 def str_to_datetime(time_string):
-    try: return datetime.strptime(time_string, API_TIME_FORMAT)
+    try: return pytz.utc.localize(datetime.strptime(time_string, API_TIME_FORMAT))
     except ValueError as e:
+        #TODO: document this error (for mat) or change this error 
         if "does not match format" in e.message: abort(400)
 
 """ Exceptions """
