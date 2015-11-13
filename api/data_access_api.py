@@ -3,10 +3,11 @@ import pytz
 from bson import ObjectId
 from bson.errors import InvalidId
 from collections import defaultdict, deque
-from cronutils import ErrorHandler, null_error_handler
+from cronutils import ErrorHandler
 from datetime import datetime
 from flask import Blueprint, request, abort, json
-
+from StringIO import StringIO
+from zipfile import ZipFile, ZIP_DEFLATED
 from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock,\
     FileToProcess, ChunkRegistry
 from db.study_models import Study
@@ -17,8 +18,6 @@ from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
     SURVEY_ANSWERS, SURVEY_TIMINGS, TEXTS_LOG, VOICE_RECORDING,
     WIFI, ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM,
     LENGTH_OF_STUDY_ID)
-
-
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -39,7 +38,8 @@ def grab_data():
         admin creds are invalid 
         (Flask automatically returns a 400 response if a parameter is accessed
         (Flask automatically returns a 400 response if a parameter is accessed
-        but does not exist in request.values() ) """
+        but does not exist in request.values() )
+    Returns a zip file of all data files found by the query. """
     #Case: bad study id
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
@@ -73,17 +73,21 @@ def grab_data():
         registry = parse_registry(request.values["registry"]) 
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    data = {}
+    f = StringIO()
+    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
+    ret_reg = {}
     for chunk in chunks:
         if (str(chunk._id) in registry and
             registry[str(chunk._id)] == chunk["chunk_hash"]): continue
         file_name = ( ("%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s.mp4")
                       % (chunk["data_type"], chunk["time_bin"] ) )
         print file_name
-        data[file_name] = (s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True), chunk["chunk_hash"])
-    return json.dumps(data)
-#     return INSERT ZIP FILE BUILDER HERE
-
+        file_data = s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True)
+        ret_reg[str(chunk._id)] = chunk["chunk_hash"]
+        z.writestr(file_name, file_data)
+    z.writestr("registry", json.dumps(ret_reg))
+    z.close()
+    return f.getvalue()
 
 
 def parse_registry(reg_dat):
