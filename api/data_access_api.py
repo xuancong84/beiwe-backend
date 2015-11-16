@@ -1,5 +1,3 @@
-import pytz
-
 from bson import ObjectId
 from bson.errors import InvalidId
 from collections import defaultdict, deque
@@ -17,7 +15,7 @@ from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
     BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS, LOG_FILE, POWER_STATE,
     SURVEY_ANSWERS, SURVEY_TIMINGS, TEXTS_LOG, VOICE_RECORDING,
     WIFI, ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM,
-    LENGTH_OF_STUDY_ID)
+    LENGTH_OF_STUDY_ID, HUMAN_READABLE_TIME_LABEL)
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -176,6 +174,7 @@ def upload_binified_data(binified_data, error_handler):
         with error_handler:
             study_id, user_id, data_type, time_bin, header = binn
             rows = list(data_rows_deque)
+            header = convert_unix_to_human_readable_timestamps(header, rows)
             chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin) 
             chunk = ChunkRegistry(chunk_path=chunk_path)
             if not chunk:
@@ -208,12 +207,7 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
     """ S3 file paths for chunks are of this form:
         CHUNKED_DATA/study_id/user_id/data_type/time_bin.csv """
     return "%s/%s/%s/%s/%s.csv" % (CHUNKS_FOLDER, study_id, user_id, data_type,
-        #pytz.utc.localize(datetime.utcfromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM) ).strftime( API_TIME_FORMAT) )
-        datetime.utcfromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM).strftime( API_TIME_FORMAT) )
-
-# def reverse_s3_chunk_path(path): 
-#     """" CHUNKS_FOLDER, study_id, user_id, data_type, time_bin. """
-#     return path.split("/")
+        unix_time_to_string(time_bin*CHUNK_TIMESLICE_QUANTUM) )
 
 """################################# Key ####################################"""
 
@@ -237,15 +231,23 @@ def ensure_sorted_by_timestamp(l):
         faster, this is how to declare a sort by the first column (timestamp). """
     l.sort(key = lambda x: int(x[0]))
 
+def convert_unix_to_human_readable_timestamps(header, rows):
+    """ Adds a new column to the end which is the unix time represented in
+    a human readable time format.  Returns an appropriately modified header. """
+    #lists are implemented as vectors with some proportionally extra space, append should be fine.
+    for row in rows:
+        unix_millisecond = int(row[0])
+        time_string = unix_time_to_string(unix_millisecond / 1000 )
+        time_string += "." + str( unix_millisecond % 1000 )
+        row.append(time_string)
+    return header + HUMAN_READABLE_TIME_LABEL
+    
+
 def binify_from_timecode(unix_ish_time_code_string):
     """ Takes a unix-ish time code (accepts unix millisecond), and returns an
         integer value of the bin it should go in. """
     actually_a_timecode = clean_java_timecode(unix_ish_time_code_string) # clean java time codes...
     return actually_a_timecode / CHUNK_TIMESLICE_QUANTUM #separate into nice, clean hourly chunks!
-
-def clean_java_timecode(java_time_code_string):
-    """ converts millisecond time (string) to an integer normal unix time. """
-    return int(java_time_code_string[:10])
 
 """############################## Standard CSVs #############################"""
 
@@ -325,11 +327,17 @@ def construct_csv_string(header, rows_list):
 
 """ Time Handling """
 def str_to_datetime(time_string):
-#     try: return pytz.utc.localize(datetime.strptime(time_string, API_TIME_FORMAT))
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
         #TODO: document this error (for mat) or change this error 
         if "does not match format" in e.message: abort(400)
+
+def clean_java_timecode(java_time_code_string):
+    """ converts millisecond time (string) to an integer normal unix time. """
+    return int(java_time_code_string[:10])
+
+def unix_time_to_string(unix_time):
+    return datetime.utcfromtimestamp(unix_time).strftime( API_TIME_FORMAT )
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
