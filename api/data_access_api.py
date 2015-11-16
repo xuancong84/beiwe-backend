@@ -208,7 +208,8 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
     """ S3 file paths for chunks are of this form:
         CHUNKED_DATA/study_id/user_id/data_type/time_bin.csv """
     return "%s/%s/%s/%s/%s.csv" % (CHUNKS_FOLDER, study_id, user_id, data_type,
-        pytz.utc.localize(datetime.fromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM) ).strftime( API_TIME_FORMAT) )
+        #pytz.utc.localize(datetime.utcfromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM) ).strftime( API_TIME_FORMAT) )
+        datetime.utcfromtimestamp(time_bin*CHUNK_TIMESLICE_QUANTUM).strftime( API_TIME_FORMAT) )
 
 # def reverse_s3_chunk_path(path): 
 #     """" CHUNKS_FOLDER, study_id, user_id, data_type, time_bin. """
@@ -314,7 +315,7 @@ def fix_wifi_csv(header, rows_list, file_name):
 def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header
-        line along with the list of rows. """ 
+        line along with the list of rows. """
     lines = [ line for line in csv_string.splitlines() ]
     return lines[0], [row.split(",") for row in lines[1:]]
 
@@ -324,7 +325,8 @@ def construct_csv_string(header, rows_list):
 
 """ Time Handling """
 def str_to_datetime(time_string):
-    try: return pytz.utc.localize(datetime.strptime(time_string, API_TIME_FORMAT))
+#     try: return pytz.utc.localize(datetime.strptime(time_string, API_TIME_FORMAT))
+    try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
         #TODO: document this error (for mat) or change this error 
         if "does not match format" in e.message: abort(400)
