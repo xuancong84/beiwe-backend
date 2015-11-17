@@ -86,7 +86,7 @@ def grab_data():
     z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
     ret_reg = {}
     for chunk, file_contents in chunks_and_content:
-        file_name = ( ("%s/%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s.mp4")
+        file_name = ( ("%s/%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s/%s.mp4")
                       % (chunk["user_id"], chunk["data_type"], chunk["time_bin"] ) )
         ret_reg[str(chunk._id)] = chunk["chunk_hash"]
         z.writestr(file_name, file_contents)
