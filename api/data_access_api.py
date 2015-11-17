@@ -358,7 +358,7 @@ def batch_retrieve_for_processing(ftp):
     return ftp, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
 
 def batch_retrieve_for_api_request(chunk):
-    return chunk, s3_retrieve(chunk["s3_file_path"], chunk["study_id"], raw_path=True)
+    return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
