@@ -73,19 +73,24 @@ def grab_data():
         registry = parse_registry(request.values["registry"]) 
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    f = StringIO()
-    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
-    ret_reg = {}
+    get_these_files = []
     for chunk in chunks:
         if (str(chunk._id) in registry and
             registry[str(chunk._id)] == chunk["chunk_hash"]): continue
+        get_these_files.append(chunk)
+    #Retrieve data
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files) 
+    #write data to zip
+    f = StringIO()
+    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
+    ret_reg = {}
+    for chunk, file_contents in chunks_and_content:
         file_name = ( ("%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s.mp4")
                       % (chunk["data_type"], chunk["time_bin"] ) )
-        print file_name
-        file_data = s3_retrieve(chunk['chunk_path'], chunk["study_id"], raw_path=True)
         ret_reg[str(chunk._id)] = chunk["chunk_hash"]
-        z.writestr(file_name, file_data)
-    z.writestr("registry", json.dumps(ret_reg))
+        z.writestr(file_name, file_contents)
+    z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
     z.close()
     return f.getvalue()
 
@@ -136,7 +141,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    ftps = pool.map(batch_retrieve, FilesToProcess()[skip_count:count+skip_count])
+    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess()[skip_count:count+skip_count])
     for ftp, file_contents in ftps:
         with error_handler:
             s3_file_path = ftp["s3_file_path"]
@@ -348,9 +353,12 @@ def unix_time_to_string(unix_time):
     return datetime.utcfromtimestamp(unix_time).strftime( API_TIME_FORMAT )
 
 """ Batch Operations """
-def batch_retrieve(ftp):
+def batch_retrieve_for_processing(ftp):
     """ Used for mapping an s3_retrieve function. """
     return ftp, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
+
+def batch_retrieve_for_api_request(chunk):
+    return chunk, s3_retrieve(chunk["s3_file_path"], chunk["study_id"], raw_path=True)
 
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
