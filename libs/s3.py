@@ -48,15 +48,15 @@ def s3_retrieve(key_path, study_id, raw_path=False):
     key = Key(_get_bucket(S3_BUCKET), key_path)
     return encryption.decrypt_server( key.read(), study_id )
 
-def s3_retrieve_or_none(key_path, study_id, raw_path=False):
-    """ Like s3_retreive except returns None if the key does not exist instead
-        of erroring.  This API makes an additional network request, increasing
-        cost and latency. """
-    if not raw_path: key_path = str(study_id) + "/" + key_path
-    key = _get_bucket(S3_BUCKET).get_key(key_path) #this line is the only difference.
-    if not key: return None
-    return encryption.decrypt_server(key.read(), study_id)
-    
+# def s3_retrieve_or_none(key_path, study_id, raw_path=False):
+#     """ Like s3_retreive except returns None if the key does not exist instead
+#         of erroring.  This API makes an additional network request, increasing
+#         cost and latency. """
+#     if not raw_path: key_path = str(study_id) + "/" + key_path
+#     key = _get_bucket(S3_BUCKET).get_key(key_path) #this line is the only difference.
+#     if not key: return None
+#     return encryption.decrypt_server(key.read(), study_id)
+
 def s3_list_files( prefix ):
     """ Method fetches a list of filenames with prefix.
         note: entering the empty string into this search without later calling
@@ -64,6 +64,10 @@ def s3_list_files( prefix ):
     bucket = _get_bucket(S3_BUCKET)
     results = bucket.list(prefix=prefix)
     return [i.name.strip("/") for i in results]
+
+def s3_delete(key_path):
+    key = Key(_get_bucket(S3_BUCKET), key_path)
+    key.delete()
 
 #unused file based upload function, not up to date with new upload file names.
 # def s3_upload_handler_file( key_name, file_obj ):
