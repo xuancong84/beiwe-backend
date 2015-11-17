@@ -34,6 +34,8 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "voice_recording_max_time_length_seconds",
                 "wifi_log_frequency_seconds"]
 
+CONCURRENT_NETWORK_OPS = 10
+
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """

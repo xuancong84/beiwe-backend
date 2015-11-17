@@ -1,13 +1,15 @@
 from bson import ObjectId
-from bson.errors import InvalidId
 from collections import defaultdict, deque
 from cronutils import ErrorHandler
 from datetime import datetime
 from flask import Blueprint, request, abort, json
+from multiprocessing.pool import ThreadPool
 from StringIO import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED
-from db.data_access_models import FilesToProcess, ChunksRegistry,FileProcessLock,\
-    FileToProcess, ChunkRegistry
+
+from bson.errors import InvalidId
+from db.data_access_models import (FilesToProcess, ChunksRegistry,FileProcessLock,
+                                   FileToProcess, ChunkRegistry)
 from db.study_models import Study
 from db.user_models import Admin, User
 from libs.s3 import s3_retrieve, s3_upload
@@ -15,7 +17,7 @@ from config.constants import (API_TIME_FORMAT, CHUNKS_FOLDER, ACCELEROMETER,
     BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS, LOG_FILE, POWER_STATE,
     SURVEY_ANSWERS, SURVEY_TIMINGS, TEXTS_LOG, VOICE_RECORDING,
     WIFI, ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM,
-    LENGTH_OF_STUDY_ID, HUMAN_READABLE_TIME_LABEL)
+    LENGTH_OF_STUDY_ID, HUMAN_READABLE_TIME_LABEL, CONCURRENT_NETWORK_OPS)
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -133,14 +135,14 @@ def do_process_file_chunks(count, error_handler, skip_count):
     #this is how you declare a defaultdict containing a tuple of two deques.
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
-    
-    for ftp in FilesToProcess()[skip_count:count+skip_count]:
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    ftps = pool.map(batch_retrieve, FilesToProcess()[skip_count:count+skip_count])
+    for ftp, file_contents in ftps:
         with error_handler:
             s3_file_path = ftp["s3_file_path"]
 #             print s3_file_path
-            data_type = file_path_to_data_type(ftp["s3_file_path"])
+            data_type = file_path_to_data_type(s3_file_path)
             if data_type in CHUNKABLE_FILES:
-                file_contents = s3_retrieve(s3_file_path[LENGTH_OF_STUDY_ID:], ftp["study_id"])
                 newly_binified_data = process_csv_data(ftp["study_id"],
                                      ftp["user_id"], data_type, file_contents,
                                      s3_file_path)
@@ -169,6 +171,7 @@ def upload_binified_data(binified_data, error_handler):
         Raises any errors on the passed in ErrorHandler."""
     failed_ftps = set([])
     ftps_to_remove = set([])
+    upload_these = []
     for binn, values in binified_data.items():
         data_rows_deque, ftp_deque = values
         with error_handler:
@@ -187,19 +190,24 @@ def upload_binified_data(binified_data, error_handler):
                 s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
                 old_header, old_rows = csv_to_list(s3_file_data) 
                 if old_header != header:
+                    #to handle the case where a file was on an hour boundry and
+                    # placed in two separate chunks we need to FAIL to retire
+                    #this file.  If this happens AND ONE of the files DOES NOT
+                    #have a header mismatch this may (will?) cause data
+                    #duplication in the chunked file whenever the file processing occurs run.
                     failed_ftps.update(ftp_deque)
-                    #TODO: this does not add to the delete queue due to the error... is this correct? I think its fine, handling this using sets.... walk through logic anddetermin if this is correct...
                     raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
                                                   (old_header, header, chunk_path) )
                 old_rows.extend(rows)
                 ensure_sorted_by_timestamp(old_rows)
                 new_contents = construct_csv_string(header, old_rows)
-                s3_upload( chunk_path, new_contents, study_id, raw_path=True)
+                upload_these.append( chunk_path, new_contents, study_id )
                 chunk.update_chunk_hash(new_contents)
             ftps_to_remove.update(ftp_deque)
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    pool.map(batch_upload, upload_these)
     #The things in ftps to removed that are not in failed ftps.
     return ftps_to_remove.difference(failed_ftps), len(failed_ftps)
-
 
 """################################ S3 Stuff ################################"""
 
@@ -338,6 +346,16 @@ def clean_java_timecode(java_time_code_string):
 
 def unix_time_to_string(unix_time):
     return datetime.utcfromtimestamp(unix_time).strftime( API_TIME_FORMAT )
+
+""" Batch Operations """
+def batch_retrieve(ftp):
+    """ Used for mapping an s3_retrieve function. """
+    return ftp, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
+
+def batch_upload(upload):
+    """ Used for mapping an s3_upload function. """
+    s3_upload(*upload, raw_path=True)
+
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
