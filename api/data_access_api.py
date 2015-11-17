@@ -80,7 +80,7 @@ def grab_data():
         get_these_files.append(chunk)
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files) 
+    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1) 
     #write data to zip
     f = StringIO()
     z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
@@ -141,7 +141,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess()[skip_count:count+skip_count])
+    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess()[skip_count:count+skip_count], chunksize=1)
     for ftp, file_contents in ftps:
         with error_handler:
             s3_file_path = ftp["s3_file_path"]
@@ -210,7 +210,7 @@ def upload_binified_data(binified_data, error_handler):
                 chunk.update_chunk_hash(new_contents)
             ftps_to_remove.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    pool.map(batch_upload, upload_these)
+    pool.map(batch_upload, upload_these, chunksize=1)
     #The things in ftps to removed that are not in failed ftps.
     return ftps_to_remove.difference(failed_ftps), len(failed_ftps)
 
@@ -358,12 +358,12 @@ def batch_retrieve_for_processing(ftp):
     return ftp, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
 
 def batch_retrieve_for_api_request(chunk):
+    print chunk['chunk_path']
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
     s3_upload(*upload, raw_path=True)
-
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
