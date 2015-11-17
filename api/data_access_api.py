@@ -183,7 +183,7 @@ def upload_binified_data(binified_data, error_handler):
             if not chunk:
                 ensure_sorted_by_timestamp(rows)
                 new_contents = construct_csv_string(header, rows)
-                s3_upload( chunk_path, new_contents, study_id, raw_path=True )
+                upload_these.append((chunk_path, new_contents, study_id))
                 ChunkRegistry.add_new_chunk(study_id, user_id, data_type,
                                 chunk_path,time_bin, file_contents=new_contents )
             else:
@@ -201,7 +201,7 @@ def upload_binified_data(binified_data, error_handler):
                 old_rows.extend(rows)
                 ensure_sorted_by_timestamp(old_rows)
                 new_contents = construct_csv_string(header, old_rows)
-                upload_these.append( chunk_path, new_contents, study_id )
+                upload_these.append(( chunk_path, new_contents, study_id ))
                 chunk.update_chunk_hash(new_contents)
             ftps_to_remove.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
