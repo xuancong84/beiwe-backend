@@ -44,17 +44,17 @@ HUMAN_READABLE_TIME_LABEL = ",UTC time"
 CHUNKS_FOLDER = "CHUNKED_DATA"
 
 ACCELEROMETER = "accelerometer"
-BLUETOOTH = "bluetooth_log"
-CALL_LOG = "call_log"
+BLUETOOTH = "bluetooth"
+CALL_LOG = "calls"
 GPS = "gps"
 IDENTIFIERS = "identifiers"
-LOG_FILE = "log_file"
+LOG_FILE = "app_log"
 POWER_STATE = "power_state"
 SURVEY_ANSWERS = "survey_answers"
 SURVEY_TIMINGS = "survey_timings"
-TEXTS_LOG = "texts_log"
-VOICE_RECORDING = "voice_recording"
-WIFI = "wifi_log"
+TEXTS_LOG = "texts"
+VOICE_RECORDING = "audio_recordings"
+WIFI = "wifi"
 
 ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
