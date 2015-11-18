@@ -45,8 +45,7 @@ Eli:
 
 
 Josh:
-0: "Josh, go through the contract and send jeanette a thing on how we can get the final chunk of the contract payment."
-
+-Deleting studies is broken.
 -Check per-study permissions; researchers can go straight to the URL of a study they're not authorized on
 -Fix the "Next" button in the in-app survey
 -Make some questions optional
