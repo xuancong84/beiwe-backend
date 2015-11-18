@@ -87,7 +87,8 @@ def grab_data():
     ret_reg = {}
     for chunk, file_contents in chunks_and_content:
         file_name = ( ("%s/%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s/%s.mp4")
-                      % (chunk["user_id"], chunk["data_type"], chunk["time_bin"] ) )
+                      % (chunk["user_id"], chunk["data_type"],
+                         str(chunk["time_bin"]).replace(":", "_") ) )
         ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
         z.writestr(file_name, file_contents)
     z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
