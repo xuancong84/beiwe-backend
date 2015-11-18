@@ -159,7 +159,6 @@ def do_process_file_chunks(count, error_handler, skip_count):
                 continue
             else:
                 timestamp = clean_java_timecode( s3_file_path.rsplit("/", 1)[-1][:-4])
-#                 print timestamp
                 ChunkRegistry.add_new_chunk(ftp["study_id"], ftp["user_id"],
                                             data_type, s3_file_path, timestamp)
                 ftps_to_remove.add(ftp._id)
@@ -248,14 +247,12 @@ def ensure_sorted_by_timestamp(l):
 def convert_unix_to_human_readable_timestamps(header, rows):
     """ Adds a new column to the end which is the unix time represented in
     a human readable time format.  Returns an appropriately modified header. """
-    #lists are implemented as vectors with some proportionally extra space, append should be fine.
     for row in rows:
         unix_millisecond = int(row[0])
         time_string = unix_time_to_string(unix_millisecond / 1000 )
         time_string += "." + str( unix_millisecond % 1000 )
-        row.append(time_string)
+        row.insert(1, time_string)
     return header + HUMAN_READABLE_TIME_LABEL
-    
 
 def binify_from_timecode(unix_ish_time_code_string):
     """ Takes a unix-ish time code (accepts unix millisecond), and returns an
@@ -288,6 +285,7 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     """ Constructs a binified dict of a given list of a csv rows,
         catches csv files with known problems and runs the correct logic.
         Returns None If the csv has no data in it. """
+    if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
     header, csv_rows_list = csv_to_list(file_contents)
     if data_type == CALL_LOG: fix_call_log_csv(header, csv_rows_list)
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
@@ -326,6 +324,35 @@ def fix_wifi_csv(header, rows_list, file_name):
         row = row.insert(0, time_stamp)
     rows_list.pop(-1) #remove last row
     return "timestamp," + header
+
+def fix_app_log_file(file_contents, file_path):
+    """ The log file is less of a csv than it is a time enumerated list of 
+        events, with the time code preceding each row.
+        We insert a base value, a new row stating that a new log file was created,
+        which allows us to guarantee at least one timestamp in the file."""
+    time_stamp = file_path.rsplit("/", 1)[-1][:-4]
+    rows_list = file_contents.splitlines()
+    rows_list[0] = time_stamp + " New app log file created"
+    new_rows = []
+    for row in rows_list:
+        row_elements = row.split(" ", 1) #split first whitespace, element 0 is a java timecode
+        try:
+            int(row_elements[0]) #grab first element, check if it is a valid int
+            new_rows.append(row_elements)
+        except ValueError as e:
+            if ("Device does not" == row[:15] or
+                "Trying to start Accelerometer" == row[:29] ):
+                #use time stamp from previous row
+                new_rows.append(new_rows[-1][0] + row)
+                continue
+            if ("bluetooth Failure" == row[:17] or
+                "our not-quite-race-condition" == row[:28] or
+                "accelSensorManager" in row[:18] or #this actually covers 2 cases
+                "a sessionactivity tried to clear the" == row[:36] ):
+                #Just drop matches to the above lines 
+                continue
+            raise e
+    return "timestamp, event\n" + "\n".join(",".join(row) for row in new_rows)
 
 """ CSV Utils """
 def csv_to_list(csv_string):
