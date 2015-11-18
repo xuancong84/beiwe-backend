@@ -20,10 +20,9 @@ note: the old beiwe bucket is going to throw a wrench into... everything.
 
 send email on upload failure ?
 add to website an obvious display of the study id
-
+todo: test registry file checking for non-chunked files (empty hashes)
+TODO: check that timestamp nonsense involving timezones crap still puts the files into the correct timestamped files.  (UUUHHHGGGG)
 TODO: logging for data access requests?
-TODO: inform mat about the known problem that occurs when two neighboring files (in the same time quantum) have different headers.
-
 
 Eli:
 1. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
