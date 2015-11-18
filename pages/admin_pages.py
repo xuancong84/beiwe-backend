@@ -1,8 +1,9 @@
-from flask import Blueprint, redirect, render_template, request, session
+from flask import Blueprint, flash, Markup, redirect, render_template, request,\
+    session
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
-    authenticate_system_admin, authenticate_admin_study_access,\
-    get_admins_allowed_studies, admin_is_system_admin
+    authenticate_admin_study_access, get_admins_allowed_studies,\
+    admin_is_system_admin
 from db.user_models import Users, Admin
 from db.study_models import Study
 
@@ -72,10 +73,14 @@ def login():
     else:
         return redirect("/admin")
 
-@admin_pages.route('/reset_admin_password_form')
+
+@admin_pages.route('/manage_credentials')
 @authenticate_admin_login
-def render_reset_admin_password_form():
-    return render_template('reset_admin_password.html')
+def manage_credentials():
+    return render_template('manage_credentials.html',
+                           allowed_studies=get_admins_allowed_studies(),
+                           system_admin=admin_is_system_admin())
+
 
 @admin_pages.route('/reset_admin_password', methods=['POST'])
 @authenticate_admin_login
@@ -85,9 +90,25 @@ def reset_admin_password():
     new_password = request.values['new_password']
     confirm_new_password = request.values['confirm_new_password']
     if not Admin.check_password(username, current_password):
-        return 'The "Current Password" you entered is invalid'
+        flash("The Current Password you entered is invalid", 'danger')
+        return redirect('/manage_credentials')
     if new_password != confirm_new_password:
-        return 'New Password does not match Confirm New Password'
+        flash("New Password does not match Confirm New Password", 'danger')
+        return redirect('/manage_credentials')
     Admin(username).set_password(new_password)
-    return redirect('/')
+    flash("Your password has been reset!", 'success')
+    return redirect('/manage_credentials')
 
+
+@admin_pages.route('/reset_download_api_credentials', methods=['POST'])
+@authenticate_admin_login
+def reset_download_api_credentials():
+    admin = Admin(session['admin_username'])
+    access_key, secret_key = admin.reset_access_credentials()
+    msg = """<h3>Your Data-Download API access credentials have been reset!</h3>
+        <p>Your new <b>Access Key</b> is: %s</p>
+        <p>Your new <b>Secret Key</b> is: %s</p>
+        <p>Please record these somewhere; they will not be shown again!</p>""" \
+        % (access_key, secret_key)
+    flash(Markup(msg), 'warning')
+    return redirect("/manage_credentials")
