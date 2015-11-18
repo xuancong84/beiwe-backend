@@ -252,7 +252,9 @@ def convert_unix_to_human_readable_timestamps(header, rows):
         time_string = unix_time_to_string(unix_millisecond / 1000 )
         time_string += "." + str( unix_millisecond % 1000 )
         row.insert(1, time_string)
-    return ",".join(header.split(",").insert(1, HUMAN_READABLE_TIME_LABEL))
+    header = header.split(",")
+    header.insert(1, HUMAN_READABLE_TIME_LABEL)
+    return ",".join(header)
 
 def binify_from_timecode(unix_ish_time_code_string):
     """ Takes a unix-ish time code (accepts unix millisecond), and returns an
