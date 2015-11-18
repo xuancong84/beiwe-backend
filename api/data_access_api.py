@@ -75,7 +75,7 @@ def grab_data():
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
     get_these_files = []
     for chunk in chunks:
-        if (str(chunk._id) in registry and
+        if (chunk['chunk_path'] in registry and
             registry[str(chunk._id)] == chunk["chunk_hash"]): continue
         get_these_files.append(chunk)
     #Retrieve data
@@ -88,7 +88,7 @@ def grab_data():
     for chunk, file_contents in chunks_and_content:
         file_name = ( ("%s/%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s/%s.mp4")
                       % (chunk["user_id"], chunk["data_type"], chunk["time_bin"] ) )
-        ret_reg[str(chunk._id)] = chunk["chunk_hash"]
+        ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
         z.writestr(file_name, file_contents)
     z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
     z.close()
