@@ -44,27 +44,27 @@ def grab_data():
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
     study_obj = Study(study_id)
-    if not study_obj: return abort(404)
+    if not study_obj: abort(404)
     #Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
-    if not admin: return abort(403) #access key DNE
+    if not admin: abort(403) #access key DNE
     if admin._id not in study_obj['admins']:
-        return abort(403) #admin is not credentialed for this study
+        abort(403) #admin is not credentialed for this study
     if not admin.validate_access_credentials(access_secret):
-        return abort(403) #incorrect secret key
+        abort(403) #incorrect secret key
     query = {}
     #select data streams
     if "data_streams" in request.values: #note: researchers use the term "data streams" instead of "data types"
         query["data_types"] = json.loads(request.values["data_streams"])
         for data_stream in query['data_types']:
-            if data_stream not in ALL_DATA_STREAMS: return abort(404)
+            if data_stream not in ALL_DATA_STREAMS: abort(404)
     #select users
     if "user_ids" in request.values:
         query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
         for user_id in query["user_ids"]: #Case: one of the user ids was invalid
-            if not User(user_id): return abort(404)
+            if not User(user_id): abort(404)
     #construct time ranges
     if "time_start" in request.values: query["start"] = str_to_datetime(request.values["time_start"])
     if "time_end" in request.values: query["end"] = str_to_datetime(request.values["time_end"])
