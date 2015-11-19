@@ -48,7 +48,7 @@ if not __name__ == '__main__':
 # Points our custom 404 page (in /frontend/templates) to display on a 404 error.
     @app.errorhandler(404)
     def e404(e):
-        return render_template("404.html",is_logged_in=is_logged_in())
+        return render_template("404.html",is_logged_in=is_logged_in()), 404
 
 #Extra Debugging settings
 if __name__ == '__main__':
