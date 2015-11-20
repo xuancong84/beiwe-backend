@@ -302,10 +302,11 @@ def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be
         the timestamp, it has it in column 3.
         Note: older versions of the app name the timestamp column "date". """
+    for row in rows_list:
+        row.insert(0, row.pop(2))
     header_list = header.split(",")
     header_list.insert(0, header_list.pop(2))
-    header = ",".join(header_list)
-    (row.insert(0, row.pop(2)) for row in rows_list)
+    return ",".join(header_list)
 
 def fix_identifier_csv(header, rows_list, file_name):
     """ The identifiers file has its timestamp in the file name. """
