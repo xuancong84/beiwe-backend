@@ -175,44 +175,46 @@ def upload_binified_data(binified_data, error_handler):
         Returns the number of failed FTPS so that we don't retry them.
         Raises any errors on the passed in ErrorHandler."""
     failed_ftps = set([])
-    ftps_to_remove = set([])
+    ftps_to_retire = set([])
     upload_these = []
     for binn, values in binified_data.items():
         data_rows_deque, ftp_deque = values
         with error_handler:
-            study_id, user_id, data_type, time_bin, header = binn
-            rows = list(data_rows_deque)
-            header = convert_unix_to_human_readable_timestamps(header, rows)
-            chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin) 
-            chunk = ChunkRegistry(chunk_path=chunk_path)
-            if not chunk:
-                ensure_sorted_by_timestamp(rows)
-                new_contents = construct_csv_string(header, rows)
-                upload_these.append((chunk_path, new_contents, study_id))
-                ChunkRegistry.add_new_chunk(study_id, user_id, data_type,
-                                chunk_path,time_bin, file_contents=new_contents )
-            else:
-                s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
-                old_header, old_rows = csv_to_list(s3_file_data) 
-                if old_header != header:
-                    #to handle the case where a file was on an hour boundry and
-                    # placed in two separate chunks we need to FAIL to retire
-                    #this file.  If this happens AND ONE of the files DOES NOT
-                    #have a header mismatch this may (will?) cause data
-                    #duplication in the chunked file whenever the file processing occurs run.
-                    failed_ftps.update(ftp_deque)
-                    raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
-                                                  (old_header, header, chunk_path) )
-                old_rows.extend(rows)
-                ensure_sorted_by_timestamp(old_rows)
-                new_contents = construct_csv_string(header, old_rows)
-                upload_these.append(( chunk_path, new_contents, study_id ))
-                chunk.update_chunk_hash(new_contents)
-            ftps_to_remove.update(ftp_deque)
+            try:
+                study_id, user_id, data_type, time_bin, header = binn
+                rows = list(data_rows_deque)
+                header = convert_unix_to_human_readable_timestamps(header, rows)
+                chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin) 
+                chunk = ChunkRegistry(chunk_path=chunk_path)
+                if not chunk:
+                    ensure_sorted_by_timestamp(rows)
+                    new_contents = construct_csv_string(header, rows)
+                    upload_these.append((chunk_path, new_contents, study_id))
+                    ChunkRegistry.add_new_chunk(study_id, user_id, data_type,
+                                    chunk_path,time_bin, file_contents=new_contents )
+                else:
+                    s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
+                    old_header, old_rows = csv_to_list(s3_file_data) 
+                    if old_header != header:
+#to handle the case where a file was on an hour boundry and placed in two separate
+#chunks we need to FAIL to retire this file. If this happens AND ONE of the files
+#DOES NOT have a header mismatch this may (will?) cause data duplication in the
+#chunked file whenever the file processing occurs run.
+                        raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
+                                                      (old_header, header, chunk_path) )
+                    old_rows.extend(rows)
+                    ensure_sorted_by_timestamp(old_rows)
+                    new_contents = construct_csv_string(header, old_rows)
+                    upload_these.append(( chunk_path, new_contents, study_id ))
+                    chunk.update_chunk_hash(new_contents)
+            except Exception as e:
+                failed_ftps.update(ftp_deque)
+                raise e
+            ftps_to_retire.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     pool.map(batch_upload, upload_these, chunksize=1)
     #The things in ftps to removed that are not in failed ftps.
-    return ftps_to_remove.difference(failed_ftps), len(failed_ftps)
+    return ftps_to_retire.difference(failed_ftps), len(failed_ftps)
 
 """################################ S3 Stuff ################################"""
 
