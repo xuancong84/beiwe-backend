@@ -45,7 +45,7 @@ def upload():
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
         #TODO: Eli. Reenable this after successful testing of data access.
-        #FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
+        FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
