@@ -1,4 +1,5 @@
 from bson.objectid import ObjectId
+from boto.exception import S3ResponseError
 from config.constants import API_TIME_FORMAT, LENGTH_OF_STUDY_ID, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
     VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
@@ -84,13 +85,16 @@ def do_process_file_chunks(count, error_handler, skip_count):
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess(page_size=count+skip_count)[skip_count:], chunksize=1)
-    for ftp, file_contents in ftps:
+    for element in pool.map(batch_retrieve_for_processing,
+                          FilesToProcess(page_size=count+skip_count)[skip_count:],
+                          chunksize=1):
         with error_handler:
+            #raise errors that we encountered in the s3 access to the error_handler
+            if isinstance(element, Exception): raise element
+            ftp, data_type, chunkable, file_contents = element
             s3_file_path = ftp["s3_file_path"]
 #             print s3_file_path
-            data_type = file_path_to_data_type(s3_file_path)
-            if data_type in CHUNKABLE_FILES:
+            if chunkable:
                 newly_binified_data = process_csv_data(ftp["study_id"],
                                      ftp["user_id"], data_type, file_contents,
                                      s3_file_path)
@@ -323,8 +327,14 @@ def unix_time_to_string(unix_time):
 """ Batch Operations """
 def batch_retrieve_for_processing(ftp):
     """ Used for mapping an s3_retrieve function. """
-    return ftp, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
-
+    data_type = file_path_to_data_type(ftp['s3_file_path'])
+    if data_type in CHUNKABLE_FILES:
+        #in the event of an error (boto error) we actually RETURN that error and
+        # handle it back on the main thread.
+        try: return ftp, data_type, True, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
+        except Exception as e: return e
+    else: return ftp, data_type, False, ""
+    
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
     s3_upload(*upload, raw_path=True)
