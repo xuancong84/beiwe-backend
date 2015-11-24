@@ -1,17 +1,17 @@
-from datetime import datetime
-from multiprocessing.pool import ThreadPool
-from db.data_access_models import FilesToProcess, ChunkRegistry,\
-    FileToProcess, ChunksRegistry, FileProcessLock
-from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
-from db.study_models import Studies
 from bson.objectid import ObjectId
 from config.constants import API_TIME_FORMAT, LENGTH_OF_STUDY_ID, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
     VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
     BLUETOOTH, ACCELEROMETER, GPS, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER,\
     CHUNKABLE_FILES
-from _collections import defaultdict, deque
 from cronutils.error_handler import ErrorHandler
+from datetime import datetime
+from db.data_access_models import FilesToProcess, ChunkRegistry,\
+    FileToProcess, ChunksRegistry, FileProcessLock
+from db.study_models import Studies
+from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
+from multiprocessing.pool import ThreadPool
+from collections import defaultdict, deque
 
 def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
@@ -55,12 +55,12 @@ def process_file_chunks():
 #     error_handler = null_error_handler
     number_bad_files = 0
     while True:
-        starting_length = len(FilesToProcess())
+        starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
         number_bad_files += do_process_file_chunks(250, error_handler, number_bad_files)
-        if starting_length == len(FilesToProcess()): break
+        if starting_length == FilesToProcess.count(): break
     FileProcessLock.unlock()
-    print len(FilesToProcess())
+    print FilesToProcess.count()
     error_handler.raise_errors()
 
 def do_process_file_chunks(count, error_handler, skip_count):
@@ -84,7 +84,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([]);
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess()[skip_count:count+skip_count], chunksize=1)
+    ftps = pool.map(batch_retrieve_for_processing, FilesToProcess(page_size=count+skip_count)[skip_count:], chunksize=1)
     for ftp, file_contents in ftps:
         with error_handler:
             s3_file_path = ftp["s3_file_path"]
