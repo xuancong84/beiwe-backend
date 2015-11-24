@@ -57,7 +57,7 @@ def process_file_chunks():
     while True:
         starting_length = len(FilesToProcess())
         print str(datetime.now()), starting_length
-        number_bad_files += do_process_file_chunks(1000, error_handler, number_bad_files)
+        number_bad_files += do_process_file_chunks(250, error_handler, number_bad_files)
         if starting_length == len(FilesToProcess()): break
     FileProcessLock.unlock()
     print len(FilesToProcess())
