@@ -12,6 +12,7 @@ from db.study_models import Studies
 from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
 from multiprocessing.pool import ThreadPool
 from collections import defaultdict, deque
+import gc
 
 def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
@@ -55,7 +56,6 @@ def process_file_chunks():
     error_handler = ErrorHandler()
 #     error_handler = null_error_handler
     number_bad_files = 0
-#     for _ in range(100):
     while True:
         starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
@@ -116,6 +116,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     ftps_to_remove.update(more_ftps_to_remove)
     for ftp_id in ftps_to_remove:
         FileToProcess(ftp_id).remove()
+    gc.collect()
     return number_bad_files
     
 def upload_binified_data(binified_data, error_handler):
