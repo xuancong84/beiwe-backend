@@ -43,8 +43,13 @@ class FileToProcess(DatabaseObject):
                  "study_id": REQUIRED,
                  "user_id": REQUIRED_STRING }
     @classmethod
-    def append_file_for_processing(cls, file_path, study_id, user_id): 
-        FileToProcess.create( {"s3_file_path":file_path, "study_id":study_id, "user_id":user_id}, random_id=True)
+    def append_file_for_processing(cls, file_path, study_id, user_id):
+        if file_path[:24] == str(study_id): 
+            FileToProcess.create( {"s3_file_path":file_path, "study_id":study_id,
+                                    "user_id":user_id}, random_id=True)
+        else: FileToProcess.create( {"s3_file_path":str(study_id)+'/'+file_path,
+                                     "study_id":study_id, "user_id":user_id},
+                                     random_id=True)
 
 class FileProcessLock(DatabaseObject):
     PATH = "beiwe.file_process_running"
