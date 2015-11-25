@@ -1,6 +1,5 @@
 from bson.objectid import ObjectId
-from boto.exception import S3ResponseError
-from config.constants import API_TIME_FORMAT, LENGTH_OF_STUDY_ID, IDENTIFIERS,\
+from config.constants import API_TIME_FORMAT, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
     VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
     BLUETOOTH, ACCELEROMETER, GPS, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER,\
@@ -92,7 +91,8 @@ def do_process_file_chunks(count, error_handler, skip_count):
             #raise errors that we encountered in the s3 access to the error_handler
             if isinstance(element, Exception): raise element
             ftp, data_type, chunkable, file_contents = element
-            s3_file_path = ftp["s3_file_path"]
+            del element
+#             s3_file_path = ftp["s3_file_path"]
 #             print s3_file_path
             if chunkable:
                 newly_binified_data = process_csv_data(ftp["study_id"],
@@ -331,7 +331,7 @@ def batch_retrieve_for_processing(ftp):
     if data_type in CHUNKABLE_FILES:
         #in the event of an error (boto error) we actually RETURN that error and
         # handle it back on the main thread.
-        try: return ftp, data_type, True, s3_retrieve(ftp['s3_file_path'][LENGTH_OF_STUDY_ID:], ftp["study_id"])
+        try: return ftp, data_type, True, s3_retrieve(ftp['s3_file_path'], ftp["study_id"], raw_path=True)
         except Exception as e: return e
     else: return ftp, data_type, False, ""
     

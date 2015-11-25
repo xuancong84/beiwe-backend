@@ -67,5 +67,3 @@ CHUNKABLE_FILES = set( [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
 
 # each chunk represents 1 hour of data, and because unix time 0 is on an hour
 # boundry our time codes will also be on nice, clean hour boundaries.
-
-LENGTH_OF_STUDY_ID = 24
