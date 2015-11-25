@@ -39,7 +39,8 @@ def reindex_all_files_to_process():
             if ".csv" == fp[-4:] or ".mp4" == fp[-4:]:
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
-    
+    pool.close()
+    pool.terminate()
     print str(datetime.now()), "processing data."
     FileProcessLock.unlock()
     process_file_chunks()
@@ -54,7 +55,8 @@ def process_file_chunks():
     error_handler = ErrorHandler()
 #     error_handler = null_error_handler
     number_bad_files = 0
-    for _ in range(100):
+#     for _ in range(100):
+    while True:
         starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
         number_bad_files += do_process_file_chunks(1000, error_handler, number_bad_files)
@@ -92,7 +94,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
             if isinstance(element, Exception): raise element
             ftp, data_type, chunkable, file_contents = element
             del element
-#             s3_file_path = ftp["s3_file_path"]
+            s3_file_path = ftp["s3_file_path"]
 #             print s3_file_path
             if chunkable:
                 newly_binified_data = process_csv_data(ftp["study_id"],
@@ -108,6 +110,8 @@ def do_process_file_chunks(count, error_handler, skip_count):
                 ChunkRegistry.add_new_chunk(ftp["study_id"], ftp["user_id"],
                                             data_type, s3_file_path, timestamp)
                 ftps_to_remove.add(ftp._id)
+    pool.close()
+    pool.terminate()
     more_ftps_to_remove, number_bad_files = upload_binified_data(binified_data, error_handler)
     ftps_to_remove.update(more_ftps_to_remove)
     for ftp_id in ftps_to_remove:
@@ -159,6 +163,8 @@ def upload_binified_data(binified_data, error_handler):
             ftps_to_retire.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     pool.map(batch_upload, upload_these, chunksize=1)
+    pool.close()
+    pool.terminate()
     #The things in ftps to removed that are not in failed ftps.
     return ftps_to_retire.difference(failed_ftps), len(failed_ftps)
 
