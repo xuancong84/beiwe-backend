@@ -3,7 +3,7 @@ from config.constants import API_TIME_FORMAT, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
     VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
     BLUETOOTH, ACCELEROMETER, GPS, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER,\
-    CHUNKABLE_FILES
+    CHUNKABLE_FILES, FILE_PROCESS_PAGE_SIZE
 from cronutils.error_handler import ErrorHandler
 from datetime import datetime
 from db.data_access_models import FilesToProcess, ChunkRegistry,\
@@ -59,7 +59,7 @@ def process_file_chunks():
     while True:
         starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
-        number_bad_files += do_process_file_chunks(1000, error_handler, number_bad_files)
+        number_bad_files += do_process_file_chunks(FILE_PROCESS_PAGE_SIZE, error_handler, number_bad_files)
         if starting_length == FilesToProcess.count(): break
     FileProcessLock.unlock()
     print FilesToProcess.count()

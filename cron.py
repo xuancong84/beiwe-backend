@@ -1,7 +1,7 @@
 from sys import argv
 from cronutils import run_tasks
 from cronfig.backup import run_backup 
-
+from libs.files_to_process import process_file_chunks
 FIVE_MINUTES = "five_minutes"
 HOURLY = "hourly"
 FOUR_HOURLY = "four_hourly"
@@ -10,7 +10,7 @@ WEEKLY = "weekly"
 
 TASKS = {
     FIVE_MINUTES: [],
-    HOURLY: [],
+    HOURLY: [process_file_chunks],
     FOUR_HOURLY: [],
     DAILY: [run_backup],
     WEEKLY: []

@@ -35,7 +35,12 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "wifi_log_frequency_seconds"]
 
 CONCURRENT_NETWORK_OPS = 10
-
+FILE_PROCESS_PAGE_SIZE = 250
+#NOTE: this number was determined through trial and error.  There is a point in
+# when reindexing the full dataset (@300,000 items it was after processing ~120,000)
+# there are a chunk of files that, with a page size of 250, fills up ~38% of 
+# available memory on a server with 4GB of ram.
+# (There was also a memory leak that exacerbated this, but it has been vastly reduced.) 
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
