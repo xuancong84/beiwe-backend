@@ -54,10 +54,10 @@ def process_file_chunks():
     error_handler = ErrorHandler()
 #     error_handler = null_error_handler
     number_bad_files = 0
-    while True:
+    for _ in range(100):
         starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
-        number_bad_files += do_process_file_chunks(250, error_handler, number_bad_files)
+        number_bad_files += do_process_file_chunks(1000, error_handler, number_bad_files)
         if starting_length == FilesToProcess.count(): break
     FileProcessLock.unlock()
     print FilesToProcess.count()
