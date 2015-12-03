@@ -2,49 +2,45 @@
 #################### Currently In Progress ###################
 ##############################################################
 
-1. list of additional customizable text strings and parameters:
+Forever: list of additional customizable text strings and parameters
     a. the message of a survey's notification
     b. text on the main screen of the beiwe app
-    c. the duration of the toast message after completing a survey, or make it responsive to the length of the message.  include descriptive text about this on the ui
-
-###############################
-metrics:
-with 4 concurrent requests that uses 30-40% cpu, so 7.5-10% cpu when waiting on network
+    c. the duration of the toast message after completing a survey, or make it responsive to the length of the message.  Include descriptive text about this in the ui.
 
 ############################################################
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
-note: the existing credential system for data access will break when we transfer the s3 bucket.
-note: the old beiwe bucket is going to throw a wrench into... everything.
-
 send email on upload failure ?
 add to website an obvious display of the study id
 todo: test registry file checking for non-chunked files (empty hashes)
-TODO: check that timestamp nonsense involving timezones crap still puts the files into the correct timestamped files.  (UUUHHHGGGG)
 TODO: logging for data access requests?
 
 Eli:
-1. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
+0. iOS Everything.
+
+1. user metadata (how much data uploaded, how many files, how many surveys completed)
+2. check cascading delete with "McLean Baker" study
+3. architecture change - implement survey names in backend.
+4. add to notification popping a debug log statement... the point is to have data for researchers saying "hay I'm not getting surveys"
    check whether we already have "entered survey taking activity" to the debug log
-2. document all the things that the app will dump into the debug log.
-3. investigate whether it is possible to provide the string prompt for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
-4. change the "date" column in phone call logger to "timestamp"
-5. check cascading delete with "McLean Baker" study
-6. architecture change - implement survey names in backend.
-7.  updates for Marshmallow
+5. investigate whether it is possible to provide the string prompt for the two phone numbers _on the phone number entry page_ (should be, we are customizing the consent menu...)
+6. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
+    a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
+7. add retire study functionality, remove delete study functionality entirely.
+
+On Hold:
+updates for Marshmallow
     new permissions - "To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans, your app must now have the ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permissions"
     new alarm functions - setAndAllowWhileIdle and setExactAndAllowWhileIdle are new alarm functions that we will probably have to handle in the alarm manager code.
     app standby - add isIgnoringBatteryOptimizations()
     how-to for debugging this - http://developer.android.com/training/monitoring-device-state/doze-standby.html
     update docs or beiwedata about bluetooth ID in android 6.0
-8. app debug - In RegistrationActivity, make sure we don't set username and password on the device UNTIL they've been validated by the server.
-    a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
-9. add retire study functionality
+
 
 
 Josh:
--Deleting studies is broken.
+-Deleting studies is broken - DON'T FIX IT - DELETED STUDIES CANNOT HAVE THEIR DATA DECRYPTED
 -Check per-study permissions; researchers can go straight to the URL of a study they're not authorized on
 -Fix the "Next" button in the in-app survey
 -Make some questions optional
