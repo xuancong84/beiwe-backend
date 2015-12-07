@@ -16,6 +16,8 @@ add to website an obvious display of the study id
 todo: test registry file checking for non-chunked files (empty hashes)
 TODO: logging for data access requests?
 
+upgrade tablet to android 6, check behavior of beiwe where possible (minimal)
+
 Eli:
 0. iOS Everything.
 

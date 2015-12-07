@@ -2,6 +2,7 @@
 *.pyc
 *~
 .settings
+._project_architecture.txt
 .DS_Store
 .project
 *.pem
