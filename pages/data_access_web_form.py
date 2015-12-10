@@ -12,7 +12,8 @@ data_access_web_form = Blueprint('data_access_web_form', __name__)
 @data_access_web_form.route("/data_access_web_form")
 def data_api_web_form_page():
     admin_id = session['admin_username']
-    if not Admin(admin_id)['access_key_id']:
+    admin = Admin(admin_id)
+    if 'access_key_id' not in admin or not Admin(admin_id)['access_key_id']:
         return render_template("data_api_web_form_fail.html")
     # list of [study objects]
     studies = Studies(admins=admin_id)

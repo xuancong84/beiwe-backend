@@ -81,6 +81,7 @@ class ChunksRegistry(DatabaseCollection):
         query = {"study_id":study_id}
         if user_ids: query["user_id"] = { "$in":user_ids }
         if data_types: query["data_type"] = { "$in":data_types }
+        #TODO: test whether this query is exclusive or inclusive, document on api query page.
         if start and end: query["time_bin"] = {"$gt": start, "$lt": end }
         if start and not end: query["time_bin"] = { "$gt": start}
         if end and not start: query["time_bin"] = { "$lt": end }
