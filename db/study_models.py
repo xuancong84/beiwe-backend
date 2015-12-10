@@ -55,11 +55,7 @@ class Study( DatabaseObject ):
         self["surveys"].remove(survey._id)
         self.save()
     
-    #Accessors, class methods
-    @classmethod
-    def get_studies_for_admin(cls, admin_id):
-        return [Studies(_id=study_id) for study_id in Studies(admins=admin_id)]
-    
+    #Accessors
     def get_surveys_for_study(self):
         """ Returns a dict of survey_id strings paired with their survey data. """
         ret = [ dict(Survey(survey_id)) for survey_id in self['surveys'] ]
