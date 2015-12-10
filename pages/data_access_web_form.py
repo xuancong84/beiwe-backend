@@ -4,6 +4,7 @@ from flask.templating import render_template
 from db.study_models import Study, Studies
 from flask.globals import session
 from db.user_models import Admin, Users
+from pprint import pprint
 
 data_access_web_form = Blueprint('data_access_web_form', __name__)
 
@@ -19,7 +20,8 @@ def data_api_web_form_page():
     users_by_study = {study["_id"] :
                       [user["_id"] for user in Users(study_id=study['_id'])]
                       for study in studies }
-    print studies
-    print users_by_study
+    pprint(studies)
+    print ""
+    pprint(users_by_study)
 #     return render_template("data_api_web_form.html", studies=studies,
 #                            users_by_study=users_by_study)
