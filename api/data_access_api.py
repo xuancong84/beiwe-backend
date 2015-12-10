@@ -30,7 +30,6 @@ def grab_data():
         missing creds or study, invalid admin or study, admin does not have access
         admin creds are invalid 
         (Flask automatically returns a 400 response if a parameter is accessed
-        (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() )
     Returns a zip file of all data files found by the query. """
     #Case: bad study id
