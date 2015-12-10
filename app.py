@@ -1,6 +1,7 @@
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
-from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages
+from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
+    data_access_web_form
 from api import mobile_api, survey_api, admin_api, data_access_api
 from libs.admin_authentication import is_logged_in
 from libs.logging import log_error
@@ -25,6 +26,7 @@ app.register_blueprint(survey_designer.survey_designer)
 app.register_blueprint(admin_api.admin_api)
 app.register_blueprint(survey_api.survey_api)
 app.register_blueprint(data_access_api.data_access_api)
+app.register_blueprint(data_access_web_form.data_access_web_form)
 
 @app.route("/<page>.html")
 def strip_dot_html(page):
