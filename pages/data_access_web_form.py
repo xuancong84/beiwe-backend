@@ -1,7 +1,7 @@
 from flask import Blueprint
 from libs.admin_authentication import authenticate_admin_login
 from flask.templating import render_template
-from db.study_models import Study
+from db.study_models import Study, Studies
 from flask.globals import session
 from db.user_models import Admin, Users
 
@@ -14,7 +14,7 @@ def data_api_web_form_page():
     if not Admin(admin_id)['access_key_id']:
         return render_template("data_api_web_form_fail.html")
     # list of [study objects]
-    studies = Study.get_studies_for_admin(admin_id)
+    studies = Studies(admins=admin_id)
     # dict of {study ids : list of user ids}
     users_by_study = {study["_id"] :
                       [user["_id"] for user in Users(study_id=study['_id'])]
