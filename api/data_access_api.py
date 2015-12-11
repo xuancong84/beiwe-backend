@@ -13,6 +13,8 @@ from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               CONCURRENT_NETWORK_OPS)
 from boto.utils import JSONDecodeError
+from flask.helpers import send_file
+from _io import BytesIO
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -76,8 +78,11 @@ def grab_data():
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1) 
-    #write data to zip
-    f = StringIO()
+    #write data to zip.  If the request comes from the web form we need to use
+    # a bytesio "file" object to return a file blob, if it came from the command
+    # line we use a StringIO because that was how it was written.  :D
+    if 'web_form' in request.values: f = BytesIO()
+    else: f = StringIO()
     z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
     ret_reg = {}
     for chunk, file_contents in chunks_and_content:
@@ -86,11 +91,13 @@ def grab_data():
                          str(chunk["time_bin"]).replace(":", "_") ) )
         ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
         z.writestr(file_name, file_contents)
-    z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
+    if 'web_form' not in request.values:
+        z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
     z.close()
     if 'web_form' in request.values:
         print "Came from the web form!"
-        # TODO: Eli, make it return a zip file instead 
+        f.seek(0)
+        return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
     return f.getvalue()
 
 def parse_registry(reg_dat):
