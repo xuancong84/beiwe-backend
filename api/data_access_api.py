@@ -12,6 +12,7 @@ from db.user_models import Admin, User
 from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               CONCURRENT_NETWORK_OPS)
+from boto.utils import JSONDecodeError
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -48,18 +49,20 @@ def grab_data():
         abort(403) #incorrect secret key
     query = {}
     #select data streams
-    if "data_streams" in request.values: #note: researchers use the term "data streams" instead of "data types"
-        query["data_types"] = json.loads(request.values["data_streams"])
+    if 'data_streams' in request.values: #note: researchers use the term "data streams" instead of "data types"
+        try: query['data_types'] = json.loads(request.values['data_streams'])
+        except JSONDecodeError: query['data_types'] = request.form.getlist('data_streams')
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS: abort(404)
     #select users
-    if "user_ids" in request.values:
-        query["user_ids"] = [user for user in json.loads(request.values["user_ids"])]
-        for user_id in query["user_ids"]: #Case: one of the user ids was invalid
+    if 'user_ids' in request.values:
+        try: query['user_ids'] = [user for user in json.loads(request.values['user_ids'])]
+        except JSONDecodeError: query['user_ids'] = request.form.getlist('user_ids')
+        for user_id in query['user_ids']: #Case: one of the user ids was invalid
             if not User(user_id): abort(404)
     #construct time ranges
-    if "time_start" in request.values: query["start"] = str_to_datetime(request.values["time_start"])
-    if "time_end" in request.values: query["end"] = str_to_datetime(request.values["time_end"])
+    if 'time_start' in request.values: query['start'] = str_to_datetime(request.values['time_start'])
+    if 'time_end' in request.values: query['end'] = str_to_datetime(request.values['time_end'])
     registry = {}
     if "registry" in request.values:
         registry = parse_registry(request.values["registry"]) 
@@ -85,6 +88,9 @@ def grab_data():
         z.writestr(file_name, file_contents)
     z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
     z.close()
+    if 'web_form' in request.values:
+        print "Came from the web form!"
+        # TODO: Eli, make it return a zip file instead 
     return f.getvalue()
 
 def parse_registry(reg_dat):

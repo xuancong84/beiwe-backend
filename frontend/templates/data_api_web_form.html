@@ -47,18 +47,18 @@
       <br><br><br><br><br> -->
 
       <div class="row well">
-        <form action="" method="POST" id="data_download_parameters_form">
+        <form action="/get-data/v1" method="POST" id="data_download_parameters_form">
 
           {# Access Key #}
           <div class="form-group">
             <label for="access_key">Access Key</label>
-            <input type="text" name="access_key" id="access_key" class="form-control" placeholder="Paste your unique Access Key here" {#required#}>
+            <input type="text" name="access_key" id="access_key" class="form-control" placeholder="Paste your unique Access Key here" required>
           </div>
 
           {# Secret Key #}
           <div class="form-group">
             <label for="secret_key">Secret Key</label>
-            <input type="text" name="secret_key" id="secret_key" class="form-control" placeholder="Paste your unique Secret Key here" {#required#}>
+            <input type="text" name="secret_key" id="secret_key" class="form-control" placeholder="Paste your unique Secret Key here" required>
           </div>
 
           <br>
@@ -70,7 +70,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="study_selector">Study</label>
-                <select class="form-control" name="study_selector" id="study_selector">
+                <select class="form-control" name="study_id" id="study_selector">
                   {% for study in allowed_studies %}
                     <option value="{{ study._id }}">{{ study.name }}</option>
                   {% endfor %}
@@ -82,7 +82,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="patient_selector">Patients</label>
-                <select class="form-control" name="patient_selector" id="patient_selector" size=12 multiple>
+                <select class="form-control" name="user_ids" id="patient_selector" size=12 multiple>
                 </select>
                 <script id="patient_select_template" type="text/x-handlebars-template">
                   {% raw %}
@@ -98,7 +98,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="data_stream_selector">Data Types</label>
-                <select class="form-control" name="data_stream_selector" id="data_stream_selector" size=12 multiple>
+                <select class="form-control" name="data_streams" id="data_stream_selector" size=12 multiple>
                   {% for data_stream in ALL_DATA_STREAMS %}
                     <option>{{ data_stream }}</option>
                   {% endfor %}
@@ -118,7 +118,7 @@
               <div class="form-group">
                 <label for="start_datetime">Start Date and Time</label>
                 <div class="input-group date" id="start_datetimepicker">
-                  <input type="text" class="form-control" name="start_datetime" id="start_datetime" />
+                  <input type="text" class="form-control" name="time_start" id="start_datetime" />
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
@@ -131,7 +131,7 @@
               <div class="form-group">
                 <label for="end_datetime">End Date and Time</label>
                 <div class="input-group date" id="end_datetimepicker">
-                  <input type="text" class="form-control" name="end_datetime" id="end_datetime" />
+                  <input type="text" class="form-control" name="time_end" id="end_datetime" />
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
@@ -141,6 +141,9 @@
 
           </div>
           <br><br>
+
+          {# Hidden Input to tell Data Download API that this request came from the web form (not from the command-line) #}
+          <input type="hidden" name="web_form" value="true">
 
           <input type="submit" class="btn btn-success" value="Download Data">
 
