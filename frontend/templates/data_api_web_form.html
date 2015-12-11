@@ -1,14 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Log In{% endblock %}
+{% block title %}Download Data{% endblock %}
 
-{% block navbar %}{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="/static/css/libraries/bootstrap-datetimepicker.css"  type="text/css"/>
+  <script type="text/javascript" src="../static/javascript/libraries/moment.js"></script>
+  <script type="text/javascript" src="../static/javascript/libraries/transition.js"></script>
+  <script type="text/javascript" src="../static/javascript/libraries/collapse.js"></script>
+  <script type="text/javascript" src="../static/javascript/libraries/bootstrap-3.3.4.min.js"></script>
+  <script type="text/javascript" src="../static/javascript/libraries/bootstrap-datetimepicker.js"></script>
+  <script type="text/javascript" src="../static/javascript/data_download_page.js"></script>
+  <script type="text/javascript">
+    var users_by_study = '{{ users_by_study|tojson }}';
+  </script>
+{% endblock %}
 
 {% block content %}
 
     <div class="container">
       <br><br>
-      <div class="span4">
+<!--      <div class="span4">
         <h3>Fill in Your Query</h3>
         <p>Please select/fill in the fields below.</p>
         Time: for date-time parameters copy this syntax: <b>1990-01-31T07:30:04 <br> NOTE:</b> all data streams, except for Survey Answers, are split into files by hour.  Time parameters are Inclusive.
@@ -31,24 +43,112 @@
 
         Please consider using the Python command line interface if you wish to pull in a large data set.  The Python command line allows for an "updates-only" query, which will can improve the query time substantially.
       </div>
+
+      <br><br><br><br><br> -->
+
+      <div class="row well">
+        <form action="" method="POST" id="data_download_parameters_form">
+
+          {# Access Key #}
+          <div class="form-group">
+            <label for="access_key">Access Key</label>
+            <input type="text" name="access_key" id="access_key" class="form-control" placeholder="Paste your unique Access Key here" {#required#}>
+          </div>
+
+          {# Secret Key #}
+          <div class="form-group">
+            <label for="secret_key">Secret Key</label>
+            <input type="text" name="secret_key" id="secret_key" class="form-control" placeholder="Paste your unique Secret Key here" {#required#}>
+          </div>
+
+          <br>
+
+          {# Data Selectors #}
+          <div class="row">
+
+            {# Study ID #}
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="study_selector">Study</label>
+                <select class="form-control" name="study_selector" id="study_selector">
+                  {% for study in allowed_studies %}
+                    <option value="{{ study._id }}">{{ study.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            {# Patient Selector #}
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="patient_selector">Patients</label>
+                <select class="form-control" name="patient_selector" id="patient_selector" size=12 multiple>
+                </select>
+                <script id="patient_select_template" type="text/x-handlebars-template">
+                  {% raw %}
+                  {{#each patients}}
+                    <option>{{this}}</option>
+                  {{/each}}
+                  {% endraw %}
+                </script>
+              </div>
+            </div>
+
+            {# Data Stream Selector #}
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="data_stream_selector">Data Types</label>
+                <select class="form-control" name="data_stream_selector" id="data_stream_selector" size=12 multiple>
+                  {% for data_stream in ALL_DATA_STREAMS %}
+                    <option>{{ data_stream }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <br>
+
+
+          {# Time Range #}
+          <div class="row">
+
+            {# Start Datetime #}
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="start_datetime">Start Date and Time</label>
+                <div class="input-group date" id="start_datetimepicker">
+                  <input type="text" class="form-control" name="start_datetime" id="start_datetime" />
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {# End Datetime #}
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="end_datetime">End Date and Time</label>
+                <div class="input-group date" id="end_datetimepicker">
+                  <input type="text" class="form-control" name="end_datetime" id="end_datetime" />
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <br><br>
+
+          <input type="submit" class="btn btn-success" value="Download Data">
+
+        </form>
+      </div>
+
+
     </div>
 
-
-{# this is the mapping of data stream types to names for display in the data streams picker 
-
-ACCELEROMETER = "accelerometer"
-BLUETOOTH = "bluetooth"
-CALL_LOG = "calls"
-GPS = "gps"
-IDENTIFIERS = "identifiers"
-the debug LOG_FILE = "app_log"
-POWER_STATE = "power_state"
-SURVEY_ANSWERS = "survey_answers"
-SURVEY_TIMINGS = "survey_timings"
-TEXTS_LOG = "texts"
-VOICE_RECORDING = "audio_recordings"
-WIFI = "wifi"
-
-#}
 
 {% endblock %}
