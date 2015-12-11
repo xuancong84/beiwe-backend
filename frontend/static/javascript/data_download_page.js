@@ -13,11 +13,7 @@ $(document).ready(function() {
 	$('#study_selector').change(display_patients_for_study);
 
 	/* When the form gets submitted, reformat the DateTimes into ISO UTC format */
-	$('#data_download_parameters_form').submit(function() {
-		$('#start_datetime').val(moment($('#start_datetime').val()).format('YYYY-MM-DDTHH:mm:ss'));
-		$('#end_datetime').val(moment($('#end_datetime').val()).format('YYYY-MM-DDTHH:mm:ss'));
-		return true;
-	});
+	$('#data_download_parameters_form').submit(format_datetimepickers);
 });
 
 function display_patients_for_study() {
@@ -29,4 +25,19 @@ function display_patients_for_study() {
     var dataList = {patients: patients_list};
     var patient_list = template(dataList);
     $('#patient_selector').html(patient_list);
+};
+
+function format_datetimepickers() {
+	/* If they're empty, remove this value from the POST request */
+	if (!$('#start_datetime').val()) {
+		$('#start_datetime').attr('disabled', 'disabled');
+	};
+	if (!$('#end_datetime').val()) {
+		$('#end_datetime').attr('disabled', 'disabled');
+	};
+
+	/* Format DateTime strings */
+	$('#start_datetime').val(moment($('#start_datetime').val()).format('YYYY-MM-DDTHH:mm:ss'));
+	$('#end_datetime').val(moment($('#end_datetime').val()).format('YYYY-MM-DDTHH:mm:ss'));
+	return true;
 };
