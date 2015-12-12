@@ -145,7 +145,14 @@
           {# Hidden Input to tell Data Download API that this request came from the web form (not from the command-line) #}
           <input type="hidden" name="web_form" value="true">
 
-          <input type="submit" class="btn btn-success" value="Download Data">
+          <div class="row">
+            <div class="col-sm-2">
+              <input type="submit" class="btn btn-success" value="Download Data" id="download_submit_button">
+            </div>
+            <div class="col-sm-10">
+              <p id="explanation_paragraph" hidden><b>It may take several minutes to compile your data and download it as a .zip file. Do not click "Reload" or "Back" until your data finishes downloading. Once your datafile downloads, you must reload this page before you can download another datafile.</b></p>
+            </div>
+          </div>
 
         </form>
       </div>
