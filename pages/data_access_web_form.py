@@ -12,8 +12,6 @@ data_access_web_form = Blueprint('data_access_web_form', __name__)
 @authenticate_admin_login
 def data_api_web_form_page():
     # TODO: Josh, provide access to this route via a link in the top navbar
-    # TODO: Josh, make the Submit button only clickable once
-    # TODO: Josh, add form validation
     admin = Admin(session['admin_username'])
     warn_admin_if_hasnt_yet_generated_access_key(admin)
     allowed_studies = get_admins_allowed_studies()

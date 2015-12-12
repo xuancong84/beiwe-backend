@@ -95,7 +95,6 @@ def grab_data():
         z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
     z.close()
     if 'web_form' in request.values:
-        print "Came from the web form!"
         f.seek(0)
         return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
     return f.getvalue()
