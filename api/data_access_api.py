@@ -113,5 +113,5 @@ def str_to_datetime(time_string):
         if "does not match format" in e.message: abort(400)
 
 def batch_retrieve_for_api_request(chunk):
-    print chunk['chunk_path']
+    # print chunk['chunk_path']
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
