@@ -50,34 +50,41 @@ def grab_data():
     if not admin.validate_access_credentials(access_secret):
         abort(403) #incorrect secret key
     query = {}
+
     #select data streams
     if 'data_streams' in request.values: #note: researchers use the term "data streams" instead of "data types"
         try: query['data_types'] = json.loads(request.values['data_streams'])
         except JSONDecodeError: query['data_types'] = request.form.getlist('data_streams')
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS: abort(404)
+
     #select users
     if 'user_ids' in request.values:
         try: query['user_ids'] = [user for user in json.loads(request.values['user_ids'])]
         except JSONDecodeError: query['user_ids'] = request.form.getlist('user_ids')
         for user_id in query['user_ids']: #Case: one of the user ids was invalid
             if not User(user_id): abort(404)
+
     #construct time ranges
     if 'time_start' in request.values: query['start'] = str_to_datetime(request.values['time_start'])
     if 'time_end' in request.values: query['end'] = str_to_datetime(request.values['time_end'])
-    registry = {}
-    if "registry" in request.values:
-        registry = parse_registry(request.values["registry"]) 
+
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
+
+    #purge already extant files
     get_these_files = []
-    for chunk in chunks:
-        if (chunk['chunk_path'] in registry and
-            registry[chunk['chunk_path']] == chunk["chunk_hash"]): continue
-        get_these_files.append(chunk)
+    if "registry" in request.values:
+        registry = parse_registry(request.values["registry"])
+        for chunk in chunks:
+            if (chunk['chunk_path'] in registry and
+                registry[chunk['chunk_path']] == chunk["chunk_hash"]): continue
+            get_these_files.append(chunk)
+
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1) 
+    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1)
+
     #write data to zip.  If the request comes from the web form we need to use
     # a bytesio "file" object to return a file blob, if it came from the command
     # line we use a StringIO because that was how it was written.  :D
@@ -99,10 +106,11 @@ def grab_data():
         return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
     return f.getvalue()
 
+
 def parse_registry(reg_dat):
     """ Parses the provided registry.dat file and returns a dictionary of chunk
     file names and hashes.  The registry file is a json dictionary containing a
-    list of file names and hashes""" 
+    list of file names and hashes"""
     return json.loads(reg_dat)
 
 """ Time Handling """
