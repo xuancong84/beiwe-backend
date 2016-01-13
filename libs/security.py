@@ -105,7 +105,7 @@ def generate_easy_alphanumeric_string():
     """ Generates a pretty easy alphanumeric (lower case) string, this string
         will not contain the number 0. """
     random_string = hashlib.md5( urandom(16) ).digest().encode('base64')
-    return re.sub(r'[^A-Z1-9]', "", random_string)[:6].lower()
+    return re.sub(r'[^A-Z1-9]', "", random_string)[:8].lower()
 
 def generate_random_string():
     return hashlib.sha512( urandom(16) ).digest().encode('base64')
