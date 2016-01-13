@@ -80,6 +80,7 @@ def grab_data():
             if (chunk['chunk_path'] in registry and
                 registry[chunk['chunk_path']] == chunk["chunk_hash"]): continue
             get_these_files.append(chunk)
+    else: get_these_files.extend(chunks)
 
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
