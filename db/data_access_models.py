@@ -15,19 +15,13 @@ class ChunkRegistry(DatabaseObject):
                 "time_bin": REQUIRED,
                 "chunk_hash": None,
                 "chunk_path": REQUIRED_STRING,
-                "is_chunkable": REQUIRED,
-                "survey_id": "" }
+                "is_chunkable": REQUIRED }
 
     @classmethod
     def add_new_chunk(cls, study_id, user_id, data_type, s3_file_path,
                       time_bin, file_contents=None):
         is_chunkable = data_type in CHUNKABLE_FILES
         if is_chunkable: time_bin = int(time_bin)*CHUNK_TIMESLICE_QUANTUM
-        # Survey related files need to include their survey ID somewhere.
-        if data_type == SURVEY_TIMINGS or data_type == SURVEY_ANSWERS:
-            survey_id = s3_file_path.rsplit("/", 2)[1]
-            print s3_file_path
-        else: survey_id = ""
 
         ChunkRegistry.create(
             {"study_id": study_id,
@@ -36,8 +30,7 @@ class ChunkRegistry(DatabaseObject):
             "chunk_path": s3_file_path,
             "chunk_hash": chunk_hash(file_contents) if is_chunkable else None,
             "time_bin": datetime.fromtimestamp(time_bin),
-            "is_chunkable": is_chunkable,
-            "survey_id": survey_id },
+            "is_chunkable": is_chunkable },
             random_id=True )
 #         print "new chunk:", s3_file_path
     

@@ -119,7 +119,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
                           FilesToProcess(page_size=count+skip_count)[skip_count:],
                           chunksize=1):
         with error_handler:
-            #raise errors that we encountered in the s3 access to the error_handler
+            #raise errors that we encountered in the s3 access threaded operations to the error_handler
             if isinstance(element, Exception): raise element
             ftp, data_type, chunkable, file_contents = element
             del element
@@ -263,7 +263,6 @@ def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
 def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
     """ Appends binified rows to an existing binified row data structure.
         Should be in-place. """
-    #ignore the overwrite builtin namespace warning.
     for binn, rows in new_binified_rows.items():
         old_binified_rows[binn][0].extend(rows)  #Add data rows
         old_binified_rows[binn][1].append(file_to_process._id)  #add ftp id
@@ -277,10 +276,18 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
+    if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
     if csv_rows_list: return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
     else: return None
 
 """############################ CSV Fixes #####################################"""
+
+def fix_survey_timings(header, rows_list, file_path):
+    """ Survey timings need to have a column inserted stating the survey id they come from."""
+    survey_id = file_path.rsplit("/", 2)[1]
+    for row in rows_list: row += ", " + survey_id
+    header += ",survey_id"
+    return header
 
 def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be

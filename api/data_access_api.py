@@ -116,7 +116,7 @@ def determine_file_name(chunk):
     """ Handles issues like mp4 file type on the recording and naming of survey files. """
     if chunk["data_type"] == VOICE_RECORDING: extension = "mp4"
     else: extension = "csv"
-    if chunk["data_type"] == SURVEY_ANSWERS or chunk["data_type"] == SURVEY_TIMINGS:
+    if chunk["data_type"] == SURVEY_ANSWERS:
         #add the survey_id from the file path.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
