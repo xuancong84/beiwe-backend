@@ -85,13 +85,15 @@ def process_file_chunks():
     error_handler = ErrorHandler()
 #     error_handler = null_error_handler
     number_bad_files = 0
+    run_count = 0
     while True:
+        previous_number_bad_files = number_bad_files
         starting_length = FilesToProcess.count()
         print str(datetime.now()), starting_length
         number_bad_files += do_process_file_chunks(FILE_PROCESS_PAGE_SIZE, error_handler, number_bad_files)
         if starting_length == FilesToProcess.count(): #zero files processed
-            if number_bad_files != FILE_PROCESS_PAGE_SIZE: #every file broke.
-                break #corner case we don't care about: total number bad files divisible by file process page size.
+            if previous_number_bad_files == number_bad_files: #every file broke.
+                break
             else: continue
     FileProcessLock.unlock()
     print FilesToProcess.count()
