@@ -292,7 +292,8 @@ def fix_survey_timings(header, rows_list, file_path):
     """ Survey timings need to have a column inserted stating the survey id they come from."""
     survey_id = file_path.rsplit("/", 2)[1]
     for row in rows_list: row.append(", " + survey_id)
-    header += ",survey_id"
+    header
+    header += u",survey_id"
     return header
 
 def fix_call_log_csv(header, rows_list):
@@ -366,8 +367,10 @@ def csv_to_list(csv_string):
     return lines[0], [row.split(",") for row in lines[1:]]
 
 def construct_csv_string(header, rows_list):
-    """ Takes a header list and a csv and returns a single string of a csv"""
-    return header + "\n" + "\n".join( [",".join(row) for row in rows_list ] )
+    """ Takes a header list and a csv and returns a single string of a csv.
+        Now handles unicode errors.  :D :D :D """
+    ret = header.decode("utf") + u"\n" + u"\n".join( [u",".join([x.decode("utf") for x in row]) for row in rows_list ] )
+    return ret.encode("utf")
 
 def clean_java_timecode(java_time_code_string):
     """ converts millisecond time (string) to an integer normal unix time. """
