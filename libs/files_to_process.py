@@ -107,6 +107,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
                 continue
             else:
                 timestamp = clean_java_timecode( s3_file_path.rsplit("/", 1)[-1][:-4])
+
                 ChunkRegistry.add_new_chunk(ftp["study_id"], ftp["user_id"],
                                             data_type, s3_file_path, timestamp)
                 ftps_to_remove.add(ftp._id)
@@ -250,7 +251,8 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     if csv_rows_list: return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
     else: return None
 
-""" CSV Fixes """
+"""############################ CSV Fixes #####################################"""
+
 def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be
         the timestamp, it has it in column 3.
@@ -265,14 +267,6 @@ def fix_identifier_csv(header, rows_list, file_name):
     """ The identifiers file has its timestamp in the file name. """
     time_stamp = file_name.rsplit("_", 1)[-1][:-4]
     return insert_timestamp_single_row_csv(header, rows_list, time_stamp)
-
-def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
-    """ Inserts the timestamp field into the header of a csv, inserts the timestamp
-        value provided into the first column.  Returns the new header string."""
-    header_list = header.split(",")
-    header_list.insert(0, "timestamp")
-    rows_list[0].insert(0, time_stamp)
-    return ",".join(header_list)
 
 def fix_wifi_csv(header, rows_list, file_name):
     """ Fixing wifi requires inserting the same timestamp on EVERY ROW.
@@ -312,7 +306,16 @@ def fix_app_log_file(file_contents, file_path):
             raise e
     return "timestamp, event\n" + "\n".join(",".join(row) for row in new_rows)
 
-""" CSV Utils """
+"""###################################### CSV Utils ##################################"""
+
+def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
+    """ Inserts the timestamp field into the header of a csv, inserts the timestamp
+        value provided into the first column.  Returns the new header string."""
+    header_list = header.split(",")
+    header_list.insert(0, "timestamp")
+    rows_list[0].insert(0, time_stamp)
+    return ",".join(header_list)
+
 def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header

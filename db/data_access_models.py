@@ -1,7 +1,7 @@
 from datetime import datetime
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from libs.security import chunk_hash
-from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
+from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, SURVEY_TIMINGS, SURVEY_ANSWERS
 from mongolia.constants import REQUIRED_STRING
 
 class EverythingsGoneToHellException(Exception): pass
@@ -15,13 +15,19 @@ class ChunkRegistry(DatabaseObject):
                 "time_bin": REQUIRED,
                 "chunk_hash": None,
                 "chunk_path": REQUIRED_STRING,
-                "is_chunkable": REQUIRED }
+                "is_chunkable": REQUIRED,
+                "survey_id": "" }
 
     @classmethod
     def add_new_chunk(cls, study_id, user_id, data_type, s3_file_path,
                       time_bin, file_contents=None):
         is_chunkable = data_type in CHUNKABLE_FILES
-        if is_chunkable: time_bin = int(time_bin)*CHUNK_TIMESLICE_QUANTUM 
+        if is_chunkable: time_bin = int(time_bin)*CHUNK_TIMESLICE_QUANTUM
+        # Survey related files need to include their survey ID somewhere.
+        if data_type == SURVEY_TIMINGS or data_type == SURVEY_ANSWERS:
+            survey_id = s3_file_path.rsplit("/", 2)[1]
+        else: survey_id = ""
+
         ChunkRegistry.create(
             {"study_id": study_id,
             "user_id": user_id,
@@ -29,7 +35,8 @@ class ChunkRegistry(DatabaseObject):
             "chunk_path": s3_file_path,
             "chunk_hash": chunk_hash(file_contents) if is_chunkable else None,
             "time_bin": datetime.fromtimestamp(time_bin),
-            "is_chunkable": is_chunkable },
+            "is_chunkable": is_chunkable,
+            "survey_id": survey_id },
             random_id=True )
 #         print "new chunk:", s3_file_path
     

@@ -11,7 +11,7 @@ from db.study_models import Study
 from db.user_models import Admin, User
 from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS)
+                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS)
 from boto.utils import JSONDecodeError
 from flask.helpers import send_file
 from _io import BytesIO
@@ -116,10 +116,9 @@ def determine_file_name(chunk):
     """ Handles issues like mp4 file type on the recording and naming of survey files. """
     if chunk["data_type"] == VOICE_RECORDING: extension = "mp4"
     else: extension = "csv"
-    if chunk["data_type"] == SURVEY_ANSWERS:
-        #pull out the survey_id from the file path
-        survey_id = chunk["chunk_path"].rsplit("/", 2)[1]
-        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], survey_id,
+    if chunk["data_type"] == SURVEY_ANSWERS or chunk["data_type"] == SURVEY_TIMINGS:
+        #add the survey_id from the file path.
+        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
     else:
         return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
