@@ -244,7 +244,7 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
         Returns None If the csv has no data in it. """
     if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
     header, csv_rows_list = csv_to_list(file_contents)
-    if data_type == CALL_LOG: fix_call_log_csv(header, csv_rows_list)
+    if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
     if csv_rows_list: return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
