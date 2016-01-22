@@ -16,6 +16,7 @@ class ChunkRegistry(DatabaseObject):
                 "chunk_hash": None,
                 "chunk_path": REQUIRED_STRING,
                 "is_chunkable": REQUIRED }
+
     @classmethod
     def add_new_chunk(cls, study_id, user_id, data_type, s3_file_path,
                       time_bin, file_contents=None):

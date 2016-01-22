@@ -11,7 +11,7 @@ from db.study_models import Study
 from db.user_models import Admin, User
 from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              CONCURRENT_NETWORK_OPS)
+                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS)
 from boto.utils import JSONDecodeError
 from flask.helpers import send_file
 from _io import BytesIO
@@ -94,9 +94,7 @@ def grab_data():
     z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
     ret_reg = {}
     for chunk, file_contents in chunks_and_content:
-        file_name = ( ("%s/%s/%s.csv" if chunk['data_type'] != VOICE_RECORDING else "%s/%s/%s.mp4")
-                      % (chunk["user_id"], chunk["data_type"],
-                         str(chunk["time_bin"]).replace(":", "_") ) )
+        file_name = determine_file_name(chunk)
         ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
         z.writestr(file_name, file_contents)
     if 'web_form' not in request.values:
@@ -114,6 +112,20 @@ def parse_registry(reg_dat):
     list of file names and hashes"""
     return json.loads(reg_dat)
 
+def determine_file_name(chunk):
+    """ Handles issues like mp4 file type on the recording and naming of survey files. """
+    if chunk["data_type"] == VOICE_RECORDING: extension = "mp4"
+    else: extension = "csv"
+    if chunk["data_type"] == SURVEY_ANSWERS:
+        #pull out the survey_id from the file path
+        survey_id = chunk["chunk_path"].rsplit("/", 2)[1]
+        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], survey_id,
+                                str(chunk["time_bin"]).replace(":", "_"), extension)
+    else:
+        return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
+                                str(chunk["time_bin"]).replace(":", "_"), extension)
+
+
 """ Time Handling """
 def str_to_datetime(time_string):
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
@@ -122,5 +134,6 @@ def str_to_datetime(time_string):
         if "does not match format" in e.message: abort(400)
 
 def batch_retrieve_for_api_request(chunk):
+    """ Data is returned in the form (chunk_object, file_data). """
     # print chunk['chunk_path']
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
