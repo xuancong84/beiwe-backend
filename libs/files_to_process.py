@@ -48,20 +48,20 @@ def reindex_all_files_to_process():
 
 def reindex_specific_data_type(data_type):
     #TODO: this function has only been tested with survey timings.
-    print "starting"
+    print "starting..."
     #this line will raise an error if something is wrong with the data type
     file_name_key = data_stream_to_s3_file_name_string(data_type)
-
-    relevant_source_files = [f for f in s3_list_files("") if file_name_key in f]
     relevant_chunks = ChunksRegistry(data_type=data_type)
     relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
-
+    print "purging old data..."
     for chunk in relevant_chunks: chunk.remove()
 
     pool = ThreadPool(20)
     pool.map(s3_delete, relevant_indexed_files)
 
+    print "pulling files to process..."
     files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
+    print "parsing files to process..."
     for i,l in enumerate(files_lists):
         print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
         for fp in l:
@@ -70,8 +70,9 @@ def reindex_specific_data_type(data_type):
     del files_lists, l
     pool.close()
     pool.terminate()
-    print str(datetime.now()), "processing data."
+    print str(datetime.now()), "processing data..."
     process_file_chunks()
+    print "Done."
 
 
 """########################## Hourly Update Tasks ###########################"""

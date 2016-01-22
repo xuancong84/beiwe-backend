@@ -26,6 +26,7 @@ class ChunkRegistry(DatabaseObject):
         # Survey related files need to include their survey ID somewhere.
         if data_type == SURVEY_TIMINGS or data_type == SURVEY_ANSWERS:
             survey_id = s3_file_path.rsplit("/", 2)[1]
+            print s3_file_path
         else: survey_id = ""
 
         ChunkRegistry.create(
