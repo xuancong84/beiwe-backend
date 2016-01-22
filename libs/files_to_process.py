@@ -3,11 +3,11 @@ from config.constants import API_TIME_FORMAT, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
     VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
     BLUETOOTH, ACCELEROMETER, GPS, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER,\
-    CHUNKABLE_FILES, FILE_PROCESS_PAGE_SIZE
+    CHUNKABLE_FILES, FILE_PROCESS_PAGE_SIZE, ALL_DATA_STREAMS, data_stream_to_s3_file_name_string
 from cronutils.error_handler import ErrorHandler
 from datetime import datetime
-from db.data_access_models import FilesToProcess, ChunkRegistry,\
-    FileToProcess, ChunksRegistry, FileProcessLock
+
+from db.data_access_models import ChunksRegistry, FileToProcess, FilesToProcess, ChunksRegistry, ChunkRegistry, FileProcessLock
 from db.study_models import Studies
 from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
 from multiprocessing.pool import ThreadPool
@@ -45,6 +45,34 @@ def reindex_all_files_to_process():
     print str(datetime.now()), "processing data."
     FileProcessLock.unlock()
     process_file_chunks()
+
+def reindex_specific_data_type(data_type):
+    #TODO: this function has only been tested with survey timings.
+    print "starting"
+    #this line will raise an error if something is wrong with the data type
+    file_name_key = data_stream_to_s3_file_name_string(data_type)
+
+    relevant_source_files = [f for f in s3_list_files("") if file_name_key in f]
+    relevant_chunks = ChunksRegistry(data_type=data_type)
+    relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
+
+    for chunk in relevant_chunks: chunk.remove()
+
+    pool = ThreadPool(20)
+    pool.map(s3_delete, relevant_indexed_files)
+
+    files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
+    for i,l in enumerate(files_lists):
+        print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
+        for fp in l:
+            if ".csv" == fp[-4:] or ".mp4" == fp[-4:] and file_name_key in f:
+                FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
+    del files_lists, l
+    pool.close()
+    pool.terminate()
+    print str(datetime.now()), "processing data."
+    process_file_chunks()
+
 
 """########################## Hourly Update Tasks ###########################"""
 

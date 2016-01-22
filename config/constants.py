@@ -66,6 +66,22 @@ WIFI = "wifi"
 ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
                     TEXTS_LOG, VOICE_RECORDING, WIFI]
+
+def data_stream_to_s3_file_name_string(data_type):
+    if data_type == ACCELEROMETER: return "accel"
+    if data_type == BLUETOOTH: return "bluetoothLog"
+    if data_type == CALL_LOG: return "callLog"
+    if data_type == GPS: return "gps"
+    if data_type == IDENTIFIERS: return "identifiers"
+    if data_type == LOG_FILE: return "logFile"
+    if data_type == POWER_STATE: return "powerState"
+    if data_type == SURVEY_ANSWERS: return "surveyAnswers"
+    if data_type == SURVEY_TIMINGS: return "surveyTimings"
+    if data_type == TEXTS_LOG: return "textsLog"
+    if data_type == VOICE_RECORDING: return "voiceRecording"
+    if data_type == WIFI: return "wifiLog"
+    raise Exception("unknown data type: %s" % data_type)
+
 CHUNKABLE_FILES = set( [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                   LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI] )
 # RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE ])
