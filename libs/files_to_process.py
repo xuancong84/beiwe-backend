@@ -291,7 +291,7 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
 def fix_survey_timings(header, rows_list, file_path):
     """ Survey timings need to have a column inserted stating the survey id they come from."""
     survey_id = file_path.rsplit("/", 2)[1]
-    for row in rows_list: row += ", " + survey_id
+    for row in rows_list: row.append(", " + survey_id)
     header += ",survey_id"
     return header
 
