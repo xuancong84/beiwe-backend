@@ -65,7 +65,7 @@ def reindex_specific_data_type(data_type):
     for i,l in enumerate(files_lists):
         print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
         for fp in l:
-            if ".csv" == fp[-4:] or ".mp4" == fp[-4:] and file_name_key in f:
+            if file_name_key in fp and (".csv" == fp[-4:] or ".mp4" == fp[-4:]):
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
     pool.close()
