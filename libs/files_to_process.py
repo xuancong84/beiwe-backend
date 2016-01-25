@@ -18,6 +18,7 @@ def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
     clears the chunksregistry, and then adds all relevent files on s3 to the
     files to process registry. """
+    FileProcessLock.lock()
     print str(datetime.now()), "purging FilesToProcess:", FilesToProcess.count()
     FileToProcess.db().drop()
     print str(datetime.now()), "purging existing ChunksRegistry", ChunksRegistry.count()
