@@ -118,7 +118,7 @@ def determine_file_name(chunk):
     else: extension = "csv"
     if chunk["data_type"] == SURVEY_ANSWERS:
         #add the survey_id from the file path.
-        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
+        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
     else:
         return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
@@ -129,7 +129,7 @@ def determine_file_name(chunk):
 def str_to_datetime(time_string):
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
-        #TODO: document this error (for mat) or change this error 
+        #TODO: document this error (for mat) or change this error
         if "does not match format" in e.message: abort(400)
 
 def batch_retrieve_for_api_request(chunk):
