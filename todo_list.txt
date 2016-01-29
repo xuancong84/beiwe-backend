@@ -16,6 +16,8 @@ add to website an obvious display of the study id
 todo: test registry file checking for non-chunked files (empty hashes)
 TODO: logging for data access requests?
 
+TODO: add check in data upload to discard data that is empty AFTER decryption (there were incorrectly encrypted lines in the file, they were dropped, then data cleaning broke when it chomped on empty data.)
+
 upgrade tablet to android 6, check behavior of beiwe where possible (minimal)
 
 Eli:

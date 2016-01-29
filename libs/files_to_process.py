@@ -49,6 +49,7 @@ def reindex_all_files_to_process():
 
 def reindex_specific_data_type(data_type):
     #TODO: this function has only been tested with survey timings.
+    FileProcessLock.lock()
     print "starting..."
     #this line will raise an error if something is wrong with the data type
     file_name_key = data_stream_to_s3_file_name_string(data_type)
@@ -72,6 +73,7 @@ def reindex_specific_data_type(data_type):
     pool.close()
     pool.terminate()
     print str(datetime.now()), "processing data..."
+    FileProcessLock.unlock()
     process_file_chunks()
     print "Done."
 
