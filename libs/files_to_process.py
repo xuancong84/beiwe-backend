@@ -199,7 +199,7 @@ def upload_binified_data(binified_data, error_handler):
             except Exception as e:
                 failed_ftps.update(ftp_deque)
                 print study_id, user_id, data_type, time_bin, header
-                raise e
+                raise
             ftps_to_retire.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     pool.map(batch_upload, upload_these, chunksize=1)
@@ -349,7 +349,7 @@ def fix_app_log_file(file_contents, file_path):
                 "a sessionactivity tried to clear the" == row[:36] ):
                 #Just drop matches to the above lines 
                 continue
-            raise e
+            raise
     return "timestamp, event\n" + "\n".join(",".join(row) for row in new_rows)
 
 """###################################### CSV Utils ##################################"""
