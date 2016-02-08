@@ -188,7 +188,8 @@ def upload_binified_data(binified_data, error_handler):
                     try:
                         s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
                     except S3ResponseError as e:
-                        if "404" in e.message:
+                        #The following check is correct for boto version 2.38.0
+                        if "The specified key does not exist." == e.message:
                             chunk.remove()
                             raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
                         raise #raise original error if not 404 s3 error
