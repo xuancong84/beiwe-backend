@@ -198,7 +198,8 @@ def upload_binified_data(binified_data, error_handler):
                     chunk.update_chunk_hash(new_contents)
             except Exception as e:
                 failed_ftps.update(ftp_deque)
-                print study_id, user_id, data_type, time_bin, header
+                print ("failed to update: study_id:%s, user_id:%s, data_type:%s, time_bin:%s, header:%s "
+                       % (study_id, user_id, data_type, time_bin, header) )
                 raise
             ftps_to_retire.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
@@ -295,7 +296,6 @@ def fix_survey_timings(header, rows_list, file_path):
     """ Survey timings need to have a column inserted stating the survey id they come from."""
     survey_id = file_path.rsplit("/", 2)[1]
     for row in rows_list: row.append(", " + survey_id)
-    header
     header += u",survey_id"
     return header
 
