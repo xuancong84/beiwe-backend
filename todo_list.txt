@@ -11,17 +11,24 @@ Forever: list of additional customizable text strings and parameters
 ################ ACTUALLY DO THESE THINGS ##################
 ############################################################
 
-send email on upload failure ?
+TRIAGE THESE:
+send email on upload failures ?
 add to website an obvious display of the study id
-todo: test registry file checking for non-chunked files (empty hashes)
-TODO: logging for data access requests?
+test registry file checking for non-chunked files (empty hashes)
+logging for data access requests?
+add check in data upload to discard data that is empty AFTER decryption (there were incorrectly encrypted lines in the file, they were dropped, then data cleaning broke when it chomped on empty data.)
 
-TODO: add check in data upload to discard data that is empty AFTER decryption (there were incorrectly encrypted lines in the file, they were dropped, then data cleaning broke when it chomped on empty data.)
-
-upgrade tablet to android 6, check behavior of beiwe where possible (minimal)
 
 Eli:
-0. iOS Everything.
+
+Android 6 Updates
+    new permissions - "To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans, your app must now have the ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permissions"
+    new alarm functions - setAndAllowWhileIdle and setExactAndAllowWhileIdle are new alarm functions that we will probably have to handle in the alarm manager code.
+    app standby - add isIgnoringBatteryOptimizations()
+    how-to for debugging this - http://developer.android.com/training/monitoring-device-state/doze-standby.html
+    update docs or beiwedata about bluetooth ID in android 6.0
+
+Insert multiselection line on 
 
 1. user metadata (how much data uploaded, how many files, how many surveys completed)
 2. check cascading delete with "McLean Baker" study
@@ -33,13 +40,6 @@ Eli:
     a. if this would require substantial changes to PostRequest.java, don't implement change, move todo somewhere else.
 7. add retire study functionality, remove delete study functionality entirely.
 
-On Hold:
-updates for Marshmallow
-    new permissions - "To access the hardware identifiers of nearby external devices via Bluetooth and Wi-Fi scans, your app must now have the ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permissions"
-    new alarm functions - setAndAllowWhileIdle and setExactAndAllowWhileIdle are new alarm functions that we will probably have to handle in the alarm manager code.
-    app standby - add isIgnoringBatteryOptimizations()
-    how-to for debugging this - http://developer.android.com/training/monitoring-device-state/doze-standby.html
-    update docs or beiwedata about bluetooth ID in android 6.0
 
 
 
