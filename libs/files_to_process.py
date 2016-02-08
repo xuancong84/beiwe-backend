@@ -1,3 +1,4 @@
+from boto.exception import S3ResponseError
 from bson.objectid import ObjectId
 from config.constants import API_TIME_FORMAT, IDENTIFIERS,\
     WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
@@ -13,6 +14,8 @@ from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
 from multiprocessing.pool import ThreadPool
 from collections import defaultdict, deque
 import gc
+
+class ChunkFailedToExist(Exception): pass
 
 def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
@@ -182,7 +185,13 @@ def upload_binified_data(binified_data, error_handler):
                     ChunkRegistry.add_new_chunk(study_id, user_id, data_type,
                                     chunk_path,time_bin, file_contents=new_contents )
                 else:
-                    s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
+                    try:
+                        s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
+                    except S3ResponseError as e:
+                        if "404" in e.message:
+                            chunk.remove()
+                            raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
+                        raise #raise original error if not 404 s3 error
                     old_header, old_rows = csv_to_list(s3_file_data) 
                     if old_header != header:
 #to handle the case where a file was on an hour boundry and placed in two separate
