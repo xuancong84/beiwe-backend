@@ -27,7 +27,7 @@ def reindex_all_files_to_process():
     print str(datetime.now()), "purging existing ChunksRegistry", ChunksRegistry.count()
     ChunkRegistry.db().drop()
     
-    pool = ThreadPool(20)
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS * 2 )
     
     print str(datetime.now()), "deleting older chunked data:",
     CHUNKED_DATA = s3_list_files(CHUNKS_FOLDER)
@@ -79,6 +79,22 @@ def reindex_specific_data_type(data_type):
     FileProcessLock.unlock()
     process_file_chunks()
     print "Done."
+
+
+def check_for_bad_chunks():
+    """ This function runs through all chunkable data and checks for invalid file pointers
+    to s3. """
+    chunked_data = set(s3_list_files("CHUNKED_DATA"))
+    bad_chunks = []
+    for entry in ChunksRegistry():
+        if entry.data_type in CHUNKABLE_FILES and entry.chunk_path not in chunked_data:
+            bad_chunks.append(entry)
+    print "bad chunks:", len(bad_chunks)
+
+    # for chunk in bad_chunks:
+    #     u = chunk.user_id
+    #     print Study(_id=u.study_id).name
+
 
 
 """########################## Hourly Update Tasks ###########################"""
