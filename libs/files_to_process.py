@@ -191,6 +191,10 @@ def upload_binified_data(binified_data, error_handler):
                         #The following check is correct for boto version 2.38.0
                         if "The specified key does not exist." == e.message:
                             chunk.remove()
+                            #This error can only occur if the processing gets actually interrupted and
+                            # data files fail to upload after DB entries are created.
+                            #Encountered this condition 11pm feb 7 2016, cause unknown, there was
+                            #no python stacktrace.  Best guess is mongo blew up.
                             raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
                         raise #raise original error if not 404 s3 error
                     old_header, old_rows = csv_to_list(s3_file_data) 
