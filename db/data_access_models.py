@@ -1,10 +1,10 @@
 from datetime import datetime
-from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
+from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from libs.security import chunk_hash
-from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, SURVEY_TIMINGS, SURVEY_ANSWERS
+from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
 from mongolia.constants import REQUIRED_STRING
 
-class EverythingsGoneToHellException(Exception): pass
+class FileProcessingLockedError(Exception): pass
 
 class ChunkRegistry(DatabaseObject):
     PATH = "beiwe.chunk_registry"
@@ -58,7 +58,7 @@ class FileProcessLock(DatabaseObject):
     DEFAULTS = {"mark":""}
     @classmethod
     def lock(cls):
-        if len(FileProcessLockCollection()) > 0: raise EverythingsGoneToHellException
+        if len(FileProcessLockCollection()) > 0: raise FileProcessingLockedError
         FileProcessLock.create({"mark":"marked"}, random_id=True)
     @classmethod
     def unlock(cls):
