@@ -198,6 +198,7 @@ def upload_binified_data(binified_data, error_handler):
                     chunk.update_chunk_hash(new_contents)
             except Exception as e:
                 failed_ftps.update(ftp_deque)
+                print e
                 print ("failed to update: study_id:%s, user_id:%s, data_type:%s, time_bin:%s, header:%s "
                        % (study_id, user_id, data_type, time_bin, header) )
                 raise
