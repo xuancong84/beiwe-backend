@@ -84,27 +84,32 @@ def grab_data():
 
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1)
+    try:
+        chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1)
 
-    #write data to zip.  If the request comes from the web form we need to use
-    # a bytesio "file" object to return a file blob, if it came from the command
-    # line we use a StringIO because that was how it was written.  :D
-    if 'web_form' in request.values: f = BytesIO()
-    else: f = StringIO()
-    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
-    ret_reg = {}
-    for chunk, file_contents in chunks_and_content:
-        file_name = determine_file_name(chunk)
-        ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
-        z.writestr(file_name, file_contents)
-    if 'web_form' not in request.values:
-        z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
-    z.close()
-    if 'web_form' in request.values:
-        f.seek(0)
-        return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
-    return f.getvalue()
-
+        #write data to zip.  If the request comes from the web form we need to use
+        # a bytesio "file" object to return a file blob, if it came from the command
+        # line we use a StringIO because that was how it was written.  :D
+        if 'web_form' in request.values: f = BytesIO()
+        else: f = StringIO()
+        z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
+        ret_reg = {}
+        for chunk, file_contents in chunks_and_content:
+            file_name = determine_file_name(chunk)
+            ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
+            z.writestr(file_name, file_contents)
+        if 'web_form' not in request.values:
+            z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
+        z.close()
+        if 'web_form' in request.values:
+            f.seek(0)
+            return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
+        return f.getvalue()
+    except Exception:
+        raise
+    finally:
+        pool.close()
+        pool.terminate()
 
 def parse_registry(reg_dat):
     """ Parses the provided registry.dat file and returns a dictionary of chunk
