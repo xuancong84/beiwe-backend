@@ -93,6 +93,7 @@ def grab_data():
     # line we use a StringIO because that was how it was written.  :D
     ret_reg = {}
     try:
+        #run through the data in chunks, construct the zip file in memory using some smaller amount of memory than maximum
         for slice_start in range(0, len(get_these_files), NUMBER_FILES_IN_FLIGHT):
             #pull in data
             chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files[slice_start:slice_start + NUMBER_FILES_IN_FLIGHT], chunksize=1)
@@ -103,10 +104,13 @@ def grab_data():
                 z.writestr(file_name, file_contents)
                 file_contents = None
                 chunk = None
-                
+
         if 'web_form' not in request.values:
             z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
+        # close all the things.
         z.close()
+        pool.close()
+        pool.terminate()
         if 'web_form' in request.values:
             f.seek(0)
             return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
