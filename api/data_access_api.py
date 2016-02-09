@@ -11,7 +11,7 @@ from db.study_models import Study
 from db.user_models import Admin, User
 from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS)
+                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS, NUMBER_FILES_IN_FLIGHT)
 from boto.utils import JSONDecodeError
 from flask.helpers import send_file
 from _io import BytesIO
@@ -71,7 +71,6 @@ def grab_data():
 
     #Do Query
     chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-
     #purge already extant files
     get_these_files = []
     if "registry" in request.values:
@@ -82,22 +81,29 @@ def grab_data():
             get_these_files.append(chunk)
     else: get_these_files.extend(chunks)
 
+    del chunks
+
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    if 'web_form' in request.values: f = BytesIO()
+    else: f = StringIO()
+    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
+    # If the request comes from the web form we need to use
+    # a bytesio "file" object to return a file blob, if it came from the command
+    # line we use a StringIO because that was how it was written.  :D
+    ret_reg = {}
     try:
-        chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files, chunksize=1)
-
-        #write data to zip.  If the request comes from the web form we need to use
-        # a bytesio "file" object to return a file blob, if it came from the command
-        # line we use a StringIO because that was how it was written.  :D
-        if 'web_form' in request.values: f = BytesIO()
-        else: f = StringIO()
-        z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
-        ret_reg = {}
-        for chunk, file_contents in chunks_and_content:
-            file_name = determine_file_name(chunk)
-            ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
-            z.writestr(file_name, file_contents)
+        for slice_start in range(0, len(get_these_files), NUMBER_FILES_IN_FLIGHT):
+            #pull in data
+            chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files[slice_start:slice_start + NUMBER_FILES_IN_FLIGHT], chunksize=1)
+            #write data to zip.
+            for chunk, file_contents in chunks_and_content:
+                file_name = determine_file_name(chunk)
+                ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
+                z.writestr(file_name, file_contents)
+                file_contents = None
+                chunk = None
+                
         if 'web_form' not in request.values:
             z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
         z.close()
@@ -105,8 +111,10 @@ def grab_data():
             f.seek(0)
             return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
         return f.getvalue()
+
     except Exception:
         raise
+
     finally:
         pool.close()
         pool.terminate()

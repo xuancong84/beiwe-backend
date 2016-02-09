@@ -35,6 +35,7 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "wifi_log_frequency_seconds"]
 
 CONCURRENT_NETWORK_OPS = 10
+NUMBER_FILES_IN_FLIGHT = 100
 FILE_PROCESS_PAGE_SIZE = 250
 #NOTE: this number was determined through trial and error.  There is a point in
 # when reindexing the full dataset (@300,000 items it was after processing ~120,000)
