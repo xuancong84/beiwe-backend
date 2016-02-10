@@ -7,4 +7,4 @@ from mongobackup import backup
 def run_backup():
     backup(MONGO_USERNAME, MONGO_PASSWORD, LOCAL_BACKUPS_DIRECTORY,
            s3_bucket=S3_BACKUPS_BUCKET, s3_access_key_id=BACKUP_ID,
-           s3_secret_key=BACKUP_KEY)
+           s3_secret_key=BACKUP_KEY, purge_local=30)
