@@ -87,7 +87,7 @@ def grab_data():
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     if 'web_form' in request.values: f = BytesIO()
     else: f = StringIO()
-    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED)
+    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
     # If the request comes from the web form we need to use
     # a bytesio "file" object to return a file blob, if it came from the command
     # line we use a StringIO because that was how it was written.  :D
