@@ -1,6 +1,9 @@
+import httplib.IncompleteRead
 from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
+
+from config.constants import DEFAULT_S3_RETRIES
 from config.security import S3_BUCKET
 from libs import encryption, logging
 
@@ -40,13 +43,19 @@ def s3_upload( key_path, data_string, study_id, raw_path=False):
 #     key = Key(_get_bucket(S3_BUCKET), key_name)
 #     return key.read()
 
-def s3_retrieve(key_path, study_id, raw_path=False):
+def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):
     """ Takes an S3 file path (key_path), and a study ID.  Takes an optional
         argument, raw_path, which defaults to false.  When set to false the 
         path is prepended to place the file in the appropriate study_id  folder. """
     if not raw_path: key_path = str(study_id) + "/" + key_path
     key = Key(_get_bucket(S3_BUCKET), key_path)
-    return encryption.decrypt_server( key.read(), study_id )
+    try:
+        return encryption.decrypt_server( key.read(), study_id )
+    except httplib.IncompleteRead:
+        if number_retries > 0:
+            print "s3_retreive failed with incomplete read, retrying on %s" % key_path
+            return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
+        raise
 
 # def s3_retrieve_or_none(key_path, study_id, raw_path=False):
 #     """ Like s3_retreive except returns None if the key does not exist instead

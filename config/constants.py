@@ -1,17 +1,13 @@
-# This file contains values used throughout the codebase.
-# Don't change values if you don't know what they do.
+""" This file contains values used throughout the codebase.
+    Don't change values if you don't know what they do. """
 
 ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 
-#TODO: Eli/Josh. These values are still used in the graph, which needs to be rewritten anyway
-DAILY_SURVEY_NAME = 'Daily'
-WEEKLY_SURVEY_NAME = 'Weekly'
-
-#Survey types
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
+## HTML lists ##
 CHECKBOX_TOGGLES = ["accelerometer",
                   "gps",
                   "calls",
@@ -34,14 +30,17 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "voice_recording_max_time_length_seconds",
                 "wifi_log_frequency_seconds"]
 
+## Networking ##
+DEFAULT_S3_RETRIES = 1 #This value is used in libs.s3, does what it says.
 CONCURRENT_NETWORK_OPS = 10
 NUMBER_FILES_IN_FLIGHT = 100
 FILE_PROCESS_PAGE_SIZE = 250
-#NOTE: this number was determined through trial and error.  There is a point in
+#NOTE: these number was determined through trial and error on a C4 Large AWS instance.  There is a point in
 # when reindexing the full dataset (@300,000 items it was after processing ~120,000)
 # there are a chunk of files that, with a page size of 250, fills up ~38% of 
 # available memory on a server with 4GB of ram.
-# (There was also a memory leak that exacerbated this, but it has been vastly reduced.) 
+# (There was also a memory leak that exacerbated this, but it has been vastly reduced/solved.)
+
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
@@ -69,6 +68,8 @@ ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     TEXTS_LOG, VOICE_RECORDING, WIFI]
 
 def data_stream_to_s3_file_name_string(data_type):
+    """Maps a data type to the internal string representation used throughout the codebase.
+        (could be a dict mapping, but it is fine) """
     if data_type == ACCELEROMETER: return "accel"
     if data_type == BLUETOOTH: return "bluetoothLog"
     if data_type == CALL_LOG: return "callLog"
@@ -83,8 +84,8 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == WIFI: return "wifiLog"
     raise Exception("unknown data type: %s" % data_type)
 
-CHUNKABLE_FILES = set( [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
-                  LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI] )
+CHUNKABLE_FILES = { ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
+                  LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI }
 # RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE ])
 
 # each chunk represents 1 hour of data, and because unix time 0 is on an hour
