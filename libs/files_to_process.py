@@ -9,7 +9,7 @@ from cronutils.error_handler import ErrorHandler
 from datetime import datetime
 
 from db.data_access_models import ChunksRegistry, FileToProcess, FilesToProcess, ChunksRegistry, ChunkRegistry, FileProcessLock
-from db.study_models import Studies
+from db.study_models import Studies, Study
 from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
 from multiprocessing.pool import ThreadPool
 from collections import defaultdict, deque
@@ -66,7 +66,6 @@ def reindex_specific_data_type(data_type):
 
     print "pulling files to process..."
     files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
-    print "parsing files to process..."
     for i,l in enumerate(files_lists):
         print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
         for fp in l:
@@ -95,7 +94,14 @@ def check_for_bad_chunks():
     #     u = chunk.user_id
     #     print Study(_id=u.study_id).name
 
-
+def count_study_chunks():
+    chunked_data = s3_list_files("CHUNKED_DATA")
+    study_prefixes = { f[:38] for f in chunked_data }
+    study_prefix_to_id = { study_prefix: ObjectId(study_prefix.split("/")[-2]) for study_prefix in study_prefixes }
+    study_prefix_to_name= { study_prefix:Study(_id=study_id).name for study_prefix, study_id in study_prefix_to_id.items() }
+    study_count = { study_prefix_to_name[study_prefix]: len([f for f in chunked_data if f[:38] == study_prefix]) for study_prefix in study_prefixes }
+    return study_count
+    #map study ids to names
 
 """########################## Hourly Update Tasks ###########################"""
 
