@@ -1,10 +1,10 @@
-import httplib.IncompleteRead
 from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
 
 from config.constants import DEFAULT_S3_RETRIES
 from config.security import S3_BUCKET
+from httplib import IncompleteRead
 from libs import encryption, logging
 
 from config.security import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
@@ -51,7 +51,7 @@ def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RE
     key = Key(_get_bucket(S3_BUCKET), key_path)
     try:
         return encryption.decrypt_server( key.read(), study_id )
-    except httplib.IncompleteRead:
+    except IncompleteRead:
         if number_retries > 0:
             print "s3_retreive failed with incomplete read, retrying on %s" % key_path
             return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
