@@ -42,7 +42,6 @@ def upload():
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
         return render_template('blank.html'), 200
 
-        
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension( file_name ):

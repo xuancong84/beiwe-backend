@@ -66,19 +66,19 @@ def decrypt_device_file(patient_id, data, private_key):
     try:
         decoded_key = decode_base64( data[0].encode( "utf-8" ) )
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
-    except (TypeError, IndexError) as e:
+    #except (TypeError, IndexError) as e: #Testing whether index errors get raised anymore 2/12/2016
+    except TypeError as e:
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
 
     #(we have an inefficiency in this encryption process, this might not need
     # to be doubly encoded in base64.  It works, not fixing it.)
     #The following is all error catching code for bugs we encountered (and solved)
-    # in development.  ANY of these errors showing up EVER is a CRITICAL FAILURE
-    # and we should be informed.
-    # As of the start of the first/pilot/FAS study we have not seen any of these
-    # errors in many months.
-    #TODO: Eli. make errors here email us if they happen.
+    # in development.
     # print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
+        if data is None:
+            print "encountered empty line of data, ignoring."
+            continue
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
