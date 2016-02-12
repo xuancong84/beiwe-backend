@@ -66,11 +66,9 @@ def decrypt_device_file(patient_id, data, private_key):
     try:
         decoded_key = decode_base64( data[0].encode( "utf-8" ) )
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
-    except TypeError as e:
+    except (TypeError, IndexError) as e:
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
-    except IndexError as e:
-        raise DecryptionKeyError("invalid decryption key. %s" % e.message)
-    
+
     #(we have an inefficiency in this encryption process, this might not need
     # to be doubly encoded in base64.  It works, not fixing it.)
     #The following is all error catching code for bugs we encountered (and solved)
@@ -124,7 +122,13 @@ def decrypt_device_line(patient_id, key, data):
     try:
         decrypted = AES.new(key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception:
-        print "length iv: %s, length data: %s, length key: %s" % (len(iv), len(data), len(key))
+        if iv is None: len_iv = "None"
+        else: len_iv = len(iv)
+        if data is None: len_data = "None"
+        else: len_data = len(data)
+        if key is None: len_key = "None"
+        else: len_key = len(key)
+        print "length iv: %s, length data: %s, length key: %s" % (len_iv, len_data, len_key)
         raise
     return remove_PKCS5_padding( decrypted )
 
