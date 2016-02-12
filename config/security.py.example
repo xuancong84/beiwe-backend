@@ -44,6 +44,11 @@ ASYMMETRIC_KEY_LENGTH = 2048
 # value once people have created passwords, because then the hashes won't match!
 ITERATIONS = 1000
 
+# Email addresses used on the server.
+E500_EMAIL_ADDRESS = "e500_errors@example.beiwe.org" #500 error email source
+SYSADMIN_EMAILS = ["person1@example.com", #500 error email recipients
+                   "person2@example.com"]
+
 
 """            Setting up MongoDB and mongolia
 

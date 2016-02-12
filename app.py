@@ -4,7 +4,7 @@ from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages
     data_access_web_form
 from api import mobile_api, survey_api, admin_api, data_access_api
 from libs.admin_authentication import is_logged_in
-from libs.logging import log_error
+from libs.logging import log_error, log_and_email_error
 from libs.security import set_secret_key
 
 
@@ -36,12 +36,8 @@ def strip_dot_html(page):
 
 # Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
 @app.errorhandler(500)
-def e500_text(e):
-    try:
-        stacktrace = traceback.format_exc()
-        print(stacktrace)
-    except Exception as e:
-        log_error(e)
+def e500_handler(e):
+    log_and_email_error(e)
     return abort(500)
 
 

@@ -1,10 +1,10 @@
 """ This file contains values used throughout the codebase.
     Don't change values if you don't know what they do. """
 
+## Data streams and survey types ##
 ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
 ## HTML lists ##
