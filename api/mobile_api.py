@@ -6,6 +6,7 @@ from db.user_models import User
 from db.study_models import Study
 from libs.encryption import decrypt_device_file, DecryptionKeyError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
+from libs.security import PaddingException
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from werkzeug.exceptions import BadRequestKeyError
@@ -33,12 +34,14 @@ def upload():
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
-    except DecryptionKeyError as e:
+    except (DecryptionKeyError, PaddingException) as e:
         #documenting behavior change for production 1:
         # when decryption fails, regardless of why, we rely on the decryption code
         # to log it correctly and return 200 OK to get the device to delete the file.
+        # We do not want emails on these types of errors, so we use log_error explicitly.
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
         return render_template('blank.html'), 200
+
         
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...

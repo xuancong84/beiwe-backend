@@ -7,7 +7,7 @@ from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
 
 class DatabaseIsDownError(Exception): pass
-
+class PaddingException(Exception): pass
 
 def set_secret_key(app):
     """grabs the Flask secret key"""
@@ -52,7 +52,11 @@ def decode_base64(data):
     """ unpacks url safe base64 encoded string. """
     #there seemed to be some problems with inserting a config.encode('utf-8') here,
     # never determined why.
-    return base64.urlsafe_b64decode(data)
+    try:
+        return base64.urlsafe_b64decode(data)
+    except TypeError as e:
+        if "Incorrect padding" == e.message:
+            raise PaddingException
 
 def generate_user_hash_and_salt( password ):
     """ Generates a hash and salt that will match a given input string, and also
