@@ -76,7 +76,7 @@ def decrypt_device_file(patient_id, data, private_key):
     # in development.
     # print "length decrypted key", len(decrypted_key)
     for line in data[1:]:
-        if data is None:
+        if line is None:
             print "encountered empty line of data, ignoring."
             continue
         try:
