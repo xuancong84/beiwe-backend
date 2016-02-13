@@ -8,6 +8,7 @@ from security import decode_base64
 from db.study_models import Study
 
 class DecryptionKeyError(Exception): pass
+class HandledError(Exception): pass
 
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
@@ -100,18 +101,17 @@ def decrypt_device_file(patient_id, data, private_key):
                 log_error(e, error_message)
                 continue
             ##################### flip out on these errors #####################
-            if 'AES key' in e.message:
-                error_message += "AES key has bad length."
-            elif 'IV must be' in e.message:
-                error_message += "iv has bad length."
+            if 'AES key' in e.message: error_message += "AES key has bad length."
+            elif 'IV must be' in e.message: error_message += "iv has bad length."
             elif 'Incorrect padding' in e.message:
                 error_message += "base64 padding error, config is truncated."
                 # this is only seen in mp4 files. possibilities:
                 #  upload during write operation.
                 #  broken base64 conversion in the app
                 #  some unanticipated error in the file upload
-            log_error(e, error_message)
-            raise
+            else:
+                raise #If none of the above errors happened, raise the error.
+            raise HandledError(error_message) #if any of them did happen, raise a HandledError to cease execution.
     return return_data
 
 def decrypt_device_line(patient_id, key, data):

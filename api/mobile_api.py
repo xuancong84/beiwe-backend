@@ -4,7 +4,7 @@ from flask import Blueprint, request, abort, render_template, json
 from config.constants import ALLOWED_EXTENSIONS
 from db.user_models import User
 from db.study_models import Study
-from libs.encryption import decrypt_device_file, DecryptionKeyError
+from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.security import PaddingException
 from libs.user_authentication import authenticate_user, authenticate_user_registration
@@ -34,7 +34,7 @@ def upload():
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
-    except (DecryptionKeyError, PaddingException) as e:
+    except (DecryptionKeyError, HandledError) as e:
         #documenting behavior change for production 1:
         # when decryption fails, regardless of why, we rely on the decryption code
         # to log it correctly and return 200 OK to get the device to delete the file.
