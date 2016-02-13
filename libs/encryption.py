@@ -63,11 +63,11 @@ def decrypt_device_file(patient_id, data, private_key):
     data = [line for line in data.split('\n') if line != "" ]
     return_data = ""
     
-    try:
+    try: #get the decryption key from the file.
         decoded_key = decode_base64( data[0].encode( "utf-8" ) )
+        #TODO: data is sometimes an empty list, we get an index error.  Fix, don't catch.
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
-    #except (TypeError, IndexError) as e: #Testing whether index errors get raised anymore 2/12/2016
-    except TypeError as e:
+    except (TypeError, IndexError) as e:
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
 
     #(we have an inefficiency in this encryption process, this might not need
