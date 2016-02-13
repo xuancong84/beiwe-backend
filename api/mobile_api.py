@@ -33,7 +33,6 @@ def upload():
 #     print "uploaded file name:", file_name, len(uploaded_file)
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
-        uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
     except (DecryptionKeyError, PaddingException) as e:
         #documenting behavior change for production 1:
         # when decryption fails, regardless of why, we rely on the decryption code

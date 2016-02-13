@@ -143,3 +143,19 @@ def authenticate_system_admin(some_function):
         return some_function(*args, **kwargs)
     return authenticate_and_call
 
+
+################################################################################
+########################## Data API Credentials ################################
+################################################################################
+
+
+def authenticate_api_credentials(some_function):
+    #Cases: invalid access creds
+    access_key = request.values["access_key"]
+    access_secret = request.values["secret_key"]
+    admin = Admin(access_key_id=access_key)
+    if not admin: abort(403) #access key DNE
+    if admin._id not in study_obj['admins']:
+        abort(403) #admin is not credentialed for this study
+    if not admin.validate_access_credentials(access_secret):
+        abort(403) #incorrect secret key
