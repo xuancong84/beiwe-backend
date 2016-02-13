@@ -6,8 +6,9 @@ def log_and_email_error(e, message=None, emails=SYSADMIN_EMAILS ):
     """ Prints in the server logs (defaults to Apache if not specified),
         does NOT stop execution. """
     try:
-        error_email = 'Subject: %s\n\n%s' % ("Beiwe 500 Error",
-                                             log_error(e, message, reraise=True) )
+        subject = "Beiwe Error: %s" % e.message
+        content = log_error(e, message, reraise=True)
+        error_email = 'Subject: %s\n\n%s' % (subject, content)
         email_server = smtplib.SMTP("localhost")
         email_server.sendmail( E500_EMAIL_ADDRESS, emails, error_email )
         email_server.quit()
@@ -22,7 +23,7 @@ def log_error(e, message=None, reraise=False):
         error_message = "===================\n"
         error_message += datetime.utcnow().isoformat() + "\n"
         if message is not None: error_message += message + "\n"
-        error_message += "ERROR:\n" + str(e.__repr__()) + "\n"
+        error_message += "ERROR:" + str(e.__repr__()) + "\n"
         error_message += traceback.format_exc() + "\n"
         error_message += "===================\n"
         print(error_message)
