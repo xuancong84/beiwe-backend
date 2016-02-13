@@ -82,8 +82,13 @@ def decrypt_device_file(patient_id, data, private_key):
             continue
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
+
         except Exception as e:
             error_message = "There was an error in user decryption: "
+            if isinstance(e, IndexError):
+                error_message += "Something is wrong with data padding:\n\tline: %s" % line
+                log_error(e, error_message)
+                continue
             ################### skip these errors ##############################
             if "unpack" in e.message:
                 error_message += "malformed line of config, dropping it and continuing."
@@ -134,7 +139,6 @@ def decrypt_device_line(patient_id, key, data):
         else: len_key = len(key)
         print "length iv: %s, length data: %s, length key: %s" % (len_iv, len_data, len_key)
         raise
-
     return remove_PKCS5_padding( decrypted )
 
 ################################################################################
@@ -142,4 +146,6 @@ def decrypt_device_line(patient_id, key, data):
 def remove_PKCS5_padding(data):
     """ Unpacks encrypted config from the device that was encypted using the
         PKCS5 padding scheme (which is the ordinal value of the last byte). """
+    #This can raise an indexerror when data is empty? that is not right
+    #TODO: fix.
     return  data[0: -ord( data[-1] ) ]
