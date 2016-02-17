@@ -23,3 +23,9 @@ while True:
         except SegfaultError as e:
             log_and_email_error(e, message="Apache encountered a segfault")
             continue
+
+    if "Unable to get bucket brigade for request" in line:
+        try: raise SegfaultError(line)
+        except SegfaultError as e:
+            log_and_email_error(e, message="Bucket brigade error")
+            continue
