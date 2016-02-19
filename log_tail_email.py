@@ -24,12 +24,17 @@ while True:
                              log_message=line )
         continue
 
-    if "Unable to get bucket brigade for request" in line:
-        log_and_email_error( BucketBrigadeError("Bucket brigade error"),
-                                 log_message=line )
-        continue
+    # As of Feb 19 2016 there are no complaints about function of the data access api.
+    # I think (70007)The timeout specified has expired occurs when a connection is lost and occurs with mobile uploads, and
+    # (70008)Partial results are valid but processing is incomplete occurs when a download via the data api is cancelled.
+    # (these guesses are from looking at the IP addresses included in these errors.
+    # if "Unable to get bucket brigade for request" in line:
+    #     log_and_email_error( BucketBrigadeError("Bucket brigade error"),
+    #                              log_message=line )
+    #     continue
 
-    if "IOError: failed to write data" in line:
-        log_and_email_error( UnkownIOError("WSGI IOError"),
-                             log_message=line )
-        continue
+    # IOError means a connection was dropped, usually by the user.
+    # if "IOError: failed to write data" in line:
+    #     log_and_email_error( UnkownIOError("WSGI IOError"),
+    #                          log_message=line )
+    #     continue
