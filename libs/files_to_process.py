@@ -103,6 +103,13 @@ def count_study_chunks():
     return study_count
     #map study ids to names
 
+def create_fake_mp4(number=10):
+    for x in range(number):
+        with open("thing", "r") as f:
+            file_path = "55d3826297013e3a1c9b8c3e/h6fflp/voiceRecording/%s.mp4" % (1000000000 + x)
+            s3_upload(file_path, f.read(), ObjectId("55d3826297013e3a1c9b8c3e"), raw_path=True)
+            FileToProcess.append_file_for_processing(file_path, ObjectId("55d3826297013e3a1c9b8c3e"), "h6fflp")
+
 """########################## Hourly Update Tasks ###########################"""
 
 def process_file_chunks():
