@@ -89,6 +89,12 @@ def decrypt_device_file(patient_id, data, private_key):
                 error_message += "Something is wrong with data padding:\n\tline: %s" % line
                 log_error(e, error_message)
                 continue
+
+            if isinstance(e, TypeError) and decrypted_key is None:
+                error_message += "The key was empty:\n\tline: %s" % line
+                log_error(e, error_message)
+                continue
+
             ################### skip these errors ##############################
             if "unpack" in e.message:
                 error_message += "malformed line of config, dropping it and continuing."
@@ -138,6 +144,7 @@ def decrypt_device_line(patient_id, key, data):
         if key is None: len_key = "None"
         else: len_key = len(key)
         print "length iv: %s, length data: %s, length key: %s" % (len_iv, len_data, len_key)
+        print patient_id, key, data
         raise
     return remove_PKCS5_padding( decrypted )
 
