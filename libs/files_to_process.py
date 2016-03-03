@@ -215,7 +215,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     upload_these.append((chunk_path, new_contents, study_id))
 
                     if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
-                        survey_id_hash = study_id, user_id, data_type, header
+                        survey_id_hash = ObjectId(study_id), user_id, data_type, header
                         survey_id = survey_id_dict[survey_id_hash]
                     else:
                         survey_id = None
