@@ -207,13 +207,13 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
             try:
                 study_id, user_id, data_type, time_bin, original_header = binn
                 rows = list(data_rows_deque)
-                new_header = convert_unix_to_human_readable_timestamps(original_header,
+                updated_header = convert_unix_to_human_readable_timestamps(original_header,
                                                                     rows)
                 chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin)
                 chunk = ChunkRegistry(chunk_path=chunk_path)
                 if not chunk:
                     ensure_sorted_by_timestamp(rows)
-                    new_contents = construct_csv_string(new_header, rows)
+                    new_contents = construct_csv_string(updated_header, rows)
                     upload_these.append((chunk_path, new_contents, study_id))
 
                     if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
@@ -243,23 +243,23 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                             raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
                         raise #raise original error if not 404 s3 error
                     old_header, old_rows = csv_to_list(s3_file_data) 
-                    if old_header != header:
+                    if old_header != updated_header:
 #to handle the case where a file was on an hour boundry and placed in two separate
 #chunks we need to FAIL to retire this file. If this happens AND ONE of the files
 #DOES NOT have a header mismatch this may (will?) cause data duplication in the
 #chunked file whenever the file processing occurs run.
                         raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
-                                                      (old_header, header, chunk_path) )
+                                                      (old_header, updated_header, chunk_path) )
                     old_rows.extend(rows)
                     ensure_sorted_by_timestamp(old_rows)
-                    new_contents = construct_csv_string(header, old_rows)
+                    new_contents = construct_csv_string(updated_header, old_rows)
                     upload_these.append(( chunk_path, new_contents, study_id ))
                     chunk.update_chunk_hash(new_contents)
             except Exception as e:
                 failed_ftps.update(ftp_deque)
                 print e
                 print ("failed to update: study_id:%s, user_id:%s, data_type:%s, time_bin:%s, header:%s "
-                       % (study_id, user_id, data_type, time_bin, header) )
+                       % (study_id, user_id, data_type, time_bin, updated_header) )
                 raise
             ftps_to_retire.update(ftp_deque)
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
