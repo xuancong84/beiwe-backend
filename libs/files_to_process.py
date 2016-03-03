@@ -112,10 +112,11 @@ def create_fake_mp4(number=10):
 
 """########################## Hourly Update Tasks ###########################"""
 
-def process_file_chunks(error_handler = ErrorHandler()):
+def process_file_chunks():
     """ This is the function that is called from cron.  It runs through all new
     files that have been uploaded and 'chunks' them. Handles logic for skipping
     bad files, raising errors appropriately. """ 
+    error_handler = ErrorHandler()
     FileProcessLock.lock()
     number_bad_files = 0
     run_count = 0
@@ -163,12 +164,12 @@ def do_process_file_chunks(count, error_handler, skip_count):
             file_to_process, data_type, chunkable, file_contents = element
             del element
             s3_file_path = file_to_process["s3_file_path"]
-#             print s3_file_path
             if chunkable:
                 newly_binified_data, survey_id_hash = process_csv_data(file_to_process["study_id"],
                                      file_to_process["user_id"], data_type, file_contents,
                                      s3_file_path)
                 if data_type in [SURVEY_ANSWERS,SURVEY_TIMINGS]:
+                    print survey_id_hash
                     survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path, data_type)
                 if newly_binified_data:
                     append_binified_csvs(binified_data, newly_binified_data, file_to_process)
@@ -217,9 +218,9 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
                         survey_id_hash = ObjectId(study_id), user_id, data_type, header
                         survey_id = survey_id_dict[survey_id_hash]
+                        print survey_id_hash
                     else:
                         survey_id = None
-
                     ChunkRegistry.add_new_chunk(study_id,
                                                 user_id,
                                                 data_type,
