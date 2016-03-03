@@ -1,21 +1,21 @@
+import gc
 from boto.exception import S3ResponseError
 from bson.objectid import ObjectId
-from config.constants import API_TIME_FORMAT, IDENTIFIERS,\
-    WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,\
-    VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS, POWER_STATE,\
-    BLUETOOTH, ACCELEROMETER, GPS, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER,\
-    CHUNKABLE_FILES, FILE_PROCESS_PAGE_SIZE, ALL_DATA_STREAMS, data_stream_to_s3_file_name_string
+from collections import defaultdict, deque
+from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
+                              CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,
+                              VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
+                              POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
+                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
+                              FILE_PROCESS_PAGE_SIZE, data_stream_to_s3_file_name_string )
 from cronutils.error_handler import ErrorHandler
 from datetime import datetime
+from multiprocessing.pool import ThreadPool
 
-from db.data_access_models import ChunksRegistry, FileToProcess, FilesToProcess, ChunksRegistry, ChunkRegistry, FileProcessLock
+from db.data_access_models import (FileToProcess, FilesToProcess, ChunksRegistry,
+                                   ChunkRegistry, FileProcessLock)
 from db.study_models import Studies, Study
 from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
-from multiprocessing.pool import ThreadPool
-from collections import defaultdict, deque
-import gc
-
-class ChunkFailedToExist(Exception): pass
 
 def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
@@ -112,13 +112,11 @@ def create_fake_mp4(number=10):
 
 """########################## Hourly Update Tasks ###########################"""
 
-def process_file_chunks():
+def process_file_chunks(error_handler = ErrorHandler()):
     """ This is the function that is called from cron.  It runs through all new
     files that have been uploaded and 'chunks' them. Handles logic for skipping
     bad files, raising errors appropriately. """ 
     FileProcessLock.lock()
-    error_handler = ErrorHandler()
-#     error_handler = null_error_handler
     number_bad_files = 0
     run_count = 0
     while True:
@@ -153,43 +151,47 @@ def do_process_file_chunks(count, error_handler, skip_count):
     """
     #this is how you declare a defaultdict containing a tuple of two deques.
     binified_data = defaultdict( lambda : ( deque(), deque() ) )
-    ftps_to_remove = set([]);
+    ftps_to_remove = set([])
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    survey_id_dict = {}
     for element in pool.map(batch_retrieve_for_processing,
                           FilesToProcess(page_size=count+skip_count)[skip_count:],
                           chunksize=1):
         with error_handler:
             #raise errors that we encountered in the s3 access threaded operations to the error_handler
             if isinstance(element, Exception): raise element
-            ftp, data_type, chunkable, file_contents = element
+            file_to_process, data_type, chunkable, file_contents = element
             del element
-            s3_file_path = ftp["s3_file_path"]
+            s3_file_path = file_to_process["s3_file_path"]
 #             print s3_file_path
             if chunkable:
-                newly_binified_data = process_csv_data(ftp["study_id"],
-                                     ftp["user_id"], data_type, file_contents,
+                newly_binified_data, survey_id_hash = process_csv_data(file_to_process["study_id"],
+                                     file_to_process["user_id"], data_type, file_contents,
                                      s3_file_path)
+                if data_type in [SURVEY_ANSWERS,SURVEY_TIMINGS]:
+                    survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path, data_type)
                 if newly_binified_data:
-                    append_binified_csvs(binified_data, newly_binified_data, ftp)
+                    append_binified_csvs(binified_data, newly_binified_data, file_to_process)
                 else: # delete empty files from FilesToProcess
-                    ftps_to_remove.add(ftp._id)
+                    ftps_to_remove.add(file_to_process._id)
                 continue
             else:
                 timestamp = clean_java_timecode( s3_file_path.rsplit("/", 1)[-1][:-4])
 
-                ChunkRegistry.add_new_chunk(ftp["study_id"], ftp["user_id"],
+                ChunkRegistry.add_new_chunk(file_to_process["study_id"],
+                                            file_to_process["user_id"],
                                             data_type, s3_file_path, timestamp)
-                ftps_to_remove.add(ftp._id)
+                ftps_to_remove.add(file_to_process._id)
     pool.close()
     pool.terminate()
-    more_ftps_to_remove, number_bad_files = upload_binified_data(binified_data, error_handler)
+    more_ftps_to_remove, number_bad_files = upload_binified_data(binified_data,error_handler, survey_id_dict)
     ftps_to_remove.update(more_ftps_to_remove)
     for ftp_id in ftps_to_remove:
         FileToProcess(ftp_id).remove()
     gc.collect()
     return number_bad_files
     
-def upload_binified_data(binified_data, error_handler):
+def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     """ Takes in binified csv data and handles uploading/downloading+updating
         older data to/from S3 for each chunk.
         Returns a set of concatenations that have succeeded and can be removed.
@@ -205,14 +207,26 @@ def upload_binified_data(binified_data, error_handler):
                 study_id, user_id, data_type, time_bin, header = binn
                 rows = list(data_rows_deque)
                 header = convert_unix_to_human_readable_timestamps(header, rows)
-                chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin) 
+                chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin)
                 chunk = ChunkRegistry(chunk_path=chunk_path)
                 if not chunk:
                     ensure_sorted_by_timestamp(rows)
                     new_contents = construct_csv_string(header, rows)
                     upload_these.append((chunk_path, new_contents, study_id))
-                    ChunkRegistry.add_new_chunk(study_id, user_id, data_type,
-                                    chunk_path,time_bin, file_contents=new_contents )
+
+                    if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
+                        survey_id_hash = study_id, user_id, data_type, header
+                        survey_id = survey_id_dict[survey_id_hash]
+                    else:
+                        survey_id = None
+
+                    ChunkRegistry.add_new_chunk(study_id,
+                                                user_id,
+                                                data_type,
+                                                chunk_path,
+                                                time_bin,
+                                                file_contents=new_contents,
+                                                survey_id=survey_id)
                 else:
                     try:
                         s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
@@ -301,13 +315,18 @@ def binify_from_timecode(unix_ish_time_code_string):
     actually_a_timecode = clean_java_timecode(unix_ish_time_code_string) # clean java time codes...
     return actually_a_timecode / CHUNK_TIMESLICE_QUANTUM #separate into nice, clean hourly chunks!
 
+def resolve_survey_id_from_file_name(name, data_type):
+    if data_type not in [SURVEY_ANSWERS, SURVEY_ANSWERS]:
+        return None
+    return name.rsplit("/", 2)[1]
+
 """############################## Standard CSVs #############################"""
 
 def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
     """ Assumes a clean csv with element 0 in the rows column as a unix(ish) timestamp.
         Sorts data points into the appropriate bin based on the rounded down hour
         value of the entry's unix(ish) timestamp. (based CHUNK_TIMESLICE_QUANTUM)
-        Returns a dict of form {(study_id, user_id, data_type, time_bin, heeader):rows_lists}. """
+        Returns a dict of form {(study_id, user_id, data_type, time_bin, heeder):rows_lists}. """
     ret = defaultdict(deque)
     for row in rows_list:
         ret[(study_id, user_id, data_type,
@@ -319,7 +338,7 @@ def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
         Should be in-place. """
     for binn, rows in new_binified_rows.items():
         old_binified_rows[binn][0].extend(rows)  #Add data rows
-        old_binified_rows[binn][1].append(file_to_process._id)  #add ftp id
+        old_binified_rows[binn][1].append(file_to_process._id)  #add ftp
 
 def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     """ Constructs a binified dict of a given list of a csv rows,
@@ -331,8 +350,10 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
     if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
-    if csv_rows_list: return binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header)
-    else: return None
+    if csv_rows_list:
+        return ( binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header ),
+                 (study_id, user_id, data_type, header) )
+    else: return None, None
 
 """############################ CSV Fixes #####################################"""
 
@@ -443,4 +464,4 @@ def batch_upload(upload):
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
-
+class ChunkFailedToExist(Exception): pass
