@@ -17,6 +17,8 @@ from db.data_access_models import (FileToProcess, FilesToProcess, ChunksRegistry
 from db.study_models import Studies, Study
 from libs.s3 import s3_list_files, s3_delete, s3_retrieve, s3_upload
 
+SURVEY_DATA_FILES = (SURVEY_ANSWERS, SURVEY_TIMINGS)
+
 def reindex_all_files_to_process():
     """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
     clears the chunksregistry, and then adds all relevent files on s3 to the
@@ -168,7 +170,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
                 newly_binified_data, survey_id_hash = process_csv_data(file_to_process["study_id"],
                                      file_to_process["user_id"], data_type, file_contents,
                                      s3_file_path)
-                if data_type in [SURVEY_ANSWERS,SURVEY_TIMINGS]:
+                if data_type in SURVEY_DATA_FILES:
                     # print survey_id_hash
                     survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path)
                 if newly_binified_data:
@@ -216,7 +218,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     new_contents = construct_csv_string(updated_header, rows)
                     upload_these.append((chunk_path, new_contents, study_id))
 
-                    if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
+                    if data_type in SURVEY_DATA_FILES:
                         survey_id_hash = ObjectId(study_id), user_id, data_type, original_header
                         survey_id = survey_id_dict[survey_id_hash]
                         #print survey_id_hash
