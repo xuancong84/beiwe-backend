@@ -205,18 +205,19 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
         data_rows_deque, ftp_deque = values
         with error_handler:
             try:
-                study_id, user_id, data_type, time_bin, header = binn
+                study_id, user_id, data_type, time_bin, original_header = binn
                 rows = list(data_rows_deque)
-                header = convert_unix_to_human_readable_timestamps(header, rows)
+                new_header = convert_unix_to_human_readable_timestamps(original_header,
+                                                                    rows)
                 chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin)
                 chunk = ChunkRegistry(chunk_path=chunk_path)
                 if not chunk:
                     ensure_sorted_by_timestamp(rows)
-                    new_contents = construct_csv_string(header, rows)
+                    new_contents = construct_csv_string(new_header, rows)
                     upload_these.append((chunk_path, new_contents, study_id))
 
                     if data_type in [SURVEY_ANSWERS, SURVEY_TIMINGS]:
-                        survey_id_hash = ObjectId(study_id), user_id, data_type, header
+                        survey_id_hash = ObjectId(study_id), user_id, data_type, original_header
                         survey_id = survey_id_dict[survey_id_hash]
                         print survey_id_hash
                     else:
