@@ -170,7 +170,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
                                      s3_file_path)
                 if data_type in [SURVEY_ANSWERS,SURVEY_TIMINGS]:
                     print survey_id_hash
-                    survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path, data_type)
+                    survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path)
                 if newly_binified_data:
                     append_binified_csvs(binified_data, newly_binified_data, file_to_process)
                 else: # delete empty files from FilesToProcess
@@ -317,9 +317,7 @@ def binify_from_timecode(unix_ish_time_code_string):
     actually_a_timecode = clean_java_timecode(unix_ish_time_code_string) # clean java time codes...
     return actually_a_timecode / CHUNK_TIMESLICE_QUANTUM #separate into nice, clean hourly chunks!
 
-def resolve_survey_id_from_file_name(name, data_type):
-    if data_type not in [SURVEY_ANSWERS, SURVEY_ANSWERS]:
-        return None
+def resolve_survey_id_from_file_name(name):
     return name.rsplit("/", 2)[1]
 
 """############################## Standard CSVs #############################"""
