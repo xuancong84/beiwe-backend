@@ -35,6 +35,10 @@ def grab_data():
         (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() )
     Returns a zip file of all data files found by the query. """
+
+    #uncomment the following line when doing a reindex
+    #return abort(503)
+    
     #Case: bad study id
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
