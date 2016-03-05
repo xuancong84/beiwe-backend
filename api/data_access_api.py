@@ -137,6 +137,11 @@ def determine_file_name(chunk):
         #add the survey_id from the file path.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
+
+    elif chunk["data_type"] == SURVEY_TIMINGS:
+        #add the survey_id from the database entry.
+        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],chunk["survey_id"],
+                                str(chunk["time_bin"]).replace(":", "_"), extension)
     else:
         return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
