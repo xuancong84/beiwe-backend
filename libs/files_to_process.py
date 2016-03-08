@@ -378,7 +378,7 @@ def fix_call_log_csv(header, rows_list):
 
 def fix_identifier_csv(header, rows_list, file_name):
     """ The identifiers file has its timestamp in the file name. """
-    time_stamp = file_name.rsplit("_", 1)[-1][:-4]
+    time_stamp = file_name.rsplit("_", 1)[-1][:-4] + "000"
     return insert_timestamp_single_row_csv(header, rows_list, time_stamp)
 
 def fix_wifi_csv(header, rows_list, file_name):

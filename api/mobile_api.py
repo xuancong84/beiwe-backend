@@ -138,7 +138,10 @@ def register_user():
                       beiwe_version) )
     # print file_contents, "\n"
     s3_upload( file_name, file_contents, study_id )
-    
+    FileToProcess.append_file_for_processing(file_name,
+                                             user['study_id'],
+                                             patient_id)
+
     # set up device.
     user.set_device( device_id )
     User(patient_id).set_password(request.values['new_password'])
