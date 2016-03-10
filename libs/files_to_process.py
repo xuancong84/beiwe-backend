@@ -203,11 +203,11 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     failed_ftps = set([])
     ftps_to_retire = set([])
     upload_these = []
-    for binn, values in binified_data.items():
+    for data_bin, values in binified_data.items():
         data_rows_deque, ftp_deque = values
         with error_handler:
             try:
-                study_id, user_id, data_type, time_bin, original_header = binn
+                study_id, user_id, data_type, time_bin, original_header = data_bin
                 rows = list(data_rows_deque)
                 updated_header = convert_unix_to_human_readable_timestamps(original_header,
                                                                     rows)
@@ -244,7 +244,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                             #no python stacktrace.  Best guess is mongo blew up.
                             raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
                         raise #raise original error if not 404 s3 error
-                    old_header, old_rows = csv_to_list(s3_file_data) 
+                    old_header, old_rows = csv_to_list(s3_file_data)
                     if old_header != updated_header:
 #to handle the case where a file was on an hour boundry and placed in two separate
 #chunks we need to FAIL to retire this file. If this happens AND ONE of the files
@@ -338,9 +338,9 @@ def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
 def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
     """ Appends binified rows to an existing binified row data structure.
         Should be in-place. """
-    for binn, rows in new_binified_rows.items():
-        old_binified_rows[binn][0].extend(rows)  #Add data rows
-        old_binified_rows[binn][1].append(file_to_process._id)  #add ftp
+    for data_bin, rows in new_binified_rows.items():
+        old_binified_rows[data_bin][0].extend(rows)  #Add data rows
+        old_binified_rows[data_bin][1].append(file_to_process._id)  #add ftp
 
 def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     """ Constructs a binified dict of a given list of a csv rows,
