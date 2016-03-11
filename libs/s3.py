@@ -1,3 +1,5 @@
+from _ssl import SSLError
+
 from boto import connect_s3
 from boto.exception import S3ResponseError
 from boto.s3.key import Key
@@ -56,6 +58,12 @@ def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RE
             print "s3_retreive failed with incomplete read, retrying on %s" % key_path
             return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
         raise
+    except SSLError as e:
+        if 'The read operation timed out' == e.message:
+            print "s3_retreive failed with timeout, retrying on %s" % key_path
+            return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
+        raise
+
 
 # def s3_retrieve_or_none(key_path, study_id, raw_path=False):
 #     """ Like s3_retreive except returns None if the key does not exist instead
