@@ -74,12 +74,14 @@ def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RE
 #     if not key: return None
 #     return encryption.decrypt_server(key.read(), study_id)
 
-def s3_list_files( prefix ):
+def s3_list_files( prefix, get_live_iterable=False ):
     """ Method fetches a list of filenames with prefix.
         note: entering the empty string into this search without later calling
         the object results in a truncated/paginated view."""
     bucket = _get_bucket(S3_BUCKET)
     results = bucket.list(prefix=prefix)
+    if get_live_iterable:
+        return results
     return [i.name.strip("/") for i in results]
 
 def s3_delete(key_path):
