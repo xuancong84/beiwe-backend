@@ -146,7 +146,11 @@ def register_user():
 
     user = User(patient_id)
     study_id = user['study_id']
-    
+
+    if brand.lower() == "apple":
+        #TODO: implement ios-specific logic. (possibly a diffirent function entirely?)
+        pass
+
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # CASE: this patient has a registered a device already and it does not
         # match this device.  They need to contact the study and unregister
@@ -195,7 +199,8 @@ def register_user():
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
 @authenticate_user
 def set_password():
-    """ After authenticating a user, sets the new password and returns 200."""
+    """ After authenticating a user, sets the new password and returns 200.
+    Provide the new password in a parameter named "new_password"."""
     User(request.values["patient_id"]).set_password(request.values["new_password"])
     return render_template('blank.html'), 200
 
