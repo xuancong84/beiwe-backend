@@ -6,7 +6,12 @@ from db.user_models import User
 def authenticate_user(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
-       device IDs are invalid."""
+       device IDs are invalid.
+
+       In any funcion wrapped with this decorator provide a parameter named
+       "patient_id" (with the user's id), a parameter named "password" with an SHA256
+       hashed instance of the user's password, a parameter named "device_id" with a
+       unique identifier derived from that device. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_post( *args, **kwargs )
@@ -17,7 +22,8 @@ def authenticate_user(some_function):
 
 
 def validate_post( *args, **kwargs ):
-    """Check if user exists, check if the provided passwords match."""
+    """Check if user exists, check if the provided passwords match, and if the
+    device id matches."""
     #print "user info:  ", request.values.items()
     #print "file info:  ", request.files.items()
     if ("patient_id" not in request.values
@@ -34,7 +40,11 @@ def validate_post( *args, **kwargs ):
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
        Returns 403 (forbidden) if the identifying info (usernames, passwords
-       device IDs are invalid."""
+       device IDs are invalid.
+
+       In any funcion wrapped with this decorator provide a parameter named
+       "patient_id" (with the user's id) and a parameter named "password" with an
+       SHA256 hashed instance of the user's password. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         is_this_user_valid = validate_registration( *args, **kwargs )
