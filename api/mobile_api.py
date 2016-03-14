@@ -8,7 +8,7 @@ from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledErro
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.security import PaddingException
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error
+from libs.logging import log_error, log_and_email_error
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
 
@@ -25,7 +25,39 @@ mobile_api = Blueprint('mobile_api', __name__)
 @authenticate_user
 def upload():
     """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log,
-        Texts Log, Survey Response, and debugging files to s3"""
+        Texts Log, Survey Response, and debugging files to s3.
+
+        Behavior:
+        The Beiwe app is supposed to delete the uploaded file if it receives an
+        html 200 response.  The API returns a 200 response when the file has A) been
+        successfully handled, B) the file it has been sent is empty, C) the file did
+        not decrypt properly.  We encountered problems in production with incorrectly
+        encrypted files (as well as Android generating "rList" files under unknown
+        circumstances) and the app then uploads them.  The source of encryption
+        errors is not well understood and could not be tracked down.  In order to
+        salvage partial data the server decrypts files to the best of its ability and
+        uploads it to S3.  In order to delete these files we still send a 200 response.
+
+        (The above about encryption is awful, in a theoretical version 2.0 the 200
+        response would be replaced with a difference response code to allow for
+        better debugging and less/fewer ... hax.)
+
+        A 400 error means there is something is wrong with the uploaded file or its
+        parameters, administrators will be emailed regarding this upload, the event
+        will be logged to the apache log.  The app should not delete the file,
+        it should try to upload it again at some point.
+
+        If a 500 error occurs that means there is something wrong server side,
+        administrators will be emailed and the event will be logged. The app should
+        not delete the file, it should try to upload it again at some point.
+
+        Request format:
+        send an http post request to studies.beiwe.org/upload, remember to include
+        security parameters (see user_authentication for documentation).
+        Provide the contents of the file, encrypted (see encryption specification)
+        and properly converted to Base64 encoded text, as a request parameter
+        entitled "file".
+        Provide the file name in a request parameter entitled "file_name". """
     patient_id = request.values['patient_id']
     user = User(patient_id)
     uploaded_file = request.values['file']
@@ -35,8 +67,7 @@ def upload():
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
     except (DecryptionKeyError, HandledError) as e:
-        #documenting behavior change for production 1:
-        # when decryption fails, regardless of why, we rely on the decryption code
+        # when decrypting fails, regardless of why, we rely on the decryption code
         # to log it correctly and return 200 OK to get the device to delete the file.
         # We do not want emails on these types of errors, so we use log_error explicitly.
         print "the following error was handled:"
@@ -47,13 +78,11 @@ def upload():
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
-        #TODO: Eli. Reenable this after successful testing of data access.
         FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
         return render_template('blank.html'), 200
     
     #error cases, (self documenting)
     else:
-        #TODO: Eli. This should probably send an email if it fails.
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
             #it appears that very occasionally the app creates some spurious files 
@@ -68,7 +97,7 @@ def upload():
             error_message += "contains an invalid extension, it was interpretted as "
             error_message += grab_file_extension(file_name)
         else: error_message += "AN UNKNOWN ERROR OCCURRED."
-        log_error( Exception("upload error"), error_message )
+        log_and_email_error( Exception("upload error"), error_message )
         return abort(400)
 
 
@@ -82,14 +111,18 @@ def register_user():
     """ Checks that the patient id has been granted, and that there is no device
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
-        Returns the encryption key for this patient. """
-    #CASE: If the id and password combination do not match, the decorator returns
-    # a 403 error.
+
+        Check the documentation in user_authentication to ensure you have provided
+        the proper credentials.
+
+        Returns the encryption key for this patient/user. """
+
+    #CASE: If the id and password combination do not match, the decorator returns a 403 error.
+    #the following parameter values are required.
     patient_id = request.values['patient_id']
-    mac_address = request.values['bluetooth_id']
     phone_number = request.values['phone_number']
     device_id = request.values['device_id']
-    
+
     #These values may not be returned by earlier versions of the beiwe app
     try: device_os = request.values['device_os']
     except BadRequestKeyError: device_os = "none"
@@ -107,7 +140,10 @@ def register_user():
     except BadRequestKeyError: model = "none"
     try: beiwe_version = request.values["beiwe_version"]
     except BadRequestKeyError: beiwe_version = "none"
-    
+    #This value may not be returned by later versions of the beiwe app.
+    try: mac_address = request.values['bluetooth_id']
+    except BadRequestKeyError: mac_address = "none"
+
     user = User(patient_id)
     study_id = user['study_id']
     
