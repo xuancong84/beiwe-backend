@@ -44,14 +44,14 @@
     <h3> Beta Status: </h3>
       <div class="well">
     {# this text is going to change whenever we upload a new version of the app, keep it simple #}
-      <p><b> There is currently no Beta version of the Beiwe app. </b> </p> 
-    {# <div class="well">
-      The following feature is ready for testing:
-      <p><b> The current Beta includes additional device-identifier fields that are included at registration.
-      <br> UPDATE: the Beta has been updated to additionally include the version of the Beiwe app installed at registration. </b> </p>
+      {# <p><b> There is currently no Beta version of the Beiwe app. </b> </p>  #}
+    
+      <b>The following features and bugfixes are ready for testing: </b>
+      <p> • Feature: additional device-identifier fields are included at device registration.</p>
+      <p> • Bug: a change in Android 5.1 to MMS/SMS caused the Beiwe app to unpredictably crash.  Beiwe now logs a verbose error to Log File instead of crash, this log statement is intended for use in diagnosing the bug. </p>
+      <p> • Known Issue: due to an implementation detail on the server you may lose device identifier information if you register/re-register using the beta version of the app, and then re-register using the current production version of app, all with the same user.  The best way to avoid this issue is to create new users that will only run this beta and future versions of the app. </p>
+       
     </div>
-
-
       <div class="row">
         <div class="col-xs-12">
           <a href="/download_beta" class="btn btn-primary btn-block">Download the BETA version of the Beiwe app </a>
@@ -64,7 +64,8 @@
         <div class="col-xs-12">
           <a href="/download_beta_debug" class="btn btn-primary btn-block">Download the BETA version of the Study Debugger </a>
         </div>
-      </div> #}
+      </div>
+      {# #}
     </div>
 
     <h3> Changelog: </h3>
