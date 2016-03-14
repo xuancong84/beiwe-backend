@@ -7,8 +7,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 from bson.errors import InvalidId
 from db.data_access_models import ChunksRegistry
-from db.study_models import Study
-from db.user_models import Admin, User
+from db.study_models import Study, Studies
+from db.user_models import Admin, User, Users
 from libs.s3 import s3_retrieve
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS, NUMBER_FILES_IN_FLIGHT)
@@ -22,6 +22,36 @@ from _io import BytesIO
 # The debug log has many lines without timestamps.
 
 data_access_api = Blueprint('data_access_api', __name__)
+
+
+@data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
+def get_studies():
+    #Cases: invalid access creds
+    access_key = request.values["access_key"]
+    access_secret = request.values["secret_key"]
+    admin = Admin(access_key_id=access_key)
+    if not admin: abort(403) #access key DNE
+    if not admin.validate_access_credentials(access_secret):
+        abort(403) #incorrect secret key
+    return json.dumps({str(study._id):study.name for study in Studies( admins=str(admin._id) ) } )
+
+@data_access_api.route("/get-users/v1", methods=['POST', "GET"])
+def get_users_in_study():
+    try: study_id = ObjectId(request.values["study_id"])
+    except InvalidId: study_id = None
+    study_obj = Study(study_id)
+    if not study_obj: abort(404)
+    #Cases: invalid access creds
+    access_key = request.values["access_key"]
+    access_secret = request.values["secret_key"]
+    admin = Admin(access_key_id=access_key)
+    if not admin: abort(403) #access key DNE
+    if admin._id not in study_obj['admins']:
+        abort(403) #admin is not credentialed for this study
+    if not admin.validate_access_credentials(access_secret):
+        abort(403) #incorrect secret key
+    return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
+
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
 def grab_data():
