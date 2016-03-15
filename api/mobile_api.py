@@ -8,7 +8,7 @@ from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledErro
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.security import PaddingException
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error, log_and_email_error
+from libs.logging import log_error, log_and_email_error, email_system_administrators
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
 
@@ -63,6 +63,10 @@ def upload():
     uploaded_file = request.values['file']
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
+    if "crashlog" in file_name.lower():
+        email_system_administrators(uploaded_file, "Beiwe Android Crash Log",
+                                    source_email="android_errors@studies.beiwe.org")
+
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )

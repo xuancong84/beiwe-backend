@@ -1,6 +1,7 @@
 import traceback, smtplib
 from datetime import datetime
-from config.security import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS
+from config.security import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+
 
 def log_and_email_error(e, log_message=None, emails=SYSADMIN_EMAILS ):
     """ Prints in the server logs (defaults to Apache if not specified),
@@ -36,3 +37,15 @@ def log_error(e, message=None, reraise=False):
         print("\n!!!! ERROR IN log_error !!!!")
         if reraise:
             raise
+
+
+def email_system_administrators(message, subject, source_email=OTHER_EMAIL_ADDRESS):
+    """ Sends an email to the system administrators. """
+    error_email = 'Subject: %s\n\n%s' % (subject, message)
+    try:
+        email_server = smtplib.SMTP("localhost")
+        email_server.sendmail( source_email, SYSADMIN_EMAILS, error_email )
+        email_server.quit()
+    except Exception as e:
+        # todo: this reraise parameter may be incorrect.
+        log_error(e, message="sysadmin email failed", reraise=False)
