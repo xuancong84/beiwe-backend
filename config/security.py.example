@@ -46,6 +46,7 @@ ITERATIONS = 1000
 
 # Email addresses used on the server.
 E500_EMAIL_ADDRESS = "e500_errors@example.beiwe.org" #500 error email source
+OTHER_EMAIL_ADDRESS = "telegram_service@example.beiwe.org"
 SYSADMIN_EMAILS = ["person1@example.com", #500 error email recipients
                    "person2@example.com"]
 

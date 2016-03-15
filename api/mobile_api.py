@@ -66,6 +66,7 @@ def upload():
     if "crashlog" in file_name.lower():
         email_system_administrators(uploaded_file, "Beiwe Android Crash Log",
                                     source_email="android_errors@studies.beiwe.org")
+        return render_template('blank.html'), 200
 
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
