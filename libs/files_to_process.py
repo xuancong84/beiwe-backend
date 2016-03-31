@@ -352,6 +352,7 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
     if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
+    #TODO: this is where I stick the strip trailing and leading whitespace per header element.
     if csv_rows_list:
         return ( binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header ),
                  (study_id, user_id, data_type, header) )
@@ -364,6 +365,7 @@ def fix_survey_timings(header, rows_list, file_path):
     survey_id = file_path.rsplit("/", 2)[1]
     for row in rows_list: row.append(", " + survey_id)
     header += u",survey_id"
+    #TODO: move this over to the zero-index 2nd row (after utc timestamp)
     return header
 
 def fix_call_log_csv(header, rows_list):
@@ -433,12 +435,14 @@ def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header
         line along with the list of rows. """
+    #TODO: refactor so that we don't have 3x data memory usage mid-run
     lines = [ line for line in csv_string.splitlines() ]
     return lines[0], [row.split(",") for row in lines[1:]]
 
 def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv.
         Now handles unicode errors.  :D :D :D """
+    #TODO: make the list comprehensions in-place map operations
     ret = header.decode("utf") + u"\n" + u"\n".join( [u",".join([x.decode("utf") for x in row]) for row in rows_list ] )
     return ret.encode("utf")
 
