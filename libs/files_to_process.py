@@ -394,10 +394,11 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
 def fix_survey_timings(header, rows_list, file_path):
     """ Survey timings need to have a column inserted stating the survey id they come from."""
     survey_id = file_path.rsplit("/", 2)[1]
-    for row in rows_list: row.append(", " + survey_id)
-    header += u",survey_id"
-    #TODO: move this over to the zero-index 2nd row (after utc timestamp)
-    return header
+    for row in rows_list:
+        row.insert(2, survey_id)
+    header_list = header.split( "," )
+    header_list.insert( 2, "survey id" )
+    return ",".join(header_list)
 
 def fix_call_log_csv(header, rows_list):
     """ The call log has poorly ordered columns, the first column should always be
