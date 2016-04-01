@@ -53,7 +53,6 @@ def reindex_all_files_to_process():
     process_file_chunks()
 
 def reindex_specific_data_type(data_type):
-    #TODO: this function has only been tested with survey timings.
     FileProcessLock.lock()
     print "starting..."
     #this line will raise an error if something is wrong with the data type
@@ -76,6 +75,38 @@ def reindex_specific_data_type(data_type):
     del files_lists, l
     pool.close()
     pool.terminate()
+    print str(datetime.now()), "processing data..."
+    FileProcessLock.unlock()
+    process_file_chunks()
+    print "Done."
+
+
+def reindex_study(study_id):
+    if isinstance(study_id, (str, unicode)):
+        study_id = ObjectId(study_id)
+    study_id_string = str(study_id)
+    FileProcessLock.lock()
+    print "starting..."
+    #this line will raise an error if something is wrong with the data type
+    relevant_chunks = ChunksRegistry(study_id=study_id)
+    relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
+    print "purging old data..."
+    for chunk in relevant_chunks: chunk.remove()
+
+    pool = ThreadPool(20)
+    pool.map(s3_delete, relevant_indexed_files)
+    pool.close( )
+    pool.terminate( )
+
+    print "pulling files to process..."
+    file_list = s3_list_files(study_id_string)
+    print "adding", len(file_list), "files to process"
+
+    for fp in file_list:
+        if (".csv" == fp[-4:] or ".mp4" == fp[-4:]):
+            FileToProcess.append_file_for_processing(fp, study_id, fp.split("/", 2)[1])
+
+    del fp, file_list, chunk, relevant_chunks, relevant_indexed_files, pool
     print str(datetime.now()), "processing data..."
     FileProcessLock.unlock()
     process_file_chunks()
