@@ -384,6 +384,7 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
     if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
     #TODO: this is where I stick the strip trailing and leading whitespace per header element.
+    header = ",".join([column_name.strip() for column_name in header.split(",")])
     if csv_rows_list:
         return ( binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header ),
                  (study_id, user_id, data_type, header) )
