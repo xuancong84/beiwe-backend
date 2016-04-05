@@ -164,19 +164,19 @@ def parse_registry(reg_dat):
     return json.loads(reg_dat)
 
 def determine_file_name(chunk):
-    """ Handles issues like mp4 file type on the recording and naming of survey files. """
-    if chunk["data_type"] == VOICE_RECORDING: extension = "mp4"
-    else: extension = "csv"
+    """ Generates the correct file name to provide the file with in the zip file.
+        (This also includes the folder location files in the zip.) """
+    extension = chunk["chunk_path"][-3:] #get 3 letter file extension from the source.
     if chunk["data_type"] == SURVEY_ANSWERS:
         #add the survey_id from the file path.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
-
     elif chunk["data_type"] == SURVEY_TIMINGS:
         #add the survey_id from the database entry.
-        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],chunk["survey_id"],
+        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
     else:
+        #all other files have this form:
         return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
 

@@ -3,11 +3,12 @@ from boto.exception import S3ResponseError
 from bson.objectid import ObjectId
 from collections import defaultdict, deque
 from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
-                              CHUNK_TIMESLICE_QUANTUM, HUMAN_READABLE_TIME_LABEL,
+                              CHUNK_TIMESLICE_QUANTUM,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
-                              FILE_PROCESS_PAGE_SIZE, data_stream_to_s3_file_name_string )
+                              FILE_PROCESS_PAGE_SIZE, data_stream_to_s3_file_name_string,
+                              PROCESSABLE_FILE_EXTENSIONS)
 from cronutils.error_handler import ErrorHandler
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
@@ -43,7 +44,7 @@ def reindex_all_files_to_process():
     for i,l in enumerate(files_lists):
         print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
         for fp in l:
-            if ".csv" == fp[-4:] or ".mp4" == fp[-4:]:
+            if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
     pool.close()
@@ -70,7 +71,7 @@ def reindex_specific_data_type(data_type):
     for i,l in enumerate(files_lists):
         print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
         for fp in l:
-            if file_name_key in fp and (".csv" == fp[-4:] or ".mp4" == fp[-4:]):
+            if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
     pool.close()
@@ -103,7 +104,7 @@ def reindex_study(study_id):
     print "adding", len(file_list), "files to process"
 
     for fp in file_list:
-        if (".csv" == fp[-4:] or ".mp4" == fp[-4:]):
+        if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
             FileToProcess.append_file_for_processing(fp, study_id, fp.split("/", 2)[1])
 
     del fp, file_list, chunk, relevant_chunks, relevant_indexed_files, pool
@@ -174,7 +175,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     If a file is empty put its ftp object to the empty_files_list, we can't
         delete objects in-place while iterating over the db. 
     
-    All files except for the audio recording mp4 file are in the form of CSVs,
+    All files except for the audio recording files are in the form of CSVs,
     most of those files can be separated by "time bin" (separated into one-hour
     chunks) and concatenated and sorted trivially. A few files, call log,
     identifier file, and wifi log, require some triage beforehand.  The debug log
@@ -341,7 +342,7 @@ def convert_unix_to_human_readable_timestamps(header, rows):
         time_string += "." + str( unix_millisecond % 1000 )
         row.insert(1, time_string)
     header = header.split(",")
-    header.insert(1, HUMAN_READABLE_TIME_LABEL)
+    header.insert(1, "UTC time")
     return ",".join(header)
 
 def binify_from_timecode(unix_ish_time_code_string):

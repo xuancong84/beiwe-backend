@@ -86,7 +86,6 @@ def upload():
         FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
         return render_template('blank.html'), 200
     
-    #error cases, (self documenting)
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:

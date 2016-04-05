@@ -2,19 +2,21 @@
     Don't change values if you don't know what they do. """
 
 ## Data streams and survey types ##
-ALLOWED_EXTENSIONS = set(['csv', 'json', 'mp4', 'txt'])
+ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
+PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
+MEDIA_EXTENSIONS = [".mp4", ".wav"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
 ## HTML lists ##
 CHECKBOX_TOGGLES = ["accelerometer",
-                  "gps",
-                  "calls",
-                  "texts",
-                  "wifi",
-                  "bluetooth",
-                  "power_state"]
+                    "gps",
+                    "calls",
+                    "texts",
+                    "wifi",
+                    "bluetooth",
+                    "power_state"]
 
 TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "accelerometer_on_duration_seconds",
@@ -44,12 +46,12 @@ FILE_PROCESS_PAGE_SIZE = 250
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
+# This value is in seconds, it sets the time period that chunked files will be sliced into.
 CHUNK_TIMESLICE_QUANTUM = 3600
-
-HUMAN_READABLE_TIME_LABEL = "UTC time"
-
+# the name of the s3 folder that contains chunked data
 CHUNKS_FOLDER = "CHUNKED_DATA"
 
+# Constants for for the keys in data_stream_to_s3_file_name_string
 ACCELEROMETER = "accelerometer"
 BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
@@ -87,6 +89,3 @@ def data_stream_to_s3_file_name_string(data_type):
 CHUNKABLE_FILES = { ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                   LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI }
 # RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE ])
-
-# each chunk represents 1 hour of data, and because unix time 0 is on an hour
-# boundry our time codes will also be on nice, clean hour boundaries.
