@@ -1,5 +1,6 @@
 import functools
 from flask import request, abort
+from werkzeug.datastructures import MultiDict
 from db.user_models import User
 
 
@@ -14,6 +15,7 @@ def authenticate_user(some_function):
        unique identifier derived from that device. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
+        check_for_basic_auth( *args, **kwargs );
         is_this_user_valid = validate_post( *args, **kwargs )
         if is_this_user_valid:
             return some_function(*args, **kwargs)
@@ -47,6 +49,7 @@ def authenticate_user_registration(some_function):
        SHA256 hashed instance of the user's password. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
+        check_for_basic_auth( *args, **kwargs );
         is_this_user_valid = validate_registration( *args, **kwargs )
         if is_this_user_valid: return some_function(*args, **kwargs)
         return abort(403)
@@ -63,3 +66,19 @@ def validate_registration( *args, **kwargs ):
     if not user.validate_password( request.values['password'] ): return False
     return True
 
+def check_for_basic_auth( *args, **kwargs ):
+    """Check if user exists, check if the provided passwords match"""
+    auth = request.authorization
+    if not auth:
+        return
+    username_parts = auth.username.split('@')
+    if len(username_parts) == 2:
+        replace_dict = MultiDict(request.values.to_dict());
+        if "patient_id" not in replace_dict:
+            replace_dict['patient_id'] = username_parts[0]
+        if "device_id" not in replace_dict:
+            replace_dict['device_id'] = username_parts[1]
+        if "password" not in replace_dict:
+            replace_dict['password'] = auth.password
+        request.values = replace_dict
+    return
