@@ -21,7 +21,12 @@ CHECKBOX_TOGGLES = ["accelerometer",
                     "texts",
                     "wifi",
                     "bluetooth",
-                    "power_state"]
+                    "power_state",
+                    "proximity",
+                    "gyro",
+                    "magnetometer",
+                    "devicemotion",
+                    "reachability"]
 
 TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "accelerometer_on_duration_seconds",
@@ -35,7 +40,14 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "seconds_before_auto_logout",
                 "upload_data_files_frequency_seconds",
                 "voice_recording_max_time_length_seconds",
-                "wifi_log_frequency_seconds"]
+                "wifi_log_frequency_seconds",
+                "gyro_off_duration_seconds",
+                "gyro_on_duration_seconds",
+                "magnetometer_off_duration_seconds",
+                "magnetometer_on_duration_seconds",
+                "devicemotion_off_duration_seconds",
+                "devicemotion_on_duration_seconds",
+                ]
 
 ## Networking ##
 DEFAULT_S3_RETRIES = 1 #This value is used in libs.s3, does what it says.
@@ -69,10 +81,16 @@ SURVEY_TIMINGS = "survey_timings"
 TEXTS_LOG = "texts"
 VOICE_RECORDING = "audio_recordings"
 WIFI = "wifi"
+PROXIMITY = "proximity"
+GYRO = "gyro"
+MAGNETOMETER = "magnetometer"
+DEVICEMOTION = "devicemotion"
+REACHABILITY = "reachability"
 
 ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
-                    TEXTS_LOG, VOICE_RECORDING, WIFI]
+                    TEXTS_LOG, VOICE_RECORDING, WIFI, PROXIMITY, GYRO,
+                    MAGNETOMETER, DEVICEMOTION, REACHABILITY]
 
 SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
@@ -91,8 +109,14 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == TEXTS_LOG: return "textsLog"
     if data_type == VOICE_RECORDING: return "voiceRecording"
     if data_type == WIFI: return "wifiLog"
+    if data_type == PROXIMITY: return "proximity"
+    if data_type == GYRO: return "gyro"
+    if data_type == MAGNETOMETER: return "magnetometer"
+    if data_type == DEVICEMOTION: return "devicemotion"
+    if data_type == REACHABILITY: return "reachability"
     raise Exception("unknown data type: %s" % data_type)
 
 CHUNKABLE_FILES = { ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
-                  LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI }
+                  LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI,
+                  PROXIMITY, GYRO, MAGNETOMETER, DEVICEMOTION, REACHABILITY  }
 # RAW_FILES = set([SURVEY_ANSWERS, VOICE_RECORDING, LOG_FILE ])
