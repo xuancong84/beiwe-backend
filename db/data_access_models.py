@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from libs.security import chunk_hash
@@ -7,7 +8,7 @@ from mongolia.constants import REQUIRED_STRING
 class FileProcessingLockedError(Exception): pass
 
 class ChunkRegistry(DatabaseObject):
-    PATH = "beiwe.chunk_registry"
+    PATH = os.getenv("MONGO_DB", "beiwe") + ".chunk_registry"
     DEFAULTS = {"study_id":REQUIRED,
                 "user_id":REQUIRED_STRING,
                 "data_type": "",
@@ -42,7 +43,7 @@ class ChunkRegistry(DatabaseObject):
 #         print "upd chunk", self['chunk_path']
     
 class FileToProcess(DatabaseObject):
-    PATH = "beiwe.file_to_process"
+    PATH = os.getenv("MONGO_DB", "beiwe") + ".file_to_process"
     DEFAULTS = { "s3_file_path":REQUIRED_STRING,
                  "study_id": REQUIRED,
                  "user_id": REQUIRED_STRING }
@@ -56,7 +57,7 @@ class FileToProcess(DatabaseObject):
                                      random_id=True)
 
 class FileProcessLock(DatabaseObject):
-    PATH = "beiwe.file_process_running"
+    PATH = os.getenv("MONGO_DB", "beiwe") + ".file_process_running"
     DEFAULTS = {"mark":""}
     @classmethod
     def lock(cls):
