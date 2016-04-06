@@ -1,3 +1,4 @@
+import os
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
@@ -50,5 +51,5 @@ if not __name__ == '__main__':
 
 #Extra Debugging settings
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", "8080")), debug=True)
 
