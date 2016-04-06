@@ -5,7 +5,9 @@ from collections import defaultdict, deque
 from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
-                              POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS, SURVEY_DATA_FILES,
+                              POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
+                              PROXIMITY, GYRO, MAGNETOMETER, 
+                              DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES)
 from cronutils.error_handler import ErrorHandler
 from datetime import datetime
@@ -199,6 +201,11 @@ def file_path_to_data_type(file_path):
     if "/textsLog/" in file_path: return TEXTS_LOG
     if "/voiceRecording" in file_path: return VOICE_RECORDING
     if "/wifiLog/" in file_path: return WIFI
+    if "/proximity/" in file_path: return PROXIMITY
+    if "/gyro/" in file_path: return GYRO
+    if "/magnetometer/" in file_path: return MAGNETOMETER
+    if "/devicemotion/" in file_path: return DEVICEMOTION
+    if "/reachability/" in file_path: return REACHABILITY
     raise Exception("data type unknown: %s" % file_path)
 
 def ensure_sorted_by_timestamp(l):
