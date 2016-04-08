@@ -101,7 +101,7 @@ def reindex_study(study_id):
         if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
             FileToProcess.append_file_for_processing(fp, study_id, fp.split("/", 2)[1])
 
-    del fp, file_list, chunk, relevant_chunks, relevant_indexed_files, pool
+    del file_list, relevant_chunks, relevant_indexed_files, pool
     print str(datetime.now()), "processing data..."
     FileProcessLock.unlock()
     process_file_chunks()
