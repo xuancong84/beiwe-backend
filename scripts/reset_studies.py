@@ -1,13 +1,3 @@
-# Test study 1: 55d231c197013e3a1c9b8c31
-# Test study 2: 55d2332397013e3a1c9b8c33
-# Test study 3: 55d235d397013e3a1c9b8c39
-# Debugging Study: 55d3826297013e3a1c9b8c3e
-# UW_McLaughlin_Adolescent Stress : 569544c61206f76a7e2e443b
-# Test study 4: 56a0f93a1206f7615f9ce096
-# UW_McLaughlin_Adolescent Stress_Passive Data Only : 56a67b9d1206f70a8f76d77d
-# Demo Study : 56a795a31206f75bfce275ec
-# RAND_Rudin_Asthma Symptom Monitoring: 56ac04491206f75bfce30030
-# BWH_Lee_Rheumatoid Arthritis Flares : 56ac04e91206f75bfce30032
 from bson import ObjectId
 
 from db.data_access_models import FilesToProcess
