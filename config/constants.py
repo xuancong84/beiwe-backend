@@ -69,6 +69,8 @@ ALL_DATA_STREAMS = [ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
                     LOG_FILE, POWER_STATE, SURVEY_ANSWERS, SURVEY_TIMINGS,
                     TEXTS_LOG, VOICE_RECORDING, WIFI]
 
+SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
+
 def data_stream_to_s3_file_name_string(data_type):
     """Maps a data type to the internal string representation used throughout the codebase.
         (could be a dict mapping, but it is fine) """
