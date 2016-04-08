@@ -42,4 +42,4 @@ for study_id in studies:
     except Exception as e:
         do_email( study )
         print "stopped on " + str( study_id )
-        break
+        raise
