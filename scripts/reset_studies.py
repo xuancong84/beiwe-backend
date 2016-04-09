@@ -3,9 +3,11 @@ from bson import ObjectId
 from db.data_access_models import FilesToProcess
 from db.study_models import Study
 from libs.file_processing_utils import reindex_study
+from libs.files_to_process import process_file_chunks
 from libs.logging import email_system_administrators
 
 studies = []
+DEFAULT_RETRIES = 2
 
 if not studies:
     raise Exception("you need to provide some studies")
@@ -17,29 +19,26 @@ def do_email( study ):
                                  source_email="reindexing_error@studies.beiwe.org" )
 
 
+
 for study_id in studies:
     if isinstance( study_id, (str, unicode) ):
         study_id = ObjectId( study_id )
-    study = Study(study_id)
-
+    study = Study( study_id )
     print "============================================================="
     print "============================================================="
     print "============================================================="
-    print "starting on %s, study id: %s\n" % (study.name, str(study_id))
+    print "starting on %s, study id: %s" % (study.name, str( study_id ))
     print "============================================================="
     print "============================================================="
     print "============================================================="
-
-    if FilesToProcess.count() != 0:
-        do_email(study)
-        print "stopped on " + str( study_id )
-        break
 
     study_id = ObjectId( study_id )
 
     try:
-        reindex_study(study)
+        reindex_study( study_id )
     except Exception as e:
+        process_file_chunks() #will raise an error if things fail on second attempt
+
+    if FilesToProcess.count( ) != 0:
         do_email( study )
-        print "stopped on " + str( study_id )
-        raise
+        raise Exception("stopped on " + str( study_id ))
