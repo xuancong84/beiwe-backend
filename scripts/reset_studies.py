@@ -42,3 +42,7 @@ for study_id in studies:
     if FilesToProcess.count( ) != 0:
         do_email( study )
         raise Exception("stopped on " + str( study_id ))
+
+email_system_administrators( "OMG IT FINISHED AND EVERYTHING IS DONE.",
+                             "Go git checkout .; touch wsgi.py",
+                             source_email="reindexing_error@studies.beiwe.org" )
