@@ -1,14 +1,14 @@
 import calendar, time
 
 from flask import Blueprint, request, abort, render_template, json
-from config.constants import ALLOWED_EXTENSIONS
+from config.constants import ALLOWED_EXTENSIONS, ANDROID_API, IOS_API
 from db.user_models import User
 from db.study_models import Study
 from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
-from libs.security import PaddingException
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error, log_and_email_error, email_system_administrators
+from libs.http_utils import determine_os_api
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
 
@@ -109,9 +109,12 @@ def upload():
 ############################## Registration ####################################
 ################################################################################
 
+#TODO: Keary. Point iOS at /register_user/ios/ and stick the new logic according to the TODOs below
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
+@mobile_api.route( '/register_user/ios/', methods=['GET', 'POST'] )
+@determine_os_api
 @authenticate_user_registration
-def register_user():
+def register_user(OS_API=""):
     """ Checks that the patient id has been granted, and that there is no device
         registered with that id.  If the patient id has no device registered it
         registers this device and logs the bluetooth mac address.
@@ -151,6 +154,7 @@ def register_user():
     user = User(patient_id)
     study_id = user['study_id']
 
+    #TODO: Keary. you may have hooked in to the if block below, if so shift the logic (if possible) into the return 405  in the block after this one
     if brand.lower() == "apple":
         #TODO: implement ios-specific logic. (possibly a diffirent function entirely?)
         pass
@@ -164,7 +168,12 @@ def register_user():
         # the device's unique identifier) they user CAN reregister an existing
         # device, the unlock key they need to enter to at registration is their\
         # old password.
-        return abort(405)
+        if OS_API == ANDROID_API:
+            return abort(405)
+        if OS_API == IOS_API:
+            pass
+            #TODO: Keary. Insert return construction for proper iOS functionality here.
+        raise Exception("registration done gone wrong.")
     
     # At this point the device has been checked for validity and will be
     # registered successfully.  Any errors after this point will be server errors

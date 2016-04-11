@@ -1,6 +1,11 @@
 """ This file contains values used throughout the codebase.
     Don't change values if you don't know what they do. """
 
+# API differences
+# use_these aliases to determine if the incoming url was for an api version
+IOS_API = "IOS"
+ANDROID_API = "ANDROID"
+
 ## Data streams and survey types ##
 ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]

@@ -1,3 +1,10 @@
+import functools
+
+from flask import request
+
+from config.constants import IOS_API, ANDROID_API
+
+
 def checkbox_to_boolean(list_checkbox_params, dict_all_params):
     """ Takes a list of strings that are to be processed as checkboxes on a post
         parameter, (checkboxes supply some arbitrary value in a post if they are
@@ -22,3 +29,25 @@ def string_to_int(list_int_params, dict_all_params):
 def combined_multi_dict_to_dict(cmd):
     """ converts an ImmutableMultiDict to a mutable python Dict. """
     return { key: value for key, value in cmd.items() }
+
+
+def determine_os_api(some_function):
+    """ Add this as a decorator to a url function, under (after) the wsgi route
+    decorator.  It detects if the url ends in /ios.
+    This decorator provides to the function with the new variable "OS_API", which can
+    then be compared against the IOS_API and ANDROID_API variables in constants.
+
+    To handle any issues that arise from an undeclared keyword argument, throw
+    'OS_API=""' into your url function declaration. """
+    @functools.wraps(some_function)
+    def provide_os_determination_and_call( *args, **kwargs ):
+        #naive, could be improved, but sufficient
+        url_end = request.path[-4:].lower()
+        if "ios" in url_end:
+            kwargs["OS_API"] = IOS_API
+        else:
+            kwargs["OS_API"] = ANDROID_API
+        return some_function( *args, **kwargs )
+
+    return provide_os_determination_and_call
+
