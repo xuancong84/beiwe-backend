@@ -2,11 +2,11 @@ import functools
 from flask import request, abort
 from werkzeug.datastructures import MultiDict
 from db.user_models import User
-
+from config.constants import ANDROID_API, IOS_API
 
 def authenticate_user(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
-       Returns 403 (forbidden) if the identifying info (usernames, passwords
+       Returns 403 (forbidden) or 401 (depending on beiwei-api-version) if the identifying info (usernames, passwords
        device IDs are invalid.
 
        In any funcion wrapped with this decorator provide a parameter named
@@ -19,7 +19,7 @@ def authenticate_user(some_function):
         is_this_user_valid = validate_post( *args, **kwargs )
         if is_this_user_valid:
             return some_function(*args, **kwargs)
-        return abort(403)
+        return abort(401 if (kwargs["OS_API"] == IOS_API) else 403)
     return authenticate_and_call
 
 
@@ -41,7 +41,7 @@ def validate_post( *args, **kwargs ):
 
 def authenticate_user_registration(some_function):
     """Decorator for functions (pages) that require a user to provide identification.
-       Returns 403 (forbidden) if the identifying info (usernames, passwords
+       Returns 403 (forbidden)  or 401 (depending on beiwei-api-version) if the identifying info (usernames, passwords
        device IDs are invalid.
 
        In any funcion wrapped with this decorator provide a parameter named
@@ -52,7 +52,7 @@ def authenticate_user_registration(some_function):
         check_for_basic_auth( *args, **kwargs );
         is_this_user_valid = validate_registration( *args, **kwargs )
         if is_this_user_valid: return some_function(*args, **kwargs)
-        return abort(403)
+        return abort(401 if (kwargs["OS_API"] == IOS_API) else 403)
     return authenticate_and_call
 
 
