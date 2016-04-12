@@ -22,8 +22,10 @@ mobile_api = Blueprint('mobile_api', __name__)
 ################################################################################
 
 @mobile_api.route('/upload', methods=['POST'])
+@mobile_api.route( '/upload/ios/', methods=['GET', 'POST'] )
+@determine_os_api
 @authenticate_user
-def upload():
+def upload(OS_API=""):
     """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log,
         Texts Log, Survey Response, and debugging files to s3.
 
@@ -215,8 +217,10 @@ def register_user(OS_API=""):
 ################################################################################
 
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
+@mobile_api.route( '/set_password/ios/', methods=['GET', 'POST'] )
+@determine_os_api
 @authenticate_user
-def set_password():
+def set_password(OS_API=""):
     """ After authenticating a user, sets the new password and returns 200.
     Provide the new password in a parameter named "new_password"."""
     User(request.values["patient_id"]).set_password(request.values["new_password"])
@@ -240,8 +244,10 @@ def contains_valid_extension(file_name):
 ################################################################################
 
 @mobile_api.route('/download_surveys', methods=['GET', 'POST'])
+@mobile_api.route( '/download_surveys/ios/', methods=['GET', 'POST'] )
+@determine_os_api
 @authenticate_user
-def get_latest_surveys():
+def get_latest_surveys(OS_API=""):
     user = User(request.values['patient_id'])
     study = Study(user.study_id)
     return json.dumps(study.get_surveys_for_study())
