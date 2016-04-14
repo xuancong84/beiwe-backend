@@ -1,6 +1,12 @@
 import csv
+from multiprocessing.pool import ThreadPool
+
 from bson.objectid import ObjectId
 from datetime import datetime
+
+from db.study_models import Studies
+from db.user_models import Users
+from libs.s3 import s3_list_files
 
 INPUT_FILEPATH = "/Users/admin/Desktop/working/timings.csv"
 OUTPUT_DIRECTORY = "/Users/admin/Desktop/working/recreated/"
@@ -129,3 +135,23 @@ def reconstruct_answer_options(question):
 def get_questions_from_survey():
     return [question for question in survey['content']
             if question['question_type'] != 'info_text_box']
+
+
+
+def get_all_timings_files():
+    #get users associated with studies
+    study_users = { str(s._id): Users(study_id=s._id, field='_id') for s in Studies() }
+    all_user_timings = []
+    for sid, users in study_users.items(): #construct prefixes
+        all_user_timings.extend([sid + "/" + u + "/" + "surveyTimings" for u in users])
+    #use a threadpool to efficiently get all those strings of s3 paths we will need
+    pool = ThreadPool( len(all_user_timings) )
+    files_lists = pool.map( s3_list_files, all_user_timings )
+    pool.close( )
+    pool.terminate( )
+
+    files_list = []
+    for l in files_lists: files_list.extend(l)
+    #we need to purge the occasional pre-multistudy file
+    return [ f for f in files_list if f.count('/') == 4 ]
+
