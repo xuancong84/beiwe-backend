@@ -13,17 +13,16 @@ from libs.s3 import s3_list_files, s3_retrieve
 
 from libs.security import chunk_hash
 
-FULL_S3_PATH = "thing?"
+
 
 def print_answers_csv(timings_csv_contents, full_s3_path):
-    FULL_S3_PATH = full_s3_path
     survey_id_string = full_s3_path.split("/")[3]
     file_creation_time = full_s3_path.rsplit("/", 1)[1][:-4]
     timings_csv_contents = timings_csv_contents.decode("utf8")
     questions, submit_time = read_questions_and_submission_time(timings_csv_contents)
 
     if submit_time is None:
-        print full_s3_path + " does not have submit button"
+        print "does not have submit button"
         return
     output_filename = submit_time.strftime('%Y-%m-%d %H_%M_%S') + ".csv"
 
@@ -74,7 +73,7 @@ def sort_and_reconstruct_questions(questions, survey_id_string):
     current_survey_question_ids = [content["question_id"] for content in sq]
     for q_id in questions.keys():
         if q_id not in current_survey_question_ids:
-            print "missing question text in %s" % FULL_S3_PATH
+            print "missing question text in"
         # else:
         #     print "%s found in survey questions" % q_id
 
