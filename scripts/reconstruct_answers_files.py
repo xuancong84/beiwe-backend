@@ -19,7 +19,10 @@ def print_answers_csv(timings_csv_contents, full_s3_path):
     survey_id_string = full_s3_path.split("/")[3]
     file_creation_time = full_s3_path.rsplit("/", 1)[1][:-4]
     timings_csv_contents = timings_csv_contents.decode("utf8")
-    questions, submit_time = read_questions_and_submission_time(timings_csv_contents)
+    questions, submit_time, first_displayed_time = read_questions_and_submission_time(timings_csv_contents)
+
+    if first_displayed_time is None:
+        print "does not have first displayed time"
 
     if submit_time is None:
         print "does not have submit button"
@@ -41,6 +44,7 @@ def print_answers_csv(timings_csv_contents, full_s3_path):
 
 def read_questions_and_submission_time(timings_csv_contents):
     questions = {}
+    first_displayed_time = None
     submit_time = None
     #might need to split contents on new lines
     # x = BytesIO()
@@ -61,9 +65,11 @@ def read_questions_and_submission_time(timings_csv_contents):
                 'question_text': question_text,
                 'question_answer_options': question_answer_options,
                 'answer': answer }
+        elif row[1] == "Survey first rendered and displayed to user":
+            first_displayed_time = datetime.utcfromtimestamp(int(row[0])/1000.0)
         elif row[1] == "User hit submit":
             submit_time = datetime.utcfromtimestamp(int(row[0])/1000.0)
-    return questions, submit_time
+    return questions, submit_time, first_displayed_time
 
 
 def sort_and_reconstruct_questions(questions, survey_id_string):
