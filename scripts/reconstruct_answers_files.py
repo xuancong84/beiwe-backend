@@ -1,7 +1,6 @@
-import csv
-from StringIO import StringIO
 from multiprocessing.pool import ThreadPool
 
+import collections
 from bson.objectid import ObjectId
 from datetime import datetime
 
@@ -11,52 +10,7 @@ from db.study_models import Studies, Survey
 from db.user_models import Users
 from libs.s3 import s3_list_files, s3_retrieve
 
-# INPUT_FILEPATH = "/Users/admin/Desktop/working/timings.csv"
-# OUTPUT_DIRECTORY = "/Users/admin/Desktop/working/recreated/"
-# survey = {u'_id': ObjectId('570ff1ea1206f75fc2bbfdd6'),
-#  u'content': [{u'question_id': u'85cbb327-350b-46f6-a80f-b549e3785ee1',
-#    u'question_text': u'This is a text box.  Non-randomized survey.',
-#    u'question_type': u'info_text_box'},
-#   {u'max': u'7',
-#    u'min': u'1',
-#    u'question_id': u'107d67f2-118d-46d6-eabb-c2caf43a8527',
-#    u'question_text': u'Here is a slider question from 1 to 7.',
-#    u'question_type': u'slider'},
-#   {u'answers': [{u'text': u'Curly'}, {u'text': u'Larry'}, {u'text': u'Moe'}],
-#    u'question_id': u'032b5846-f79b-4606-e428-aa53f57609b4',
-#    u'question_text': u'Radio button with three options',
-#    u'question_type': u'radio_button'},
-#   {u'answers': [{u'text': u'Curly'},
-#     {u'text': u'Larry'},
-#     {u'text': u'Moe'},
-#     {u'text': u'Shemp'}],
-#    u'question_id': u'ac40dbe3-275e-4539-dfff-b21255603f12',
-#    u'question_text': u'Checkbox with four options',
-#    u'question_type': u'checkbox'},
-#   {u'question_id': u'32e2fac4-f892-4d9c-9bfe-e98fbd9e0bfc',
-#    u'question_text': u'Free response with a numeric answer',
-#    u'question_type': u'free_response',
-#    u'text_field_type': u'NUMERIC'},
-#   {u'question_id': u'2991c82c-3fab-426c-d12a-ae97e825782d',
-#    u'question_text': u'Free response with a single-line text answer',
-#    u'question_type': u'free_response',
-#    u'text_field_type': u'SINGLE_LINE_TEXT'},
-#   {u'question_id': u'16e1b47f-a86c-4b33-894a-6dec606c223d',
-#    u'question_text': u'Free response with a multi-line text answer',
-#    u'question_type': u'free_response',
-#    u'text_field_type': u'MULTI_LINE_TEXT'},
-#   {u'question_id': u'47a00a1d-99d6-4cb6-8599-f5d98bdf15f9',
-#    u'question_text': u'And an info text box at the end of the survey, just for good luck.',
-#    u'question_type': u'info_text_box'}],
-#  u'settings': {u'number_of_random_questions': None,
-#   u'randomize': False,
-#   u'randomize_with_memory': False,
-#   u'trigger_on_first_download': True},
-#  u'survey_type': u'tracking_survey',
-#  u'timings': [[], [63000], [63000], [63000], [63000], [63000], [63000]]}
 
-
-#translate into s3 stuff
 from libs.security import chunk_hash
 
 FULL_S3_PATH = "thing?"
@@ -65,6 +19,7 @@ def print_answers_csv(timings_csv_contents, full_s3_path):
     FULL_S3_PATH = full_s3_path
     survey_id_string = full_s3_path.split("/")[3]
     file_creation_time = full_s3_path.rsplit("/", 1)[1][:-4]
+    timings_csv_contents = timings_csv_contents.decode("utf8")
     questions, submit_time = read_questions_and_submission_time(timings_csv_contents)
 
     if submit_time is None:
@@ -72,17 +27,16 @@ def print_answers_csv(timings_csv_contents, full_s3_path):
         return
     output_filename = submit_time.strftime('%Y-%m-%d %H_%M_%S') + ".csv"
 
-    f = StringIO()
-    writer = csv.writer(f, delimiter=',', lineterminator='\n')
-    writer.writerow(['question id', 'question type', 'question text',
-                     'question answer options', 'answer'])
+    rows = [",".join(['question id', 'question type', 'question text',
+                     'question answer options', 'answer'])]
+
     for question in sort_and_reconstruct_questions(questions, survey_id_string):
-        writer.writerow([question['question_id'],
-                         question['question_type'],
-                         question['question_text'],
-                         question['question_answer_options'],
-                         question['answer']])
-    f.seek(0)
+        rows.append(",".join([question['question_id'],
+                              question['question_type'],
+                              question['question_text'],
+                              question['question_answer_options'],
+                              question['answer'] ] ) )
+    csv = "\n".join(rows)
     return
 
 
@@ -90,26 +44,26 @@ def read_questions_and_submission_time(timings_csv_contents):
     questions = {}
     submit_time = None
     #might need to split contents on new lines
-    x = StringIO()
-    x.write(timings_csv_contents)
-    x.seek(0)
-    reader = csv.reader(x, delimiter=',')
-    for i, row in enumerate(reader):
-        if i > 0:
-            if len(row) >= 5:
-                question_id = row[1]
-                question_type = row[2]
-                question_text = row[3]
-                question_answer_options = row[4]
-                answer = ''
-                if len(row) > 5: answer = row[5]
-                questions[question_id] = {
-                    'question_type': question_type.encode("utf8"),
-                    'question_text': question_text.encode("utf8"),
-                    'question_answer_options': question_answer_options.encode("utf8"),
-                    'answer': answer.encode("utf8")}
-            elif row[1] == "User hit submit":
-                submit_time = datetime.utcfromtimestamp(int(row[0])/1000.0)
+    # x = BytesIO()
+    # x.write(timings_csv_contents)
+    # x.seek(0)
+    # reader = csv.reader(timings_csv_contents.splitlines(), delimiter=',')
+    header, csv = csv_to_list(timings_csv_contents)
+    for row in csv:
+        if len(row) >= 5:
+            question_id = row[1]
+            question_type = row[2]
+            question_text = row[3]
+            question_answer_options = row[4]
+            answer = ''
+            if len(row) > 5: answer = row[5]
+            questions[question_id] = {
+                'question_type': question_type,
+                'question_text': question_text,
+                'question_answer_options': question_answer_options,
+                'answer': answer }
+        elif row[1] == "User hit submit":
+            submit_time = datetime.utcfromtimestamp(int(row[0])/1000.0)
     return questions, submit_time
 
 
@@ -216,6 +170,35 @@ def get_data_for_raw_file_paths(all_timings_files):
         pool.close( )
         pool.terminate( )
     return data
+
+
+def recursive_convert_to_unicode(data):
+    if isinstance(data, basestring):
+        return data.encode("utf8")
+    elif isinstance(data, collections.Mapping):
+        return dict(map(recursive_convert_to_unicode, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(recursive_convert_to_unicode, data))
+    else:
+        return data
+
+
+
+
+def csv_to_list(csv_string):
+    """ Grab a list elements from of every line in the csv, strips off trailing
+        whitespace. dumps them into a new list (of lists), and returns the header
+        line along with the list of rows. """
+    #TODO: refactor so that we don't have 3x data memory usage mid-run
+    lines = [ line for line in csv_string.splitlines() ]
+    return lines[0], [row.split(",") for row in lines[1:]]
+
+def construct_csv_string(header, rows_list):
+    """ Takes a header list and a csv and returns a single string of a csv.
+        Now handles unicode errors.  :D :D :D """
+    #TODO: make the list comprehensions in-place map operations
+    return header + u"\n" + u"\n".join( [u",".join([x for x in row]) for row in rows_list ] )
+
 
 
 files = get_all_timings_files()
