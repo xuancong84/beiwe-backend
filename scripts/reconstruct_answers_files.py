@@ -221,6 +221,6 @@ def get_data_for_raw_file_paths(all_timings_files):
 files = get_all_timings_files()
 debug_files = [f for f in files if "55d3826297013e3a1c9b8c3e" in f]
 file_path_contents = get_data_for_raw_file_paths(debug_files) #tuples of (file path, contents)
-for fp, data in file_path_contents:
-    print_answers_csv( fp, data )
-    print "--"
+for data, fp in file_path_contents:
+    print fp
+    print_answers_csv( data, fp )
