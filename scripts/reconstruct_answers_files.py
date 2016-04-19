@@ -1,5 +1,4 @@
 cpaste
-
 import cPickle, os, collections
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
@@ -10,6 +9,11 @@ from db.study_models import Studies, Survey
 from db.user_models import Users
 from libs.s3 import s3_list_files, s3_retrieve
 
+class UnableToReconcileError(Exception): pass
+class ItemTooEarlyException( Exception ): pass
+class ItemTooLateException( Exception ): pass
+class NoBackupSurveysException( Exception ): pass
+class UnableToFindSurveyError( Exception ): pass
 
 """
 Cases:
@@ -37,30 +41,40 @@ def conditionally_setup_debug_stuff():
     else: debug_file_data = global_vars['debug_file_data ']
     return debug_files, debug_file_data
 
+def conditionally_setup_fo_realzies_stuff():
+    global_vars = globals( )
+    if 'all_files' not in global_vars:
+        all_files = get_all_timings_files()
+    else: all_files = global_vars['all_files']
+    if "all_file_data" not in global_vars:
+        all_file_data = get_data_for_raw_file_paths( all_files )
+    else: all_file_data = global_vars['all_file_data']
+    return all_files, all_file_data
+
 
 ############################### Administrative functions ###############################
 
 def debug(old_surveys=None, ignore_unsubmitted=True):
     debug_files, debug_data_files = conditionally_setup_debug_stuff()
-    uuids = get_uuids(debug_data_files)
+    # uuids = get_uuids(debug_data_files)
     stuff = do_run( debug_data_files, old_surveys=old_surveys, ignore_unsubmitted=True )
-    return uuids, stuff
+    return stuff
 
 def fo_realzies( old_surveys=None, ignore_unsubmitted=True ):
-    data = get_data_for_raw_file_paths( get_all_timings_files() )
-    uuids = get_uuids( data )
-    stuff = do_run( data, old_surveys=old_surveys, ignore_unsubmitted=True )
-    return uuids, stuff
+    all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
+    # uuids = get_uuids( all_file_data )
+    stuff = do_run( all_file_data, old_surveys=old_surveys, ignore_unsubmitted=True )
+    return stuff
 
 def do_run(file_paths_and_contents, old_surveys=None, ignore_unsubmitted=True):
     ret = {}
     for data, fp in file_paths_and_contents:
-        print fp
-        study, timecode, csv = construct_answers_csv( data, fp,
+        # print fp
+        study, timecode, csv, status_update = construct_answers_csv( data, fp,
                                                       old_surveys=old_surveys,
                                                       ignore_unsubmitted=ignore_unsubmitted)
-        if study and timecode and csv: #drop any return where a value is None
-            ret[study, timecode] = csv
+        # if study and timecode and csv: #drop any return where a value is None
+        ret[fp] = status_update
     return ret
 
 
@@ -71,12 +85,13 @@ def construct_answers_csv(timings_csv_contents, full_s3_path, old_surveys=None,
     #setup vars
     survey_id_string = full_s3_path.split("/")[3]
     study_id_string = full_s3_path.split("/",1)[0]
-    questions_answered, submission_time = parse_timings_file( timings_csv_contents )
-
-    # if first_displayed_time is None: print "does not have first displayed time"
+    status = []
+    questions_answered, submission_time = parse_timings_file( timings_csv_contents,
+                                                              status=status )
 
     if submission_time is None and ignore_unsubmitted:
-        return None, None, None
+        status.append("this file did not contain a submission button press")
+        return None, None, None, status
         # we only really want to create answers files that would have been written
         # to a surveyanswers files, by default no false submissions
     # output_filename = submission_time.strftime('%Y-%m-%d %H_%M_%S') + ".csv"
@@ -85,54 +100,146 @@ def construct_answers_csv(timings_csv_contents, full_s3_path, old_surveys=None,
     for question in sort_and_reconstruct_questions(questions_answered,
                                                    survey_id_string,
                                                    old_surveys=old_surveys,
-                                                   submit_time=submission_time):
+                                                   submit_time=submission_time,
+                                                   status=status):
         rows.append(",".join([question['question_id'],  # construct row
                               question['question_type'],
                               question['question_text'],
                               question['question_answer_options'],
                               question['answer'] ] ) )
     if len(rows) == 1: #drop anything that consists of only the header
-        return None, None, None
-    return study_id_string, submission_time, "\n".join(rows) # construct csv
+        status.append("this file consisted only of a header")
+        return None, None, None, status
+    return study_id_string, submission_time, "\n".join(rows), status
 
 
 def sort_and_reconstruct_questions(questions_answered_dict, survey_id_string,
-                                   old_surveys=None, submit_time=None):
+                                   old_surveys=None, submit_time=None, status=None):
     question_answers = []
-
-    try:
-        survey_questions = get_questions_from_survey( survey_id_string,
+    try: survey_questions = get_questions_from_survey(survey_id_string,
                                                       old_surveys=old_surveys,
-                                                      submit_time=submit_time )
-
-        current_survey_question_ids = [content["question_id"] for content in survey_questions]
-        missing_question_ids = []
-        for q_id in questions_answered_dict.keys():
-            if q_id not in current_survey_question_ids:
-                missing_question_ids.append(q_id)
-        if missing_question_ids: print missing_question_ids
-    except:
-        print "unable to get any missing questions."
+                                                      submit_time=submit_time,
+                                                      status=status)
+    except UnableToFindSurveyError:
+        status.append("unable to find any missing questions.")
         return question_answers
-
+    #there is a corner case where a survey can have multiple source surveys:
+    try:
+        if not isinstance( survey_questions, tuple ):
+            survey_questions = corral_question_ids( questions_answered_dict,
+                                                    survey_questions, status=status )
+        else: survey_questions = corral_question_ids( questions_answered_dict,
+                             survey_questions[0], survey_questions[1], status=status)
+    except UnableToReconcileError: return question_answers
+    # now we reconstruct any unanswered questions using that survey.
     for survey_question in survey_questions:
         if survey_question['question_id'] in questions_answered_dict:
             question = questions_answered_dict[survey_question['question_id']]
             question['question_id'] = survey_question['question_id']
             question_answers.append(question)
-        else:
-            question_answers.append( reconstruct_unanswered_question( survey_question) )
+        else: question_answers.append( reconstruct_unanswered_question(
+                                       survey_question, status=status) )
     return question_answers
 
 
-def get_questions_from_survey(survey_id_string, old_surveys=None, submit_time=None):
+def corral_question_ids(questions_answered_dict, source_a, source_b=None, status=None):
+    if len(questions_answered_dict) == 0:
+        status.append("there were no answered questions,")
+
+    timings_q_ids = questions_answered_dict.keys()
+    q_ids_a = [q["question_id"] for q in source_a]
+    missing_q_ids_a, extra_q_ids_a = compare_survey_questions_to_source(
+                                                timings_q_ids, q_ids_a )
+    if source_b is None:
+        if not missing_q_ids_a: status.append("all questions answered,")
+        else: status.append( "all missing questions recovered,")
+        if not extra_q_ids_a: status.append( "no extra questions.")
+        else:
+            status.append("encountered extra questions in answers")
+            status.append(extra_q_ids_a)
+        return source_a
+
+    status.append("There are two potential surveys for this question...")
+    # else: we were handed 2 surveys and need to compare what we received.
+    q_ids_b = [q["question_id"] for q in source_b]
+    missing_q_ids_b, extra_q_ids_b = compare_survey_questions_to_source(
+                                                    timings_q_ids, q_ids_b )
+
+    #case: if everything is present in one but not the other, use that.
+    #If missing questions in A but no missing questions in B, and there are no extras
+    #  in B, return B
+    if missing_q_ids_a and not missing_q_ids_b:
+        if not extra_q_ids_b:
+            status.append( "all questions present in survey 1 but not in 2, resolved." )
+            return source_b
+        else: raise Exception( "A) extra questions." ) #yay never happens.
+    #If missing questions in B but no missing questions in A, and there are no extras
+    # in A, return A
+    if not missing_q_ids_a and missing_q_ids_b:
+        if not extra_q_ids_a:
+            status.append( "all questions present in survey 2 but not in 1, resolved.")
+            return source_a
+        else: raise Exception( "B) extra questions." ) #yay never happens.
+
+    #case: someone added new questions, and then in that instance when the survey
+    # had been updated the person answered only some of the questions.
+    #if both are empty, check the extras, return the one that has zero extras
+    if not missing_q_ids_a and not missing_q_ids_b:
+        if not extra_q_ids_a and extra_q_ids_b:
+            status.append( "survey 2 would have had extra questions, resolved.")
+            return source_a
+        if not extra_q_ids_b and extra_q_ids_a:
+            status.append( "survey 2 would have had extra questions, resolved.")
+            return source_b
+
+    if not missing_q_ids_a and not extra_q_ids_a and not missing_q_ids_b and not extra_q_ids_b:
+        status.append( "there were no missing or extra questions for either survey, "
+                       "this means question order was changed, and it is resolved. ")
+        if len(source_a) > len(source_b): return source_a
+        else: return source_b
+
+    if missing_q_ids_b and missing_q_ids_b:
+        status.append("both surveys have missing answers...")
+        if not extra_q_ids_a and extra_q_ids_b:
+            status.append("but survey 1 has no extra questions, resolved.")
+            return source_a
+        if not extra_q_ids_b and extra_q_ids_a:
+            status.append("but survey 2 has no extra questions, resolved.")
+            return source_b
+        if extra_q_ids_b and extra_q_ids_a:
+            status.append("survey was changed and there were answers provided that did not "
+                          "map to _either_ survey. Could not resolve.")
+            raise UnableToReconcileError( )
+        if not extra_q_ids_b and not extra_q_ids_a:
+            status.append("survey was changed and user did not answer enough questions to "
+                          "determine which survey. Could not resolve.")
+            raise UnableToReconcileError()
+
+    raise Exception("what does this even mean...")
+
+
+def compare_survey_questions_to_source(timing_questions, survey_questions, status=None):
+    """ Provides the missing and extra questions from the provided answers with
+        regards to the provided survey questions. """
+    missing_q_ids = [q_id for q_id in survey_questions if q_id not in timing_questions]
+    extra_q_ids = [q_id for q_id in timing_questions if q_id not in survey_questions]
+    return missing_q_ids, extra_q_ids
+
+
+def get_questions_from_survey(survey_id_string, old_surveys=None, submit_time=None,
+                              status=None):
     survey_objid = ObjectId(survey_id_string)
     #TODO: can we propagate up two mismatched survey questions?
     if old_surveys:
-        print submit_time
+        status.append(submit_time)
         try:
-            return old_surveys.get_closest_survey_from_datetime(submit_time, survey_id_string)
-        except UnableToFindSurveyError:
+            return old_surveys.get_closest_survey_from_datetime(submit_time,
+                                                                survey_id_string,
+                                                                status=status)
+        except (UnableToFindSurveyError, ItemTooLateException):
+            #in both of these cases we want to pull from the most current survey,
+            # in teh case of unabletofind this is a hail mary, in the case of itemtoolate
+            # we want a time later than our survey backups provides.
             pass
 
     try:
@@ -143,7 +250,8 @@ def get_questions_from_survey(survey_id_string, old_surveys=None, submit_time=No
         raise UnableToFindSurveyError
 
 
-def reconstruct_unanswered_question(survey_question):
+def reconstruct_unanswered_question(survey_question, status=None):
+    """Does what it says"""
     question = {}
     question['question_id'] = survey_question['question_id']
     question['question_type'] = question_type_map[survey_question['question_type']]
@@ -152,7 +260,8 @@ def reconstruct_unanswered_question(survey_question):
     question['answer'] = "NO_ANSWER_SELECTED"
     return question
 
-def reconstruct_answer_options(question):
+
+def reconstruct_answer_options(question, status=None):
     """ reconstructs the answer option portion of the questions to a hash-identical
      format to what would have been on the survey answers. """
     if 'max' in question and 'min' in question:
@@ -168,7 +277,7 @@ def reconstruct_answer_options(question):
 
 ################################## Data Parsing ######################################
 
-def parse_timings_file( timings_csv_contents ):
+def parse_timings_file( timings_csv_contents, status=None ):
     """ parses the timings file for question text and answers to questions.
     returns a tuple of questions and associated answers, and, submission time. """
     questions_answered = {}
@@ -260,9 +369,6 @@ def recursive_convert_ascii(data):
         return data
 
 
-##################################################################################
-
-
 ############################## Data Acquisition ##################################
 
 def get_all_timings_files():
@@ -299,21 +405,12 @@ def get_data_for_raw_file_paths(timings_files):
     return data
 
 
-def conditionally_setup_old_surveys(global_vars=vars()):
-    """ run this function in the global scope. """
-    if "old_surveys" not in global_vars:
-        return unconditionally_setup_old_survey()
-    return global_vars["old_surveys"]
-
 def unconditionally_setup_old_survey():
     old_surveys = OldSurveys( )
     old_surveys.__innit__( )
     return old_surveys
 
-class ItemTooEarlyException( Exception ): pass
-class ItemTooLateException( Exception ): pass
-class NoBackupSurveysException( Exception ): pass
-class UnableToFindSurveyError( Exception ): pass
+
 # Old surveys.  This is pulled in from a pickled load of all the survey db backups,
 # the get_survey_bson_data_from_pickle function
 class OldSurveys():
@@ -328,18 +425,12 @@ class OldSurveys():
     def _get_closest(self, some_item):
         if not self.keys: raise NoBackupSurveysException()
 
-        # try: # try direct match, if it works, awesome, we have our item
-        #     return some_list.index( some_item ),
-        # except KeyError:
-        #     pass  # on failure we iterate for best (earliest) match
-
         previous = self.keys[0]
         for element in self.keys:
             if element > some_item: break
             previous = element
 
         if element == previous: #item provided comes before first item in list.
-            # raise ItemTooEarlyException()
             # the best we can do is hope it is all in the earliest set of questions
             # that we have.
             return element, previous
@@ -360,7 +451,7 @@ class OldSurveys():
         return [question for question in survey["content"] if question['question_type']
                                                                    != 'info_text_box' ]
 
-    def get_closest_survey_from_datetime(self, dt, survey_id):
+    def get_closest_survey_from_datetime(self, dt, survey_id, status=None):
         """ Searches through the backups for the best survey we have on file to
         reconstruct everything from. """
         # provide a datetime directly, get closest day
@@ -368,11 +459,11 @@ class OldSurveys():
 
         #day_before is the surveys the closest day before,
         # day_after is the surveys from end of THAT day.
-        try:day_before, day_after = self._get_closest(search_d)
-        except ItemTooLateException:
-            print "GOOD NEWS: this survey is almost definitely fully recoverable."
-            raise
-        # except ItemTooEarlyException:
+        day_before, day_after = self._get_closest(search_d)
+        # except ItemTooLateException:
+        #     print "GOOD NEWS: this survey is almost definitely fully recoverable."
+        #     raise
+        # # except ItemTooEarlyException:
         #     return None
 
         before_surveys = { str(s['_id']):s for s in self.surveys[day_before] }
@@ -391,18 +482,18 @@ class OldSurveys():
         if questions_after is None and questions_before is None:
             #it is acceptable for an empty list to be returned for the questions texts,
             # we check explicitly for None
-            print "probably about to fail..."
             closest_surveys =  { str(s['_id']):s for s in self.surveys[
                 self._extaustive_reverse_lookup(search_d) ] }
             try: return old_surveys._extract_questions( closest_surveys[survey_id] )
-            except KeyError: raise UnableToFindSurveyError()
+            except KeyError:
+                status.append("could not find a survey in survey history")
+                raise UnableToFindSurveyError()
 
         if questions_after is None and questions_before is not None: return questions_before
         if questions_after is not None and questions_before is None: return questions_after
         if questions_after is not None and questions_before is not None:
             if questions_after == questions_before: return questions_before
-            else: raise Exception("Well. Shit.")
-
+            else: return questions_before, questions_after
         raise Exception("unreachable code? hunh?")
 
     @classmethod
@@ -427,4 +518,6 @@ old_surveys = unconditionally_setup_old_survey()
 --
 # x,y = debug(old_surveys=old_surveys)
 
+all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
 
+x = fo_realzies(old_surveys=old_surveys)
