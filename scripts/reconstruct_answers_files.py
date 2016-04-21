@@ -1,13 +1,17 @@
+from db.data_access_models import FileToProcess
+
 cpaste
 import cPickle, os, collections
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
+from time import mktime
 from mongolia.errors import NonexistentObjectError
 
 from multiprocessing.pool import ThreadPool
-from db.study_models import Studies, Survey
+from db.study_models import Studies, Survey, Study
 from db.user_models import Users
-from libs.s3 import s3_list_files, s3_retrieve
+from libs.s3 import s3_list_files, s3_retrieve, s3_upload
+
 
 class UnableToReconcileError(Exception): pass
 class ItemTooEarlyException( Exception ): pass
@@ -30,6 +34,36 @@ question_type_map ={'slider': "Slider Question",
                     'radio_button': "Radio Button Question",
                     'checkbox': "Checkbox Question",
                     'free_response': "Open Response Question"}
+good_messages ={
+    "no_answers":"there were no answered questions,", #not the same as no submit
+    "everything_answered":"all questions answered,",
+    "all_missing_recovered":"all missing questions recovered,",
+    "no_extra_questions":"no extra questions.",
+    "1_not_2_resolved":"all questions present in survey 1 but not in 2, resolved.",
+    "2_not_1_resolved":"all questions present in survey 2 but not in 1, resolved.",
+    "extra_1_resolved":"survey 1 would have had extra questions, resolved.",
+    "extra_2_resolved":"survey 2 would have had extra questions, resolved.",
+    "reordered_questions":"there were no missing or extra questions for either survey "
+                       "this means question order was changed, and it is resolved. ",
+    "no_extra_1":"but survey 1 has no extra questions, resolved.",
+    "no_extra_2":"but survey 2 has no extra questions, resolved.",
+}
+bad_messages = {
+    "has_no_submit":"this file did not contain a submission button press",
+    "extra_questions":"encountered extra questions in answers",
+    "only_header":"this file consisted only of a header",
+    "no_mappings":"survey was changed and there were answers provided that did not map "
+                  "to _either_ survey. Could not resolve.",
+    "not_enough_answers":"survey was changed and user did not answer enough questions "
+                         "to determine which survey. Could not resolve.",
+}
+other_messages = {
+    "2_potential":"There are two potential surveys for this question...",
+    "both_missing":"both surveys have missing answers...",
+    "no_survey_1":"unable to find survey.",  #may still be recovered in live survey
+    "no_survey_2":"could not find a survey in survey history"
+}
+
 
 def conditionally_setup_debug_stuff():
     global_vars = globals( )
@@ -60,16 +94,17 @@ def debug(old_surveys=None, ignore_unsubmitted=True):
     stuff = do_run( debug_data_files, old_surveys=old_surveys, ignore_unsubmitted=True )
     return stuff
 
-def fo_realzies( old_surveys=None, ignore_unsubmitted=True ):
-    all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
-    # uuids = get_uuids( all_file_data )
-    stuff = do_run( all_file_data, old_surveys=old_surveys, ignore_unsubmitted=True )
-    return stuff
+
+# def fo_realzies( old_surveys=None, ignore_unsubmitted=True ):
+#     all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
+#     # uuids = get_uuids( all_file_data )
+#     stuff = do_run( all_file_data, old_surveys=old_surveys, ignore_unsubmitted=True )
+#     return stuff
 
 def do_run(file_paths_and_contents, old_surveys=None, ignore_unsubmitted=True):
+    if old_surveys == None: raise Exception( "OLD SURVEYS NOT PRESENT" )
     ret = {}
     for data, fp in file_paths_and_contents:
-        # print fp
         study, timecode, csv, status_update = construct_answers_csv( data, fp,
                                                       old_surveys=old_surveys,
                                                       ignore_unsubmitted=ignore_unsubmitted)
@@ -77,6 +112,138 @@ def do_run(file_paths_and_contents, old_surveys=None, ignore_unsubmitted=True):
         ret[fp] = status_update
     return ret
 
+
+def get_resolvable_survey_timings(from_do_run):
+    ret = {}
+    for k, v in from_do_run.items():
+        for m in bad_messages.values():
+            if m in v: break
+        if m not in v:
+            ret[k] = v
+    return ret
+
+def do_actually_run(file_paths, old_surveys=None):
+    if old_surveys == None: raise Exception("OLD SURVEYS NOT PRESENT")
+    file_paths_and_contents = get_data_for_raw_file_paths(file_paths)
+    ret = {}
+    for data, fp in file_paths_and_contents:
+        study, timecode, csv, status_update = construct_answers_csv( data, fp,
+                                                      old_surveys=old_surveys)
+        # if study and timecode and csv: #drop any return where a value is None
+        ret[fp] = csv,timecode
+    return ret
+
+def do_upload(file_paths_and_contents, data_type=None, forcibly_overwrite=False):
+    if data_type == None: raise Exception("DATA TYPE!")
+    upload_stream_map = { "survey_answers":("surveyAnswers", "csv"),
+                          "audio":("voiceRecording", "mp4") }
+    data_stream_string, file_extension = upload_stream_map[data_type]
+
+    for timings_path, contents_and_timestamp in file_paths_and_contents.items():
+        contents, timestamp = contents_and_timestamp
+        study_id_string, user_id, _, survey_id, _ = timings_path.split("/")
+        try:
+            timestamp_string = str( int( mktime( timestamp.timetuple( ) ) ) ) + "000"
+        except AttributeError:
+            print "PROBLEM WITH TIMESTAME FROM: %s" % timings_path
+            continue
+        if len(timestamp_string) != 13:
+            raise Exception("LOL! No.")
+
+        study_obj_id = Study(ObjectId(study_id_string))._id
+
+        s3_file_path = "%s/%s/%s/%s/%s.%s" % (study_id_string,
+                                              user_id,
+                                              data_stream_string,
+                                              survey_id,
+                                              timestamp_string,
+                                              file_extension)
+        if len(s3_list_files(s3_file_path)) != 0:
+            print "ALREADY_EXISTS: %s, %s" % (timings_path, s3_file_path)
+            if forcibly_overwrite == False:
+                continue
+        else: print "yay!: ", s3_file_path
+        contents = contents.encode("utf8") #maybe make this unicode-16?
+
+        s3_upload(s3_file_path, contents, study_obj_id, raw_path=True)
+        FileToProcess.append_file_for_processing( s3_file_path, study_obj_id, user_id )
+
+def get_all_timings_files( ):
+    # get users associated with studies
+    study_users = { str( s._id ):Users( study_id=s._id, field='_id' ) for s in
+                    Studies( ) }
+    all_user_timings = []
+    for sid, users in study_users.items( ):  # construct prefixes
+        all_user_timings.extend(
+                [sid + "/" + u + "/" + "surveyTimings" for u in users] )
+    # use a threadpool to efficiently get all those strings of s3 paths we
+    # will need
+    pool = ThreadPool( len( all_user_timings ) )
+    try:
+        files_lists = pool.map( s3_list_files, all_user_timings )
+    except Exception:
+        raise
+    finally:
+        pool.close( )
+        pool.terminate( )
+
+    files_list = []
+    for l in files_lists: files_list.extend( l )
+    # we need to purge the occasional pre-multistudy file, and ensure it is utf encoded.
+    return [f.decode( "utf8" ) for f in files_list if f.count( '/' ) == 4]
+
+def get_data_for_raw_file_paths( timings_files ):
+    # Pulls in (timings) files from s3
+    pool = ThreadPool( 50 )
+
+    def batch_retrieve(
+            parameters ):  # need to handle parameters, ensure unicode
+        return s3_retrieve( *parameters, raw_path=True ).decode( "utf8" ), \
+               parameters[0]
+
+    params = [(f, ObjectId( f.split( "/", 1 )[0] )) for f in timings_files]
+    try:
+        data = pool.map( batch_retrieve, params )
+    except Exception:
+        raise
+    finally:
+        pool.close( )
+        pool.terminate( )
+    return data
+
+def get_file_paths_for_studies(list_of_study_id_strings):
+    # get users associated with studies
+    study_users = { s:Users(study_id=ObjectId(s), field="_id") for s in
+                    list_of_study_id_strings }
+
+    all_user_timings = []
+    for sid, users in study_users.items( ):  # construct prefixes
+        all_user_timings.extend(
+                [sid + "/" + u + "/" + "surveyTimings" for u in users] )
+    # use a threadpool to efficiently get all those strings of s3 paths we
+    # will need
+    pool = ThreadPool( len( all_user_timings ) )
+    try:
+        files_lists = pool.map( s3_list_files, all_user_timings )
+    except Exception:
+        raise
+    finally:
+        pool.close( )
+        pool.terminate( )
+
+    files_list = []
+    for l in files_lists: files_list.extend( l )
+    # we need to purge the occasional pre-multistudy file, and ensure it is utf encoded.
+    return [f.decode( "utf8" ) for f in files_list if f.count( '/' ) == 4]
+
+
+
+def do_everything(list_of_files):
+    print "getting files"
+    files = get_data_for_raw_file_paths(list_of_files)
+    # info = do_run( files, old_surveys=old_surveys)
+    data = do_actually_run(files, old_surveys=old_surveys)
+    do_upload(data, data_type="survey_answers", forcibly_overwrite=False)
 
 ################################# Data Reconstruction ##################################
 
@@ -90,7 +257,7 @@ def construct_answers_csv(timings_csv_contents, full_s3_path, old_surveys=None,
                                                               status=status )
 
     if submission_time is None and ignore_unsubmitted:
-        status.append("this file did not contain a submission button press")
+        status.append(bad_messages["has_no_submit"])
         return None, None, None, status
         # we only really want to create answers files that would have been written
         # to a surveyanswers files, by default no false submissions
@@ -108,7 +275,7 @@ def construct_answers_csv(timings_csv_contents, full_s3_path, old_surveys=None,
                               question['question_answer_options'],
                               question['answer'] ] ) )
     if len(rows) == 1: #drop anything that consists of only the header
-        status.append("this file consisted only of a header")
+        status.append(bad_messages["only_header"])
         return None, None, None, status
     return study_id_string, submission_time, "\n".join(rows), status
 
@@ -121,7 +288,7 @@ def sort_and_reconstruct_questions(questions_answered_dict, survey_id_string,
                                                       submit_time=submit_time,
                                                       status=status)
     except UnableToFindSurveyError:
-        status.append("unable to find any missing questions.")
+        status.append(other_messages["no_survey_1"])
         return question_answers
     #there is a corner case where a survey can have multiple source surveys:
     try:
@@ -144,22 +311,22 @@ def sort_and_reconstruct_questions(questions_answered_dict, survey_id_string,
 
 def corral_question_ids(questions_answered_dict, source_a, source_b=None, status=None):
     if len(questions_answered_dict) == 0:
-        status.append("there were no answered questions,")
+        status.append(good_messages["no_answers"])
 
     timings_q_ids = questions_answered_dict.keys()
     q_ids_a = [q["question_id"] for q in source_a]
     missing_q_ids_a, extra_q_ids_a = compare_survey_questions_to_source(
                                                 timings_q_ids, q_ids_a )
     if source_b is None:
-        if not missing_q_ids_a: status.append("all questions answered,")
-        else: status.append( "all missing questions recovered,")
-        if not extra_q_ids_a: status.append( "no extra questions.")
+        if not missing_q_ids_a: status.append(good_messages["everything_answered"])
+        else: status.append( good_messages["all_missing_recovered"] )
+        if not extra_q_ids_a: status.append( good_messages["no_extra_questions"])
         else:
-            status.append("encountered extra questions in answers")
+            status.append(bad_messages["extra_questions"])
             status.append(extra_q_ids_a)
         return source_a
 
-    status.append("There are two potential surveys for this question...")
+    status.append(other_messages["2_potential"])
     # else: we were handed 2 surveys and need to compare what we received.
     q_ids_b = [q["question_id"] for q in source_b]
     missing_q_ids_b, extra_q_ids_b = compare_survey_questions_to_source(
@@ -170,14 +337,14 @@ def corral_question_ids(questions_answered_dict, source_a, source_b=None, status
     #  in B, return B
     if missing_q_ids_a and not missing_q_ids_b:
         if not extra_q_ids_b:
-            status.append( "all questions present in survey 1 but not in 2, resolved." )
+            status.append( good_messages["1_not_2_resolved"] )
             return source_b
         else: raise Exception( "A) extra questions." ) #yay never happens.
     #If missing questions in B but no missing questions in A, and there are no extras
     # in A, return A
     if not missing_q_ids_a and missing_q_ids_b:
         if not extra_q_ids_a:
-            status.append( "all questions present in survey 2 but not in 1, resolved.")
+            status.append( good_messages["2_not_1_resolved"] )
             return source_a
         else: raise Exception( "B) extra questions." ) #yay never happens.
 
@@ -186,36 +353,33 @@ def corral_question_ids(questions_answered_dict, source_a, source_b=None, status
     #if both are empty, check the extras, return the one that has zero extras
     if not missing_q_ids_a and not missing_q_ids_b:
         if not extra_q_ids_a and extra_q_ids_b:
-            status.append( "survey 2 would have had extra questions, resolved.")
+            status.append( good_messages["extra_2_resolved"])
             return source_a
         if not extra_q_ids_b and extra_q_ids_a:
-            status.append( "survey 2 would have had extra questions, resolved.")
+            status.append( good_messages["extra_1_resolved"])
             return source_b
 
     if not missing_q_ids_a and not extra_q_ids_a and not missing_q_ids_b and not extra_q_ids_b:
-        status.append( "there were no missing or extra questions for either survey, "
-                       "this means question order was changed, and it is resolved. ")
+        status.append( good_messages["reordered_questions"] )
         if len(source_a) > len(source_b): return source_a
         else: return source_b
 
     if missing_q_ids_b and missing_q_ids_b:
-        status.append("both surveys have missing answers...")
+        status.append(other_messages["both_missing"])
         if not extra_q_ids_a and extra_q_ids_b:
-            status.append("but survey 1 has no extra questions, resolved.")
+            status.append(good_messages["no_extra_1"])
             return source_a
         if not extra_q_ids_b and extra_q_ids_a:
-            status.append("but survey 2 has no extra questions, resolved.")
+            status.append(good_messages["no_extra_2"])
             return source_b
         if extra_q_ids_b and extra_q_ids_a:
-            status.append("survey was changed and there were answers provided that did not "
-                          "map to _either_ survey. Could not resolve.")
+            status.append(bad_messages["no_mappings"])
             raise UnableToReconcileError( )
         if not extra_q_ids_b and not extra_q_ids_a:
-            status.append("survey was changed and user did not answer enough questions to "
-                          "determine which survey. Could not resolve.")
+            status.append(bad_messages["not_enough_answers"])
             raise UnableToReconcileError()
 
-    raise Exception("what does this even mean...")
+    raise Exception("Unreachable code")
 
 
 def compare_survey_questions_to_source(timing_questions, survey_questions, status=None):
@@ -371,39 +535,6 @@ def recursive_convert_ascii(data):
 
 ############################## Data Acquisition ##################################
 
-def get_all_timings_files():
-    #get users associated with studies
-    study_users = { str(s._id): Users(study_id=s._id, field='_id') for s in Studies() }
-    all_user_timings = []
-    for sid, users in study_users.items(): #construct prefixes
-        all_user_timings.extend([sid + "/" + u + "/" + "surveyTimings" for u in users])
-    #use a threadpool to efficiently get all those strings of s3 paths we will need
-    pool = ThreadPool( len( all_user_timings ) )
-    try:
-        files_lists = pool.map( s3_list_files, all_user_timings )
-    except Exception: raise
-    finally:
-        pool.close( )
-        pool.terminate( )
-
-    files_list = []
-    for l in files_lists: files_list.extend(l)
-    #we need to purge the occasional pre-multistudy file, and ensure it is utf encoded.
-    return [ f.decode("utf8") for f in files_list if f.count('/') == 4 ]
-
-def get_data_for_raw_file_paths(timings_files):
-    #Pulls in (timings) files from s3
-    pool = ThreadPool(50)
-    def batch_retrieve(parameters): #need to handle parameters, ensure unicode
-        return s3_retrieve(*parameters, raw_path=True).decode("utf8"), parameters[0]
-    params = [(f, ObjectId( f.split( "/", 1)[0] )) for f in timings_files ]
-    try: data = pool.map(batch_retrieve, params)
-    except Exception: raise
-    finally:
-        pool.close( )
-        pool.terminate( )
-    return data
-
 
 def unconditionally_setup_old_survey():
     old_surveys = OldSurveys( )
@@ -486,7 +617,7 @@ class OldSurveys():
                 self._extaustive_reverse_lookup(search_d) ] }
             try: return old_surveys._extract_questions( closest_surveys[survey_id] )
             except KeyError:
-                status.append("could not find a survey in survey history")
+                status.append(other_messages["no_survey_2"])
                 raise UnableToFindSurveyError()
 
         if questions_after is None and questions_before is not None: return questions_before
@@ -518,6 +649,7 @@ old_surveys = unconditionally_setup_old_survey()
 --
 # x,y = debug(old_surveys=old_surveys)
 
-all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
+# all_files, all_file_data = conditionally_setup_fo_realzies_stuff()
 
-x = fo_realzies(old_surveys=old_surveys)
+# x = fo_realzies(old_surveys=old_surveys)
+# x = debug(old_surveys=old_surveys)
