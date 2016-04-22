@@ -12,7 +12,6 @@ class ChunkRegistry(DatabaseObject):
     DEFAULTS = {"study_id":REQUIRED,
                 "user_id":REQUIRED_STRING,
                 "data_type": "",
-                #todo: check datetime support in mongolia
                 "time_bin": REQUIRED,
                 "chunk_hash": None,
                 "chunk_path": REQUIRED_STRING,

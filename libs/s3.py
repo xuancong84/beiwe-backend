@@ -6,7 +6,7 @@ from boto.s3.key import Key
 from boto.s3.connection import OrdinaryCallingFormat 
 
 
-from config.constants import DEFAULT_S3_RETRIES
+from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
 from config.security import S3_BUCKET
 from httplib import IncompleteRead
 from libs import encryption, logging
@@ -87,6 +87,8 @@ def s3_list_files( prefix, get_live_iterable=False ):
     return [i.name.strip("/") for i in results]
 
 def s3_delete(key_path):
+    if CHUNKS_FOLDER not in key_path:
+        raise Exception("absolutely not deleting %s" % key_path)
     key = Key(_get_bucket(S3_BUCKET), key_path)
     key.delete()
 
