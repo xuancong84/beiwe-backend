@@ -145,7 +145,7 @@ def do_upload(file_paths_and_contents, data_type=None, forcibly_overwrite=False)
         try:
             timestamp_string = str( int( mktime( timestamp.timetuple( ) ) ) ) + "000"
         except AttributeError:
-            print "PROBLEM WITH TIMESTAME FROM: %s" % timings_path
+            print "PROBLEM WITH TIMESTAMP FROM: %s" % timings_path
             continue
         if len(timestamp_string) != 13:
             raise Exception("LOL! No.")
@@ -196,8 +196,7 @@ def get_data_for_raw_file_paths( timings_files ):
     # Pulls in (timings) files from s3
     pool = ThreadPool( 50 )
 
-    def batch_retrieve(
-            parameters ):  # need to handle parameters, ensure unicode
+    def batch_retrieve( parameters ):  # need to handle parameters, ensure unicode
         return s3_retrieve( *parameters, raw_path=True ).decode( "utf8" ), \
                parameters[0]
 
@@ -237,12 +236,22 @@ def get_file_paths_for_studies(list_of_study_id_strings):
     return [f.decode( "utf8" ) for f in files_list if f.count( '/' ) == 4]
 
 
+def remove_files_that_are_after_the_data_loss(file_list):
+    #the server is in utc time, this will be a utc datetime object
+    datetime_of_data_loss = datetime(year=2016,month=4,day=8, hour=22)
+    ret = []
+    for f in file_list:
+        unix_timestamp_int = int(f.split("/")[-1][:-4]) / 1000
+        if datetime.utcfromtimestamp(unix_timestamp_int) < datetime_of_data_loss:
+            ret.append(f)
+    return ret
+
 
 def do_everything(list_of_files):
     print "getting files"
-    files = get_data_for_raw_file_paths(list_of_files)
+    list_of_files = remove_files_that_are_after_the_data_loss( list_of_files )
     # info = do_run( files, old_surveys=old_surveys)
-    data = do_actually_run(files, old_surveys=old_surveys)
+    data = do_actually_run(list_of_files, old_surveys=old_surveys)
     do_upload(data, data_type="survey_answers", forcibly_overwrite=False)
 
 ################################# Data Reconstruction ##################################
