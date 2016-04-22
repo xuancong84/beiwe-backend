@@ -82,8 +82,9 @@ def reindex_study(study_id):
     study_id_string = str(study_id)
     FileProcessLock.lock()
     print "starting..."
-    #this line will raise an error if something is wrong with the data type
-    relevant_chunks = ChunksRegistry(study_id=study_id)
+    #FIXME: this line is awful, it cause the data loss
+    raise Exception("ELI YOU ARE DUMB!")
+    # relevant_chunks = ChunksRegistry(study_id=study_id)
     relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
     print "purging old data..."
     for chunk in relevant_chunks: chunk.remove()
