@@ -176,13 +176,9 @@ def register_user(OS_API=""):
         # the device's unique identifier) they user CAN reregister an existing
         # device, the unlock key they need to enter to at registration is their\
         # old password.
-        if OS_API == ANDROID_API:
+        # KG: 405 is good for IOS and Android, no need to check OS_API
             return abort(405)
-        if OS_API == IOS_API:
-            pass
-            #TODO: Keary. Insert return construction for proper iOS functionality here.
-        raise Exception("registration done gone wrong.")
-    
+
     # At this point the device has been checked for validity and will be
     # registered successfully.  Any errors after this point will be server errors
     # and return 500 codes
