@@ -29,7 +29,6 @@ def reindex_all_files_to_process():
     CHUNKED_DATA = s3_list_files(CHUNKS_FOLDER)
     print len(CHUNKED_DATA)
     pool.map(s3_delete, CHUNKED_DATA)
-    # NEVER NEVER EVER EVER delete files via chunk_path
     del CHUNKED_DATA
 
     print str(datetime.now()), "pulling new files to process..."
@@ -60,7 +59,6 @@ def reindex_specific_data_type(data_type):
 
     pool = ThreadPool(20)
     pool.map(s3_delete, relevant_indexed_files)
-    # NEVER NEVER EVER EVER delete files via chunk_path
 
     print "pulling files to process..."
     files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
@@ -93,7 +91,6 @@ def reindex_study(study_id):
 
     pool = ThreadPool(20)
     pool.map(s3_delete, relevant_indexed_files)
-    #NEVER NEVER EVER EVER delete files via chunk_path
     pool.close( )
     pool.terminate( )
 

@@ -66,6 +66,8 @@ def validate_registration( *args, **kwargs ):
     if not user.validate_password( request.values['password'] ): return False
     return True
 
+#TODO: Keary.  Please document the effect of this function. (I gather that it sets the
+#values that you stick into the iOS http requests.)
 def check_for_basic_auth( *args, **kwargs ):
     """Check if user exists, check if the provided passwords match"""
     auth = request.authorization

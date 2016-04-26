@@ -61,7 +61,7 @@ def decrypt_server(input_string, study_id):
 
 def decrypt_device_file(patient_id, data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
-
+    #This is a special handler for iOS file uploads.
     if type(data) is FileStorage:
         data = data.read()
     data = [line for line in data.split('\n') if line != "" ]

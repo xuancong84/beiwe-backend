@@ -1,4 +1,3 @@
-import os
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from config.constants import SURVEY_TYPES
 from db.user_models import Users
@@ -6,7 +5,7 @@ from mongolia.constants import ID_KEY
 
 
 class Study( DatabaseObject ):
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".studies"
+    PATH = "beiwe.studies"
     
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
@@ -88,6 +87,11 @@ class StudyDeviceSettings( DatabaseObject ):
                 "wifi":False,
                 "bluetooth":False,
                 "power_state":False,
+                #iOS-specific data streams
+                #TODO: Eli + Keary.  We need to test how android interacts with these
+                # new data types, if they cause android to crash when downloading
+                # surveys we need to stick these somewhere else. (Hopefully I
+                # implemented that with key value extraction and not naive iteration.)
                 "proximity":False,
                 "gyro": False,
                 "magnetometer": False,
@@ -107,6 +111,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "upload_data_files_frequency_seconds": 3600,
                 "voice_recording_max_time_length_seconds": 240,
                 "wifi_log_frequency_seconds": 300,
+                #iOS-specific timer variables
                 "gyro_off_duration_seconds": 600,
                 "gyro_on_duration_seconds": 60,
                 "magnetometer_off_duration_seconds": 600,
@@ -119,6 +124,7 @@ class StudyDeviceSettings( DatabaseObject ):
                 "consent_form_text": " I have read and understood the information about the study and all of my questions about the study have been answered by the study researchers.",
                 "survey_submit_success_toast_text": """Thank you for completing the survey.  A clinician will not see your answers immediately, so if you need help or are thinking about harming yourself, please contact your clinician.  You can also press the "Call My Clinician" button."""
             }
+
     @classmethod
     def create_default(cls):
         return StudyDeviceSettings.create(cls.DEFAULTS, random_id=True)
@@ -144,25 +150,12 @@ class Survey( DatabaseObject ):
         
     #TODO: Low priority. Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".surveys"
+    PATH = "beiwe.surveys"
     DEFAULTS = {"content": [],
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED,
                 "settings":{} }
-
-    #enhanced audio survey.   The following settings will be added to the settings dict
-    # "audio_survey_type" maps to either "compressed" or "raw"
-    # The app should default to a "compressed" survey if audio_survey_type is not present.
-    # "raw" should always be paired with the keyword "sample_rate", which should map to
-    #       an integer value.  Valid values are... 16000, 22050, and 44100.
-    #     (Those values may change, almost definitely this is an android limitation.)
-    #     (The app should default to 44100 if there is no sample_rate key, but this
-    #       case probably will not occur outside of testing.)
-    # "compressed" should always be paired with the keyword "bit_rate", which should
-    #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
-    #     (The app should default to 64 if no value is provided.  This will occur when
-    #       audio_survey_type is not provided.)
-
+    
     @classmethod
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:

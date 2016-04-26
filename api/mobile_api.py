@@ -62,12 +62,13 @@ def upload(OS_API=""):
         Provide the file name in a request parameter entitled "file_name". """
     patient_id = request.values['patient_id']
     user = User(patient_id)
-    if "file" in request.files:
-        uploaded_file = request.files['file']
-    elif "file" in request.values:
-        uploaded_file = request.values['file']
-    else:
-        uploaded_file = request.data
+
+    #Slightly different values for iOS vs Android behavior.
+    #TODO: Keary.  Please tag the lines below that are for ios and android
+    if "file" in request.files: uploaded_file = request.files['file']
+    elif "file" in request.values: uploaded_file = request.values['file']
+    else: uploaded_file = request.data
+
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
     if "crashlog" in file_name.lower():
