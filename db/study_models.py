@@ -1,3 +1,4 @@
+import os
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
 from config.constants import SURVEY_TYPES
 from db.user_models import Users
@@ -5,7 +6,7 @@ from mongolia.constants import ID_KEY
 
 
 class Study( DatabaseObject ):
-    PATH = "beiwe.studies"
+    PATH = os.getenv("MONGO_DB", "beiwe") + ".studies"
     
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
@@ -79,52 +80,51 @@ class StudyDeviceSettings( DatabaseObject ):
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
     # Ensure that any toggles displayed on the website using CHECKBOXES are enumerated in CHECKBOX_TOGGLES in constants.
-    DEFAULTS = {#device sensors (listeners)
-                "accelerometer":False,
-                "gps":False,
-                "calls":False,
-                "texts":False,
-                "wifi":False,
-                "bluetooth":False,
-                "power_state":False,
-                #iOS-specific data streams
-                #TODO: Eli + Keary.  We need to test how android interacts with these
-                # new data types, if they cause android to crash when downloading
-                # surveys we need to stick these somewhere else. (Hopefully I
-                # implemented that with key value extraction and not naive iteration.)
-                "proximity":False,
-                "gyro": False,
-                "magnetometer": False,
-                "devicemotion": False,
-                "reachability": False,
-                #timer variables
-                "accelerometer_off_duration_seconds": 10,
-                "accelerometer_on_duration_seconds": 10,
-                "bluetooth_on_duration_seconds": 60,
-                "bluetooth_total_duration_seconds": 300,
-                "bluetooth_global_offset_seconds": 0,
-                "check_for_new_surveys_frequency_seconds": 3600 * 6,
-                "create_new_data_files_frequency_seconds": 15 * 60,
-                "gps_off_duration_seconds": 600,
-                "gps_on_duration_seconds": 60,
-                "seconds_before_auto_logout": 600,
-                "upload_data_files_frequency_seconds": 3600,
-                "voice_recording_max_time_length_seconds": 240,
-                "wifi_log_frequency_seconds": 300,
-                #iOS-specific timer variables
-                "gyro_off_duration_seconds": 600,
-                "gyro_on_duration_seconds": 60,
-                "magnetometer_off_duration_seconds": 600,
-                "magnetometer_on_duration_seconds": 60,
-                "devicemotion_off_duration_seconds": 600,
-                "devicemotion_on_duration_seconds": 60,
-                #text strings
-                "about_page_text": "The Beiwe application runs on your phone and helps researchers collect information about your behaviors. Beiwe may ask you to fill out short surveys or to record your voice. It may collect information about your location (using phone GPS) and how much you move (using phone accelerometer). Beiwe may also monitor how much you use your phone for calling and texting and keep track of the people you communicate with. Importantly, Beiwe never records the names or phone numbers of anyone you communicate with. While it can tell if you call the same person more than once, it does not know who that person is. Beiwe also does not record the content of your text messages or phone calls. Beiwe may keep track of the different Wi-Fi networks and Bluetooth devices around your phone, but the names of those networks are replaced with random codes.\n\nAlthough Beiwe collects large amounts of data, the data is processed to protect your privacy. This means that it does not know your name, your phone number, or anything else that could identify you. Beiwe only knows you by an identification number. Because Beiwe does not know who you are, it cannot communicate with your clinician if you are ill or in danger. Researchers will not review the data Beiwe collects until the end of the study. To make it easier for you to connect with your clinician, the 'Call my Clinician' button appears at the bottom of every page.\n\nBeiwe was conceived and designed by Dr. Jukka-Pekka 'JP' Onnela at the Harvard T.H. Chan School of Public Health. Development of the Beiwe smartphone application and data analysis software is funded by NIH grant 1DP2MH103909-01 to Dr. Onnela. The smartphone application was built by Zagaran, Inc., in Cambridge, Massachusetts.",
-                "call_clinician_button_text": "Call My Clinician",
-                "consent_form_text": " I have read and understood the information about the study and all of my questions about the study have been answered by the study researchers.",
-                "survey_submit_success_toast_text": """Thank you for completing the survey.  A clinician will not see your answers immediately, so if you need help or are thinking about harming yourself, please contact your clinician.  You can also press the "Call My Clinician" button."""
-            }
-
+    DEFAULTS = {  # device sensors (listeners)
+        "accelerometer":False,
+        "gps":False,
+        "calls":False,
+        "texts":False,
+        "wifi":False,
+        "bluetooth":False,
+        "power_state":False,
+        # iOS-specific data streams
+        # TODO: Eli + Keary.  We need to test how android interacts with these
+        # new data types, if they cause android to crash when downloading
+        # surveys we need to stick these somewhere else. (Hopefully I
+        # implemented that with key value extraction and not naive iteration.)
+        "proximity":False,
+        "gyro":False,
+        "magnetometer":False,
+        "devicemotion":False,
+        "reachability":False,
+        # timer variables
+        "accelerometer_off_duration_seconds":10,
+        "accelerometer_on_duration_seconds":10,
+        "bluetooth_on_duration_seconds":60,
+        "bluetooth_total_duration_seconds":300,
+        "bluetooth_global_offset_seconds":0,
+        "check_for_new_surveys_frequency_seconds":3600 * 6,
+        "create_new_data_files_frequency_seconds":15 * 60,
+        "gps_off_duration_seconds":600,
+        "gps_on_duration_seconds":60,
+        "seconds_before_auto_logout":600,
+        "upload_data_files_frequency_seconds":3600,
+        "voice_recording_max_time_length_seconds":240,
+        "wifi_log_frequency_seconds":300,
+        # iOS-specific timer variables
+        "gyro_off_duration_seconds":600,
+        "gyro_on_duration_seconds":60,
+        "magnetometer_off_duration_seconds":600,
+        "magnetometer_on_duration_seconds":60,
+        "devicemotion_off_duration_seconds":600,
+        "devicemotion_on_duration_seconds":60,
+        # text strings
+        "about_page_text":"The Beiwe application runs on your phone and helps researchers collect information about your behaviors. Beiwe may ask you to fill out short surveys or to record your voice. It may collect information about your location (using phone GPS) and how much you move (using phone accelerometer). Beiwe may also monitor how much you use your phone for calling and texting and keep track of the people you communicate with. Importantly, Beiwe never records the names or phone numbers of anyone you communicate with. While it can tell if you call the same person more than once, it does not know who that person is. Beiwe also does not record the content of your text messages or phone calls. Beiwe may keep track of the different Wi-Fi networks and Bluetooth devices around your phone, but the names of those networks are replaced with random codes.\n\nAlthough Beiwe collects large amounts of data, the data is processed to protect your privacy. This means that it does not know your name, your phone number, or anything else that could identify you. Beiwe only knows you by an identification number. Because Beiwe does not know who you are, it cannot communicate with your clinician if you are ill or in danger. Researchers will not review the data Beiwe collects until the end of the study. To make it easier for you to connect with your clinician, the 'Call my Clinician' button appears at the bottom of every page.\n\nBeiwe was conceived and designed by Dr. Jukka-Pekka 'JP' Onnela at the Harvard T.H. Chan School of Public Health. Development of the Beiwe smartphone application and data analysis software is funded by NIH grant 1DP2MH103909-01 to Dr. Onnela. The smartphone application was built by Zagaran, Inc., in Cambridge, Massachusetts.",
+        "call_clinician_button_text":"Call My Clinician",
+        "consent_form_text":" I have read and understood the information about the study and all of my questions about the study have been answered by the study researchers.",
+        "survey_submit_success_toast_text":"""Thank you for completing the survey.  A clinician will not see your answers immediately, so if you need help or are thinking about harming yourself, please contact your clinician.  You can also press the "Call My Clinician" button."""
+    }
     @classmethod
     def create_default(cls):
         return StudyDeviceSettings.create(cls.DEFAULTS, random_id=True)
@@ -150,12 +150,25 @@ class Survey( DatabaseObject ):
         
     #TODO: Low priority. Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
-    PATH = "beiwe.surveys"
+    PATH = os.getenv("MONGO_DB", "beiwe") + ".surveys"
     DEFAULTS = {"content": [],
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED,
                 "settings":{} }
-    
+
+    #enhanced audio survey.   The following settings will be added to the settings dict
+    # "audio_survey_type" maps to either "compressed" or "raw"
+    # The app should default to a "compressed" survey if audio_survey_type is not present.
+    # "raw" should always be paired with the keyword "sample_rate", which should map to
+    #       an integer value.  Valid values are... 16000, 22050, and 44100.
+    #     (Those values may change, almost definitely this is an android limitation.)
+    #     (The app should default to 44100 if there is no sample_rate key, but this
+    #       case probably will not occur outside of testing.)
+    # "compressed" should always be paired with the keyword "bit_rate", which should
+    #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
+    #     (The app should default to 64 if no value is provided.  This will occur when
+    #       audio_survey_type is not provided.)
+
     @classmethod
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
