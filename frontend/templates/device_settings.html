@@ -257,6 +257,25 @@
                     <textarea rows="3" cols="120" id="survey_submit_success_toast_text" name="survey_submit_success_toast_text">{{settings['survey_submit_success_toast_text']}}</textarea>
                 </div>
             </div>
+            {% for section, section_title in { "welcome": "Welcome", "data_gathering": "Data Gathering", "privacy": "Privacy", "time_commitment": "Time Commitment",
+                "study_survey": "Study Survey", "study_tasks": "Study Tasks", "withdrawing": "Withdrawing" }.iteritems() %}
+                <div class="form-group">
+                    <div class="row">
+                        <label for="{{section}}_summary">iOS consent {{section_title}} text:</label>
+                    </div>
+                    <div class="row">
+                        <textarea rows="4" cols="120" id="{{section}}_summary" name="consent_sections.{{section}}.text">{{settings['consent_sections'][section]['text']}}</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <label for="{{section}}_more">iOS consent {{section_title}} learn more:</label>
+                    </div>
+                    <div class="row">
+                        <textarea rows="4" cols="120" id="{{section}}_more" name="consent_sections.{{section}}.more">{{settings['consent_sections'][section]['more']}}</textarea>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
     <button class="btn btn-primary btn-block" type="submit">Submit</button>
