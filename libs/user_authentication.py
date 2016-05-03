@@ -66,9 +66,20 @@ def validate_registration( *args, **kwargs ):
     if not user.validate_password( request.values['password'] ): return False
     return True
 
-#TODO: Keary.  Please document the effect of this function. (I gather that it sets the
-#values that you stick into the iOS http requests.)
 def check_for_basic_auth( *args, **kwargs ):
+    """If basic authentication exists and is in the correct format, move the
+     patient_id, device_id and password into request.values for processing by the
+     existing user authentication functions"""
+    # Flask automatically parses a Basic authentication header into request.authorization
+    #
+    # If this is set, and the username portion is in the form xxxxxx@yyyyyyy, then assume
+    # this is patient_id@device_id.  
+    #
+    # Parse out the patient_id, device_id from username, and then store patient_id, device_id and
+    # password as if they were passed as parameters (into request.values)
+    #
+    # Note:  Because request.values is immutable in Flask, copy it and replace with
+    # a mutable dict first.
     """Check if user exists, check if the provided passwords match"""
     auth = request.authorization
     if not auth:
