@@ -296,7 +296,7 @@ def fix_wifi_csv(header, rows_list, file_name):
     time_stamp = file_name.rsplit("/", 1)[-1][:-4]
     for row in rows_list[:-1]: #uhg, the last row is a new line.
         row = row.insert(0, time_stamp)
-    rows_list.pop(-1) #remove last row
+    if rows_list: rows_list.pop(-1)  #remove last row (encountered an empty wifi log on sunday may 8 2016)
     return "timestamp," + header
 
 def fix_app_log_file(file_contents, file_path):

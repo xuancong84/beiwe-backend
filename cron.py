@@ -15,20 +15,19 @@ TASKS = {
     FIVE_MINUTES: [],
     HOURLY: [process_file_chunks],
     FOUR_HOURLY: [],
-    DAILY: [run_backup],
-    WEEKLY: [optimize_db]
+    DAILY: [optimize_db, run_backup],
+    WEEKLY: []
 }
 
 TIME_LIMITS = {
     FIVE_MINUTES: 180, # 3 minutes
-    HOURLY: 3600,      # 60 minutes
-    FOUR_HOURLY: 5400, # 1.5 hours
+    HOURLY: 60*40,      # 40 minutes
+    FOUR_HOURLY: 60*60*2, # 2 hours
     DAILY: 43200,      # 12 hours
     WEEKLY: 86400,     # 1 day
 }
 
 VALID_ARGS = [FIVE_MINUTES, HOURLY, FOUR_HOURLY, DAILY, WEEKLY]
-
 
 if __name__ == "__main__":
     if len(argv) <= 1:
@@ -38,5 +37,4 @@ if __name__ == "__main__":
         run_tasks(TASKS[cron_type], TIME_LIMITS[cron_type], cron_type)
     else:
         raise Exception("Invalid argument to cron\n")
-    
     
