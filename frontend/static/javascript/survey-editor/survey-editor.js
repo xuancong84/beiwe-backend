@@ -6,14 +6,11 @@ var questions = [];
 
 $(document).ready(function() {
     questions = JSON.parse(survey_content);
-    if (tracking_survey) {
-        renderQuestionsList();
-    };
+    if (tracking_survey) { renderQuestionsList(); };
     renderSchedule();
-
     $('.schedule-timepicker').timepicker();
-
     toggle_randomize_inputs_visibility();
+    audioSurveyTypeChange( $("[name='audio_survey_type']:checked").val() )
     $('#randomize').change(toggle_randomize_inputs_visibility);
 });
 
@@ -25,6 +22,7 @@ function toggle_randomize_inputs_visibility() {
         $('#additional_randomization_inputs').hide();
     };
 }
+
 
 
 // Return the hour number (in 24-hour time) that the user selected in the form
