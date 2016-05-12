@@ -60,7 +60,12 @@ function get_survey_settings() {
                 'randomize_with_memory': randomize_with_memory,
                 'number_of_random_questions': number_of_random_questions};
     } else {
-        return {'trigger_on_first_download': trigger_on_first_download};
+        var audioSurveyType = $("[name='audio_survey_type']:checked").val()
+        ret = {'trigger_on_first_download': trigger_on_first_download,
+                'audio_survey_type': audioSurveyType };
+        if (audioSurveyType == 'raw') { ret['sample_rate'] = $('#raw_options').val(); }
+        else { ret['bit_rate'] = $('#raw_options').val(); }
+        return ret;
     };
 }
 
@@ -132,8 +137,7 @@ function renderQuestionsList() {
 
     // Insert the template into the page's HTML
     $("#listOfCurrentQuestions").html(htmlQuestion);
-
-    $('#number_of_total_questions').html(questions.length)
+    $('#number_of_total_questions').html(questions.length);
 }
 
 // Get the question object from the Edit Question modal, and append it to the questions array
@@ -148,6 +152,18 @@ function replaceQuestion(index) {
     var questionObject = getQuestionObjectFromModal();
     questions.splice(index, 1, questionObject);
     renderQuestionsList();
+}
+
+//TODO CDUCMENCDHIsdcoihh
+function audioSurveyTypeChange(audio_survey_type) {
+    if (audio_survey_type == 'raw') {
+        $("#compressed_options").hide();
+        $("#raw_options").show();
+    }
+    else {
+        $("#raw_options").hide();
+        $("#compressed_options").show();
+    }
 }
 
 // Open the Edit Question modal, and pre-populate it with the data from the selected question
@@ -178,3 +194,4 @@ function moveQuestionDown(index) {
         renderQuestionsList();
     };
 }
+
