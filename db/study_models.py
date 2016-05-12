@@ -142,9 +142,29 @@ class Survey( DatabaseObject ):
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
-        survey = { "survey_type": survey_type }
+
+        if survey_type == "audio_survey":
+            survey = {"survey_type":survey_type,
+                      "audio_survey_type":"compressed",
+                      "bit_rate":64000,
+                      "sample_rate":44100}
+        else: survey = { "survey_type": survey_type }
         return Survey.create(survey, random_id=True)
-    
+
+    #enhanced audio survey.   The following settings will be added to the settings dict
+    # "audio_survey_type" maps to either "compressed" or "raw"
+    # The app should default to a "compressed" survey if audio_survey_type is not present.
+    # "raw" should always be paired with the keyword "sample_rate", which should map to
+    #       an integer value.  Valid values are... 16000, 22050, and 44100.
+    #     (Those values may change, almost definitely this is an android limitation.)
+    #     (The app should default to 44100 if there is no sample_rate key, but this
+    #       case probably will not occur outside of testing.)
+    # "compressed" should always be paired with the keyword "bit_rate", which should
+    #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
+    #     (The app should default to 64 if no value is provided.  This will occur when
+    #       audio_survey_type is not provided.)
+
+
     #debugging function
 #     def set_alarms_thirty_seconds(self):
 #         now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
