@@ -9,8 +9,8 @@ $(document).ready(function() {
     if (tracking_survey) { renderQuestionsList(); };
     renderSchedule();
     $('.schedule-timepicker').timepicker();
-    toggle_randomize_inputs_visibility();
     audioSurveyTypeChange( $("[name='audio_survey_type']:checked").val() )
+    toggle_randomize_inputs_visibility();
     $('#randomize').change(toggle_randomize_inputs_visibility);
 });
 
