@@ -137,17 +137,18 @@ class Survey( DatabaseObject ):
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED,
                 "settings":{} }
-    
+
+
     @classmethod
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
 
         if survey_type == "audio_survey":
-            survey = {"survey_type":survey_type,
-                      "audio_survey_type":"compressed",
-                      "bit_rate":64000,
-                      "sample_rate":44100}
+            survey = {"survey_type":survey_type}
+            survey["settings"] = {"audio_survey_type":"compressed",
+                                  "bit_rate":64000, "sample_rate":44100}
+
         else: survey = { "survey_type": survey_type }
         return Survey.create(survey, random_id=True)
 

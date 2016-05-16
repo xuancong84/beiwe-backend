@@ -16,7 +16,7 @@ $(document).ready(function() {
 
 
 function toggle_randomize_inputs_visibility() {
-    if (document.getElementById('randomize').checked) {
+    if (document.getElementById('randomize').checked) { //this will error on the audio page, its fine
         $('#additional_randomization_inputs').show();
     } else {
         $('#additional_randomization_inputs').hide();
@@ -61,8 +61,8 @@ function get_survey_settings() {
         var audioSurveyType = $("[name='audio_survey_type']:checked").val()
         ret = {'trigger_on_first_download': trigger_on_first_download,
                 'audio_survey_type': audioSurveyType };
-        if (audioSurveyType == 'raw') { ret['sample_rate'] = $('#raw_options').val(); }
-        else { ret['bit_rate'] = $('#raw_options').val(); }
+        if (audioSurveyType == 'raw') { ret['sample_rate'] = parseInt($('#raw_options').val()); }
+        if (audioSurveyType == 'compressed') { ret['bit_rate'] = parseInt($('#compressed_options').val()); }
         return ret;
     };
 }

@@ -24,7 +24,6 @@
 
 {% block content %}
 
-
     <div class="container">
 
       <div class="span12">
@@ -58,11 +57,43 @@
               </button>
         	{% include 'randomize_questions.html' %}
           </div>
+
         {% elif survey.survey_type == 'audio_survey' %}
           <div class="row">
             <h3>Voice Recording Prompt</h3>
             <input id="voice_recording_prompt_text_input" type="text" class="form-control" value="{% if survey.content[0] %}{{survey.content[0]['prompt']}}{% endif %}">
           </div>
+          <hr>
+          <div class="row">
+            <h3>Technical Settings</h3>
+            <div class="well well-sm">
+              <p>Audio recordings contain a single channel and are made using the active microphone on the device, which may may be on a connected headset.  Older versions of the Android Beiwe App will only make compressed recordings at 64Kbps.</p>
+
+              <p><b>Compressed</b> audio files use AAC compression. 64Kbps should be sufficient for a vocal recording under nearly all situations, and produces roughly <b>one half of a megabyte </b> of data for each minute of audio. The sample rate of a compressed recording is always 44,100Hz. </p>
+
+              <p><b>Uncompressed</b> audio recordings produce wav files. A wav file with a sample rate of 44,100 ("CD quality") has a bit rate equivalence of 706Kbps, or roughly <b>five megabytes</b> of data for each minute of audio.</p>
+              </div>
+
+            <input type="radio" name="audio_survey_type" id="radio_compressed" value="compressed" onclick="audioSurveyTypeChange('compressed')" {{ 'checked' if survey.settings['audio_survey_type'] == 'compressed' }}>
+            <label for="radio_compressed"> Compressed audio&nbsp;&nbsp;&nbsp; </label>
+            
+            <input type="radio" name="audio_survey_type" value="raw" id="radio_uncompressed" onclick="audioSurveyTypeChange('raw')"  {{ 'checked' if survey.settings['audio_survey_type'] == 'raw' }} > 
+            <label for="radio_uncompressed"> Uncompressed audio&nbsp;&nbsp;&nbsp; </label>
+            
+            <select id="compressed_options" name="bit_rate" >
+                <option value="32000" {{ 'selected' if survey.settings['bit_rate'] == 32000 }}>32Kbps</option>
+                <option value="64000" {{ 'selected' if survey.settings['bit_rate'] == 64000 or not survey.settings['bit_rate'] }}>64Kbps</option>
+                <option value="96000" {{ 'selected' if survey.settings['bit_rate'] == 96000 }}>96Kbps</option>
+                <option value="128000" {{ 'selected' if survey.settings['bit_rate'] == 128000 }}>128Kbps</option>
+            </select>
+
+            <select id="raw_options" name="sample_rate" >
+                <option value="16000" {{ 'selected' if survey.settings['sample_rate'] == 16000 }}>16,000Hz</option>
+                <option value="22050" {{ 'selected' if survey.settings['sample_rate'] == 22050 }}>22,050Hz</option>
+                <option value="44100" {{ 'selected' if survey.settings['sample_rate'] == 44100 or not survey.settings['sample_rate'] }}>44,100Hz</option>      
+            </select>
+        </div>
+        
         {% endif %}
 
         <hr><br>
