@@ -43,30 +43,31 @@
 
     <h3> Beta Status: </h3>
       <div class="well">
-    {# this text is going to change whenever we upload a new version of the app, keep it simple #}
-       <p><b> There is currently no Beta version of the Beiwe app. </b> </p> 
-    {#
-      <b>The following features and bugfixes are ready for testing: </b>
-      <p> • Feature: additional device-identifier fields are included at device registration.</p>
-      <p> • Bug Fix: a change in Android 5.1 to MMS/SMS caused the Beiwe app to unpredictably crash, this has been fixed. </p>
-      <p> • Feature: The Beiwe app now has a built-in crash reporting capability. All crashes are logged and sent to the developers the next time the app uploads files. <br>
-          Note: the Beiwe app no longer reports to the user that it has stopped working, instead the app automatically restarts itself. The Beiwe service should always be visible in your device's running services list. </p>
-      <p> • Known Issue: due to an implementation detail on the server you may lose device identifier information if you register/re-register using the beta version of the app, and then re-register using the current production version of app, all with the same user.  The best way to avoid this issue is to create new users that will only run this beta and future versions of the app. </p>
-    </div>
-      <div class="row">
-        <div class="col-xs-12">
-          <a href="/download_beta" class="btn btn-primary btn-block">Download the BETA version of the Beiwe app </a>
-          <div class="text-center">
-            You must be logged in to download either of the Beta apps.
+      {# this text is going to change whenever we upload a new version of the app, keep it simple #}
+      {# <p><b> There is currently no Beta version of the Beiwe app. </b> </p>  #}
+        <b> The current version of the Beiwe Beta includes updates for compatibility with Android 6.</b>
+        <p> <b> 4/25/16: Beiwe version 5. </b> There are no new features enabled, this is a compatibility release.
+        {# <b>The following features and bugfixes are ready for testing: </b>
+        <p> • Feature: additional device-identifier fields are included at device registration.</p>
+        <p> • Bug Fix: a change in Android 5.1 to MMS/SMS caused the Beiwe app to unpredictably crash, this has been fixed. </p>
+        <p> • Feature: The Beiwe app now has a built-in crash reporting capability. All crashes are logged and sent to the developers the next time the app uploads files. <br>
+            Note: the Beiwe app no longer reports to the user that it has stopped working, instead the app automatically restarts itself. The Beiwe service should always be visible in your device's running services list. </p>
+        <p> • Known Issue: due to an implementation detail on the server you may lose device identifier information if you register/re-register using the beta version of the app, and then re-register using the current production version of app, all with the same user.  The best way to avoid this issue is to create new users that will only run this beta and future versions of the app. </p> #}
+      </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <a href="/download_beta" class="btn btn-primary btn-block">Download the BETA version of the Beiwe app </a>
+            <div class="text-center">
+              You must be logged in to download either of the Beta apps.
+            </div>
           </div>
         </div>
-      </div>
       <div class="row">
         <div class="col-xs-12">
           <a href="/download_beta_debug" class="btn btn-primary btn-block">Download the BETA version of the Study Debugger </a>
         </div>
       </div>
-      #}
+      
     </div>
 
     <h3> Changelog: </h3>
