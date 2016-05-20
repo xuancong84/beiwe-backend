@@ -1,7 +1,5 @@
-from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED #, ID_KEY
+from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from config.constants import SURVEY_TYPES
-from db.user_models import Users
-from mongolia.constants import ID_KEY
 
 
 class Study( DatabaseObject ):
@@ -74,7 +72,7 @@ class Study( DatabaseObject ):
 class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".device_settings"
+    PATH = "beiwe.device_settings"
     #If anything here changes...
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
@@ -168,14 +166,37 @@ class Survey( DatabaseObject ):
     #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
     #     (The app should default to 64 if no value is provided.  This will occur when
     #       audio_survey_type is not provided.)
+    #Example settings dict parameters:
+    #   'settings': {'audio_survey_type': 'compressed', 'bit_rate': 64000}
+
 
     @classmethod
     def create_default_survey(cls, survey_type):
         if survey_type not in SURVEY_TYPES:
             raise SurveyTypeError("%s is not a valid survey type" % survey_type)
-        survey = { "survey_type": survey_type }
+
+        if survey_type == "audio_survey":
+            survey = {"survey_type":survey_type}
+            survey["settings"] = {"audio_survey_type":"compressed",
+                                  "bit_rate":64000, "sample_rate":44100}
+
+        else: survey = { "survey_type": survey_type }
         return Survey.create(survey, random_id=True)
-    
+
+    #enhanced audio survey.   The following settings will be added to the settings dict
+    # "audio_survey_type" maps to either "compressed" or "raw"
+    # The app should default to a "compressed" survey if audio_survey_type is not present.
+    # "raw" should always be paired with the keyword "sample_rate", which should map to
+    #       an integer value.  Valid values are... 16000, 22050, and 44100.
+    #     (Those values may change, almost definitely this is an android limitation.)
+    #     (The app should default to 44100 if there is no sample_rate key, but this
+    #       case probably will not occur outside of testing.)
+    # "compressed" should always be paired with the keyword "bit_rate", which should
+    #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
+    #     (The app should default to 64 if no value is provided.  This will occur when
+    #       audio_survey_type is not provided.)
+
+
     #debugging function
 #     def set_alarms_thirty_seconds(self):
 #         now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
