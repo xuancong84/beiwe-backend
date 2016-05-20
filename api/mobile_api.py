@@ -72,7 +72,8 @@ def upload(OS_API=""):
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
     if "crashlog" in file_name.lower():
-        email_system_administrators(uploaded_file, "Beiwe Android Crash Log",
+        email_system_administrators(uploaded_file,
+                                    "Beiwe Android Crash Log: %s" % user._id,
                                     source_email="android_errors@studies.beiwe.org")
         return render_template('blank.html'), 200
 
