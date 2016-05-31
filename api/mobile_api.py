@@ -180,6 +180,14 @@ def register_user(OS_API=""):
         # KG: 405 is good for IOS and Android, no need to check OS_API
             return abort(405)
 
+    if user['os_type'] is not None and user['os_type'] != OS_API:
+        # CASE: this patient has registered, but with a different device type
+        # To keep the CSV munging code sane, don't allow this...
+        #TODO: Eli.  KG: Not sure what the correct error handling is here.  Similar to the above...
+        log_error( Exception("register error"), "Attempt to register same patient id on iOS and Android" )
+        return abort(405)
+
+
     # At this point the device has been checked for validity and will be
     # registered successfully.  Any errors after this point will be server errors
     # and return 500 codes
@@ -202,6 +210,7 @@ def register_user(OS_API=""):
 
     # set up device.
     user.set_device( device_id )
+    user.set_os_type( OS_API)
     User(patient_id).set_password(request.values['new_password'])
     device_settings = Study(study_id).get_study_device_settings()
     device_settings.pop('_id', None)

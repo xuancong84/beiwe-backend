@@ -25,10 +25,11 @@ class User( DatabaseObject ):
     DEFAULTS = { "password":REQUIRED,
                 'device_id':None,
                 'salt':REQUIRED,
-                'study_id': REQUIRED }
+                'study_id':REQUIRED,
+                'os_type': None }
     
     @classmethod
-    def create(cls, study_id):
+    def create(cls, study_id, os):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
         if User(patient_id): return User.create() #TODO: Eli. check that this is correct? create a user if a user with that name (id) already exists?
@@ -59,7 +60,12 @@ class User( DatabaseObject ):
         """ Sets the device id to the new value"""
         self['device_id'] =  device_id
         self.save()
-    
+
+    def set_os_type(self, os_type):
+        """ Sets the os_type to the new value"""
+        self['os_type'] =  os_type
+        self.save()
+
     def clear_device(self):
         """ Clears the device entry."""
         self['device_id'] =  None
