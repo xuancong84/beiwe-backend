@@ -6,7 +6,7 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
-                              PROXIMITY, GYRO, MAGNETOMETER, 
+                              PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API, IOS_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES)
 from cronutils.error_handler import ErrorHandler
@@ -15,6 +15,7 @@ from multiprocessing.pool import ThreadPool
 
 from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry,
                                    FileProcessLock)
+from db.user_models import User
 
 from libs.s3 import s3_retrieve, s3_upload
 
@@ -258,12 +259,17 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
     """ Constructs a binified dict of a given list of a csv rows,
         catches csv files with known problems and runs the correct logic.
         Returns None If the csv has no data in it. """
-    if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
-    header, csv_rows_list = csv_to_list(file_contents)
-    if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
-    if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
-    if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
-    if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
+    user = User(user_id)
+    if user['os_type'] == ANDROID_API:
+        if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
+        header, csv_rows_list = csv_to_list(file_contents)
+        if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
+        if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
+        if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
+        if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
+    else:
+        header, csv_rows_list = csv_to_list(file_contents)
+        #stick fixes here.
     #TODO: this is where I stick the strip trailing and leading whitespace per header element.
     header = ",".join([column_name.strip() for column_name in header.split(",")])
     if csv_rows_list:
@@ -307,7 +313,7 @@ def fix_wifi_csv(header, rows_list, file_name):
     return "timestamp," + header
 
 def fix_app_log_file(file_contents, file_path):
-    """ The log file is less of a csv than it is a time enumerated list of 
+    """ The log file is less of a csv than it is a time enumerated list of
         events, with the time code preceding each row.
         We insert a base value, a new row stating that a new log file was created,
         which allows us to guarantee at least one timestamp in the file."""
@@ -330,7 +336,7 @@ def fix_app_log_file(file_contents, file_path):
                 "our not-quite-race-condition" == row[:28] or
                 "accelSensorManager" in row[:18] or #this actually covers 2 cases
                 "a sessionactivity tried to clear the" == row[:36] ):
-                #Just drop matches to the above lines 
+                #Just drop matches to the above lines
                 continue
             raise
     return "timestamp, event\n" + "\n".join(",".join(row) for row in new_rows)
