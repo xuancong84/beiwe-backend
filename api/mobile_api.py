@@ -185,7 +185,7 @@ def register_user(OS_API=""):
         # To keep the CSV munging code sane, don't allow this...
         #TODO: Eli.  KG: Not sure what the correct error handling is here.  Similar to the above...
         log_error( Exception("register error"), "Attempt to register same patient id on iOS and Android" )
-        return abort(405)
+        return abort(400)
 
 
     # At this point the device has been checked for validity and will be
