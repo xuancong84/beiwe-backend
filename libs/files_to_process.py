@@ -260,16 +260,18 @@ def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
         catches csv files with known problems and runs the correct logic.
         Returns None If the csv has no data in it. """
     user = User(user_id)
-    if user['os_type'] == ANDROID_API:
+    if user['os_type'] == ANDROID_API: #Do fixes for android
         if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
         header, csv_rows_list = csv_to_list(file_contents)
         if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
         if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
-        if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
-        if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
-    else:
+    else: #do fixes for ios
         header, csv_rows_list = csv_to_list(file_contents)
-        #stick fixes here.
+
+    # And do these fixes for data regardless of source.
+    if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
+    if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
+
     #TODO: this is where I stick the strip trailing and leading whitespace per header element.
     header = ",".join([column_name.strip() for column_name in header.split(",")])
     if csv_rows_list:
