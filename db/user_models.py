@@ -29,7 +29,7 @@ class User( DatabaseObject ):
                 'os_type': None }
     
     @classmethod
-    def create(cls, study_id, os):
+    def create(cls, study_id):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
         if User(patient_id): return User.create() #TODO: Eli. check that this is correct? create a user if a user with that name (id) already exists?
