@@ -64,7 +64,10 @@ def upload(OS_API=""):
     user = User(patient_id)
 
     #Slightly different values for iOS vs Android behavior.
-    #TODO: Keary.  Please tag the lines below that are for ios and android
+    #Android sends the file data as standard form post parameter (request.values)
+    #iOS sends the file as a multipart upload (so ends up in request.files)
+    #if neither is found, consider the "body" of the post the file
+    #("body" post is not currently used by any client, only here for completeness)
     if "file" in request.files: uploaded_file = request.files['file']
     elif "file" in request.values: uploaded_file = request.values['file']
     else: uploaded_file = request.data
