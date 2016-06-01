@@ -18,7 +18,7 @@ class User( DatabaseObject ):
         random number generator.  The sha256 check duplicates the storage of the
         password on the mobile device, so that the user's password is never stored
         in a reversible manner. """
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".users"
+    PATH = "beiwe.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.
     # We are using the patient's assigned ID as a unique Id.
@@ -89,7 +89,7 @@ class Users( DatabaseCollection ):
 #############################################################################"""
 
 class Admin( DatabaseObject ):
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".admins"
+    PATH = "beiwe.admins"
     
     DEFAULTS = { "password":REQUIRED, 'salt':REQUIRED, "system_admin":REQUIRED,
                 "access_key_id":None, "access_key_secret":None,

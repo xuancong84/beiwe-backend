@@ -4,7 +4,7 @@ from config.constants import SURVEY_TYPES
 
 
 class Study( DatabaseObject ):
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".studies"
+    PATH = "beiwe.studies"
     
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
@@ -73,7 +73,7 @@ class Study( DatabaseObject ):
 class StudyDeviceSettings( DatabaseObject ):
     """ The DeviceSettings database contains the structure that defines
         settings pushed to devices of users in of a study."""
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".device_settings"
+    PATH = "beiwe.device_settings"
     #If anything here changes...
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
@@ -146,7 +146,7 @@ class Survey( DatabaseObject ):
         
     #TODO: Low priority. Josh. define / document the survey json survey format you created.
     # it doesn't need to be in this document, but this should say where to find it.
-    PATH = os.getenv("MONGO_DB", "beiwe") + ".surveys"
+    PATH = "beiwe.surveys"
     DEFAULTS = {"content": [],
                 "timings": [ [], [], [], [], [], [], [] ],
                 "survey_type": REQUIRED,
