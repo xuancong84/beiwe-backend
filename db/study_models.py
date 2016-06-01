@@ -87,10 +87,6 @@ class StudyDeviceSettings( DatabaseObject ):
         "bluetooth":False,
         "power_state":False,
         # iOS-specific data streams
-        # TODO: Eli + Keary.  We need to test how android interacts with these
-        # new data types, if they cause android to crash when downloading
-        # surveys we need to stick these somewhere else. (Hopefully I
-        # implemented that with key value extraction and not naive iteration.)
         "proximity":False,
         "gyro":False,
         "magnetometer":False,

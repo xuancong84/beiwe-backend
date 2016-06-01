@@ -118,7 +118,6 @@ def upload(OS_API=""):
 ############################## Registration ####################################
 ################################################################################
 
-#TODO: Keary. Point iOS at /register_user/ios/ and stick the new logic according to the TODOs below
 @mobile_api.route('/register_user', methods=['GET', 'POST'])
 @mobile_api.route( '/register_user/ios/', methods=['GET', 'POST'] )
 @determine_os_api
@@ -163,11 +162,6 @@ def register_user(OS_API=""):
     user = User(patient_id)
     study_id = user['study_id']
 
-    #TODO: Keary. you may have hooked in to the if block below, if so shift the logic (if possible) into the return 405  in the block after this one
-    if brand.lower() == "apple":
-        #TODO: implement ios-specific logic. (possibly a diffirent function entirely?)
-        pass
-
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
         # CASE: this patient has a registered a device already and it does not
         # match this device.  They need to contact the study and unregister
@@ -181,12 +175,10 @@ def register_user(OS_API=""):
             return abort(405)
 
     if user['os_type'] is not None and user['os_type'] != OS_API:
-        # CASE: this patient has registered, but with a different device type
-        # To keep the CSV munging code sane, don't allow this...
-        #TODO: Eli.  KG: Not sure what the correct error handling is here.  Similar to the above...
-        log_error( Exception("register error"), "Attempt to register same patient id on iOS and Android" )
+        # CASE: this patient has registered, but the user was previously registered
+        # with a different device type. To keep the CSV munging code sane and data
+        # consistent (don't cross the iOS and Android data streams!) we disallow it.
         return abort(400)
-
 
     # At this point the device has been checked for validity and will be
     # registered successfully.  Any errors after this point will be server errors
