@@ -119,6 +119,6 @@ def download_beta():
 def download_beta_debug():
     return send_file("Beiwe_beta_debug.apk", as_attachment=True)
 
-@admin_api.route("/privacy_policy")`
+@admin_api.route("/privacy_policy")
 def download_privacy_policy():
     return send_file("Beiwe Data Privacy and Security.pdf", as_attachment=True)
