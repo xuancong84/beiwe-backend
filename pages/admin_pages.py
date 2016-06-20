@@ -106,8 +106,14 @@ def reset_download_api_credentials():
     admin = Admin(session['admin_username'])
     access_key, secret_key = admin.reset_access_credentials()
     msg = """<h3>Your Data-Download API access credentials have been reset!</h3>
-        <p>Your new <b>Access Key</b> is: %s</p>
-        <p>Your new <b>Secret Key</b> is: %s</p>
+        <p>Your new <b>Access Key</b> is: 
+          <div class="container-fluid">
+            <textarea rows="1" cols="85" readonly="readonly" onclick="this.focus();this.select()">%s</textarea></p>
+          </div>
+        <p>Your new <b>Secret Key</b> is:
+          <div class="container-fluid">
+            <textarea rows="1" cols="85" readonly="readonly" onclick="this.focus();this.select()">%s</textarea></p>
+          </div>
         <p>Please record these somewhere; they will not be shown again!</p>""" \
         % (access_key, secret_key)
     flash(Markup(msg), 'warning')
