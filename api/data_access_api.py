@@ -198,51 +198,52 @@ def batch_retrieve_for_api_request(chunk):
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
 
-
-@data_access_api.route("/data-upload-apiv1", methods=['POST'])
-def data_upload():
-    print "got something!"
-    #Cases: invalid access creds
-    access_key = request.values["access_key"]
-    access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin: abort(403) #access key DNE
-    if not admin.validate_access_credentials( access_secret ):
-        abort( 403 )  # incorrect secret key
-
-    if "study_id" in request.values: study_id = request.values["study_id"]
-    else: return "please provide a study_id"
-    study_obj = Study( ObjectId( study_id ) )
-    if admin._id not in study_obj['admins']: abort(403)  # admin is not credentialed for this study
-
-    if "user_id" in request.values:user_id = request.values["user_id"]
-    else: return "please provide a user_id"
-
-    if "survey_id" in request.values: survey_id = request.values["survey_id"]
-    else: return "please provide a survey_id"
-
-    if "data_stream" in request.values: data_stream = request.values["data_stream"]
-    else: return "please provide a data_stream"
-
-    if data_stream not in upload_stream_map: return "invalid data stream: %s" % data_stream
-
-    if "unix_millisecond_timestamp_string" in request.values:
-        unix_millisecond_timestamp_string = request.values['unix_millisecond_timestamp_string']
-        if len( unix_millisecond_timestamp_string ) != 13:
-            return "invalid timestamp, check millisecond time length: %s" % unix_millisecond_timestamp_string
-        try: x = int( unix_millisecond_timestamp_string )
-        except ValueError: return "something went wrong with your timestamp: %s" % unix_millisecond_timestamp_string
-    else: return "please provide a unix_millisecond_timestamp_string"
-
-    data_stream_string, file_extension  = upload_stream_map[data_stream]
-
-    s3_file_path = "%s/%s/%s/%s/%s.%s" % (study_id, user_id, data_stream_string,
-                      survey_id, unix_millisecond_timestamp_string, file_extension)
-
-    if len(s3_list_files(s3_file_path)) > 0: return "a file matching your parameters already exists"
-    if 'file' in request.files: f = request.files['file']
-    print "%s uploading new files: %s" % (admin._id, s3_file_path)
-
-    s3_upload(s3_file_path, f.read(), study_obj._id, raw_path=True)
-    FileToProcess.append_file_for_processing( s3_file_path, study_obj._id, user_id )
-    return 'file successfully uploaded.'
+#TODO: before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
+#this does not affect data downloading because those file times are generated from the chunk registry
+# @data_access_api.route("/data-upload-apiv1", methods=['POST'])
+# def data_upload():
+#     print "got something!"
+#     #Cases: invalid access creds
+#     access_key = request.values["access_key"]
+#     access_secret = request.values["secret_key"]
+#     admin = Admin(access_key_id=access_key)
+#     if not admin: abort(403) #access key DNE
+#     if not admin.validate_access_credentials( access_secret ):
+#         abort( 403 )  # incorrect secret key
+#
+#     if "study_id" in request.values: study_id = request.values["study_id"]
+#     else: return "please provide a study_id"
+#     study_obj = Study( ObjectId( study_id ) )
+#     if admin._id not in study_obj['admins']: abort(403)  # admin is not credentialed for this study
+#
+#     if "user_id" in request.values:user_id = request.values["user_id"]
+#     else: return "please provide a user_id"
+#
+#     if "survey_id" in request.values: survey_id = request.values["survey_id"]
+#     else: return "please provide a survey_id"
+#
+#     if "data_stream" in request.values: data_stream = request.values["data_stream"]
+#     else: return "please provide a data_stream"
+#
+#     if data_stream not in upload_stream_map: return "invalid data stream: %s" % data_stream
+#
+#     if "unix_millisecond_timestamp_string" in request.values:
+#         unix_millisecond_timestamp_string = request.values['unix_millisecond_timestamp_string']
+#         if len( unix_millisecond_timestamp_string ) != 13:
+#             return "invalid timestamp, check millisecond time length: %s" % unix_millisecond_timestamp_string
+#         try: x = int( unix_millisecond_timestamp_string )
+#         except ValueError: return "something went wrong with your timestamp: %s" % unix_millisecond_timestamp_string
+#     else: return "please provide a unix_millisecond_timestamp_string"
+#
+#     data_stream_string, file_extension  = upload_stream_map[data_stream]
+#
+#     s3_file_path = "%s/%s/%s/%s/%s.%s" % (study_id, user_id, data_stream_string,
+#                       survey_id, unix_millisecond_timestamp_string, file_extension)
+#
+#     if len(s3_list_files(s3_file_path)) > 0: return "a file matching your parameters already exists"
+#     if 'file' in request.files: f = request.files['file']
+#     print "%s uploading new files: %s" % (admin._id, s3_file_path)
+#
+#     s3_upload(s3_file_path, f.read(), study_obj._id, raw_path=True)
+#     FileToProcess.append_file_for_processing( s3_file_path, study_obj._id, user_id )
+#     return 'file successfully uploaded.'
