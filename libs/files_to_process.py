@@ -353,20 +353,41 @@ def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     rows_list[0].insert(0, time_stamp)
     return ",".join(header_list)
 
+
 def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header
         line along with the list of rows. """
-    #TODO: refactor so that we don't have 3x data memory usage mid-run
-    lines = [ line for line in csv_string.splitlines() ]
-    return lines[0], [row.split(",") for row in lines[1:]]
+    #rewitten to be more memory efficient than fast.
+    header = csv_string[:csv_string.find("\n")]
+    lines = csv_string.splitlines()
+    lines.pop(0) #this is annoyingly slow...
+    #tested running splitlines[1:], that was not faster (very slightly slower) and may have memory overhead...
+    # update: this is actually FASTER than the original list comeprehension in the previous method
+    del csv_string
+    return header, [row.split(",") for row in lines]
+
 
 def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv.
         Now handles unicode errors.  :D :D :D """
-    #TODO: make the list comprehensions in-place map operations
-    ret = header.decode("utf") + u"\n" + u"\n".join( [u",".join([x.decode("utf") for x in row]) for row in rows_list ] )
-    return ret.encode("utf")
+    # the list comprehension was, it turned out, both nonperformant and of an incomprehensible memory order.
+    # this is ~1.5x faster, and has a very clear
+    #also, the unicode modification is an order of magnitude slower.
+    ret = header
+    for row in rows_list:
+        ret += "\n" + ",".join(row)
+    return ret
+    #TODO: when we start getting unicode errors again, fix them, this time with a try-except
+    #This code block is included for legacy comparison
+    # try:
+    #     return header + "\n" + "\n".join([",".join([col for col in row]) for row in rows_list ])
+    #     #In almost all cases (certainly bulk passive data) this is sufficient
+    # except Exception:
+    #     #when we get unicode exceptions, which should be limited to survey timings files, we need the following
+    #     # those files are short, so this memory usage is okay.
+    #     ret = header.decode("utf") + u"\n" + u"\n".join( [u",".join([col.decode("utf") for col in row]) for row in rows_list ] )
+    #     return ret.encode("utf")
 
 def clean_java_timecode(java_time_code_string):
     """ converts millisecond time (string) to an integer normal unix time. """
