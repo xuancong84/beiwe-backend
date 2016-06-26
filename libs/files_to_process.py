@@ -8,8 +8,8 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
                               PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API, IOS_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
-                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES)
-from cronutils.error_handler import ErrorHandler
+                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES, ALL_DATA_STREAMS)
+from cronutils.error_handler import ErrorHandler, null_error_handler
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 
@@ -61,45 +61,57 @@ def do_process_file_chunks(count, error_handler, skip_count):
     Any errors are themselves concatenated using the passed in error handler.
     """
     #this is how you declare a defaultdict containing a tuple of two deques.
-    binified_data = defaultdict( lambda : ( deque(), deque() ) )
+    all_binified_data = defaultdict( lambda : ( deque(), deque() ) )
     ftps_to_remove = set([])
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     survey_id_dict = {}
-    for element in pool.map(batch_retrieve_for_processing,
+
+    for data in pool.map(batch_retrieve_for_processing,
                           FilesToProcess(page_size=count+skip_count)[skip_count:],
                           chunksize=1):
         with error_handler:
             #raise errors that we encountered in the s3 access threaded operations to the error_handler
-            if isinstance(element, Exception): raise element
-            file_to_process, data_type, chunkable, file_contents = element
-            del element
-            s3_file_path = file_to_process["s3_file_path"]
-            if chunkable:
-                newly_binified_data, survey_id_hash = process_csv_data(file_to_process["study_id"],
-                                     file_to_process["user_id"], data_type, file_contents,
-                                     s3_file_path)
-                if data_type in SURVEY_DATA_FILES:
-                    # print survey_id_hash
-                    survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(s3_file_path)
-                if newly_binified_data:
-                    append_binified_csvs(binified_data, newly_binified_data, file_to_process)
-                else: # delete empty files from FilesToProcess
-                    ftps_to_remove.add(file_to_process._id)
-                continue
-            else:
-                timestamp = clean_java_timecode( s3_file_path.rsplit("/", 1)[-1][:-4])
+            if data['exception']:
+                raise data['exception']
 
-                ChunkRegistry.add_new_chunk(file_to_process["study_id"],
-                                            file_to_process["user_id"],
-                                            data_type, s3_file_path, timestamp)
-                ftps_to_remove.add(file_to_process._id)
+            if data['chunkable']:
+                # print "1a"
+                newly_binified_data, survey_id_hash = process_csv_data(data)
+                # print data, "\n1b"
+                if data['data_type'] in SURVEY_DATA_FILES:
+                    # print survey_id_hash
+                    survey_id_dict[survey_id_hash] = resolve_survey_id_from_file_name(data['ftp']["s3_file_path"])
+                if newly_binified_data:
+                    # print "1c"
+                    append_binified_csvs(all_binified_data, newly_binified_data, data['ftp'])
+                else: # delete empty files from FilesToProcess
+                    # print "1d"
+                    ftps_to_remove.add(data['ftp']._id)
+                continue
+
+            else:#if not data['chunkable']
+                # print "2a"
+                timestamp = clean_java_timecode( data['ftp']["s3_file_path"].rsplit("/", 1)[-1][:-4])
+                # print "2a"
+                ChunkRegistry.add_new_chunk(data['ftp']["study_id"],
+                                            data['ftp']["user_id"],
+                                            data['data_type'],
+                                            data['ftp']["s3_file_path"],
+                                            timestamp)
+                # print "2b"
+                ftps_to_remove.add(data['ftp']._id)
+
     pool.close()
     pool.terminate()
-    more_ftps_to_remove, number_bad_files = upload_binified_data(binified_data,error_handler, survey_id_dict)
+    # print 3
+    more_ftps_to_remove, number_bad_files = upload_binified_data(all_binified_data, error_handler, survey_id_dict)
+    # print "X"
     ftps_to_remove.update(more_ftps_to_remove)
     for ftp_id in ftps_to_remove:
         FileToProcess(ftp_id).remove()
+    # print "Y"
     gc.collect()
+    # print "Z"
     return number_bad_files
     
 def upload_binified_data( binified_data, error_handler, survey_id_dict ):
@@ -111,38 +123,50 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     failed_ftps = set([])
     ftps_to_retire = set([])
     upload_these = []
-    for data_bin, values in binified_data.items():
-        data_rows_deque, ftp_deque = values
+    for data_bin, (data_rows_deque, ftp_deque) in binified_data.items():
+        # print 3
         with error_handler:
             try:
+                # print 4
                 study_id, user_id, data_type, time_bin, original_header = data_bin
+                # print 5
                 rows = list(data_rows_deque)
-                updated_header = convert_unix_to_human_readable_timestamps(original_header,
-                                                                    rows)
+                updated_header = convert_unix_to_human_readable_timestamps(original_header, rows)
+                # print 6
                 chunk_path = construct_s3_chunk_path(study_id, user_id, data_type, time_bin)
+                # print 7
                 chunk = ChunkRegistry(chunk_path=chunk_path)
                 if not chunk:
+                    # print "7a"
                     ensure_sorted_by_timestamp(rows)
+                    # print "7b"
                     new_contents = construct_csv_string(updated_header, rows)
-                    upload_these.append((chunk_path, new_contents, study_id))
-
+                    # print "7c"
                     if data_type in SURVEY_DATA_FILES:
+                        #We need to keep a mapping of files to survey ids, that is handled here.
+                        # print "7da"
                         survey_id_hash = ObjectId(study_id), user_id, data_type, original_header
                         survey_id = survey_id_dict[survey_id_hash]
                         #print survey_id_hash
                     else:
+                        # print "7db"
                         survey_id = None
-                    ChunkRegistry.add_new_chunk(study_id,
-                                                user_id,
-                                                data_type,
-                                                chunk_path,
-                                                time_bin,
-                                                file_contents=new_contents,
-                                                survey_id=survey_id)
+                    # print "7e"
+                    chunk_params = {"study_id":study_id,
+                                    "user_id":user_id,
+                                    "data_type":data_type,
+                                    "chunk_path":chunk_path,
+                                    "time_bin":time_bin,
+                                    "survey_id":survey_id}
+                    upload_these.append((chunk_params, chunk_path, new_contents.encode("zip"), study_id ))
                 else:
                     try:
+                        # print 8
+                        # print chunk_path
                         s3_file_data = s3_retrieve( chunk_path, study_id, raw_path=True )
+                        # print "finished s3 retrieve"
                     except S3ResponseError as e:
+                        # print 9
                         #The following check is correct for boto version 2.38.0
                         if "The specified key does not exist." == e.message:
                             chunk.remove()
@@ -152,6 +176,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                             #no python stacktrace.  Best guess is mongo blew up.
                             raise ChunkFailedToExist("chunk %s does not actually point to a file, deleting DB entry, should run correctly on next index." % chunk_path)
                         raise #raise original error if not 404 s3 error
+                    # print 10
                     old_header, old_rows = csv_to_list(s3_file_data)
                     if old_header != updated_header:
 #to handle the case where a file was on an hour boundry and placed in two separate
@@ -160,11 +185,20 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
 #chunked file whenever the file processing occurs run.
                         raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
                                                       (old_header, updated_header, chunk_path) )
+                    # print 11
+                    old_rows = [_ for _ in old_rows]
+                    # print "11a"
                     old_rows.extend(rows)
+                    # print "11b"
+                    del rows
+                    # print 12
                     ensure_sorted_by_timestamp(old_rows)
+                    # print 13
                     new_contents = construct_csv_string(updated_header, old_rows)
-                    upload_these.append(( chunk_path, new_contents, study_id ))
-                    chunk.update_chunk_hash(new_contents)
+                    del old_rows
+                    # print 14
+                    upload_these.append((chunk, chunk_path, new_contents.encode("zip"), study_id ))
+                    del new_contents
             except Exception as e:
                 failed_ftps.update(ftp_deque)
                 print e
@@ -172,8 +206,15 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                        % (study_id, user_id, data_type, time_bin, updated_header) )
                 raise
             ftps_to_retire.update(ftp_deque)
-    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    pool.map(batch_upload, upload_these, chunksize=1)
+
+    # pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    # pool = ThreadPool(1)
+    pool = dummy_threadpool()
+    errors = pool.map(batch_upload, upload_these, chunksize=1)
+    for e in errors:
+        if isinstance(e, Exception):
+            raise e
+
     pool.close()
     pool.terminate()
     #The things in ftps to removed that are not in failed ftps.
@@ -255,28 +296,52 @@ def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
         old_binified_rows[data_bin][0].extend(rows)  #Add data rows
         old_binified_rows[data_bin][1].append(file_to_process._id)  #add ftp
 
-def process_csv_data(study_id, user_id, data_type, file_contents, file_path):
+def process_csv_data(data):
+    #in order to reduce memory overhead this function was changed to take a dictionary instead of args
     """ Constructs a binified dict of a given list of a csv rows,
         catches csv files with known problems and runs the correct logic.
         Returns None If the csv has no data in it. """
-    user = User(user_id)
+    user = User(data['ftp']['user_id'])
+
+
     if user['os_type'] == ANDROID_API: #Do fixes for android
-        if data_type == LOG_FILE: file_contents = fix_app_log_file(file_contents, file_path)
-        header, csv_rows_list = csv_to_list(file_contents)
-        if data_type == CALL_LOG: header = fix_call_log_csv(header, csv_rows_list)
-        if data_type == WIFI: header = fix_wifi_csv(header, csv_rows_list, file_path)
+        if data["data_type"] == LOG_FILE:
+            data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])
+
+        header, csv_rows_list = csv_to_list(data['file_contents'])
+        if data["data_type"] != ACCELEROMETER:
+            #we only really care about memory safety in the accelerometer data file... probably
+            csv_rows_list = [r for r in csv_rows_list]
+
+        if data["data_type"] == CALL_LOG:
+            header = fix_call_log_csv(header, csv_rows_list)
+        if data["data_type"] == WIFI:
+            header = fix_wifi_csv(header, csv_rows_list, data['ftp']['s3_file_path'])
     else: #do fixes for ios
-        header, csv_rows_list = csv_to_list(file_contents)
+        header, csv_rows_list = csv_to_list(data['file_contents'])
+        if data["data_type"] != ACCELEROMETER:
+            csv_rows_list = [r for r in csv_rows_list]
+
+    del data['file_contents']
 
     # And do these fixes for data regardless of source.
-    if data_type == IDENTIFIERS: header = fix_identifier_csv(header, csv_rows_list, file_path)
-    if data_type == SURVEY_TIMINGS: header = fix_survey_timings(header, csv_rows_list, file_path)
+    if data["data_type"] == IDENTIFIERS:
+        header = fix_identifier_csv(header, csv_rows_list, data['ftp']['s3_file_path'])
+    if data["data_type"] == SURVEY_TIMINGS:
+        header = fix_survey_timings(header, csv_rows_list, data['ftp']['s3_file_path'])
 
     #TODO: this is where I stick the strip trailing and leading whitespace per header element.
     header = ",".join([column_name.strip() for column_name in header.split(",")])
     if csv_rows_list:
-        return ( binify_csv_rows(csv_rows_list, study_id, user_id, data_type, header ),
-                 (study_id, user_id, data_type, header) )
+        return (
+            #return item 1: the data
+            binify_csv_rows(csv_rows_list,
+                            data['ftp']['study_id'],
+                            data['ftp']['user_id'],
+                            data["data_type"],
+                            header ),
+            #return item 2: the tuple that we use as a convenient hash
+            (data['ftp']['study_id'], data['ftp']['user_id'], data["data_type"], header) )
     else: return None, None
 
 """############################ CSV Fixes #####################################"""
@@ -311,7 +376,7 @@ def fix_wifi_csv(header, rows_list, file_name):
     time_stamp = file_name.rsplit("/", 1)[-1][:-4]
     for row in rows_list[:-1]: #uhg, the last row is a new line.
         row = row.insert(0, time_stamp)
-    if rows_list: rows_list.pop(-1)  #remove last row (encountered an empty wifi log on sunday may 8 2016)
+    if rows_list:rows_list.pop(-1)  #remove last row (encountered an empty wifi log on sunday may 8 2016)
     return "timestamp," + header
 
 def fix_app_log_file(file_contents, file_path):
@@ -353,20 +418,20 @@ def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     rows_list[0].insert(0, time_stamp)
     return ",".join(header_list)
 
-
 def csv_to_list(csv_string):
     """ Grab a list elements from of every line in the csv, strips off trailing
         whitespace. dumps them into a new list (of lists), and returns the header
         line along with the list of rows. """
-    #rewitten to be more memory efficient than fast.
+    #rewitten to be more memory efficient than fast by making it a generator
+    # Note that almost all of the time is spent in the per-row for-loop
+    def split_yielder(l):
+        for row in l:
+            yield row.split(",")
     header = csv_string[:csv_string.find("\n")]
     lines = csv_string.splitlines()
-    lines.pop(0) #this is annoyingly slow...
-    #tested running splitlines[1:], that was not faster (very slightly slower) and may have memory overhead...
-    # update: this is actually FASTER than the original list comeprehension in the previous method
+    lines.pop(0) #this line is annoyingly slow, but its fine...
     del csv_string
-    return header, [row.split(",") for row in lines]
-
+    return header, split_yielder(lines)
 
 def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv.
@@ -374,20 +439,25 @@ def construct_csv_string(header, rows_list):
     # the list comprehension was, it turned out, both nonperformant and of an incomprehensible memory order.
     # this is ~1.5x faster, and has a very clear
     #also, the unicode modification is an order of magnitude slower.
+    def deduplicate(seq):
+        #highly optimized order preserving deduplication function.
+        # print "dedupling"
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
+    # print "rows 1"
+    rows = []
+    for row_items in rows_list:
+        rows.append(",".join(row_items))
+    del rows_list, row_items
+    #we need to ensure no duplicates
+    # print "rows 2"
+    rows = deduplicate(rows)
+    # print "rows 3"
     ret = header
-    for row in rows_list:
-        ret += "\n" + ",".join(row)
+    for row in rows:
+        ret += "\n" + row
     return ret
-    #TODO: when we start getting unicode errors again, fix them, this time with a try-except
-    #This code block is included for legacy comparison
-    # try:
-    #     return header + "\n" + "\n".join([",".join([col for col in row]) for row in rows_list ])
-    #     #In almost all cases (certainly bulk passive data) this is sufficient
-    # except Exception:
-    #     #when we get unicode exceptions, which should be limited to survey timings files, we need the following
-    #     # those files are short, so this memory usage is okay.
-    #     ret = header.decode("utf") + u"\n" + u"\n".join( [u",".join([col.decode("utf") for col in row]) for row in rows_list ] )
-    #     return ret.encode("utf")
 
 def clean_java_timecode(java_time_code_string):
     """ converts millisecond time (string) to an integer normal unix time. """
@@ -400,17 +470,58 @@ def unix_time_to_string(unix_time):
 def batch_retrieve_for_processing(ftp):
     """ Used for mapping an s3_retrieve function. """
     data_type = file_path_to_data_type(ftp['s3_file_path'])
+    ret = {'ftp':ftp,
+           "data_type":data_type,
+           'exception':None,
+           "file_contents":"" }
     if data_type in CHUNKABLE_FILES:
-        #in the event of an error (boto error) we actually RETURN that error and
-        # handle it back on the main thread.
-        try: return ftp, data_type, True, s3_retrieve(ftp['s3_file_path'], ftp["study_id"], raw_path=True)
-        except Exception as e: return e
-    else: return ftp, data_type, False, ""
+        ret['chunkable'] = True
+        try: #handle s3 errors
+            # print ftp['s3_file_path'], "\ngetting data..."
+            ret['file_contents'] = s3_retrieve(ftp['s3_file_path'], ftp["study_id"], raw_path=True)
+            # print "finished getting data"
+        except Exception as e:
+            ret['exception'] = e
+    else:
+        #We don't do anything with unchunkable data.
+        ret['chunkable'] = False
+        ret['data'] = ""
+    return ret
     
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
-    s3_upload(*upload, raw_path=True)
+    # try:
+    if len(upload) != 4:
+        print upload
+    chunk, chunk_path, new_contents, study_id = upload
+    del upload
+    new_contents = new_contents.decode("zip")
+    s3_upload(chunk_path, new_contents, study_id, raw_path=True)
+    # print "data uploaded!"
+    if isinstance(chunk, ChunkRegistry):
+        chunk.low_memory_update_chunk_hash( new_contents )
+    else:
+        ChunkRegistry.add_new_chunk(chunk['study_id'],
+                                    chunk['user_id'],
+                                    chunk['data_type'],
+                                    chunk['chunk_path'],
+                                    chunk['time_bin'],
+                                    file_contents=new_contents,
+                                    survey_id=chunk['survey_id'])
+
+        # print "chunk updated!"
+    # except Exception as e:
+    #     print upload
+    #     return e
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
 class ChunkFailedToExist(Exception): pass
+
+
+class dummy_threadpool():
+    def map(self, *args, **kwargs): #the existance of that self variable is key
+        # we actually want to cut off any threadpool args, which is conveniently easy because map does not use kwargs!
+        return map(*args)
+    def terminate(self): pass
+    def close(self): pass
