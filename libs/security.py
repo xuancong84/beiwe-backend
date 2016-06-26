@@ -36,6 +36,11 @@ def chunk_hash( data ):
     """ We need to hash data in a data stream chunk and store the hash in mongo. """
     return hashlib.md5( data ).digest().encode('base64')
 
+def low_memory_chunk_hash( data ):
+    """ We need to hash data in a data stream chunk and store the hash in mongo. """
+    return hashlib.md5( data[0] ).digest().encode('base64')
+
+
 def device_hash( data ):
     """ Hashes an input string using the sha256 hash, mimicing the hash used on
     the devices.  Expects a string not in base64, returns a base64 string."""

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
-from libs.security import chunk_hash
+from libs.security import chunk_hash, low_memory_chunk_hash
 from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
 from mongolia.constants import REQUIRED_STRING
 
@@ -40,7 +40,11 @@ class ChunkRegistry(DatabaseObject):
         self["chunk_hash"] = chunk_hash(data_to_hash)
         self.save()
 #         print "upd chunk", self['chunk_path']
-    
+
+    def low_memory_update_chunk_hash(self, list_data_to_hash):
+        self["chunk_hash"] = low_memory_chunk_hash(list_data_to_hash)
+        self.save()
+
 class FileToProcess(DatabaseObject):
     PATH = "beiwe.file_to_process"
     DEFAULTS = { "s3_file_path":REQUIRED_STRING,
