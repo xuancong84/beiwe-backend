@@ -490,29 +490,26 @@ def batch_retrieve_for_processing(ftp):
     
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
-    # try:
-    if len(upload) != 4:
-        print upload
-    chunk, chunk_path, new_contents, study_id = upload
-    del upload
-    new_contents = new_contents.decode("zip")
-    s3_upload(chunk_path, new_contents, study_id, raw_path=True)
-    # print "data uploaded!"
-    if isinstance(chunk, ChunkRegistry):
-        chunk.low_memory_update_chunk_hash( new_contents )
-    else:
-        ChunkRegistry.add_new_chunk(chunk['study_id'],
-                                    chunk['user_id'],
-                                    chunk['data_type'],
-                                    chunk['chunk_path'],
-                                    chunk['time_bin'],
-                                    file_contents=new_contents,
-                                    survey_id=chunk['survey_id'])
-
-        # print "chunk updated!"
-    # except Exception as e:
-    #     print upload
-    #     return e
+    try:
+        if len(upload) != 4:
+            print upload
+        chunk, chunk_path, new_contents, study_id = upload
+        del upload
+        new_contents = new_contents.decode("zip")
+        s3_upload(chunk_path, new_contents, study_id, raw_path=True)
+        # print "data uploaded!"
+        if isinstance(chunk, ChunkRegistry):
+            chunk.low_memory_update_chunk_hash( new_contents )
+        else:
+            ChunkRegistry.add_new_chunk(chunk['study_id'],
+                                        chunk['user_id'],
+                                        chunk['data_type'],
+                                        chunk['chunk_path'],
+                                        chunk['time_bin'],
+                                        file_contents=new_contents, #unlikely to be huge.
+                                        survey_id=chunk['survey_id'])
+    except Exception as e:
+        return e
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
