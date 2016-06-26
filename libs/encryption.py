@@ -51,11 +51,12 @@ def encrypt_for_server(input_string, study_id):
     iv = urandom(16)
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
-def decrypt_server(input_string, study_id):
+def decrypt_server(data, study_id):
     """ Decrypts config encrypted by the encrypt_for_server function."""
     encryption_key = Study(study_id)['encryption_key']
-    iv = input_string[:16]
-    return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( input_string[16:] )
+    iv = data[:16]
+    data = data[16:]
+    return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( data )
 
 ########################### User/Device Decryption #############################
 
