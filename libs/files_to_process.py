@@ -25,7 +25,7 @@ from libs.s3 import s3_retrieve, s3_upload
 def process_file_chunks():
     """ This is the function that is called from cron.  It runs through all new
     files that have been uploaded and 'chunks' them. Handles logic for skipping
-    bad files, raising errors appropriately. """ 
+    bad files, raising errors appropriately. """
     error_handler = ErrorHandler()
     FileProcessLock.lock()
     number_bad_files = 0
@@ -47,17 +47,17 @@ def do_process_file_chunks(count, error_handler, skip_count):
     """
     Run through the files to process, pull their data, put it into s3 bins.
     Run the file through the appropriate logic path based on file type.
-    
+
     If a file is empty put its ftp object to the empty_files_list, we can't
-        delete objects in-place while iterating over the db. 
-    
+        delete objects in-place while iterating over the db.
+
     All files except for the audio recording files are in the form of CSVs,
     most of those files can be separated by "time bin" (separated into one-hour
     chunks) and concatenated and sorted trivially. A few files, call log,
     identifier file, and wifi log, require some triage beforehand.  The debug log
     cannot be correctly sorted by time for all elements, because it was not
     actually expected to be used by researchers, but is apparently quite useful.
-    
+
     Any errors are themselves concatenated using the passed in error handler.
     """
     #this is how you declare a defaultdict containing a tuple of two deques.
@@ -113,7 +113,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     gc.collect()
     # print "Z"
     return number_bad_files
-    
+
 def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     """ Takes in binified csv data and handles uploading/downloading+updating
         older data to/from S3 for each chunk.
@@ -140,7 +140,12 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     # print "7a"
                     ensure_sorted_by_timestamp(rows)
                     # print "7b"
-                    new_contents = construct_csv_string(updated_header, rows)
+                    if data_type == SURVEY_TIMINGS:
+                        print "7ba"
+                        new_contents = construct_utf_safe_csv_string(updated_header, rows)
+                    else:
+                        # print "7bc"
+                        new_contents = construct_csv_string(updated_header, rows)
                     # print "7c"
                     if data_type in SURVEY_DATA_FILES:
                         #We need to keep a mapping of files to survey ids, that is handled here.
@@ -194,7 +199,13 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     # print 12
                     ensure_sorted_by_timestamp(old_rows)
                     # print 13
-                    new_contents = construct_csv_string(updated_header, old_rows)
+
+                    if data_type == SURVEY_TIMINGS:
+                        print "13a"
+                        new_contents = construct_utf_safe_csv_string(updated_header, old_rows)
+                    else:
+                        # print "13b"
+                        new_contents = construct_csv_string(updated_header, old_rows)
                     del old_rows
                     # print 14
                     upload_these.append((chunk, chunk_path, new_contents.encode("zip"), study_id ))
@@ -302,7 +313,6 @@ def process_csv_data(data):
         catches csv files with known problems and runs the correct logic.
         Returns None If the csv has no data in it. """
     user = User(data['ftp']['user_id'])
-
 
     if user['os_type'] == ANDROID_API: #Do fixes for android
         if data["data_type"] == LOG_FILE:
@@ -459,6 +469,34 @@ def construct_csv_string(header, rows_list):
         ret += "\n" + row
     return ret
 
+def construct_utf_safe_csv_string(header, rows_list):
+    """ Takes a header list and a csv and returns a single string of a csv.
+        Poor memory performances, but handles unicode errors.  :D :D :D """
+    """ Takes a header list and a csv and returns a single string of a csv.
+        Now handles unicode errors.  :D :D :D """
+    # the list comprehension was, it turned out, both nonperformant and of an incomprehensible memory order.
+    # this is ~1.5x faster, and has a very clear
+    #also, the unicode modification is an order of magnitude slower.
+    def deduplicate(seq):
+        #highly optimized order preserving deduplication function.
+        # print "dedupling"
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
+    # print "rows 1"
+    rows = []
+    for row_items in rows_list:
+        rows.append(u",".join([r.decode("utf") for r in row_items]))
+    del rows_list, row_items
+    #we need to ensure no duplicates
+    # print "rows 2"
+    rows = deduplicate(rows)
+    # print "rows 3"
+    ret = header.decode('utf')
+    for row in rows:
+        ret += u"\n" + row
+    return ret.encode('utf')
+
 def clean_java_timecode(java_time_code_string):
     """ converts millisecond time (string) to an integer normal unix time. """
     return int(java_time_code_string[:10])
@@ -487,7 +525,7 @@ def batch_retrieve_for_processing(ftp):
         ret['chunkable'] = False
         ret['data'] = ""
     return ret
-    
+
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
     try:
