@@ -141,7 +141,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     ensure_sorted_by_timestamp(rows)
                     # print "7b"
                     if data_type == SURVEY_TIMINGS:
-                        print "7ba"
+                        # print "7ba"
                         new_contents = construct_utf_safe_csv_string(updated_header, rows)
                     else:
                         # print "7bc"
