@@ -22,7 +22,7 @@ mobile_api = Blueprint('mobile_api', __name__)
 ################################################################################
 
 @mobile_api.route('/upload', methods=['POST'])
-@mobile_api.route( '/upload/ios/', methods=['GET', 'POST'] )
+@mobile_api.route('/upload/ios/', methods=['GET', 'POST'])
 @determine_os_api
 @authenticate_user
 def upload(OS_API=""):
@@ -219,7 +219,7 @@ def register_user(OS_API=""):
 ################################################################################
 
 @mobile_api.route('/set_password', methods=['GET', 'POST'])
-@mobile_api.route( '/set_password/ios/', methods=['GET', 'POST'] )
+@mobile_api.route('/set_password/ios/', methods=['GET', 'POST'])
 @determine_os_api
 @authenticate_user
 def set_password(OS_API=""):

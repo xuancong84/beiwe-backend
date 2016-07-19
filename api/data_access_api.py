@@ -140,8 +140,7 @@ def grab_data():
                 file_name = determine_file_name(chunk)
                 ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
                 z.writestr(file_name, file_contents)
-                file_contents = None
-                chunk = None
+                del file_contents, chunk
 
         if 'web_form' not in request.values:
             z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
@@ -175,14 +174,24 @@ def determine_file_name(chunk):
         #add the survey_id from the file path.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
+
     elif chunk["data_type"] == SURVEY_TIMINGS:
         #add the survey_id from the database entry.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
                                 str(chunk["time_bin"]).replace(":", "_"), extension)
-    else:
-        #all other files have this form:
-        return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
-                                str(chunk["time_bin"]).replace(":", "_"), extension)
+
+    elif chunk["data_type"] == VOICE_RECORDING:
+        #Due to a bug that was not noticed until July 2016 audio surveys did not have the survey id
+        # that they were associated with.  Later versions of the app (legacy update 1 and Android 6)
+        # correct this.  We can identify those files by checking for the existence of the extra /.
+        # When we don't find it, we revert to original behavior.
+        if chunk["chunk_path"].count("/") == 4: #
+            return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
+                                       str(chunk["time_bin"]).replace(":", "_"), extension)
+
+    #all other files have this form:
+    return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
+                            str(chunk["time_bin"]).replace(":", "_"), extension)
 
 
 """ Time Handling """
