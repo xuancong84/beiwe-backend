@@ -12,3 +12,7 @@ textarea {
     border-radius: 5px;
     resize: none
 }
+
+form#device_settings label input {
+	margin-top: -10px;
+}
