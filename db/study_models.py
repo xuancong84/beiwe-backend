@@ -92,6 +92,8 @@ class StudyDeviceSettings( DatabaseObject ):
         "magnetometer":False,
         "devicemotion":False,
         "reachability":False,
+        # upload over cellular data or only over WiFi (WiFi-only is default)
+        "allow_upload_over_cellular_data": False,
         # timer variables
         "accelerometer_off_duration_seconds":10,
         "accelerometer_on_duration_seconds":10,

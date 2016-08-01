@@ -26,7 +26,8 @@ CHECKBOX_TOGGLES = ["accelerometer",
                     "gyro",
                     "magnetometer",
                     "devicemotion",
-                    "reachability"]
+                    "reachability",
+                    "allow_upload_over_cellular_data"]
 
 TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "accelerometer_on_duration_seconds",
