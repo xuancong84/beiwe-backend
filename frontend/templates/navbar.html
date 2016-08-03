@@ -15,16 +15,16 @@
     </li>
     {# If the current admin is authorized to view only one study, give them a "Home" button to view that study #}
     {% else %}
-    	<li role="presentation"><a href="/choose_study">Home</a></li>
+    <li role="presentation"><a href="/choose_study">Home</a></li>
     {% endif %}
 
     {# Give the System Admin an extra link here to manage researchers #}
     {% if system_admin %}
-    	<li role="presentation"><a href="/manage_admins">Manage Researchers</a></li>
-        <li role="presentation"><a href="/manage_studies">Manage Studies</a></li>
+    <li role="presentation"><a href="/manage_admins">Manage Researchers</a></li>
+    <li role="presentation"><a href="/manage_studies">Manage Studies</a></li>
     {% endif %}
     <li role="presentation"><a href="/data_access_web_form">Download Data</a></li>
     <li role="presentation"><a href="/downloads">App Download</a></li>
-	<li role="presentation"><a href="/manage_credentials">Manage Credentials</a></li>
+	  <li role="presentation"><a href="/manage_credentials">Manage Credentials</a></li>
 		<li role="presentation"><a href="/logout">Log Out</a></li>
 </ul>
