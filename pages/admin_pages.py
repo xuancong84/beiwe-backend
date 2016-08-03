@@ -1,11 +1,13 @@
 from flask import Blueprint, flash, Markup, redirect, render_template, request,\
     session
+
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
     authenticate_admin_study_access, get_admins_allowed_studies,\
     admin_is_system_admin
 from db.user_models import Users, Admin
 from db.study_models import Study
+from libs.security import check_password_requirements
 
 admin_pages = Blueprint('admin_pages', __name__)
 
@@ -90,8 +92,10 @@ def reset_admin_password():
     new_password = request.values['new_password']
     confirm_new_password = request.values['confirm_new_password']
     if not Admin.check_password(username, current_password):
-        flash("The Current Password you entered is invalid", 'danger')
+        flash("The Current Password you have entered is invalid", 'danger')
         return redirect('/manage_credentials')
+    if not check_password_requirements(new_password, flash_message=True):
+        return redirect("/manage_credentials")
     if new_password != confirm_new_password:
         flash("New Password does not match Confirm New Password", 'danger')
         return redirect('/manage_credentials')
