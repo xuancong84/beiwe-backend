@@ -12,3 +12,10 @@ textarea {
     border-radius: 5px;
     resize: none
 }
+
+.checkbox-custom {
+    height: 34px;
+}
+.checkbox-custom input[type="checkbox"] {
+    position: relative;
+}

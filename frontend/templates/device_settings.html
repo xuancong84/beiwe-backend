@@ -4,12 +4,12 @@
 <div class="row">
     <h2>Edit Device Settings</h2>
 </div>
-<form action="/device_settings/{{ study_id }}" class="form-horizontal" method="POST">
-    <div class="row">
+<form action="/device_settings/{{ study_id }}" method="POST">
+    <div class="row form-horizontal">
         <div class="col-xs-6">
             <div class="form-group">
                 <label for="accelerometer" class="col-xs-8 control-label">Accelerometer:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="accelerometer" id="accelerometer" type="checkbox" {{ "checked" if settings["accelerometer"] }} />
                     </label>
@@ -17,7 +17,7 @@
             </div>
             <div class="form-group">
                 <label for="gps" class="col-xs-8 control-label">GPS:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="gps" id="gps" type="checkbox" {{ "checked" if settings["gps"] }} />
                     </label>
@@ -25,7 +25,7 @@
             </div>
             <div class="form-group">
                 <label for="calls" class="col-xs-8 control-label">Calls:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="calls" id="calls" type="checkbox" {{ "checked" if settings["calls"] }} />
                     </label>
@@ -33,7 +33,7 @@
             </div>
             <div class="form-group">
                 <label for="texts" class="col-xs-8 control-label">Texts:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="texts" id="texts" type="checkbox" {{ "checked" if settings["texts"] }} />
                     </label>
@@ -41,7 +41,7 @@
             </div>
             <div class="form-group">
                 <label for="proximity" class="col-xs-8 control-label">Proximity:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="proximity" id="proximity" type="checkbox" {{ "checked" if settings["proximity"] }} />
                     </label>
@@ -49,7 +49,7 @@
             </div>
             <div class="form-group">
                 <label for="gyro" class="col-xs-8 control-label">Gyro:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="gyro" id="gyro" type="checkbox" {{ "checked" if settings["gyro"] }} />
                     </label>
@@ -57,7 +57,7 @@
             </div>
             <div class="form-group">
                 <label for="magnetometer" class="col-xs-8 control-label">Magnetometer:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="magnetometer" id="magnetometer" type="checkbox" {{ "checked" if settings["magnetometer"] }} />
                     </label>
@@ -65,7 +65,7 @@
             </div>
             <div class="form-group">
                 <label for="devicemotion" class="col-xs-8 control-label">Device Motion:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="devicemotion" id="devicemotion" type="checkbox" {{ "checked" if settings["devicemotion"] }} />
                     </label>
@@ -73,7 +73,7 @@
             </div>
             <div class="form-group">
                 <label for="reachability" class="col-xs-8 control-label">Reachability:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="reachability" id="reachability" type="checkbox" {{ "checked" if settings["reachability"] }} />
                     </label>
@@ -81,7 +81,7 @@
             </div>
             <div class="form-group">
                 <label for="wifi" class="col-xs-8 control-label">WiFi:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="wifi" id="wifi" type="checkbox" {{ "checked" if settings["wifi"] }} />
                     </label>
@@ -89,7 +89,7 @@
             </div>
             <div class="form-group">
                 <label for="bluetooth" class="col-xs-8 control-label">Bluetooth:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="bluetooth" id="bluetooth" type="checkbox" {{ "checked" if settings["bluetooth"] }} />
                     </label>
@@ -97,7 +97,7 @@
             </div>
             <div class="form-group">
                 <label for="power_state" class="col-xs-8 control-label">Power state:</label>
-                <div class="col-xs-4 checkbox">
+                <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="power_state" id="power_state" type="checkbox" {{ "checked" if settings["power_state"] }} />
                     </label>
@@ -220,60 +220,35 @@
                     <input id="seconds_before_auto_logout" name="seconds_before_auto_logout" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['seconds_before_auto_logout'] }}">
                 </div>
             </div>
-
         </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
-                <div class="row">
-                    <label for="call_clinician_button_text">Text that appears on the app's "Call My Clinician" button:</label>
-                </div>
-                <div class="row">
-                    <input type="text" id="call_clinician_button_text" name="call_clinician_button_text" value="{{settings['call_clinician_button_text']}}">
-                </div>
+                <label for="call_clinician_button_text">Text that appears on the app's "Call My Clinician" button:</label>
+                <input type="text" name="call_clinician_button_text" id="call_clinician_button_text" class="form-control" value="{{settings['call_clinician_button_text']}}">
             </div>
             <div class="form-group">
-                <div class="row">
-                    <label for="about_page_text">Text on the app's "About" page:</label>
-                </div>
-                <div class="row">
-                    <textarea rows="20" cols="120" id="about_page_text" name="about_page_text">{{settings['about_page_text']}}</textarea>
-                </div>
+                <label for="about_page_text">Text on the app's "About" page:</label>
+                <textarea name="about_page_text" id="about_page_text" class="form-control" rows="20" cols="120">{{settings['about_page_text']}}</textarea>
             </div>
             <div class="form-group">
-                <div class="row">
-                    <label for="consent_form_text">Text that appears in the app's consent form:</label>
-                </div>
-                <div class="row">
-                    <textarea rows="20" cols="120" id="consent_form_text" name="consent_form_text">{{settings['consent_form_text']}}</textarea>
-                </div>
+                <label for="consent_form_text">Text that appears in the app's consent form:</label>
+                <textarea name="consent_form_text" id="consent_form_text" class="form-control" rows="20" cols="120">{{settings['consent_form_text']}}</textarea>
             </div>
             <div class="form-group">
-                <div class="row">
-                    <label for="survey_submit_success_toast_text">Text that appears in the pop-up message (called an Android "Toast") when a survey is submitted:</label>
-                </div>
-                <div class="row">
-                    <textarea rows="3" cols="120" id="survey_submit_success_toast_text" name="survey_submit_success_toast_text">{{settings['survey_submit_success_toast_text']}}</textarea>
-                </div>
+                <label for="survey_submit_success_toast_text">Text that appears in the pop-up message (called an Android "Toast") when a survey is submitted:</label>
+                <textarea name="survey_submit_success_toast_text" id="survey_submit_success_toast_text" class="form-control" rows="3" cols="120">{{settings['survey_submit_success_toast_text']}}</textarea>
             </div>
             {% for section, section_title in { "welcome": "Welcome", "data_gathering": "Data Gathering", "privacy": "Privacy", "time_commitment": "Time Commitment",
                 "study_survey": "Study Survey", "study_tasks": "Study Tasks", "withdrawing": "Withdrawing" }.iteritems() %}
                 <div class="form-group">
-                    <div class="row">
-                        <label for="{{section}}_summary">iOS consent {{section_title}} text:</label>
-                    </div>
-                    <div class="row">
-                        <textarea rows="4" cols="120" id="{{section}}_summary" name="consent_sections.{{section}}.text">{{settings['consent_sections'][section]['text']}}</textarea>
-                    </div>
+                    <label for="{{section}}_summary">iOS consent {{section_title}} text:</label>
+                    <textarea name="consent_sections.{{section}}.text" id="{{section}}_summary" class="form-control" rows="4" cols="120">{{settings['consent_sections'][section]['text']}}</textarea>
                 </div>
                 <div class="form-group">
-                    <div class="row">
-                        <label for="{{section}}_more">iOS consent {{section_title}} learn more:</label>
-                    </div>
-                    <div class="row">
-                        <textarea rows="4" cols="120" id="{{section}}_more" name="consent_sections.{{section}}.more">{{settings['consent_sections'][section]['more']}}</textarea>
-                    </div>
+                    <label for="{{section}}_more">iOS consent {{section_title}} learn more:</label>
+                    <textarea name="consent_sections.{{section}}.more" id="{{section}}_more" class="form-control" rows="4" cols="120">{{settings['consent_sections'][section]['more']}}</textarea>
                 </div>
             {% endfor %}
         </div>
