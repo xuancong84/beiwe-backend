@@ -13,6 +13,10 @@ textarea {
     resize: none
 }
 
-form#device_settings label input {
-	margin-top: -10px;
+.checkbox-custom {
+    height: 34px;
+}
+
+.checkbox-custom input[type="checkbox"] {
+    position: relative;
 }

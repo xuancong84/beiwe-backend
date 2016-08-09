@@ -1,5 +1,8 @@
 import base64, hashlib, re
 
+from flask import flash
+
+from config.constants import PASSWORD_REQUIREMENT_REGEX_LIST
 from config.security import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY,\
                             ITERATIONS
 from os import urandom
@@ -118,3 +121,16 @@ def generate_easy_alphanumeric_string():
 
 def generate_random_string():
     return hashlib.sha512( urandom(16) ).digest().encode('base64')
+
+def check_password_requirements(password, flash_message=False):
+    if len(password) < 8:
+        if flash_message:
+            flash("Your New Password must be at least 8 characters long.", "danger")
+        return False
+    for regex in PASSWORD_REQUIREMENT_REGEX_LIST:
+        if not re.search(regex, password):
+            if flash_message:
+                flash("Your New Password must contain at least one symbol, one number, one lowercase, and "
+                      "one uppercase character.", "danger")
+            return False
+    return True

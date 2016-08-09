@@ -47,6 +47,15 @@
 		{% if not admin_is_current_user %}
 		<div class="row">
 			<h4>Reset Password</h4>
+		    <div class="well">
+		        <b>Passwords require all of the following:</b>
+	            <ul class="list">
+	                <li class="list-item">at least one lower case letter</li>
+	                <li class="list-item">at least one upper case letter</li>
+	                <li class="list-item">at least one numeric character</li>
+	                <li class="list-item">at least one special character (! @ # $ % ^ [ ] etc.)</li>
+	            </ul>
+	        </div>
 			<form action="/set_researcher_password" method="post">
 	          	<div class="form-inline">
 	          		<input type="text" name="password" class="form-control">
