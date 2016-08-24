@@ -73,7 +73,9 @@ function end() {
         content = questions;
     } else {
         content_list = [];
-        content_list.push( { prompt:$('#voice_recording_prompt_text_input').val() } );
+        // Remove double-quotes, which break the JSON parser.
+        var sanitized_voice_recording_prompt_text_input = $('#voice_recording_prompt_text_input').val().replace(/"/g, "\u201C");
+        content_list.push( { prompt: sanitized_voice_recording_prompt_text_input } );
         content = content_list;
     }
     $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons
