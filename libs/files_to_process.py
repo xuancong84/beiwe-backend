@@ -201,7 +201,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     # print 13
 
                     if data_type == SURVEY_TIMINGS:
-                        print "13a"
+                       # print "13a"
                         new_contents = construct_utf_safe_csv_string(updated_header, old_rows)
                     else:
                         # print "13b"
