@@ -78,20 +78,21 @@ class StudyDeviceSettings( DatabaseObject ):
     # ensure that any changes here are well defined and enforced in frontend
     # and on the app.
     # Ensure that any toggles displayed on the website using CHECKBOXES are enumerated in CHECKBOX_TOGGLES in constants.
-    DEFAULTS = {  # device sensors (listeners)
-        "accelerometer":False,
-        "gps":False,
-        "calls":False,
-        "texts":False,
-        "wifi":False,
+    # the default data streams are enabled/disable by request.
+    DEFAULTS = {
+        "accelerometer":True,
+        "gps":True,
+        "calls":True,
+        "texts":True,
+        "wifi":True,
         "bluetooth":False,
-        "power_state":False,
+        "power_state":True,
         # iOS-specific data streams
         "proximity":False,
         "gyro":False,
         "magnetometer":False,
         "devicemotion":False,
-        "reachability":False,
+        "reachability":True,
         # upload over cellular data or only over WiFi (WiFi-only is default)
         "allow_upload_over_cellular_data": False,
         # timer variables
