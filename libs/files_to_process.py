@@ -272,7 +272,8 @@ def convert_unix_to_human_readable_timestamps(header, rows):
     for row in rows:
         unix_millisecond = int(row[0])
         time_string = unix_time_to_string(unix_millisecond / 1000 )
-        time_string += "." + str( unix_millisecond % 1000 )
+        # this line 0-pads millisecond values that have leading 0s.
+        time_string += ".%03d" % ( unix_millisecond % 1000 )
         row.insert(1, time_string)
     header = header.split(",")
     header.insert(1, "UTC time")
