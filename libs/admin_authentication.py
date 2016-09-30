@@ -132,7 +132,7 @@ def authenticate_system_admin(some_function):
         admin = Admin(session['admin_username'])
         if not admin["system_admin"]:
             # TODO: Low Priority. Josh. redirect to a URL, not a template file
-            return redirect("permission_denied.html")
+            return abort(403)
         if 'study_id' in kwargs:
             study_id = kwargs['study_id']
             if not isinstance(study_id, ObjectId):#make an extra check in case

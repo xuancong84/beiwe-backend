@@ -29,10 +29,7 @@
         <a href="/view_study/{{ study['_id'] }}">{{ study['name'] }}</a>
       </li>
       <li class="active">
-        {% if survey['survey_type'] == 'audio_survey' %}
-          Audio
-        {% endif %}
-        Survey ID #{{ survey['_id'] }}
+        {{ "Audio" if survey['survey_type'] == 'audio_survey' }} Survey ID #{{ survey['_id'] }}
       </li>
     </ol>
 

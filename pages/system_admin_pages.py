@@ -1,5 +1,5 @@
-from flask import Blueprint, flash, make_response, redirect, render_template,\
-    request, session
+from flask import abort, Blueprint, flash, make_response, redirect, \
+    render_template, request, session
 
 from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
     StudyAlreadyExistsError
@@ -109,13 +109,14 @@ def delete_study(study_id=None):
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
-@authenticate_system_admin
 def device_settings(study_id=None):
     study = Study(study_id)
+    readonly = not admin_is_system_admin()
     if request.method == 'GET':
         settings = study.get_study_device_settings()
         return render_template("device_settings.html", settings=settings,
-                               study_id=str(study_id) )
+                               study=study, readonly=readonly)
+    if readonly: abort(403)
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
