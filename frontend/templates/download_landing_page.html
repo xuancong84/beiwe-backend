@@ -45,16 +45,31 @@
       <div class="well">
       {# this text is going to change whenever we upload a new version of the app, keep it simple #}
       {# <p><b> There is currently no Beta version of the Beiwe app. </b> </p>  #}
-        <p> <b> The current version of the Beiwe Beta includes updates for compatibility with Android 6.</b> </p>
-        <p> <b> 4/25/16: Beiwe version 5. </b> There are no new features enabled, this is a compatibility release. (This version of Beiwe never went beyond a Beta.) </p>
-        <p> <b> 5/16/16: Beiwe version 6. </b> Enhanced (uncompressed) audio surveys enabled; a bug causing a crash after reinstallation on some Android 6 devices should be resolved.</p>
+        <p>
+          <b> The current version of the Beiwe Beta includes updates for compatibility with Android 6, numerous improvements to the underlying code, an improved error-reporting capability, and several new features.</b>
+        </p>
+        <p>
+          <b>Feature: </b> Android 6 App Standby bypassed for functionality on Android 6.<br>
+          <b>Feature: </b> Android 6 compatibility with the OS Doze feature.<br>
+          <b>Feature: </b> Enhanced (uncompressed) audio surveys, as well as additional controls over regular audio surveys. <br>
+          <b>Feature: </b> There is a new device setting that allows Beiwe to upload data over the cellular connection; improved UI for audio surveys; fixed some typos.
+        </p>
         
-        {# <b>The following features and bugfixes are ready for testing: </b>
-        <p> • Feature: additional device-identifier fields are included at device registration.</p>
-        <p> • Bug Fix: a change in Android 5.1 to MMS/SMS caused the Beiwe app to unpredictably crash, this has been fixed. </p>
-        <p> • Feature: The Beiwe app now has a built-in crash reporting capability. All crashes are logged and sent to the developers the next time the app uploads files. <br>
-            Note: the Beiwe app no longer reports to the user that it has stopped working, instead the app automatically restarts itself. The Beiwe service should always be visible in your device's running services list. </p>
-        <p> • Known Issue: due to an implementation detail on the server you may lose device identifier information if you register/re-register using the beta version of the app, and then re-register using the current production version of app, all with the same user.  The best way to avoid this issue is to create new users that will only run this beta and future versions of the app. </p> #}
+        <p>
+          <b>Fix: </b> A bug causing a crash after reinstallation on some Android 6 devices should be largely resolved. <b> Update: </b> a similar issue has appeared, see known issue below. <br> 
+          <b>Fix: </b> Audio survey files now provide a survey ID when uploaded.
+        </p>
+
+        <p>
+          <b>Known Issue: </b> Due to a bug in Android the Beiwe app may not uninstall properly. To bypass this we recommend uninstalling and then rebooting the device if you plan to reinstall Beiwe, or you can manually fix this issue by assigning all necessary permissions in the Beiwe app's settings page in system settings.  This issue presents as an immediate crash of the Beiwe app after installation but before registering under a study.
+        </p>
+
+        <p>
+          <b> Other Changes: </b> When running under Android 6, due to the nature of the permissions system, it is no longer possible to guarantee data stream content directly after registration. Recommended procedure is to reboot the device after installing Beiwe and providing permissions.
+        </p>
+
+        The most current version of the beta as it appears in the app's info is 2.0-RC2, the version identifier in the device identifiers data stream is 9.
+
       </div>
         <div class="row">
           <div class="col-xs-12">
