@@ -27,29 +27,29 @@
 </head>
 
 <body>
-	<div class="container">
-		<div class="row">
-			{% block navbar %}
-				{% include 'navbar.html' %}
-			{% endblock %}
-		</div>
+    <div class="row">
+        {% block navbar %}
+            {% include 'navbar.html' %}
+        {% endblock %}
+    </div>
 
-		<div class="row">
-			{% block notifications %}
-				{% include 'notifications.html' %}
-			{% endblock %}
-		</div>
+    <div class="row">
+        {% block notifications %}
+            {% include 'notifications.html' %}
+        {% endblock %}
+    </div>
 
-	    <div id="content" class="row">
-	    	{% block content %}
-	    	{% endblock %}
-	    </div>
+    <div class="container">
+        <div id="content" class="row">
+            {% block content %}
+            {% endblock %}
+        </div>
 
-	    <div id="footer" class="row">
-			{% block footer %}
-				{% include 'footer.html' %}
-			{% endblock %}
-	    </div>
+        <div id="footer" class="row">
+            {% block footer %}
+                {% include 'footer.html' %}
+            {% endblock %}
+        </div>
     </div>
 </body>
 

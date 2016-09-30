@@ -1,30 +1,48 @@
-<ul class="nav nav-pills navbar-right">
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
 
-    {# If the current admin is authorized to view more than one study, give them a drop-down menu to switch studies #}
-    {% if allowed_studies and (allowed_studies|count > 1) %}
-    <li class="dropdown" role="presentation">
-        <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-          View another study
-        <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        {% for study in allowed_studies %}
-            <li><a href="/view_study/{{ study._id }}">{{ study.name }}</a></li>
-        {% endfor %}
-        </ul>
-    </li>
-    {# If the current admin is authorized to view only one study, give them a "Home" button to view that study #}
-    {% else %}
-    <li role="presentation"><a href="/choose_study">Home</a></li>
-    {% endif %}
+        {# This "Open the navbar menu" toggle appears on narrow (mobile) screens when the rest of the navbar is hidden #}
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navbar-menu" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
 
-    {# Give the System Admin an extra link here to manage researchers #}
-    {% if system_admin %}
-    <li role="presentation"><a href="/manage_admins">Manage Researchers</a></li>
-    <li role="presentation"><a href="/manage_studies">Manage Studies</a></li>
-    {% endif %}
-    <li role="presentation"><a href="/data_access_web_form">Download Data</a></li>
-    <li role="presentation"><a href="/downloads">App Download</a></li>
-	  <li role="presentation"><a href="/manage_credentials">Manage Credentials</a></li>
-		<li role="presentation"><a href="/logout">Log Out</a></li>
-</ul>
+        <div class="collapse navbar-collapse" id="main-navbar-menu">
+            <ul class="nav navbar-nav navbar-left">
+                {# If the current admin is authorized to view more than one study, give them a drop-down menu to switch studies #}
+                {% if allowed_studies and (allowed_studies|count > 1) %}
+                <li class="dropdown" role="presentation">
+                    <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                      View study
+                    <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenu1">
+                    {% for study in allowed_studies %}
+                        <li><a href="/view_study/{{ study._id }}">{{ study.name }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </li>
+                {# If the current admin is authorized to view only one study, give them a "Home" button to view that study #}
+                {% else %}
+                <li role="presentation"><a href="/choose_study">Home</a></li>
+                {% endif %}
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {# Give the System Admin an extra link here to manage researchers #}
+                {% if system_admin %}
+                    <li role="presentation"><a href="/manage_admins">Manage Researchers</a></li>
+                    <li role="presentation"><a href="/manage_studies">Manage Studies</a></li>
+                {% endif %}
+                <li role="presentation"><a href="/data_access_web_form">Download Data</a></li>
+                <li role="presentation"><a href="/downloads">App Download</a></li>
+                <li role="presentation"><a href="/manage_credentials">Manage Credentials</a></li>
+                <li role="presentation"><a href="/logout">Log Out</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
