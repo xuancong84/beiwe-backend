@@ -1,7 +1,7 @@
 import functools
 from datetime import datetime, timedelta
 from flask import session, redirect
-from db.user_models import Admin, Admins
+from db.user_models import Admin
 from libs.security import generate_easy_alphanumeric_string
 from db.study_models import Studies, Study
 from bson.objectid import ObjectId
@@ -109,7 +109,7 @@ def get_admins_allowed_studies():
     """ Return a list of studies which the currently logged-in admin is autho-
     rized to view and edit """
     admin = Admin(session['admin_username'])
-    return Studies(admins=admin._id)
+    return sorted(Studies(admins=admin._id), key=lambda x: x.name.lower())
 
 
 ################################################################################

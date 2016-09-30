@@ -18,7 +18,7 @@
                     <p><i>No researchers are authorized to view or edit this study.</i></p>
                 {% endif %}
 
-                {% for admin in study.admins %}
+                {% for admin in study.admins|sort(case_sensitive=False) %}
                     <div class="list-group-item">
                         <b>{{ admin }}</b>
                         <a href="#" onclick="remove_admin_from_study('{{ admin }}', '{{ study._id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>

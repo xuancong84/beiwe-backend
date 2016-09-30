@@ -16,7 +16,7 @@
 					<p><i>This researcher is not authorized on any studies.</i></p>
 				{% endif %}
 
-				{% for study in current_studies %}
+				{% for study in current_studies|sort(case_sensitive=False) %}
 					<div class="list-group-item">
 						<b>{{ study.name }}</b>
                         <a href="#" onclick="remove_admin_from_study('{{ admin._id }}', '{{ study._id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>

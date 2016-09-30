@@ -2,8 +2,8 @@ from flask import Blueprint, flash, make_response, redirect, render_template,\
     request, session
 
 from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
-    StudyAlreadyExistsError, Survey
-from db.user_models import Admin, Admins, Users
+    StudyAlreadyExistsError
+from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
@@ -20,8 +20,9 @@ def manage_admins():
     admins = []
     for admin in Admins():
         admin_name = admin._id
-        allowed_studies = Studies(admins=admin._id, field='name')
+        allowed_studies = sorted(Studies(admins=admin._id, field='name'), key=lambda x: x.lower())
         admins.append((admin_name, allowed_studies))
+    admins = sorted(admins, key=lambda s: s[0].lower())
     return render_template('manage_admins.html', admins=admins,
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
@@ -32,9 +33,11 @@ def manage_admins():
 def edit_admin(admin_id):
     admin = Admin(admin_id)
     admin_is_current_user = (admin._id == session['admin_username'])
+    current_studies=sorted(Studies(admins=admin._id), key=lambda x: x.name.lower())
+    all_studies=sorted(Studies(), key=lambda x: x.name.lower())
     return render_template('edit_admin.html', admin=admin,
-                           current_studies=Studies(admins=admin._id),
-                           all_studies=Studies(),
+                           current_studies=current_studies,
+                           all_studies=all_studies,
                            allowed_studies=get_admins_allowed_studies(),
                            admin_is_current_user=admin_is_current_user,
                            system_admin=admin_is_system_admin())
@@ -61,7 +64,8 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
-    return render_template('manage_studies.html', studies=Studies(sort_by="name"),
+    studies = sorted(Studies(), key=lambda x: x.name.lower())
+    return render_template('manage_studies.html', studies=studies,
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
@@ -70,7 +74,7 @@ def manage_studies():
 @authenticate_system_admin
 def edit_study(study_id=None):
     return render_template('edit_study.html', study=Study(study_id),
-                           all_admins=Admins(),
+                           all_admins=sorted(Admins(), key=lambda x: x._id.lower()),
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
