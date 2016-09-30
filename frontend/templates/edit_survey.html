@@ -24,6 +24,11 @@
 
 {% block content %}
 
+    <ol class="breadcrumb">
+      <li><a href="/view_study/{{ study['_id'] }}">{{ study['name'] }}</a></li>
+      <li class="active">Survey ID #{{ survey['_id'] }}</li>
+    </ol>
+
     <div class="container">
 
       <div class="span12">
