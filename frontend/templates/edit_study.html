@@ -4,15 +4,18 @@
 
 {% block content %}
 
-    <div class="row">
-        <h3>{{ study.name }}</h3>
-    </div>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/manage_studies">Manage Studies</a>
+        </li>
+        <li class="active">
+            {{ study.name }}
+        </li>
+    </ol>
 
-    <br>
-
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="row">
-            <h4>Authorized researchers on this study</h4>
+            <h2>Authorized researchers on this study</h2>
             <div class="list-group">
                 {% if not study.admins %}
                     <p><i>No researchers are authorized to view or edit this study.</i></p>
@@ -43,22 +46,34 @@
                 <button onclick="add_admin_to_study()" class="btn btn-info add_admin_to_study_button">Add researcher to study</button>
             </div>
         </div>
-
-        <br><br><br><br>
+        <br><br><br>
 
         <div class="row">
-            <a href="/device_settings/{{ study._id }}" class="btn btn-warning">Edit study's device settings</a>
+            <h2>App settings</h2>
+            <a href="/device_settings/{{ study._id }}">Edit the types of data this study collects and the wording that study participants see in the app</a>
+        </div>
+        <br><br><br>
 
-            <a class="btn btn-danger pull-right" onclick="confirm_delete_study('{{ study.name|replace("'", "")|replace('"', "") }}', '{{ study._id }}')">
+        <div class="row">
+            <h2>Rename study</h2>
+            <form action="/rename_study/{{ study._id }}" method="post">
+                <div class="col-md-10">
+                    <input type="text" name="new_study_name" value="{{ study['name'] }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-warning" type="submit">Update Name</button>
+                </div>
+            </form>
+        </div>
+        <br><br><br>
+
+        <div class="row">
+            <h2>Delete study</h2>
+            <a class="btn btn-danger" onclick="confirm_delete_study('{{ study.name|replace("'", "")|replace('"', "") }}', '{{ study._id }}')">
             <span class="glyphicon glyphicon-trash"></span>Delete study</a>
         </div>
 
         <br><br><br><br>
-
-        <div class="row">
-            <a href="/manage_studies" class="btn btn-success"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back to all studies</a>
-        </div>
-
 
     </div>
 

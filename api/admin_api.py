@@ -54,6 +54,15 @@ def set_researcher_password():
     return redirect('/edit_admin/' + admin._id)
 
 
+@admin_api.route('/rename_study/<string:study_id>', methods=['POST'])
+@authenticate_system_admin
+def rename_study(study_id=None):
+    study = Study(ObjectId(study_id))
+    new_study_name = request.form.get('new_study_name')
+    study.update({'name': new_study_name})
+    return redirect('/edit_study/' + str(study['_id']))
+
+
 """########################## User Administration ###########################"""
 
 @admin_api.route('/reset_patient_password/<string:study_id>', methods=["POST"])
