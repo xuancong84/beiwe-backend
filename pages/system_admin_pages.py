@@ -34,10 +34,9 @@ def edit_admin(admin_id):
     admin = Admin(admin_id)
     admin_is_current_user = (admin._id == session['admin_username'])
     current_studies=sorted(Studies(admins=admin._id), key=lambda x: x.name.lower())
-    all_studies=sorted(Studies(), key=lambda x: x.name.lower())
     return render_template('edit_admin.html', admin=admin,
                            current_studies=current_studies,
-                           all_studies=all_studies,
+                           all_studies=Studies.get_all_studies(),
                            allowed_studies=get_admins_allowed_studies(),
                            admin_is_current_user=admin_is_current_user,
                            system_admin=admin_is_system_admin())
@@ -64,8 +63,8 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
-    studies = sorted(Studies(), key=lambda x: x.name.lower())
-    return render_template('manage_studies.html', studies=studies,
+    return render_template('manage_studies.html',
+                           studies=Studies.get_all_studies(),
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
@@ -97,14 +96,11 @@ def create_study():
 @authenticate_system_admin
 def delete_study(study_id=None):
     """ This functionality has been disabled pending testing and feature change."""
-    return make_response("", 200)
-#     if request.form.get('confirmation') == 'true':
-#         study = Study(study_id)
-#         [study.get_study_device_settings().remove()]    # Delete device settings
-#         [user.remove() for user in Users(study_id=study_id)]   # Delete patients
-#         [Survey(s_id).remove() for s_id in study['surveys']]    # Delete surveys
-#         study.remove()                                     # Delete study object
-#     return make_response("", 200)
+    if request.form.get('confirmation') == 'true':
+        study = Study(study_id)
+        study.update({'admins': [],
+                      'deleted': True})
+    return redirect('/manage_studies')
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])

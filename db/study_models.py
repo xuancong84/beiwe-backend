@@ -1,4 +1,3 @@
-import os
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from config.constants import SURVEY_TYPES
 
@@ -12,7 +11,8 @@ class Study( DatabaseObject ):
                  #TODO: Low Priority. Eli/Josh. the above variable will be used in the yet-to-be-implemented 3-tier user model.
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
-                 "encryption_key": REQUIRED #the study's config encryption key. 
+                 "encryption_key": REQUIRED, #the study's config encryption key.
+                 "deleted": False 
                 }
     
     @classmethod
@@ -216,6 +216,12 @@ class Survey( DatabaseObject ):
 class Studies( DatabaseCollection ):
     """ The Studies database."""
     OBJTYPE = Study
+    
+    @classmethod
+    def get_all_studies(cls):
+        return sorted(cls(deleted=False), key=lambda x: x.name.lower())
+
+
 class StudyDeviceSettingsCollection( DatabaseCollection ):
     """ The per-study device settings. """
     OBJTYPE = StudyDeviceSettings
