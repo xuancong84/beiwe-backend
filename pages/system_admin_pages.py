@@ -49,7 +49,7 @@ def create_new_researcher():
         return render_template('create_new_researcher.html',
                                allowed_studies=get_admins_allowed_studies(),
                                system_admin=admin_is_system_admin())
-    admin_id = request.form.get('admin_id')
+    admin_id = ''.join(e for e in request.form.get('admin_id') if e.isalnum())
     password = request.form.get('password')
     if Admins(_id=admin_id):
         flash("There is already a researcher with username " + admin_id, 'danger')
