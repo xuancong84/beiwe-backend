@@ -71,9 +71,8 @@ def login():
         if Admin.check_password(username, password):
             admin_authentication.log_in_admin(username)
             return redirect("/choose_study")
-        return "Username password combination is incorrect. Try again."
-    else:
-        return redirect("/admin")
+        flash("Incorrect username & password combination; try again.", 'danger')
+    return redirect("/")
 
 
 @admin_pages.route('/manage_credentials')
