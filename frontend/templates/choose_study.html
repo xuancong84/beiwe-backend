@@ -1,16 +1,40 @@
 {% extends "base.html" %}
 
+{% block head %}
+    {{ super() }}
+    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block title %}Choose Study{% endblock %}
 
 {% block content %}
     {# If this admin is authorized to view studies, list the studies #}
     {% if allowed_studies %}
-        <h4>You are authorized to view and edit multiple studies.  Please choose one:</h4>
+        <div class="row">
+            <h4>You are authorized to view and edit multiple studies.  Please choose one:</h4>
+        </div>
         <br>
-        <div class="list-group">
-            {% for study in allowed_studies %}
-                <h4><a href="/view_study/{{ study._id }}" class="list-group-item">{{ study.name }}</a></h4>
-            {% endfor %}
+
+        <div id="filterableList" ng-controller="FilterableListController">
+            <div ng-init="filterable_studies = [
+                {% for study in allowed_studies %}
+                    {name: '{{study['name']}}', study_id: '{{study['_id']}}'},
+                {% endfor %}
+            ]"></div>
+
+            {# Search/filter input field #}
+            <div class="row">
+                <div class="form-group col-sm-4">
+                    <input type="search" class="form-control" placeholder="Filter by study name" ng-model="studyFilterText" autofocus>
+                </div>
+            </div>
+
+            <div class="list-group row">
+                <h4 ng-repeat="study in filterable_studies | filter:{name: studyFilterText}">
+                    <a href="/edit_study/{% raw %}{{ study.study_id }}{% endraw %}" class="list-group-item">{% raw %}{{ study.name }}{% endraw %}</a>
+                </h4>
+            </div>
+
         </div>
 
     {# If this admin is not authorized to view any studies, show an error message #}
