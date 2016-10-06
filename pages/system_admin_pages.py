@@ -1,6 +1,5 @@
-from flask import abort, Blueprint, flash, make_response, redirect, \
-    render_template, request, session
-
+from flask import abort, Blueprint, flash, redirect, render_template, request,\
+    session
 from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
     StudyAlreadyExistsError
 from db.user_models import Admin, Admins

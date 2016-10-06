@@ -1,6 +1,7 @@
-from flask import abort, Blueprint, make_response, redirect, request, send_file, flash
+from flask import abort, Blueprint, make_response, redirect, request, send_file
 from libs.admin_authentication import authenticate_admin_study_access,\
-    authenticate_system_admin, authenticate_admin_login, admin_is_system_admin
+    authenticate_system_admin, authenticate_admin_login, admin_is_system_admin,\
+    get_admins_allowed_studies
 from db.user_models import User, Admin
 from db.study_models import Study, Studies
 from bson.objectid import ObjectId
@@ -110,7 +111,9 @@ def create_new_patient(study_id=None):
 @admin_api.route("/downloads")
 @authenticate_admin_login
 def download_page():
-    return render_template("download_landing_page.html", system_admin=admin_is_system_admin())
+    return render_template("download_landing_page.html",
+                           system_admin=admin_is_system_admin(),
+                           allowed_studies=get_admins_allowed_studies())
 
 
 @admin_api.route("/download")
