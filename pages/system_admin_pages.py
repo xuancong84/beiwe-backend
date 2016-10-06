@@ -110,8 +110,10 @@ def device_settings(study_id=None):
     readonly = not admin_is_system_admin()
     if request.method == 'GET':
         settings = study.get_study_device_settings()
-        return render_template("device_settings.html", settings=settings,
-                               study=study, readonly=readonly)
+        return render_template("device_settings.html",
+                               study=study, settings=settings,
+                               readonly=not admin_is_system_admin(),
+                               system_admin=admin_is_system_admin())
     if readonly: abort(403)
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
