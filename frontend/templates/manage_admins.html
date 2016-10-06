@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block head %}
+    {{ super() }}
+    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block title %}Manage Researchers{% endblock %}
 
 {% block content %}
@@ -10,7 +15,18 @@
 
     <br>
 
-    <div class="row">
+    <div id="filterableList" ng-controller="FilterableListController" class="row">
+        <div ng-init="filterable_admins = [
+            {% for admin in admins %}
+                {name: '{{admin[0]}}', studies: '{{admin[1]}}'},
+            {% endfor %}
+        ]"></div>
+
+        {# Search/filter input field #}
+        <div class="form-group col-sm-4">
+            <input type="search" class="form-control" placeholder="Filter by username" ng-model="researcherFilterText" autofocus>
+        </div>
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -20,21 +36,25 @@
                 </tr>
             </thead>
             <tbody>
-                {% for admin in admins %}
-                <tr>
-                    <td><b>{{ admin[0] }}</b></td>
+                <tr ng-repeat="admin in filterable_admins | filter:{name: researcherFilterText}">
                     <td>
-                        {% if admin[1]|length == 0 %}
-                            <i>This user is not authorized to view/edit any studies</i>
-                        {% else %}
-                            {% for study_name in admin[1] %}
-                                {{ study_name }} &nbsp; &nbsp;
-                            {% endfor %}
-                        {% endif %}
+                        <b>{% raw %}{{ admin.name }}{% endraw %}</b>
                     </td>
-                    <td><a href="/edit_admin/{{ admin[0] }}">edit researcher</a></td>
+                    <td>
+                        <span ng-if="admin.studies.length == 0">
+                            <i>This user is not authorized to view/edit any studies</i>
+                        </span>
+                        <span ng-if="admin.studies.length > 0">
+                            <span>{% raw %}{{ admin.studies }}{% endraw %}</span>
+                            <span ng-repeat="study_name in filtered_admin.studies">
+                                {% raw %}{{ study_name }}{% endraw %} &nbsp; &nbsp;
+                            </span>
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/edit_admin/{% raw %}{{ admin.name }}{% endraw %}">edit researcher</a>
+                    </td>
                 </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>

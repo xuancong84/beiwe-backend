@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block head %}
+    {{ super() }}
+    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block title %}Manage Studies{% endblock %}
 
 {% block content %}
@@ -10,7 +15,18 @@
 
     <br>
 
-    <div class="row">
+    <div id="filterableList" ng-controller="FilterableListController" class="row">
+        <div ng-init="filterable_studies = [
+            {% for study in studies %}
+                {name: '{{study['name']}}', study_id: '{{study['_id']}}'},
+            {% endfor %}
+        ]"></div>
+
+        {# Search/filter input field #}
+        <div class="form-group col-sm-4">
+            <input type="search" class="form-control" placeholder="Filter by username" ng-model="studyFilterText" autofocus>
+        </div>
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -18,12 +34,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for study in studies %}
-                <tr>
-                    <td><b>{{ study.name }}</b></td>
-                    <td><a href="/edit_study/{{ study._id }}">edit study</a></td>
+                <tr ng-repeat="study in filterable_studies | filter:{name: studyFilterText}">
+                    <td><b>{% raw %}{{ study.name }}{% endraw %}</b></td>
+                    <td><a href="/edit_study/{% raw %}{{ study.study_id }}{% endraw %}">edit study</a></td>
                 </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>

@@ -20,7 +20,8 @@ def manage_admins():
     admins = []
     for admin in Admins():
         admin_name = admin._id
-        allowed_studies = sorted(Studies(admins=admin._id, field='name'), key=lambda x: x.lower())
+        allowed_studies = ' | '.join(sorted(Studies(admins=admin._id, field='name'),
+                                            key=lambda x: x.lower()))
         admins.append((admin_name, allowed_studies))
     admins = sorted(admins, key=lambda s: s[0].lower())
     return render_template('manage_admins.html', admins=admins,
