@@ -31,7 +31,7 @@
 
             <div class="list-group row">
                 <h4 ng-repeat="study in filterable_studies | filter:{name: studyFilterText}">
-                    <a href="/edit_study/{% raw %}{{ study.study_id }}{% endraw %}" class="list-group-item">{% raw %}{{ study.name }}{% endraw %}</a>
+                    <a href="/view_study/{% raw %}{{ study.study_id }}{% endraw %}" class="list-group-item">{% raw %}{{ study.name }}{% endraw %}</a>
                 </h4>
             </div>
 
