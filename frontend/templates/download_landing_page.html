@@ -51,24 +51,37 @@
         <p>
           <b>Feature: </b> Android 6 App Standby bypassed for functionality on Android 6.<br>
           <b>Feature: </b> Android 6 compatibility with the OS Doze feature.<br>
+          <b>Feature: </b> Android 6.0+ now reports when the device enters and leaves Doze mode in the Power State data stream. <br>
+          <b>Feature: </b> Android 5.0+ now reports when the device enters and leaves Android's Power Save mode in the Power State data stream. <br>
           <b>Feature: </b> Enhanced (uncompressed) audio surveys, as well as additional controls over regular audio surveys. <br>
-          <b>Feature: </b> There is a new device setting that allows Beiwe to upload data over the cellular connection; improved UI for audio surveys; fixed some typos.
+          <b>Feature: </b> There is a new device setting that allows Beiwe to upload data over the cellular connection; improved UI for audio surveys; fixed some typos.<br>
         </p>
         
         <p>
           <b>Fix: </b> A bug causing a crash after reinstallation on some Android 6 devices should be largely resolved. <b> Update: </b> a similar issue has appeared, see known issue below. <br> 
-          <b>Fix: </b> Audio survey files now provide a survey ID when uploaded.
+          <b>Fix: </b> Audio survey files now provide a survey ID when uploaded. <br>
+          <b>Fix: </b> Improved behavior of known race condition, should resolve crash on slow devices.
         </p>
 
         <p>
           <b>Known Issue: </b> Due to a bug in Android the Beiwe app may not uninstall properly. To bypass this we recommend uninstalling and then rebooting the device if you plan to reinstall Beiwe, or you can manually fix this issue by assigning all necessary permissions in the Beiwe app's settings page in system settings.  This issue presents as an immediate crash of the Beiwe app after installation but before registering under a study.
         </p>
 
+        <b> Data Stream Change: </b> due to limitations imposed in Bluetooth on Android 6+, the Bluetooth data stream may not be reliable. Please review the following to determine if this affects you:
+        <ul class="list">
+                  
+          <li class="list-item"> Bluetooth LE broadcasts (the mechanism Beiwe uses to periodically send out pings to nearby, listening devices) on Android 6 will now cycle through many different random MAC addresses instead of broadcasting the real one. (iPhones have also done this since at least iOS 8, it is an anti-tracking measure.) </li>
+          
+          <li class="list-item"> Android no longer allows Beiwe to access the device's true MAC address (some devices will continue to report it anyway, see below). Instead, all devices now return <i>the same</i> default address when queried for the MAC address in the Identifiers data stream.</li>
+
+          <li class="list-item">We have been able to implement a method to report the correct MAC address for the Identifiers data stream. It is not predictable which devices this will work for, but it should at least be consistent across identical devices running the same version of Android 6. The mechanism we use is expected to be phased out in Android 7.</li>
+        </ul>
+
         <p>
           <b> Other Changes: </b> When running under Android 6, due to the nature of the permissions system, it is no longer possible to guarantee data stream content directly after registration. Recommended procedure is to reboot the device after installing Beiwe and providing permissions.
         </p>
 
-        The most current version of the beta as it appears in the app's info is 2.0-RC2, the version identifier in the device identifiers data stream is 9.
+        The most current version of the beta as it appears in the app's info is 2.0-RC3, the version identifier in the device identifiers data stream is 10.
 
       </div>
         <div class="row">
