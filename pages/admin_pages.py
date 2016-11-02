@@ -29,20 +29,15 @@ def choose_study():
 @authenticate_admin_study_access
 def view_study(study_id=None):
     study = Study(study_id)
-    patients = {user['_id']: patient_dict(user) for user in Users( study_id = study_id )}
     tracking_survey_ids = study.get_survey_ids_for_study('tracking_survey')
     audio_survey_ids = study.get_survey_ids_for_study('audio_survey')
-    return render_template('view_study.html', study=study, patients=patients,
+    return render_template('view_study.html', study=study,
+                           patients=Users( study_id = study_id ),
                            audio_survey_ids=audio_survey_ids,
                            tracking_survey_ids=tracking_survey_ids,
                            study_name=study.name,
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
-
-
-def patient_dict(patient):
-    return {'placeholder_field': 'placeholder field for future data',
-            'has_device': patient['device_id'] is not None }
 
 
 """########################## Login/Logoff ##################################"""

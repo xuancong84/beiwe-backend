@@ -24,6 +24,7 @@
             <tr>
               <th>Patient ID</th>
               <th>Phone registered</th>
+              <th>Phone OS</th>
               <th>Reset password</th>
             </tr>
           </thead>
@@ -32,17 +33,24 @@
             {% for patient in patients %}
               <tr>
                 <td>
-                  <b>{{patient}}</b>
+                  <b>{{ patient['_id'] }}</b>
                 </td>
                 <td>
-                  {% if patients[patient]['has_device'] %}
-                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{study._id}}','{{patient}}')" >Un-Register Smartphone</button>
+                  {% if patient['device_id'] %}
+                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{study._id}}','{{ patient['_id'] }}')" >Un-Register Smartphone</button>
                   {% else %}
                     No smartphone registered
                   {% endif %}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{study._id}}','{{patient}}')" >Reset Password</button>
+                  {% if 'os_type' in patient %}
+                    {{ patient['os_type'] }}
+                  {% else %}
+                    <i>unknown</i>
+                  {% endif %}
+                </td>
+                <td>
+                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{study._id}}','{{ patient['_id'] }}')" >Reset Password</button>
                 </td>
               </tr>
             {% endfor %}
