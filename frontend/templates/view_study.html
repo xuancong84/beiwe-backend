@@ -43,7 +43,7 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if 'os_type' in patient %}
+                  {% if 'os_type' in patient and patient['os_type'] != None %}
                     {{ patient['os_type'] }}
                   {% else %}
                     <i>unknown</i>
