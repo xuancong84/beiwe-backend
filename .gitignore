@@ -10,3 +10,4 @@ config/security.py
 .mongodb
 .idea/
 download/download_script_credentials.py
+server configuration/apache config.txt

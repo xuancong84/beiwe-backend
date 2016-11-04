@@ -1,0 +1,5 @@
+# use xfs filesystem
+# ensure you chown mongodb the db drive.
+
+# just set the db location to the mounted drive
+dbpath=/mnt/
