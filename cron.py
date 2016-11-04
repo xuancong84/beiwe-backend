@@ -1,7 +1,6 @@
 from sys import argv
 from cronutils import run_tasks
-from cronfig.backup import run_backup
-from cronfig.db_maintenance import optimize_db
+from cronfig.db_maintenance import run_database_tasks
 from libs.files_to_process import process_file_chunks
 
 FIVE_MINUTES = "five_minutes"
@@ -14,7 +13,7 @@ TASKS = {
     FIVE_MINUTES: [],
     HOURLY: [process_file_chunks],
     FOUR_HOURLY: [],
-    DAILY: [optimize_db, run_backup],
+    DAILY: [run_database_tasks],
     WEEKLY: []
 }
 
