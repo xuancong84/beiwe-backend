@@ -1,30 +1,27 @@
 from _ssl import SSLError
 
 from boto import connect_s3
-from boto.exception import S3ResponseError
 from boto.s3.key import Key
-from boto.s3.connection import OrdinaryCallingFormat 
-
 
 from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
-from config.security import S3_BUCKET
-from httplib import IncompleteRead
-from libs import encryption, logging
+from config.security import S3_BUCKET, S3_BACKUPS_BUCKET
+from libs import encryption
 
 from config.security import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
+
+#Errors
+from httplib import IncompleteRead
+from boto.s3.connection import OrdinaryCallingFormat
+
 
 CONN = connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
                   aws_secret_access_key=AWS_SECRET_ACCESS_KEY, is_secure=True, calling_format=OrdinaryCallingFormat())
 
 
 def _get_bucket(name):
-    """ Method tries to get a bucket; returns None if bucket doesn't exist """
-    try:
-        bucket = CONN.get_bucket(name)
-        return bucket
-    except S3ResponseError as e:
-        logging.log_error(e, e.message)
-        return None
+    """ Gets a connection to a bucket, raises an S3ResponseError on failure. """
+    return CONN.get_bucket(name)
+
 
 # def s3_upload_raw( key_name, some_string ):
 #     """ Method uploads string to bucket with key_name"""
@@ -32,7 +29,8 @@ def _get_bucket(name):
 #     key = bucket.new_key(key_name)
 #     key.set_contents_from_string(some_string)
 
-def s3_upload( key_path, data_string, study_id, raw_path=False):
+
+def s3_upload(key_path, data_string, study_id, raw_path=False):
     """ Uploads data to s3, ensures data is encrypted with the key from the
         provided study.  Takes an optional argument, raw_path, which defaults to
         false.  When false the study_id is prepended to the S3 file path (key_path),
@@ -42,28 +40,40 @@ def s3_upload( key_path, data_string, study_id, raw_path=False):
     key = _get_bucket(S3_BUCKET).new_key(key_path)
     key.set_contents_from_string(data)
 
+
 # def s3_retrieve_raw( key_name ):
 #     """ Method returns file contents with specified S3 key path"""
 #     key = Key(_get_bucket(S3_BUCKET), key_name)
 #     return key.read()
 
+
 def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):
     """ Takes an S3 file path (key_path), and a study ID.  Takes an optional
-        argument, raw_path, which defaults to false.  When set to false the 
+        argument, raw_path, which defaults to false.  When set to false the
         path is prepended to place the file in the appropriate study_id  folder. """
     if not raw_path: key_path = str(study_id) + "/" + key_path
-    key = Key(_get_bucket(S3_BUCKET), key_path)
+    encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)
+    return encryption.decrypt_server(encrypted_data, study_id)
+
+
+def backup_retrieve(key_path, number_retries=DEFAULT_S3_RETRIES):
+    return _do_retrieve(S3_BACKUPS_BUCKET, key_path, number_retries=number_retries)
+
+
+def _do_retrieve(bucket_name, key_path, number_retries=DEFAULT_S3_RETRIES):
+    """ Run-logic to do a data retrieval for a file in an S3 bucket."""
+    key = Key(_get_bucket(bucket_name), key_path)
     try:
-        return encryption.decrypt_server( key.read(), study_id )
+        return key.read()
     except IncompleteRead:
         if number_retries > 0:
             print "s3_retreive failed with incomplete read, retrying on %s" % key_path
-            return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
+            return _do_retrieve(bucket_name, key_path, number_retries=number_retries - 1)
         raise
     except SSLError as e:
         if 'The read operation timed out' == e.message:
             print "s3_retreive failed with timeout, retrying on %s" % key_path
-            return s3_retrieve(key_path, study_id, raw_path=raw_path, number_retries=number_retries - 1)
+            return _do_retrieve(bucket_name, key_path, number_retries=number_retries - 1)
         raise
 
 
@@ -76,21 +86,32 @@ def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RE
 #     if not key: return None
 #     return encryption.decrypt_server(key.read(), study_id)
 
-def s3_list_files( prefix, get_live_iterable=False ):
+
+def s3_list_files(prefix, as_generator=False):
     """ Method fetches a list of filenames with prefix.
         note: entering the empty string into this search without later calling
         the object results in a truncated/paginated view."""
-    bucket = _get_bucket(S3_BUCKET)
+    return _do_list_files(S3_BUCKET, prefix, as_generator=as_generator)
+
+
+def backups_list_files(prefix, as_generator=False):
+    return _do_list_files(S3_BACKUPS_BUCKET, prefix, as_generator=as_generator)
+
+
+def _do_list_files(bucket_name, prefix, as_generator=False):
+    bucket = _get_bucket(bucket_name)
     results = bucket.list(prefix=prefix)
-    if get_live_iterable:
-        return results
+    if as_generator:
+        return (i.name.strip("/") for i in results)
     return [i.name.strip("/") for i in results]
+
 
 def s3_delete(key_path):
     if CHUNKS_FOLDER not in key_path:
         raise Exception("absolutely not deleting %s" % key_path)
     key = Key(_get_bucket(S3_BUCKET), key_path)
     key.delete()
+
 
 #unused file based upload function, not up to date with new upload file names.
 # def s3_upload_handler_file( key_name, file_obj ):
@@ -101,6 +122,7 @@ def s3_delete(key_path):
 #     # seek to the beginning of the file and read it into the key
 #     file_obj.seek(0)
 #     key.set_contents_from_file(file_obj)
+
 
 ################################################################################
 ######################### Client Key Management ################################
