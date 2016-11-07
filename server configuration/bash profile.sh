@@ -45,6 +45,10 @@ alias df="df -h"
 #Git
 alias s='git status'
 alias gs='git status'
+alias pull="git pull"
+alias master="git checkout master"
+alias prod="git checkout production"
+
 
 #File locations
 alias www='cd /var/www/beiwe-backend'
@@ -71,6 +75,9 @@ alias uplog='up;logt'
 alias conf='sudo nano /etc/apache2/sites-enabled/beiwe.org.conf'
 alias monconf='sudo nano /etc/mongodb.conf'
 alias nanorc="nano ~/.nanorc"
+
+#Services configuration files
+alias boot="sudo sysv-rc-conf"
 
 #Developer tools
 alias db='cd /var/www/beiwe-backend/; ipython -i /var/www/beiwe-backend/db_shell.py'
