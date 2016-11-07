@@ -13,9 +13,11 @@
 #Alias aliases
 alias a="alias"
 alias p="nano ~/.profile; source ~/.profile"
+alias pup="cp /var/www/beiwe-backend/server\ configuration/bash\ profile.sh ~/.profile; source ~/.profile"
+
 
 #File Sizes
-alias mongosize="ll -h /var/lib/mongodb/" #prints out the contents with file sizes of the mongodb folder
+alias mongosize="ll -h /mnt/" #prints out the contents with file sizes of the mongodb folder
 alias duu="du -d 1 -ha | sort -h"
 
 #Swap
@@ -48,7 +50,6 @@ alias gs='git status'
 alias pull="git pull"
 alias master="git checkout master"
 alias prod="git checkout production"
-
 
 #File locations
 alias www='cd /var/www/beiwe-backend'
