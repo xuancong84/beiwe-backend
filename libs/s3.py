@@ -94,7 +94,7 @@ def s3_list_files(prefix, as_generator=False):
     return _do_list_files(S3_BUCKET, prefix, as_generator=as_generator)
 
 
-def backups_list_files(prefix, as_generator=False):
+def backup_list_files(prefix, as_generator=False):
     return _do_list_files(S3_BACKUPS_BUCKET, prefix, as_generator=as_generator)
 
 
