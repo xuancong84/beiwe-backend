@@ -10,6 +10,7 @@ from db.data_access_models import ChunksRegistry, FileToProcess
 from db.study_models import Study, Studies
 from db.user_models import Admin, User, Users
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload
+from libs.streaming_bytes_io import StreamingBytesIO
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS, NUMBER_FILES_IN_FLIGHT)
 from boto.utils import JSONDecodeError
@@ -26,6 +27,51 @@ data_access_api = Blueprint('data_access_api', __name__)
 upload_stream_map = { "survey_answers":("surveyAnswers", "csv" ),
                       "audio":("voiceRecording", "mp4" ) }
 
+
+#########################################################################################
+
+def get_and_validate_study_id():
+    """ Checks for a valid study id.
+        No study id causes a 400 (bad request) error.
+        Study id malformed (not 24 characters) causes 400 error.
+        Study id otherwise invalid causes 400 error.
+        Study id does not exist in our database causes _404_ error."""
+    
+    if "study_id" not in request.values:
+        abort(400)
+    
+    if len(request.values["study_id"]) != 24:
+        #Don't proceed with large sized input.
+        print "Received invalid length objectid as study_id in the data access API."
+        abort(400)
+    
+    try: #If the ID is of some invalid form, we catch that and return a 400
+        study_id = ObjectId(request.values["study_id"])
+    except InvalidId:
+        abort(400)
+    
+    study_obj = Study(study_id) #(ignore IDE warning, the aborts above cease execution.)
+    #Study object will be None if there is no matching study id.
+    if not study_obj: #additional case: if study object exists but is empty
+        abort(404)
+        
+    return study_obj
+
+def get_and_validate_admin(study_obj):
+    """ Finds admin based on the secret key provided, returns 403 if admin doesn't exist,
+        is not credentialled on the study, or if the secret key does not match. """
+    access_key = request.values["access_key"]
+    access_secret = request.values["secret_key"]
+    admin = Admin(access_key_id=access_key)
+    if not admin:
+        abort(403)  # access key DNE
+    if admin._id not in study_obj['admins']:
+        abort(403)  # admin is not credentialed for this study
+    if not admin.validate_access_credentials(access_secret):
+        abort(403)  # incorrect secret key
+    return admin
+
+#########################################################################################
 
 @data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
 def get_studies():
@@ -69,24 +115,11 @@ def grab_data():
         (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() )
     Returns a zip file of all data files found by the query. """
-
+    
     #uncomment the following line when doing a reindex
     #return abort(503)
-    
-    #Case: bad study id
-    try: study_id = ObjectId(request.values["study_id"])
-    except InvalidId: study_id = None
-    study_obj = Study(study_id)
-    if not study_obj: abort(404)
-    #Cases: invalid access creds
-    access_key = request.values["access_key"]
-    access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin: abort(403) #access key DNE
-    if admin._id not in study_obj['admins']:
-        abort(403) #admin is not credentialed for this study
-    if not admin.validate_access_credentials(access_secret):
-        abort(403) #incorrect secret key
+    study_obj = get_and_validate_study_id()
+    get_and_validate_admin(study_obj)
     query = {}
 
     #select data streams
@@ -118,12 +151,12 @@ def grab_data():
                 registry[chunk['chunk_path']] == chunk["chunk_hash"]): continue
             get_these_files.append(chunk)
     else: get_these_files.extend(chunks)
-
+    
     del chunks
-
+    
     #Retrieve data
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    if 'web_form' in request.values: f = BytesIO()
+    if 'web_form' in request.values: f = StreamingBytesIO()
     else: f = StringIO()
     z = ZipFile(f, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
     # If the request comes from the web form we need to use
@@ -193,18 +226,27 @@ def determine_file_name(chunk):
     return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
                             str(chunk["time_bin"]).replace(":", "_"), extension)
 
+#########################################################################################
 
-""" Time Handling """
 def str_to_datetime(time_string):
+    """ Translates a time string to a datetime object, raises a 400 if the format is wrong."""
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
-        #TODO: document this error (for mat) or change this error
         if "does not match format" in e.message: abort(400)
 
 def batch_retrieve_for_api_request(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
     # print chunk['chunk_path']
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
+
+
+
+
+
+
+
+
+
 
 
 #TODO: before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
