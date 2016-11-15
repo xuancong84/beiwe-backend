@@ -12,6 +12,7 @@ class StreamingBytesIO(BytesIO):
         Clears the BytesIO object while retaining the current virtual position
         """
         self._position = self.tell()
+        # order does not matter for truncate and seek
         self.truncate(0)
         self.seek(0)
 

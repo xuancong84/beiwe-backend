@@ -1,8 +1,7 @@
 from bson import ObjectId
 from datetime import datetime
-from flask import Blueprint, request, abort, json
+from flask import Blueprint, request, abort, json, Response
 from multiprocessing.pool import ThreadPool
-from StringIO import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from bson.errors import InvalidId
@@ -12,10 +11,8 @@ from db.user_models import Admin, User, Users
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload
 from libs.streaming_bytes_io import StreamingBytesIO
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS, NUMBER_FILES_IN_FLIGHT)
+                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS)
 from boto.utils import JSONDecodeError
-from flask.helpers import send_file
-from _io import BytesIO
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -102,6 +99,21 @@ def get_users_in_study():
         abort(403) #incorrect secret key
     return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
 
+def handle_database_query(study_id, query, registry=None):
+    """ Does the database query as a generator. """
+    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
+    # no registry, just return one by one.
+    if not registry:
+        for chunk in chunks:
+            yield chunk
+    
+    # yes registry, we need to filter and then yield
+    else:
+        for chunk in chunks:
+            if (chunk['chunk_path'] in registry
+                and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
+                yield chunk
+
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
 def grab_data():
@@ -119,84 +131,82 @@ def grab_data():
     #uncomment the following line when doing a reindex
     #return abort(503)
     study_obj = get_and_validate_study_id()
-    get_and_validate_admin(study_obj)
+    _ = get_and_validate_admin(study_obj)
+    
     query = {}
-
-    #select data streams
-    if 'data_streams' in request.values: #note: researchers use the term "data streams" instead of "data types"
-        try: query['data_types'] = json.loads(request.values['data_streams'])
-        except JSONDecodeError: query['data_types'] = request.form.getlist('data_streams')
-        for data_stream in query['data_types']:
-            if data_stream not in ALL_DATA_STREAMS: abort(404)
-
-    #select users
-    if 'user_ids' in request.values:
-        try: query['user_ids'] = [user for user in json.loads(request.values['user_ids'])]
-        except JSONDecodeError: query['user_ids'] = request.form.getlist('user_ids')
-        for user_id in query['user_ids']: #Case: one of the user ids was invalid
-            if not User(user_id): abort(404)
-
-    #construct time ranges
-    if 'time_start' in request.values: query['start'] = str_to_datetime(request.values['time_start'])
-    if 'time_end' in request.values: query['end'] = str_to_datetime(request.values['time_end'])
-
-    #Do Query
-    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    #purge already extant files
-    get_these_files = []
+    determine_data_streams_for_db_query(query) #select data streams
+    determine_users_for_db_query(query) #select users
+    determine_time_range_for_db_query(query) #construct time ranges
+    
+    #Do query (this is actually a generator)
+    #FIXME: test new registry logic, we just need tests for data download in general...
     if "registry" in request.values:
-        registry = parse_registry(request.values["registry"])
-        for chunk in chunks:
-            if (chunk['chunk_path'] in registry and
-                registry[chunk['chunk_path']] == chunk["chunk_hash"]): continue
-            get_these_files.append(chunk)
-    else: get_these_files.extend(chunks)
+        get_these_files = handle_database_query(study_obj._id, query,
+                                                registry=parse_registry(request.values["registry"]))
+    else:
+        get_these_files = handle_database_query(study_obj._id, query, registry=None)
     
-    del chunks
-    
-    #Retrieve data
+    # If the request is from the web form we need to include mime information
+    #and don't want to create a registry file.
+    if 'web_form' in request.values:
+        return Response(zip_generator(get_these_files, construct_registry=False),
+                        mimetype="zip",
+                        headers={'Content-Disposition':'attachment; filename="data.zip"'})
+    else:
+        return Response( zip_generator(get_these_files, construct_registry=True) )
+
+#Note: you cannot access the request context inside a generator function
+def zip_generator(files_list, construct_registry=False):
+    """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that data.
+    This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
+    almost immediately.
+    """
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    if 'web_form' in request.values: f = StreamingBytesIO()
-    else: f = StringIO()
-    z = ZipFile(f, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
-    # If the request comes from the web form we need to use
-    # a bytesio "file" object to return a file blob, if it came from the command
-    # line we use a StringIO because that was how it was written.  :D
-    ret_reg = {}
+    file_registry = {}
+    
+    #FIXME: need to test that CLI works with bytesio, may need to make streaming string io class too. (for some reason in the past bytesio objects did not work with the cli)
+    zip_output = StreamingBytesIO()
+    zip_input = ZipFile(zip_output, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
     try:
-        #run through the data in chunks, construct the zip file in memory using some smaller amount of memory than maximum
-        for slice_start in range(0, len(get_these_files), NUMBER_FILES_IN_FLIGHT):
-            #pull in data
-            chunks_and_content = pool.map(batch_retrieve_for_api_request, get_these_files[slice_start:slice_start + NUMBER_FILES_IN_FLIGHT], chunksize=1)
-            #write data to zip.
-            for chunk, file_contents in chunks_and_content:
-                file_name = determine_file_name(chunk)
-                ret_reg[chunk['chunk_path']] = chunk["chunk_hash"]
-                z.writestr(file_name, file_contents)
-                del file_contents, chunk
-
-        if 'web_form' not in request.values:
-            z.writestr("registry", json.dumps(ret_reg)) #and add the registry file.
-        # close all the things.
-        z.close()
-        pool.close()
-        pool.terminate()
-        if 'web_form' in request.values:
-            f.seek(0)
-            return send_file(f, attachment_filename="data.zip",mimetype="zip",as_attachment=True)
-        return f.getvalue()
-
-    except Exception:
+        # chunks_and_content is a list of tuples, of the chunk and the content of the file.
+        # chunksize (which is a keyword argument of imap, not to be confused with Beiwe Chunks)
+        # is the size of the batches that are handed to the pool. We always want to add the next
+        # file to retrieve to the pool asap, so we want a chunk size of 1.
+        # (In the documentation there are comments about the timeout, it is irrelevant under this construction.)
+        chunks_and_content = pool.imap_unordered(batch_retrieve_s3, files_list, chunksize=1)
+        
+        for chunk, file_contents in chunks_and_content:
+            if construct_registry:
+                file_registry[chunk['chunk_path']] = chunk["chunk_hash"]
+            zip_input.writestr( determine_file_name(chunk), file_contents)
+            # These can be large, and we don't want them sticking around in memory as we wait for the yield
+            del file_contents, chunk
+            yield zip_output.getvalue() #yield the (compressed) file information
+            zip_output.empty()
+        
+        if construct_registry:
+            zip_input.writestr("registry", json.dumps(file_registry))
+        
+        # close, then yield all remaining data in the zip.
+        zip_input.close()
+        yield zip_output.getvalue()
+    
+    except None:
+        #The try-except-finally block is here to guarantee the Threadpool is closed and terminated.
+        # we don't handle any errors, we just re-raise any error that shows up.
         raise
-
+    
     finally:
+        #We rely on the finally block to ensure that th threadpool will be closed and terminated.
         pool.close()
         pool.terminate()
+
+#########################################################################################
 
 def parse_registry(reg_dat):
     """ Parses the provided registry.dat file and returns a dictionary of chunk
-    file names and hashes.  The registry file is a json dictionary containing a
-    list of file names and hashes"""
+    file names and hashes.  (The registry file is just a json dictionary containing
+    a list of file names and hashes.) """
     return json.loads(reg_dat)
 
 def determine_file_name(chunk):
@@ -226,28 +236,61 @@ def determine_file_name(chunk):
     return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
                             str(chunk["time_bin"]).replace(":", "_"), extension)
 
-#########################################################################################
-
 def str_to_datetime(time_string):
     """ Translates a time string to a datetime object, raises a 400 if the format is wrong."""
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
         if "does not match format" in e.message: abort(400)
 
-def batch_retrieve_for_api_request(chunk):
+def batch_retrieve_s3(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
-    # print chunk['chunk_path']
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
+#########################################################################################
 
+def determine_data_streams_for_db_query(query):
+    """ Determines, from the html request, the data streams that should go into the database query.
+    Modifies the provided query object accordingly, there is no return value
+    Throws a 404 if the data stream provided does not exist.
+    :param query: expects a dictionary object. """
+    if 'data_streams' in request.values:
+        # the following two cases are for difference in content wrapping between
+        # the CLI script and the download page.
+        try:
+            query['data_types'] = json.loads(request.values['data_streams'])
+        except JSONDecodeError:
+            query['data_types'] = request.form.getlist('data_streams')
+        
+        for data_stream in query['data_types']:
+            if data_stream not in ALL_DATA_STREAMS:
+                abort(404)
 
+def determine_users_for_db_query(query):
+    """ Determines, from the html request, the users that should go into the database query.
+    Modifies the provided query object accordingly, there is no return value.
+    Throws a 404 if a user provided does not exist.
+    :param query: expects a dictionary object. """
+    if 'user_ids' in request.values:
+        try:
+            query['user_ids'] = [user for user in json.loads(request.values['user_ids'])]
+        except JSONDecodeError:
+            query['user_ids'] = request.form.getlist('user_ids')
+        
+        for user_id in query['user_ids']:  # Case: one of the user ids was invalid
+            if not User(user_id):
+                abort(404)
 
+def determine_time_range_for_db_query(query):
+    """ Determines, from the html request, the time range that should go into the database query.
+    Modifies the provided query object accordingly, there is no return value.
+    Throws a 404 if a user provided does not exist.
+    :param query: expects a dictionary object. """
+    if 'time_start' in request.values:
+        query['start'] = str_to_datetime(request.values['time_start'])
+    if 'time_end' in request.values:
+        query['end'] = str_to_datetime(request.values['time_end'])
 
-
-
-
-
-
+#########################################################################################
 
 #TODO: before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
 #this does not affect data downloading because those file times are generated from the chunk registry

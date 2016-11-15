@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from libs.security import chunk_hash, low_memory_chunk_hash
-from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
+from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, CONCURRENT_NETWORK_OPS
 from mongolia.constants import REQUIRED_STRING
 
 class FileProcessingLockedError(Exception): pass
@@ -93,7 +93,7 @@ class ChunksRegistry(DatabaseCollection):
         if start and not end: query["time_bin"] = { "$gte": start}
         if end and not start: query["time_bin"] = { "$lte": end }
         print query
-        return cls(query=query)
+        return cls.iterator(query=query, page_size=10*CONCURRENT_NETWORK_OPS)
 
 class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess
