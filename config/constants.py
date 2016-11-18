@@ -128,9 +128,21 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == REACHABILITY: return "reachability"
     raise Exception("unknown data type: %s" % data_type)
 
-CHUNKABLE_FILES = { ACCELEROMETER, BLUETOOTH, CALL_LOG, GPS, IDENTIFIERS,
-                  LOG_FILE, POWER_STATE, SURVEY_TIMINGS, TEXTS_LOG, WIFI,
-                  PROXIMITY, GYRO, MAGNETOMETER, DEVICEMOTION, REACHABILITY  }
+CHUNKABLE_FILES = { ACCELEROMETER,
+                    BLUETOOTH,
+                    CALL_LOG,
+                    GPS,
+                    IDENTIFIERS,
+                    LOG_FILE,
+                    POWER_STATE,
+                    SURVEY_TIMINGS,
+                    TEXTS_LOG,
+                    WIFI,
+                    PROXIMITY,
+                    GYRO,
+                    MAGNETOMETER,
+                    DEVICEMOTION,
+                    REACHABILITY  }
 
 ## Global Regexes ##
 SYMBOL_REGEX = "[^a-zA-Z0-9]"
