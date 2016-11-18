@@ -39,6 +39,9 @@ if __name__ == "__main__":
         raise Exception("Not enough arguments to cron\n")
     elif argv[1] in VALID_ARGS:
         cron_type = argv[1]
-        run_tasks(TASKS[cron_type], TIME_LIMITS[cron_type], cron_type)
+        if cron_type in KILL_TIMES:
+            run_tasks(TASKS[cron_type], TIME_LIMITS[cron_type], cron_type, KILL_TIMES[cron_type])
+        else:
+            run_tasks(TASKS[cron_type], TIME_LIMITS[cron_type], cron_type)
     else:
         raise Exception("Invalid argument to cron\n")
