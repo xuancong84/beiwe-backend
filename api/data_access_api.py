@@ -112,6 +112,8 @@ def handle_database_query(study_id, query, registry=None):
         for chunk in chunks:
             if (chunk['chunk_path'] in registry
                 and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
+                continue
+            else:
                 yield chunk
 
 
@@ -139,7 +141,6 @@ def grab_data():
     determine_time_range_for_db_query(query) #construct time ranges
     
     #Do query (this is actually a generator)
-    #FIXME: test new registry logic, we just need tests for data download in general...
     if "registry" in request.values:
         get_these_files = handle_database_query(study_obj._id, query,
                                                 registry=parse_registry(request.values["registry"]))
@@ -163,8 +164,6 @@ def zip_generator(files_list, construct_registry=False):
     """
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     file_registry = {}
-    
-    #FIXME: need to test that CLI works with bytesio, may need to make streaming string io class too. (for some reason in the past bytesio objects did not work with the cli)
     zip_output = StreamingBytesIO()
     zip_input = ZipFile(zip_output, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
     try:
