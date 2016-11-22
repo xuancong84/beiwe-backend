@@ -27,7 +27,7 @@ CHECKBOX_TOGGLES = ["accelerometer",
                     "magnetometer",
                     "devicemotion",
                     "reachability",
-                    "allow_upload_over_cellular_data"]
+                    "allow_upload_over_cellular_data" ]
 
 TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "accelerometer_on_duration_seconds",
@@ -47,11 +47,9 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "magnetometer_off_duration_seconds",
                 "magnetometer_on_duration_seconds",
                 "devicemotion_off_duration_seconds",
-                "devicemotion_on_duration_seconds",
-                ]
+                "devicemotion_on_duration_seconds" ]
 
-
-## Networking ##
+## Networking
 DEFAULT_S3_RETRIES = 1 #This value is used in libs.s3, does what it says.
 CONCURRENT_NETWORK_OPS = 10 #Used in data download and data processing, base this on CPU core count.
 FILE_PROCESS_PAGE_SIZE = 250 #Used in file processing, number of files to be pulled in and processed simultaneously.
@@ -62,12 +60,13 @@ API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
 
+## Chunks
 # This value is in seconds, it sets the time period that chunked files will be sliced into.
 CHUNK_TIMESLICE_QUANTUM = 3600
 # the name of the s3 folder that contains chunked data
 CHUNKS_FOLDER = "CHUNKED_DATA"
 
-# Constants for for the keys in data_stream_to_s3_file_name_string
+## Constants for for the keys in data_stream_to_s3_file_name_string
 ACCELEROMETER = "accelerometer"
 BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
@@ -128,23 +127,62 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == REACHABILITY: return "reachability"
     raise Exception("unknown data type: %s" % data_type)
 
-CHUNKABLE_FILES = { ACCELEROMETER,
-                    BLUETOOTH,
-                    CALL_LOG,
-                    GPS,
-                    IDENTIFIERS,
-                    LOG_FILE,
-                    POWER_STATE,
-                    SURVEY_TIMINGS,
-                    TEXTS_LOG,
-                    WIFI,
-                    PROXIMITY,
-                    GYRO,
-                    MAGNETOMETER,
-                    DEVICEMOTION,
-                    REACHABILITY  }
+CHUNKABLE_FILES = {ACCELEROMETER,
+                   BLUETOOTH,
+                   CALL_LOG,
+                   GPS,
+                   IDENTIFIERS,
+                   LOG_FILE,
+                   POWER_STATE,
+                   SURVEY_TIMINGS,
+                   TEXTS_LOG,
+                   WIFI,
+                   PROXIMITY,
+                   GYRO,
+                   MAGNETOMETER,
+                   DEVICEMOTION,
+                   REACHABILITY }
 
-## Global Regexes ##
+## Survey Question Types
+FREE_RESPONSE = "free_response"
+CHECKBOX = "checkbox"
+RADIO_BUTTON = "radio_button"
+SLIDER = "slider"
+INFO_TEXT_BOX = "info_text_box"
+
+ALL_QUESTION_TYPES = {FREE_RESPONSE,
+                      CHECKBOX,
+                      RADIO_BUTTON,
+                      SLIDER,
+                      INFO_TEXT_BOX }
+
+NUMERIC_QUESTIONS = {RADIO_BUTTON,
+                     SLIDER,
+                     FREE_RESPONSE }
+
+## Free Response text field types (answer types)
+FREE_RESPONSE_NUMERIC = "NUMERIC"
+FREE_RESPONSE_SINGLE_LINE_TEXT = "SINGLE_LINE_TEXT"
+FREE_RESPONSE_MULTI_LINE_TEXT = "MULTI_LINE_TEXT"
+
+TEXT_FIELD_TYPES = {FREE_RESPONSE_NUMERIC,
+                    FREE_RESPONSE_SINGLE_LINE_TEXT,
+                    FREE_RESPONSE_MULTI_LINE_TEXT }
+
+## Comparators
+COMPARATORS = {"<",
+               ">",
+               "<=",
+               ">=",
+               "==",
+               "!=" }
+
+NUMERIC_COMPARATORS = {"<",
+                       ">",
+                       "<=",
+                       ">=" }
+
+## Regexes
 SYMBOL_REGEX = "[^a-zA-Z0-9]"
 LOWERCASE_REGEX = "[a-z]"
 UPPERCASE_REGEX = "[A-Z]"
