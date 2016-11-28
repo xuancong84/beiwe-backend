@@ -30,6 +30,43 @@
     angular.module("surveyBuilder", []);
     
     function SurveyBuilderCtrl() {
+      /* Constants */
+      this.QUESTION_TYPES = {
+        "infoTextBox": "info_text_box",
+        "slider": "slider",
+        "radio": "radio_button",
+        "checkbox": "checkbox",
+        "freeResponse": "free_response"
+      };
+      this.QUESTION_TYPE_LABELS = {};
+      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.infoTextBox] = "Informational Text";
+      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.slider] = "Slider";
+      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.radio] = "Radio Button";
+      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.checkbox] = "Checkbox";
+      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.freeResponse] = "Free Response";
+      this.TFTTXT_TYPES = {
+        "numeric": "NUMERIC",
+        "singleLine": "SINGLE_LINE_TEXT",
+        "multiLine": "MULTI_LINE_TEXT"
+      };
+      this.TFTTXT_TYPE_LABELS = {};
+      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.numeric] = "Numeric";
+      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.singleLine] = "Single-line Text";
+      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.multiLine] = "Multi-line Text";
+      
+      /* Add Question modal */
+      this.questionFields = {
+        "questionText": "",
+        "questionType": this.QUESTION_TYPES.infoTextBox,
+        "questionMin": "",
+        "questionMax": "",
+        "tfttxt": this.TFTTXT_TYPES.numeric
+      };
+      this.defaultQuestionFields = angular.copy(this.questionFields);
+
+      this.resetQuestionModal = function() {
+        this.questionFields = angular.copy(this.defaultQuestionFields);
+      }
     }
     
     angular
@@ -80,11 +117,11 @@
         <div id="newQuestions">
         </div>
         <br>
-          <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editQuestionModal"
-                  onclick="clearModal(); return false;">
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editQuestionModal"
+                ng-click="surveyBuilder.resetQuestionModal();">
           <span class="glyphicon glyphicon-plus"></span>Add Question
-          </button>
-      {% include 'randomize_questions.html' %}
+        </button>
+        {% include 'randomize_questions.html' %}
       </div>
 
       {% elif survey.survey_type == 'audio_survey' %}

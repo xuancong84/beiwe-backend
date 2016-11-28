@@ -8,56 +8,49 @@
       </div>
       <form id="questionForm" name="question">
         <div class="modal-body">
-
           <table>
             <tr>
-              <td>Question Text:</td>
-              <td><input type="text" id="text" name="question_text"></input></td>
+              <td><label for="text">Question Text:</label></td>
+              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.questionFields.questionText"></td>
             </tr>
             <tr>
-              <td>Question Type:</td>
-              <td><select id="type" name="type" onchange="setQuestionType()">
-                <option value="info_text_box">Informational Text</option>
-                <option value="slider">Slider</option>
-                <option value="radio_button">Radio Button</option>
-                <option value="checkbox">Checkbox</option>
-                <option value="free_response">Free Response</option>
-              </select>
-            </td>
-          </tr>
-          <tr id="min_value" style="display:none;">
-            <td>Minimum Value:</td>
-            <td><input type="number" id="min" name="min" min="0" max="100"></input></td>
-          </tr>
-          <tr id="max_value" style="display:none;">
-            <td>Maximum Value:</td>
-            <td><input type="number" id="max" name="max" min="1" max="100"></input></td>
-          </tr>
-          <tr id="text_field_type" style="display:none;">
-            <td>Text Field Type:</td>
-            <td><select id="tfttxt" name="text_field_type">
-              <option value="NUMERIC">Numeric</option>
-              <option value="SINGLE_LINE_TEXT">Single-line text</option>
-              <option value="MULTI_LINE_TEXT">Multi-line text</option>
-            </select>
-          </td>
-        </tr>
-        <tbody id="fields_div" style="display:none;">
-          <tr>
-            <td>Fields:</td>
-            <td id="fieldsDiv"><button type="button" onclick="addField()">Add new field</button></td>
-            <!--<div><div id="fieldsDiv"></div><button type="button" onclick="addField()">Add new field</button></div>-->
-          </tr>
-        </tbody>
-      </table>
-
-      <input style="display:none;" id="oldName" name="oldName"></input>
+              <td><label for="type">Question Type:</label></td>
+              <td>
+                <select id="type" name="type" ng-model="surveyBuilder.questionFields.questionType"
+                        ng-options="surveyBuilder.QUESTION_TYPE_LABELS[type] for type in surveyBuilder.QUESTION_TYPES track by type">
+                </select>
+              </td>
+            </tr>
+            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+              <td><label for="min">Minimum Value:</label></td>
+              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.questionFields.questionMin"></td>
+            </tr>
+            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+              <td><label for="max">Maximum Value:</label></td>
+              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.questionFields.questionMax"></td>
+            </tr>
+            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.freeResponse">
+              <td><label for="tfttxt">Text Field Type:</label></td>
+              <td>
+                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.questionFields.tfttxt"
+                        ng-options="surveyBuilder.TFTTXT_TYPE_LABELS[type] for type in surveyBuilder.TFTTXT_TYPES track by type">
+                </select>
+              </td>
+            </tr>
+            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.questionFields.questionType) > -1"
+                   id="fields_div">
+              <tr>
+                <td><label>Fields:</label></td>
+                <td><button type="button" onclick="addField()">Add new field</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
+        </div>
+      </form>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
-    </div>
-  </form>
-</div>
-</div>
+  </div>
 </div>

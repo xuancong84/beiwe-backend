@@ -168,7 +168,6 @@ function audioSurveyTypeChange(audio_survey_type) {
 
 // Open the Edit Question modal, and pre-populate it with the data from the selected question
 function editQuestion(index) {
-    clearModal();
     populateEditQuestionModal(questions[index]);
     document.getElementById("saveQuestion").onclick = function() { replaceQuestion(index); };
 }
