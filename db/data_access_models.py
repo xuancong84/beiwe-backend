@@ -9,6 +9,9 @@ class FileProcessingLockedError(Exception): pass
 
 class ChunkRegistry(DatabaseObject):
     PATH = "beiwe.chunk_registry"
+    
+    #study_id, data_type, user_id, survey_id, and time_bin should have indexes,
+    # there is a create_indexes script to do this.
     DEFAULTS = {"study_id":REQUIRED,
                 "user_id":REQUIRED_STRING,
                 "data_type": "",
