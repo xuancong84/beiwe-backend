@@ -55,7 +55,7 @@ function getQuestionType() {
 // Return FALSE if the text_field_type drop-down/<select> is invisible; otherwise return a string
 function getTextFieldType() {
     var typeDropDown = document.getElementById("tfttxt");
-    if (typeDropDown.offsetParent === null) { // If the <select> element is hidden
+    if (typeDropDown === null || typeDropDown.offsetParent === null) { // If the <select> element is hidden
         return false;
     }
     else { // If the <select> element is not hidden

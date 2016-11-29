@@ -9,13 +9,12 @@
       var survey_times = {{ survey.timings }};
       var survey_content = '{{ survey.content|tojson }}';
   </script>
-  <script src="../static/javascript/survey-editor/handlebars-question-rendering.js"></script>
-  <script src="../static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
-  <script src="../static/javascript/survey-editor/set-up-modal.js"></script>
-  <script src="../static/javascript/survey-editor/question-from-modal.js"></script>
-  <script src="../static/javascript/survey-editor/schedule.js" type="text/javascript"></script>
-  <script src="../static/javascript/survey-editor/survey-editor.js"></script>
-  <link rel="stylesheet" href="../static/css/survey_builder.css"  type="text/css"/>
+  <script src="/static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
+  <script src="/static/javascript/survey-editor/set-up-modal.js"></script>
+  <script src="/static/javascript/survey-editor/question-from-modal.js"></script>
+  <script src="/static/javascript/survey-editor/schedule.js" type="text/javascript"></script>
+  <script src="/static/javascript/survey-editor/survey-editor.js"></script>
+  <link rel="stylesheet" href="/static/css/survey_builder.css"  type="text/css"/>
 
   <script type="text/javascript">
     var tracking_survey = false;
@@ -25,55 +24,9 @@
 {% block body_attributes %}ng-app="surveyBuilder" ng-controller="SurveyBuilderCtrl as surveyBuilder"{% endblock %}
 
 {% block javascript %}
-<script>
-  (function() {
-    angular.module("surveyBuilder", []);
-    
-    function SurveyBuilderCtrl() {
-      /* Constants */
-      this.QUESTION_TYPES = {
-        "infoTextBox": "info_text_box",
-        "slider": "slider",
-        "radio": "radio_button",
-        "checkbox": "checkbox",
-        "freeResponse": "free_response"
-      };
-      this.QUESTION_TYPE_LABELS = {};
-      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.infoTextBox] = "Informational Text";
-      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.slider] = "Slider";
-      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.radio] = "Radio Button";
-      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.checkbox] = "Checkbox";
-      this.QUESTION_TYPE_LABELS[this.QUESTION_TYPES.freeResponse] = "Free Response";
-      this.TFTTXT_TYPES = {
-        "numeric": "NUMERIC",
-        "singleLine": "SINGLE_LINE_TEXT",
-        "multiLine": "MULTI_LINE_TEXT"
-      };
-      this.TFTTXT_TYPE_LABELS = {};
-      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.numeric] = "Numeric";
-      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.singleLine] = "Single-line Text";
-      this.TFTTXT_TYPE_LABELS[this.TFTTXT_TYPES.multiLine] = "Multi-line Text";
-      
-      /* Add Question modal */
-      this.questionFields = {
-        "questionText": "",
-        "questionType": this.QUESTION_TYPES.infoTextBox,
-        "questionMin": "",
-        "questionMax": "",
-        "tfttxt": this.TFTTXT_TYPES.numeric
-      };
-      this.defaultQuestionFields = angular.copy(this.questionFields);
-
-      this.resetQuestionModal = function() {
-        this.questionFields = angular.copy(this.defaultQuestionFields);
-      }
-    }
-    
-    angular
-      .module("surveyBuilder")
-      .controller("SurveyBuilderCtrl", SurveyBuilderCtrl)
-  })();
-</script>
+  <script src="/static/javascript/app/app.module.js"></script>
+  <script src="/static/javascript/app/survey-builder/directives/question-summary/question-summary.js"></script>
+  <script src="/static/javascript/app/survey-builder/controllers/survey-builder-controller.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -111,8 +64,7 @@
         <script type="text/javascript">
           tracking_survey = true;
         </script>
-        {% include 'question_summary.html' %}
-        <div id="listOfCurrentQuestions"></div>
+        <question-summary></question-summary>
         <br>
         <div id="newQuestions">
         </div>

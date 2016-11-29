@@ -1,0 +1,39 @@
+<div ng-repeat="question in surveyBuilder.questions">
+  <h4>{{ question.question_text }}</h4>
+  <table>
+    <!-- Question type -->
+    <tr>
+      <td><i>Question Type:</i></td>
+      <td>{{ surveyBuilder.QUESTION_TYPE_LABELS[question.question_type] }}</td>
+    </tr>
+    <!-- Slider question minimum and maximum -->
+    <tr ng-if="question.min">
+      <td><i>Minimum:</i></td>
+      <td>{{min}}</td>
+    </tr>
+    <tr ng-if="question.max">
+      <td><i>Maximum:</i></td>
+      <td>{{max}}</td>
+    <tr>
+    <!-- Radio Button or Checkbox question options array -->
+    <tr ng-if="question.answers">
+      <td><i>Options:</i></td>
+      <td>{{ question.answers.join(", ") }}
+    </tr>
+    <!-- Free response question text_field_type -->
+    <tr ng-if="question.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
+      <td><i>Text Field Type:</i></td>
+      <td>{{ surveyBuilder.TFTTXT_TYPE_LABELS[question.text_field_type] }}</td>
+    </tr>
+    
+    <!-- Action buttons -->
+    <tr>
+      <td colspan="2">
+        <button class="btn btn-default btn-sm" ng-click="launchEditQuestion($index)">Edit</button>
+        <button class="btn btn-default btn-sm" onclick="deleteQuestion($index)">Delete</button>
+        <button ng-if="!$first" class="btn btn-default btn-sm" onclick="moveQuestionUp($index)">Move Up</button>
+        <button ng-if="!$last" class="btn btn-default btn-sm" onclick="moveQuestionDown($index)">Move Down</button>
+      </td>
+    </tr>
+  </table>
+</div>

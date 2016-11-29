@@ -2,11 +2,9 @@
  * Functionality to create and edit surveys via a web form
  */
 
-var questions = [];
+var questions = JSON.parse(survey_content);
 
 $(document).ready(function() {
-    questions = JSON.parse(survey_content);
-    if (tracking_survey) { renderQuestionsList(); };
     renderSchedule();
     $('.schedule-timepicker').timepicker();
     audioSurveyTypeChange( $("[name='audio_survey_type']:checked").val() )
@@ -125,33 +123,10 @@ function createJsonSurveyObject() {
     return surveyObject;
 }
 
-// Render a list of the current questions
-function renderQuestionsList() {
-    // Get the question template, and compile it using Handlebars.js
-    var source = $("#question-template").html();
-    var template = Handlebars.compile(source);
-
-    // Use the list of questions as the data list to populate the template
-    var dataList = { questions: questions };
-    var htmlQuestion = template(dataList);
-
-    // Insert the template into the page's HTML
-    $("#listOfCurrentQuestions").html(htmlQuestion);
-    $('#number_of_total_questions').html(questions.length);
-}
-
 // Get the question object from the Edit Question modal, and append it to the questions array
 function addNewQuestion() {
     var questionObject = getQuestionObjectFromModal();
     questions.push(questionObject);
-    renderQuestionsList();
-}
-
-// Get the question object from the Edit Question modal, and replace questions[index] with it
-function replaceQuestion(index) {
-    var questionObject = getQuestionObjectFromModal();
-    questions.splice(index, 1, questionObject);
-    renderQuestionsList();
 }
 
 //TODO CDUCMENCDHIsdcoihh
@@ -166,23 +141,15 @@ function audioSurveyTypeChange(audio_survey_type) {
     }
 }
 
-// Open the Edit Question modal, and pre-populate it with the data from the selected question
-function editQuestion(index) {
-    populateEditQuestionModal(questions[index]);
-    document.getElementById("saveQuestion").onclick = function() { replaceQuestion(index); };
-}
-
 // Remove the selected question from the questions array, and re-render the HTML list of questions
 function deleteQuestion(index) {
     questions.splice(index, 1);
-    renderQuestionsList();
 }
 
 // Swap the question with the one before it, as long as it's not the first in the list
 function moveQuestionUp(index) {
     if (index > 0) {
         questions.splice(index - 1, 2, questions[index], questions[index - 1]);
-        renderQuestionsList();
     };
 }
 
@@ -190,7 +157,6 @@ function moveQuestionUp(index) {
 function moveQuestionDown(index) {
     if (index < questions.length - 1) {
         questions.splice(index, 2, questions[index + 1], questions[index]);
-        renderQuestionsList();
     };
 }
 

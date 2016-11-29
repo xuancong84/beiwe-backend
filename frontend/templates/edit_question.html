@@ -11,33 +11,33 @@
           <table>
             <tr>
               <td><label for="text">Question Text:</label></td>
-              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.questionFields.questionText"></td>
+              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.currentQuestionFields.questionText"></td>
             </tr>
             <tr>
               <td><label for="type">Question Type:</label></td>
               <td>
-                <select id="type" name="type" ng-model="surveyBuilder.questionFields.questionType"
+                <select id="type" name="type" ng-model="surveyBuilder.currentQuestionFields.questionType"
                         ng-options="surveyBuilder.QUESTION_TYPE_LABELS[type] for type in surveyBuilder.QUESTION_TYPES track by type">
                 </select>
               </td>
             </tr>
-            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="min">Minimum Value:</label></td>
-              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.questionFields.questionMin"></td>
+              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.currentQuestionFields.questionMin"></td>
             </tr>
-            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="max">Maximum Value:</label></td>
-              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.questionFields.questionMax"></td>
+              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.currentQuestionFields.questionMax"></td>
             </tr>
-            <tr ng-if="surveyBuilder.questionFields.questionType == surveyBuilder.QUESTION_TYPES.freeResponse">
+            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.freeResponse">
               <td><label for="tfttxt">Text Field Type:</label></td>
               <td>
-                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.questionFields.tfttxt"
+                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.currentQuestionFields.tfttxt"
                         ng-options="surveyBuilder.TFTTXT_TYPE_LABELS[type] for type in surveyBuilder.TFTTXT_TYPES track by type">
                 </select>
               </td>
             </tr>
-            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.questionFields.questionType) > -1"
+            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.currentQuestionFields.questionType) > -1"
                    id="fields_div">
               <tr>
                 <td><label>Fields:</label></td>
@@ -47,8 +47,15 @@
           </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
+          <button class="btn btn-default" data-dismiss="modal">Close</button>
+          <button ng-if="surveyBuilder.currentQuestionFields.isNewQuestion"
+                  class="btn btn-primary"data-dismiss="modal" onclick="addNewQuestion()">
+            Add Question
+          </button>
+          <button ng-if="!surveyBuilder.currentQuestionFields.isNewQuestion" class="btn btn-primary" data-dismiss="modal"
+                  ng-click="editQuestion()">
+            Save Question
+          </button>
         </div>
       </form>
     </div>
