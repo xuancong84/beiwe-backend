@@ -1,10 +1,10 @@
 <div ng-repeat="question in surveyBuilder.questions">
-  <h4>{{ question.question_text }}</h4>
+  <h4>{{ question.text }}</h4>
   <table>
     <!-- Question type -->
     <tr>
       <td><i>Question Type:</i></td>
-      <td>{{ surveyBuilder.QUESTION_TYPE_LABELS[question.question_type] }}</td>
+      <td>{{ surveyBuilder.QUESTION_TYPE_LABELS[question.type] }}</td>
     </tr>
     <!-- Slider question minimum and maximum -->
     <tr ng-if="question.min">
@@ -29,7 +29,7 @@
     <!-- Action buttons -->
     <tr>
       <td colspan="2">
-        <button class="btn btn-default btn-sm" ng-click="launchEditQuestion($index)">Edit</button>
+        <button class="btn btn-default btn-sm" data-toggle="modal" data-target="#editQuestionModal" ng-click="surveyBuilder.launchEditQuestion($index)">Edit</button>
         <button class="btn btn-default btn-sm" onclick="deleteQuestion($index)">Delete</button>
         <button ng-if="!$first" class="btn btn-default btn-sm" onclick="moveQuestionUp($index)">Move Up</button>
         <button ng-if="!$last" class="btn btn-default btn-sm" onclick="moveQuestionDown($index)">Move Down</button>

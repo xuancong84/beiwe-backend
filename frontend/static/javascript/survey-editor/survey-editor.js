@@ -2,8 +2,6 @@
  * Functionality to create and edit surveys via a web form
  */
 
-var questions = JSON.parse(survey_content);
-
 $(document).ready(function() {
     renderSchedule();
     $('.schedule-timepicker').timepicker();

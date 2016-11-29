@@ -11,37 +11,42 @@
           <table>
             <tr>
               <td><label for="text">Question Text:</label></td>
-              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.currentQuestionFields.questionText"></td>
+              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.currentQuestionFields.text"></td>
             </tr>
             <tr>
               <td><label for="type">Question Type:</label></td>
               <td>
-                <select id="type" name="type" ng-model="surveyBuilder.currentQuestionFields.questionType"
+                <select id="type" name="type" ng-model="surveyBuilder.currentQuestionFields.type"
                         ng-options="surveyBuilder.QUESTION_TYPE_LABELS[type] for type in surveyBuilder.QUESTION_TYPES track by type">
                 </select>
               </td>
             </tr>
-            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+            <tr ng-if="surveyBuilder.currentQuestionFields.type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="min">Minimum Value:</label></td>
-              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.currentQuestionFields.questionMin"></td>
+              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.currentQuestionFields.min"></td>
             </tr>
-            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.slider">
+            <tr ng-if="surveyBuilder.currentQuestionFields.type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="max">Maximum Value:</label></td>
-              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.currentQuestionFields.questionMax"></td>
+              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.currentQuestionFields.max"></td>
             </tr>
-            <tr ng-if="surveyBuilder.currentQuestionFields.questionType == surveyBuilder.QUESTION_TYPES.freeResponse">
+            <tr ng-if="surveyBuilder.currentQuestionFields.type == surveyBuilder.QUESTION_TYPES.freeResponse">
               <td><label for="tfttxt">Text Field Type:</label></td>
               <td>
-                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.currentQuestionFields.tfttxt"
-                        ng-options="surveyBuilder.TFTTXT_TYPE_LABELS[type] for type in surveyBuilder.TFTTXT_TYPES track by type">
+                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.currentQuestionFields.textFieldType"
+                        ng-options="surveyBuilder.TEXT_FIELD_TYPE_LABELS[type] for type in surveyBuilder.TEXT_FIELD_TYPES track by type">
                 </select>
               </td>
             </tr>
-            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.currentQuestionFields.questionType) > -1"
+            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.currentQuestionFields.type) > -1"
                    id="fields_div">
               <tr>
                 <td><label>Fields:</label></td>
-                <td><button type="button" onclick="addField()">Add new field</button></td>
+                <td><button ng-click="surveyBuilder.addAnswerField()">Add new field</button></td>
+              </tr>
+              <tr ng-repeat="answer in surveyBuilder.currentQuestionFields.answers">
+                <td></td>
+                <td><input type="text" ng-model="answer.text"></td>
+                <td><button ng-click="surveyBuilder.deleteAnswerField($index)">Delete</button></td>
               </tr>
             </tbody>
           </table>
@@ -53,7 +58,7 @@
             Add Question
           </button>
           <button ng-if="!surveyBuilder.currentQuestionFields.isNewQuestion" class="btn btn-primary" data-dismiss="modal"
-                  ng-click="editQuestion()">
+                  ng-click="surveyBuilder.editQuestion()">
             Save Question
           </button>
         </div>

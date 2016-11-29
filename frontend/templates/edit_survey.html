@@ -5,9 +5,9 @@
 {% block head %}
   {{ super() }}
   <script type="text/javascript">
-      var survey_id = '{{ survey._id }}';
-      var survey_times = {{ survey.timings }};
-      var survey_content = '{{ survey.content|tojson }}';
+    var survey_id = '{{ survey._id }}';
+    var survey_times = {{ survey.timings }};
+    var questions = JSON.parse('{{ survey.content|tojson }}');
   </script>
   <script src="/static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
   <script src="/static/javascript/survey-editor/set-up-modal.js"></script>
@@ -24,6 +24,7 @@
 {% block body_attributes %}ng-app="surveyBuilder" ng-controller="SurveyBuilderCtrl as surveyBuilder"{% endblock %}
 
 {% block javascript %}
+  <script src="/static/javascript/libraries/lodash.min.js"></script>
   <script src="/static/javascript/app/app.module.js"></script>
   <script src="/static/javascript/app/survey-builder/constants.js"></script>
   <script src="/static/javascript/app/survey-builder/directives/question-summary/question-summary.js"></script>
