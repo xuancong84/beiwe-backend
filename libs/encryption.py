@@ -10,6 +10,8 @@ from db.study_models import Study
 
 class DecryptionKeyError(Exception): pass
 class HandledError(Exception): pass
+class InvalidIV(Exception): pass
+class InvalidData(Exception): pass
 
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
@@ -86,7 +88,6 @@ def decrypt_device_file(patient_id, data, private_key):
             continue
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
-
         except Exception as e:
             error_message = "There was an error in user decryption: "
             if isinstance(e, IndexError):
@@ -107,15 +108,16 @@ def decrypt_device_file(patient_id, data, private_key):
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
                 continue
-            elif "Input strings must be a multiple of 16 in length" in e.message:
+            if "Input strings must be a multiple of 16 in length" in e.message:
                 error_message += "Line was of incorrect length, dropping it and continuing."
                 log_error(e, error_message)
                 continue
-                
-            elif ("must be string or read-only buffer, not None" == e.message or
-                  "argument 3 must be string or read-only buffer, not None" == e.message):
-                #these two strings might be the result of an a changeto the encryption library.
-                error_message += "Line contained no data: " + str(line)
+            if isinstance(e, InvalidData):
+                error_message += "Line contained no data, skipping: " + str(line)
+                log_error(e, error_message)
+                continue
+            if isinstance(e, InvalidIV):
+                error_message += "Line contained no iv, skipping: " + str(line)
                 log_error(e, error_message)
                 continue
             ##################### flip out on these errors #####################
@@ -138,9 +140,12 @@ def decrypt_device_line(patient_id, key, data):
         value 2 is the initialization vector for the AES CBC cipher.
         value 3 is the config, encrypted using AES CBC, with the provided key and iv. """
     iv, data = data.split(":")
-    #this nonsense is because we appear to accasionally get ascii encoding errors.
-    iv = decode_base64( iv.encode( "utf-8" ) )
+    iv = decode_base64( iv.encode( "utf-8" ) ) #handle non-ascii encoding garbage...
     data = decode_base64( data.encode( "utf-8" ) )
+    if not data:
+        raise InvalidData()
+    if not iv:
+        raise InvalidIV
     try:
         decrypted = AES.new(key, mode=AES.MODE_CBC, IV=iv).decrypt( data )
     except Exception:
