@@ -111,7 +111,10 @@ def decrypt_device_file(patient_id, data, private_key):
                 error_message += "Line was of incorrect length, dropping it and continuing."
                 log_error(e, error_message)
                 continue
-            elif "argument must be string or read-only buffer, not None" == e.message:
+                
+            elif ("must be string or read-only buffer, not None" == e.message or
+                  "argument 3 must be string or read-only buffer, not None" == e.message):
+                #these two strings might be the result of an a changeto the encryption library.
                 error_message += "Line contained no data: " + str(line)
                 log_error(e, error_message)
                 continue
