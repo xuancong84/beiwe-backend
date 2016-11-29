@@ -1,24 +1,4 @@
 angular.module("surveyBuilder")
-  .constant("QUESTION_FIELD_MAPPINGS", (function() {
-    /**
-     * For converting question fields from what's expected backend (python) to what's expected frontend (javascript)
-     * and vice-versa.
-     */
-    var backendToFrontend = {
-      "question_type": "type",
-      "question_text": "text",
-      "min": "min",
-      "max": "max",
-      "answers": "answers",
-      "text_field_type": "textFieldType",
-      "question_id": "id"
-    };
-    var frontendToBackend = _.invert(backendToFrontend);
-    return {
-      "toFrontend": backendToFrontend,
-      "toBackend": frontendToBackend
-    }
-  })())
   .constant("QUESTION_TYPES", {
     "infoTextBox": "info_text_box",
     "slider": "slider",
@@ -35,23 +15,16 @@ angular.module("surveyBuilder")
     this[QUESTION_TYPES.checkbox] = "Checkbox";
     this[QUESTION_TYPES.freeResponse] = "Free Response";
   })
-  .service("QUESTION_FIELDS_LIST", function(QUESTION_TYPES, QUESTION_FIELD_MAPPINGS) {
+  .service("QUESTION_FIELDS_LIST", function(QUESTION_TYPES) {
     /**
      * A list of the keys necessary for each question type
      */
-    var commonKeysFrontend = ["question_id", "question_text", "question_type"];
-    this.backend = {};
-    this.backend[QUESTION_TYPES.infoTextBox] = commonKeysFrontend;
-    this.backend[QUESTION_TYPES.slider] = commonKeysFrontend.concat(["max", "min"]);
-    this.backend[QUESTION_TYPES.radio] = commonKeysFrontend.concat(["answers"]);
-    this.backend[QUESTION_TYPES.checkbox] = commonKeysFrontend.concat(["answers"]);
-    this.backend[QUESTION_TYPES.freeResponse] = commonKeysFrontend.concat(["text_field_type"]);
-    this.frontend = _.mapValues(
-      this.backend, 
-      function(value) {
-        return _.map(value, function(value) { return QUESTION_FIELD_MAPPINGS.toFrontend[value]; })
-      }
-    )
+    var commonKeys = ["question_id", "question_text", "question_type"];
+    this[QUESTION_TYPES.infoTextBox] = commonKeys;
+    this[QUESTION_TYPES.slider] = commonKeys.concat(["max", "min"]);
+    this[QUESTION_TYPES.radio] = commonKeys.concat(["answers"]);
+    this[QUESTION_TYPES.checkbox] = commonKeys.concat(["answers"]);
+    this[QUESTION_TYPES.freeResponse] = commonKeys.concat(["text_field_type"]);
   })
   .constant("TEXT_FIELD_TYPES", {
     "numeric": "NUMERIC",
