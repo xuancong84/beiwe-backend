@@ -23,11 +23,17 @@
             </tr>
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="min">Minimum Value:</label></td>
-              <td><input type="number" id="min" name="min" min="0" max="100" ng-model="surveyBuilder.currentQuestionFields.min"></td>
+              <td>
+                <input type="number" id="min" name="min" min="0" max="100"
+                       ng-keyup="surveyBuilder.checkSliderValue('min')" ng-model="surveyBuilder.currentQuestionFields.min">
+              </td>
             </tr>
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="max">Maximum Value:</label></td>
-              <td><input type="number" id="max" name="max" min="1" max="100" ng-model="surveyBuilder.currentQuestionFields.max"></td>
+              <td>
+                <input type="number" id="max" name="max" min="1" max="100"
+                       ng-keyup="surveyBuilder.checkSliderValue('max')" ng-model="surveyBuilder.currentQuestionFields.max">
+              </td>
             </tr>
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
               <td><label for="tfttxt">Text Field Type:</label></td>
@@ -54,7 +60,7 @@
         <div class="modal-footer">
           <button class="btn btn-default" data-dismiss="modal">Close</button>
           <button ng-if="surveyBuilder.currentQuestionFields.is_new_question"
-                  class="btn btn-primary"data-dismiss="modal" onclick="addNewQuestion()">
+                  class="btn btn-primary" data-dismiss="modal" ng-click="surveyBuilder.addNewQuestion()">
             Add Question
           </button>
           <button ng-if="!surveyBuilder.currentQuestionFields.is_new_question" class="btn btn-primary" data-dismiss="modal"

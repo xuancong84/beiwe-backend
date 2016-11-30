@@ -33,9 +33,13 @@
                 ng-click="surveyBuilder.populateEditQuestionModal($index)">
           Edit
         </button>
-        <button class="btn btn-default btn-sm" onclick="deleteQuestion($index)">Delete</button>
-        <button ng-if="!$first" class="btn btn-default btn-sm" onclick="moveQuestionUp($index)">Move Up</button>
-        <button ng-if="!$last" class="btn btn-default btn-sm" onclick="moveQuestionDown($index)">Move Down</button>
+        <button class="btn btn-default btn-sm" ng-click="surveyBuilder.deleteQuestion($index)">Delete</button>
+        <button ng-if="!$first" class="btn btn-default btn-sm" ng-click="surveyBuilder.moveQuestionUp($index)">
+          Move Up
+        </button>
+        <button ng-if="!$last" class="btn btn-default btn-sm" ng-click="surveyBuilder.moveQuestionDown($index)">
+          Move Down
+        </button>
       </td>
     </tr>
   </table>

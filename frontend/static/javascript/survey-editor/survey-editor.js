@@ -66,7 +66,8 @@ function get_survey_settings() {
 function end() {
     var content = "";
     if (tracking_survey) {
-        content = questions;
+        var scope = angular.element($("body")).scope();
+        content = scope.surveyBuilder.questions;
     } else {
         content_list = [];
         // Remove double-quotes, which break the JSON parser.
@@ -109,7 +110,7 @@ function createJsonSurveyObject() {
     survey_id_string = "WeeklySurveyCreatedAt" + new Date().getTime();
     var surveyObject = {
         hour_of_day: getHour(),
-        questions: questions,
+        questions: angular.element($("body")).scope().surveyBuilder.questions,
         survey_id: survey_id_string
     }
     // If it's a weekly survey, add the day of the week to ask the survey
@@ -119,12 +120,6 @@ function createJsonSurveyObject() {
     console.log("surveyObject = ");
     console.log(surveyObject);
     return surveyObject;
-}
-
-// Get the question object from the Edit Question modal, and append it to the questions array
-function addNewQuestion() {
-    var questionObject = getQuestionObjectFromModal();
-    questions.push(questionObject);
 }
 
 //TODO CDUCMENCDHIsdcoihh
@@ -138,23 +133,3 @@ function audioSurveyTypeChange(audio_survey_type) {
         $("#compressed_options").show();
     }
 }
-
-// Remove the selected question from the questions array, and re-render the HTML list of questions
-function deleteQuestion(index) {
-    questions.splice(index, 1);
-}
-
-// Swap the question with the one before it, as long as it's not the first in the list
-function moveQuestionUp(index) {
-    if (index > 0) {
-        questions.splice(index - 1, 2, questions[index], questions[index - 1]);
-    };
-}
-
-// Swap the question with the one after it, as long as it's not the last in the list
-function moveQuestionDown(index) {
-    if (index < questions.length - 1) {
-        questions.splice(index, 2, questions[index + 1], questions[index]);
-    };
-}
-
