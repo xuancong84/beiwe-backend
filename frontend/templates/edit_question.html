@@ -58,7 +58,6 @@
           </table>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-default" data-dismiss="modal">Close</button>
           <button ng-if="surveyBuilder.currentQuestionFields.is_new_question"
                   class="btn btn-primary" data-dismiss="modal" ng-click="surveyBuilder.addNewQuestion()">
             Add Question
@@ -67,6 +66,7 @@
                   ng-click="surveyBuilder.editQuestion()">
             Save Question
           </button>
+          <button class="btn btn-default pull-left" data-dismiss="modal">Close</button>
         </div>
       </form>
     </div>

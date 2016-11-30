@@ -102,11 +102,12 @@
        * or maximum depending on which side it is out of range on.
        */
       var input = $("#" + min_or_max);
-      var minimumValue = input.attr("min");
-      var maximumValue = input.attr("max");
-      if (input.val() < minimumValue) {
+      var currentValue = parseInt(input.val(), 10);
+      var minimumValue = parseInt(input.attr("min"), 10);
+      var maximumValue = parseInt(input.attr("max"), 10);
+      if (currentValue < minimumValue) {
         this.currentQuestionFields[min_or_max] = minimumValue;
-      } else if (input.val() > maximumValue) {
+      } else if (currentValue > maximumValue) {
         this.currentQuestionFields[min_or_max] = maximumValue;
       }
     };
