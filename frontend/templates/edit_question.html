@@ -1,9 +1,9 @@
 <!-- Modal for question addition/alteration-->
-<div class="modal fade" id="editQuestionModal" tabindex="-1" role="dialog" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+<div id="editQuestionModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
         <h4 class="modal-title" id="editQuestionModalLabel">Edit Question</h4>
       </div>
       <form id="questionForm" name="question">
@@ -11,12 +11,16 @@
           <table>
             <tr>
               <td><label for="text">Question Text:</label></td>
-              <td><input type="text" name="question_text" id="text" ng-model="surveyBuilder.currentQuestionFields.question_text"></td>
+              <td>
+                <input type="text" name="question_text" id="text" class="form-control"
+                       ng-model="surveyBuilder.currentQuestionFields.question_text">
+              </td>
             </tr>
             <tr>
               <td><label for="type">Question Type:</label></td>
               <td>
-                <select id="type" name="type" ng-model="surveyBuilder.currentQuestionFields.question_type"
+                <select name="type" id="type" class="form-control"
+                        ng-model="surveyBuilder.currentQuestionFields.question_type"
                         ng-options="surveyBuilder.QUESTION_TYPE_LABELS[type] for type in surveyBuilder.QUESTION_TYPES track by type">
                 </select>
               </td>
@@ -24,21 +28,24 @@
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="min">Minimum Value:</label></td>
               <td>
-                <input type="number" id="min" name="min" min="0" max="100"
-                       ng-keyup="surveyBuilder.checkSliderValue('min')" ng-model="surveyBuilder.currentQuestionFields.min">
+                <input type="number" name="min" id="min" class="form-control" min="0" max="100"
+                       ng-keyup="surveyBuilder.checkSliderValue('min')"
+                       ng-model="surveyBuilder.currentQuestionFields.min">
               </td>
             </tr>
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="max">Maximum Value:</label></td>
               <td>
-                <input type="number" id="max" name="max" min="1" max="100"
-                       ng-keyup="surveyBuilder.checkSliderValue('max')" ng-model="surveyBuilder.currentQuestionFields.max">
+                <input type="number" name="max" id="max" class="form-control" min="1" max="100"
+                       ng-keyup="surveyBuilder.checkSliderValue('max')"
+                       ng-model="surveyBuilder.currentQuestionFields.max">
               </td>
             </tr>
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
               <td><label for="tfttxt">Text Field Type:</label></td>
               <td>
-                <select id="tfttxt" name="text_field_type" ng-model="surveyBuilder.currentQuestionFields.text_field_type"
+                <select name="text_field_type" id="tfttxt" class="form-control"
+                        ng-model="surveyBuilder.currentQuestionFields.text_field_type"
                         ng-options="surveyBuilder.TEXT_FIELD_TYPE_LABELS[type] for type in surveyBuilder.TEXT_FIELD_TYPES track by type">
                 </select>
               </td>
@@ -47,12 +54,20 @@
                    id="fields_div">
               <tr>
                 <td><label>Fields:</label></td>
-                <td><button ng-click="surveyBuilder.addAnswerField()">Add new field</button></td>
+                <td>
+                  <button class="btn btn-info" ng-click="surveyBuilder.addAnswerField()">Add new field</button>
+                </td>
               </tr>
               <tr ng-repeat="answer in surveyBuilder.currentQuestionFields.answers">
-                <td></td>
-                <td><input type="text" ng-model="answer.text"></td>
-                <td><button ng-click="surveyBuilder.deleteAnswerField($index)">Delete</button></td>
+                <td class="text-right">
+                  <span ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.radio">
+                    {% raw %}{{ $index }}{% endraw %}:
+                  </span>
+                </td>
+                <td><input type="text" class="form-control" ng-model="answer.text"></td>
+                <td>
+                  <button class="btn btn-danger" ng-click="surveyBuilder.deleteAnswerField($index)">Delete</button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -62,7 +77,8 @@
                   class="btn btn-primary" data-dismiss="modal" ng-click="surveyBuilder.addNewQuestion()">
             Add Question
           </button>
-          <button ng-if="!surveyBuilder.currentQuestionFields.is_new_question" class="btn btn-primary" data-dismiss="modal"
+          <button ng-if="!surveyBuilder.currentQuestionFields.is_new_question"
+                  class="btn btn-primary" data-dismiss="modal"
                   ng-click="surveyBuilder.editQuestion()">
             Save Question
           </button>
