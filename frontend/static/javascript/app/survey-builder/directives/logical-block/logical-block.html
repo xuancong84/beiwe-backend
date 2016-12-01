@@ -3,8 +3,7 @@
     {{ type }}
   </div>
   <ul class="list-group">
-    <li class="list-group-item"
-        ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
+    <li class="list-group-item" ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
       <div ng-if="!(_.isArray(value))">
         <!-- These are either logical ("and", "or") or arithmetic ("==", "<", ...) statements -->
         <logical-block ng-if="_.includes(LOGICAL_OPERATORS, getValueType(value))"

@@ -27,7 +27,7 @@
       "index": null,
       "question_id": null,
       "answers": [],
-      "display_if": null/*{'or': [
+      "display_if": {'or': [
                          {'and': [
                                   {'==': ['6695d6c4-916b-4225-8688-89b6089a24d1', 4]},
                                   {'or': [
@@ -39,7 +39,7 @@
                                  {'>=': ['41d54793-dc4d-48d9-f370-4329a7bc6960', 3]},
                                  {'>=': ['5cfa06ad-d907-4ba7-a66a-d68ea3c89fba', 3]}
                                 ]}
-                        ]}*/
+                        ]}
     };
     this.defaultQuestionFields = angular.copy(this.currentQuestionFields);
 
