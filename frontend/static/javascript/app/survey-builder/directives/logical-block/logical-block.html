@@ -1,6 +1,10 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     {{ type }}
+    <button class="close pull-right" style="line-height: 20px;"
+            ng-click="surveyBuilder.deleteBlock(path)">
+      &times;
+    </button>
   </div>
   <ul class="list-group">
     <li class="list-group-item" ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">

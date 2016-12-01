@@ -178,6 +178,19 @@
       this.addValueToPath(path, {"==": [this.questionIds[0], ""]})
     };
 
+    this.deleteBlock = function(path) {
+      var pathLocationArray = this.getPathLocation(path);
+      var parentObject = pathLocationArray[0];
+      var key = pathLocationArray[1];
+      if (_.isArray(parentObject)) {
+        parentObject.splice(key, 1);
+      } else {
+        // This case should only be true for the base AND or OR block
+        parentObject[key] = null;
+      }
+    };
+    
+
     /**
      * Skip logic helper functions
      */
