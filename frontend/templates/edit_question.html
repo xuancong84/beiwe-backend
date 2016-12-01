@@ -9,7 +9,7 @@
       </div>
       <form id="questionForm" name="question">
         <div class="modal-body">
-          <table>
+          <table style="width: 100%;">
             <tr>
               <td><label for="text">Question Text:</label></td>
               <td>
@@ -72,13 +72,16 @@
               </tr>
             </tbody>
             <tr>
+              <td colspan="2">{{ surveyBuilder.currentQuestionFields.display_if }}</td>
+            </tr>
+            <tr>
               <td><label for="text">Display If:</label></td>
               <td>
                 <logical-block ng-if="surveyBuilder.currentQuestionFields.display_if"
                                survey-builder="surveyBuilder" path=""></logical-block>
                 <div ng-if="!surveyBuilder.currentQuestionFields.display_if">
                   <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
-                  <button class="btn btn-info">Add "AND" Block</button>
+                  <button class="btn btn-info" ng-click="surveyBuilder.addAndBlock('')">Add "AND" Block</button>
                 </div>                  
               </td>
             </tr>

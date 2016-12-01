@@ -4,26 +4,30 @@
 
 {% block head %}
   {{ super() }}
-  <script type="text/javascript">
-    var survey_id = '{{ survey._id }}';
-    var survey_times = {{ survey.timings }};
-    var questions = JSON.parse('{{ survey.content|tojson }}');
-  </script>
-  <script src="/static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
-  <script src="/static/javascript/survey-editor/question-from-modal.js"></script>
-  <script src="/static/javascript/survey-editor/schedule.js" type="text/javascript"></script>
-  <script src="/static/javascript/survey-editor/survey-editor.js"></script>
   <link rel="stylesheet" href="/static/css/survey_builder.css"  type="text/css"/>
-
-  <script type="text/javascript">
-    var tracking_survey = false;
-  </script>
+  <style>
+    @media (min-width: 768px) {
+      .modal-dialog {
+        width: 80%;
+      }
+    }
+  </style>
 {% endblock %}
 
 {% block body_attributes %}ng-app="surveyBuilder" ng-controller="SurveyBuilderCtrl as surveyBuilder"{% endblock %}
 
 {% block javascript %}
   <script src="/static/javascript/libraries/lodash.min.js"></script>
+  <script type="text/javascript">
+    var questions = JSON.parse('{{ survey.content|tojson }}');
+    var survey_id = '{{ survey._id }}';
+    var survey_times = {{ survey.timings }};
+    var tracking_survey = false;
+  </script>
+  <script src="/static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
+  <script src="/static/javascript/survey-editor/question-from-modal.js"></script>
+  <script src="/static/javascript/survey-editor/schedule.js" type="text/javascript"></script>
+  <script src="/static/javascript/survey-editor/survey-editor.js"></script>
   <script src="/static/javascript/app/app.module.js"></script>
   <script src="/static/javascript/app/survey-builder/constants.js"></script>
   <script src="/static/javascript/app/survey-builder/services.js"></script>

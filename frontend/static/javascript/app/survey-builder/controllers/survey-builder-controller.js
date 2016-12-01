@@ -4,7 +4,7 @@
     .module("surveyBuilder")
     .controller("SurveyBuilderCtrl", SurveyBuilderCtrl);
   
-  function SurveyBuilderCtrl(_, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
+  function SurveyBuilderCtrl($scope, _, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
                              TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
     /* Constants for use in template */
     this.QUESTION_TYPES = QUESTION_TYPES;
@@ -15,6 +15,7 @@
 
     /* Array of questions for this survey */
     this.questions = window.questions;
+    this.questionIds = _.map(this.questions, "question_id");
 
     /* Current question for displaying/modifying with modal */
     this.currentQuestionFields = {
@@ -27,7 +28,7 @@
       "index": null,
       "question_id": null,
       "answers": [],
-      "display_if": {'or': [
+      "display_if": null/*{'or': [
                          {'and': [
                                   {'==': ['6695d6c4-916b-4225-8688-89b6089a24d1', 4]},
                                   {'or': [
@@ -39,7 +40,7 @@
                                  {'>=': ['41d54793-dc4d-48d9-f370-4329a7bc6960', 3]},
                                  {'>=': ['5cfa06ad-d907-4ba7-a66a-d68ea3c89fba', 3]}
                                 ]}
-                        ]}
+                        ]}*/
     };
     this.defaultQuestionFields = angular.copy(this.currentQuestionFields);
 
@@ -164,9 +165,17 @@
        */
       this.addValueToPath(path, {"or": []})
     };
+    
+    this.addAndBlock = function(path) {
+      /**
+       * Adds an OR block to the display_if nested object at the path specified (path should be a string that's
+       * "/" delimited to where the OR block should be added).
+       */
+      this.addValueToPath(path, {"and": []})
+    };
 
-    this.addConditional = function(path) {
-      this.addValueToPath(path, "asdf")
+    this.addConditionalBlock = function(path) {
+      this.addValueToPath(path, {"==": [this.questionIds[0], ""]})
     };
 
     /**
@@ -216,8 +225,22 @@
       } else if (_.isArray(parentObject[key])) {
         parentObject[key].push(value);
       }
-    }
+    };
     
+    this.updateOperatorAtPath = function(path, element) {
+      var pathLocationArray = this.getPathLocation(path);
+      var parentObject = pathLocationArray[0];
+      var key = pathLocationArray[1];
+      var currentOperator = this.getOperatorType(parentObject[key]);
+      var updatedOperator = element.type;
+      var updatedStatement = {};
+      updatedStatement[updatedOperator] = parentObject[key][currentOperator];
+      parentObject.splice(key, 1, updatedStatement);
+    };
+    
+    this.getOperatorType = function(value) {
+      return _.keys(value)[0];
+    };
   }
 
 })();

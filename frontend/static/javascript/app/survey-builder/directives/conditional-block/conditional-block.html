@@ -1,6 +1,10 @@
 <form class="form-inline">
-  <select class="form-control"><option>Q1</option></select>
-  answer
-  <select class="form-control"><option>==</option></select>
-  <input type="number" class="form-control">
+  Answer to
+  <select class="form-control" ng-model="surveyBuilder.getValueAtPath(path)[type][0]"
+          ng-options="getQuestionNumber(index) for (index, questionId) in surveyBuilder.questionIds">
+  </select>
+  <select class="form-control" ng-change="surveyBuilder.updateOperatorAtPath(path, this)"
+          ng-model="type" ng-options="operator for operator in ARITHMETIC_OPERATORS">
+  </select>
+  <input type="number" class="form-control" ng-model="surveyBuilder.getValueAtPath(path)[type][1]">
 </form>

@@ -6,16 +6,22 @@
     <li class="list-group-item" ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
       <div ng-if="!(_.isArray(value))">
         <!-- These are either logical ("and", "or") or arithmetic ("==", "<", ...) statements -->
-        <logical-block ng-if="_.includes(LOGICAL_OPERATORS, getValueType(value))"
+        <logical-block ng-if="_.includes(LOGICAL_OPERATORS, surveyBuilder.getOperatorType(value))"
                        path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></logical-block>
-        <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, getValueType(value))"
+        <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, surveyBuilder.getOperatorType(value))"
                            path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></conditional-block>
       </div>
     </li>
     <li class="list-group-item">
-      <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
-      <button class="btn btn-info">Add "AND" Block</button>
-      <button class="btn btn-info">Add Conditional</button>
+      <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock(getNewPath())">
+        Add "OR" Block
+      </button>
+      <button class="btn btn-info" ng-click="surveyBuilder.addAndBlock(getNewPath())">
+        Add "AND" Block
+      </button>
+      <button class="btn btn-info" ng-click="surveyBuilder.addConditionalBlock(getNewPath())">
+        Add Conditional
+      </button>
     </li>
   </ul>
 </div>

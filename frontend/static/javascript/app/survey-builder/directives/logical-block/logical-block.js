@@ -8,11 +8,12 @@ angular.module("surveyBuilder")
         scope.LOGICAL_OPERATORS = LOGICAL_OPERATORS;
         
         scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
-        scope.getValueType = function(value) {
-          return _.keys(value)[0];
-        };
         scope.getNewPath = function(index) {
-          return scope.path + "/" + scope.type + "/" + index;
+          var newPath = scope.path + "/" + scope.type;
+          if (typeof index != "undefined") {
+            newPath = newPath + "/" + index;
+          }
+          return newPath;
         }
       },
       "restrict": "E",
