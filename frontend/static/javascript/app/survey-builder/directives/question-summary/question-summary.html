@@ -2,7 +2,10 @@
   <div class="panel-body">
     <table>
       <tr>
-        <td style="padding-left: 20px; padding-right: 30px;"><h1>Q{{ $index }}</h1></td>
+        <td style="padding-left: 20px; padding-right: 30px; text-align: center">
+          <h1>Q{{ $index + 1 }}</h1>
+          <span class="label label-success">Always Displayed</span>
+        </td>
         <td>
           <h4>{{ question.question_text }}</h4>
           <table>

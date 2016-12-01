@@ -1,3 +1,4 @@
+{% raw %}
 <!-- Modal for question addition/alteration-->
 <div id="editQuestionModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
@@ -50,7 +51,7 @@
                 </select>
               </td>
             </tr>
-            <tbody ng-if="[surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox].indexOf(surveyBuilder.currentQuestionFields.question_type) > -1"
+            <tbody ng-if="_.includes([surveyBuilder.QUESTION_TYPES.radio, surveyBuilder.QUESTION_TYPES.checkbox], surveyBuilder.currentQuestionFields.question_type)"
                    id="fields_div">
               <tr>
                 <td><label>Fields:</label></td>
@@ -61,7 +62,7 @@
               <tr ng-repeat="answer in surveyBuilder.currentQuestionFields.answers">
                 <td class="text-right">
                   <span ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.radio">
-                    {% raw %}{{ $index }}{% endraw %}:
+                    {{ $index }}:
                   </span>
                 </td>
                 <td><input type="text" class="form-control" ng-model="answer.text"></td>
@@ -70,6 +71,17 @@
                 </td>
               </tr>
             </tbody>
+            <tr>
+              <td><label for="text">Display If:</label></td>
+              <td>
+                <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
+                <button class="btn btn-info">Add "AND" Block</button>
+                <br>
+                <br>
+                <logical-block survey-builder="surveyBuilder" path=""></logical-block>
+                {{ surveyBuilder.currentQuestionFields.display_if }}
+              </td>
+            </tr>
           </table>
         </div>
         <div class="modal-footer">
@@ -88,3 +100,4 @@
     </div>
   </div>
 </div>
+{% endraw %}

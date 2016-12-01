@@ -1,0 +1,14 @@
+{{ type=_.keys(surveyBuilder.getValueAtPath(path))[0];"" }}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    {{ type }}
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item"
+        ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
+      <logical-block ng-if="!(_.isArray(value)) && _.includes(LOGICAL_OPERATORS, type)" path="{{ path + '/' + type + '/' + $index }}"
+                         survey-builder="surveyBuilder"></logical-block>
+      <div ng-if="_.isArray(value) && _.includes(ARITHMETIC_OPERATORS, type)">{{ value }}</div>
+    </li>
+  </ul>
+</div>

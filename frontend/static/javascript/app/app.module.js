@@ -1,7 +1,10 @@
 angular.module("surveyBuilder", [])
-  .run(function($rootScope) {
+  .factory("_", function($window) {
     /**
-     * Load lodash for use in angular templating
+     * Load lodash for use in angular
      */
-    $rootScope._ = window._;
+    if (!$window._) {
+      window.reload();
+    }
+    return $window._;
   });

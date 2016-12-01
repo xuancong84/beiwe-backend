@@ -35,4 +35,6 @@ angular.module("surveyBuilder")
     this[TEXT_FIELD_TYPES.numeric] = "Numeric";
     this[TEXT_FIELD_TYPES.singleLine] = "Single-line Text";
     this[TEXT_FIELD_TYPES.multiLine] = "Multi-line Text";
-  });
+  })
+  .constant("LOGICAL_OPERATORS", ["and", "or"])
+  .constant("ARITHMETIC_OPERATORS", ["==", "<", "<=", ">", ">="]);
