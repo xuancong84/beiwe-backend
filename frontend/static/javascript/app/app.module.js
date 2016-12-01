@@ -4,7 +4,7 @@ angular.module("surveyBuilder", [])
      * Load lodash for use in angular
      */
     if (!$window._) {
-      window.reload();
+      location.reload();
     }
     return $window._;
   });

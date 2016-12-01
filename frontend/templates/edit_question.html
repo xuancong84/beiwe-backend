@@ -74,12 +74,12 @@
             <tr>
               <td><label for="text">Display If:</label></td>
               <td>
-                <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
-                <button class="btn btn-info">Add "AND" Block</button>
-                <br>
-                <br>
-                <logical-block survey-builder="surveyBuilder" path=""></logical-block>
-                {{ surveyBuilder.currentQuestionFields.display_if }}
+                <logical-block ng-if="surveyBuilder.currentQuestionFields.display_if"
+                               survey-builder="surveyBuilder" path=""></logical-block>
+                <div ng-if="!surveyBuilder.currentQuestionFields.display_if">
+                  <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
+                  <button class="btn btn-info">Add "AND" Block</button>
+                </div>                  
               </td>
             </tr>
           </table>
