@@ -70,10 +70,10 @@ class FileProcessLock(DatabaseObject):
     def unlock(cls):
         for f in FileProcessLockCollection(mark="marked"):
             f.remove()
-#     @classmethod
-#     def islocked(cls):
-#         if len(FileProcessLockCollection()) > 0: return False
-#         return True
+    @classmethod
+    def islocked(cls):
+        if len(FileProcessLockCollection()) > 0: return False
+        return True
 
 ################################################################################
 

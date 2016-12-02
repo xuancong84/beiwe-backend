@@ -19,6 +19,8 @@ from db.user_models import User
 
 from libs.s3 import s3_retrieve, s3_upload
 
+class EverythingWentFine(Exception): pass
+class ProcessingOverlapError(Exception): pass
 
 """########################## Hourly Update Tasks ###########################"""
 
@@ -27,6 +29,8 @@ def process_file_chunks():
     files that have been uploaded and 'chunks' them. Handles logic for skipping
     bad files, raising errors appropriately. """
     error_handler = ErrorHandler()
+    if FileProcessLock.islocked():
+        raise ProcessingOverlapError("Data processing overlapped with a previous data indexing run.")
     FileProcessLock.lock()
     number_bad_files = 0
     run_count = 0
@@ -36,12 +40,16 @@ def process_file_chunks():
         print str(datetime.now()), starting_length
         number_bad_files += do_process_file_chunks(FILE_PROCESS_PAGE_SIZE, error_handler, number_bad_files)
         if starting_length == FilesToProcess.count(): #zero files processed
-            if previous_number_bad_files == number_bad_files: #every file broke.
+            if previous_number_bad_files == number_bad_files:
+                # Cases:
+                # every file broke, would cause infinite loop.
+                # no new files.
                 break
             else: continue
     FileProcessLock.unlock()
     print FilesToProcess.count()
     error_handler.raise_errors()
+    raise EverythingWentFine("Everything went fine.")
 
 def do_process_file_chunks(count, error_handler, skip_count):
     """
