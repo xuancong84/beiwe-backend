@@ -64,7 +64,7 @@ class FileProcessLock(DatabaseObject):
     DEFAULTS = {"mark":""}
     @classmethod
     def lock(cls):
-        if FileProcessLockCollection.count()) > 0: raise FileProcessingLockedError
+        if FileProcessLockCollection.count() > 0: raise FileProcessingLockedError
         FileProcessLock.create({"mark":"marked"}, random_id=True)
     @classmethod
     def unlock(cls):
