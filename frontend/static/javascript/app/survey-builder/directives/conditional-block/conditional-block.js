@@ -6,8 +6,13 @@ angular.module("surveyBuilder")
         scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
         scope.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
         
-        scope.getQuestionNumber = function(index) {
-          return "Q" + ++index;
+        scope.getQuestionNumber = function(questionId) {
+          var index = _.indexOf(scope.surveyBuilder.questionIds, questionId);
+          if (index >= 0) {
+            return "Q" + ++index;
+          } else {
+            return "(error)"
+          }
         }
       },
       "restrict": "E",

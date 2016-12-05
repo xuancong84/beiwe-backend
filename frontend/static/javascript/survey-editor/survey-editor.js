@@ -3,6 +3,7 @@
  */
 
 $(document).ready(function() {
+    window.scope = angular.element($("body")).scope();
     renderSchedule();
     $('.schedule-timepicker').timepicker();
     audioSurveyTypeChange( $("[name='audio_survey_type']:checked").val() )
@@ -34,15 +35,14 @@ function getDayOfWeek() {
 function get_survey_settings() {
     var trigger_on_first_download = document.getElementById('trigger_on_first_download').checked;
     if (tracking_survey) {
-        var randomize = document.getElementById('randomize').checked;
-        var randomize_with_memory = document.getElementById('randomize_with_memory').checked;
-        var number_of_random_questions = parseInt($('#number_of_random_questions').val());
-        return {'trigger_on_first_download': trigger_on_first_download,
-                'randomize': randomize,
-                'randomize_with_memory': randomize_with_memory,
-                'number_of_random_questions': number_of_random_questions};
+        return {
+            'trigger_on_first_download': trigger_on_first_download,
+            'randomize': scope.surveyBuilder.randomize,
+            'randomize_with_memory': scope.surveyBuilder.randomizeWithMemory,
+            'number_of_random_questions': scope.surveyBuilder.numberOfRandomQuestions
+        };
     } else {
-        var audioSurveyType = $("[name='audio_survey_type']:checked").val()
+        var audioSurveyType = $("[name='audio_survey_type']:checked").val();
         ret = {'trigger_on_first_download': trigger_on_first_download,
                 'audio_survey_type': audioSurveyType };
         if (audioSurveyType == 'raw') { ret['sample_rate'] = parseInt($('#raw_options').val()); }
@@ -54,7 +54,6 @@ function get_survey_settings() {
 function end() {
     var content = "";
     if (tracking_survey) {
-        var scope = angular.element($("body")).scope();
         content = scope.surveyBuilder.questions;
     } else {
         content_list = [];

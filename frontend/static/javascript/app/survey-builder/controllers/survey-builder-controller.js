@@ -13,8 +13,11 @@
     this.TEXT_FIELD_TYPE_LABELS = TEXT_FIELD_TYPE_LABELS;
     this.QUESTION_FIELDS_LIST = QUESTION_FIELDS_LIST;
 
-    /* Array of questions for this survey */
+    /* Variables from django template */
     this.questions = window.questions;
+    this.randomize = window.randomize;
+    this.randomizeWithMemory = window.randomizeWithMemory;
+    this.numberOfRandomQuestions = window.numberOfRandomQuestions;
     // this.questionIds is set below in this.refreshQuestionIds()
 
     /* Current question for displaying/modifying with modal */
@@ -43,6 +46,7 @@
       // Generate a new UUID since this is a new question
       questionObject["question_id"] = uuid.generate();
       this.questions.push(questionObject);
+      this.refreshQuestionIds();
     };
 
     this.editQuestion = function() {
@@ -143,6 +147,7 @@
        * Delete the question at the passed index in this.questions
        */
       this.questions.splice(index, 1);
+      this.refreshQuestionIds();
     };
 
     /**
@@ -277,7 +282,6 @@
        */
       this.questionIds = this.getQuestionIds();
     };
-    
     // Set this.questionIds
     this.refreshQuestionIds();
     

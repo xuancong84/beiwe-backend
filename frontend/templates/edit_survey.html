@@ -25,8 +25,10 @@
     var questions = JSON.parse('{{ survey.content|tojson }}');
     var survey_id = '{{ survey._id }}';
     var survey_times = {{ survey.timings }};
-    var randomize = {{ "true" if survey.settings['randomize'] else "false" }};
-    var tracking_survey = {{ "true" if survey.survey_type == 'tracking_survey' else "false" }};
+    var randomize = {{ "true" if survey.settings["randomize"] else "false" }};
+    var randomizeWithMemory = {{ "true" if survey.settings["randomize_with_memory"] else "false" }};
+    var numberOfRandomQuestions = {{ survey.settings["number_of_random_questions"] or "null" }};
+    var tracking_survey = {{ "true" if survey.survey_type == "tracking_survey" else "false" }};
   </script>
   <script src="/static/javascript/survey-editor/schedule.js"></script>
   <script src="/static/javascript/survey-editor/survey-editor.js"></script>
@@ -74,32 +76,32 @@
         <h3>Questions</h3>
         <question-summary></question-summary>
         <br>
-        <div id="newQuestions">
-        </div>
         <br>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editQuestionModal"
                 ng-click="surveyBuilder.resetQuestionModal();">
           <span class="glyphicon glyphicon-plus"></span>Add Question
         </button>
-        <br><br>
-      
-        <input type="checkbox" name="randomize" id="randomize" ng-model="surveyBuilder.randomize">
-        <b>Randomize</b> which questions are displayed each time the participant takes a survey
         <br>
+        <br>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="randomize" id="randomize" ng-model="surveyBuilder.randomize">
+            <b>Randomize</b> which questions are displayed each time the participant takes a survey
+          </label>
+        </div>
         <div ng-if="surveyBuilder.randomize">
-          <input type="checkbox" name="randomize_with_memory" id="randomize_with_memory"
-            {% if survey.settings['randomize_with_memory'] %}
-              checked
-            {% endif %}
-          >&nbsp; <b>Randomize without replacement</b>, i.e., on each survey, only display questions that haven't appeared yet on a previous survey, until all questions have appeared in a survey, and then start over
-          <br>
-        
-          <input type="number" name="number_of_random_questions" id="number_of_random_questions"
-            {% if survey.settings['number_of_random_questions'] %}
-              value="{{ survey.settings['number_of_random_questions'] }}"
-            {% endif %}
-          >&nbsp; <b>How many questions</b> are displayed in each survey, out of the <b>{% raw %}{{ surveyBuilder.questions.length }}{% endraw %} questions currently</b> in the question bank for this survey
-          <br>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="randomize_with_memory" id="randomize_with_memory"
+                     ng-model="surveyBuilder.randomizeWithMemory">
+              <b>Randomize without replacement</b>, i.e., on each survey, only display questions that haven't appeared
+              yet on a previous survey, until all questions have appeared in a survey, and then start over
+            </label>
+          </div>
+          <div class="form-group form-inline">
+            <input type="number" name="number_of_random_questions" id="number_of_random_questions" class="form-control" ng-model="surveyBuilder.numberOfRandomQuestions">
+            <b>How many questions</b> are displayed in each survey, out of the <b>{% raw %}{{ surveyBuilder.questions.length }}{% endraw %} questions currently</b> in the question bank for this survey
+          </div>
         </div>
       </div>
 
