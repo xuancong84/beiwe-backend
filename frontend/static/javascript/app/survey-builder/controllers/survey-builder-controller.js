@@ -4,7 +4,7 @@
     .module("surveyBuilder")
     .controller("SurveyBuilderCtrl", SurveyBuilderCtrl);
   
-  function SurveyBuilderCtrl($scope, _, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
+  function SurveyBuilderCtrl(_, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
                              TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
     /* Constants for use in template */
     this.QUESTION_TYPES = QUESTION_TYPES;
@@ -28,19 +28,7 @@
       "index": null,
       "question_id": null,
       "answers": [],
-      "display_if": null/*{'or': [
-                         {'and': [
-                                  {'==': ['6695d6c4-916b-4225-8688-89b6089a24d1', 4]},
-                                  {'or': [
-                                           {'>=': ['41d54793-dc4d-48d9-f370-4329a7bc6960', 2]},
-                                           {'>=': ['5cfa06ad-d907-4ba7-a66a-d68ea3c89fba', 2]}
-                                          ]}
-                                 ]},
-                         {'or': [
-                                 {'>=': ['41d54793-dc4d-48d9-f370-4329a7bc6960', 3]},
-                                 {'>=': ['5cfa06ad-d907-4ba7-a66a-d68ea3c89fba', 3]}
-                                ]}
-                        ]}*/
+      "display_if": null
     };
     this.defaultQuestionFields = angular.copy(this.currentQuestionFields);
 
@@ -134,7 +122,7 @@
       /**
        * Move the question at the passed index up in order in this.questions
        */
-      if (index > 0) {
+      if (index > 0 && index <= this.questions.length-1) {
         this.questions.splice(index - 1, 2, this.questions[index], this.questions[index - 1]);
       }
     };
@@ -143,7 +131,7 @@
       /**
        * Move the question at the passed index down in order in this.questions
        */
-      if (index < this.questions.length - 1) {
+      if (index >= 0 && index < this.questions.length-1) {
         this.questions.splice(index, 2, this.questions[index + 1], this.questions[index]);
       }
     };

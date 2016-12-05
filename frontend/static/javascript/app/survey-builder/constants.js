@@ -19,7 +19,7 @@ angular.module("surveyBuilder")
     /**
      * A list of the keys necessary for each question type
      */
-    var commonKeys = ["question_id", "question_text", "question_type"];
+    var commonKeys = ["question_id", "question_text", "question_type", "display_if"];
     this[QUESTION_TYPES.infoTextBox] = commonKeys;
     this[QUESTION_TYPES.slider] = commonKeys.concat(["max", "min"]);
     this[QUESTION_TYPES.radio] = commonKeys.concat(["answers"]);

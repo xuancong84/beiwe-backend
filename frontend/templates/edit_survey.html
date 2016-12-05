@@ -22,11 +22,9 @@
     var questions = JSON.parse('{{ survey.content|tojson }}');
     var survey_id = '{{ survey._id }}';
     var survey_times = {{ survey.timings }};
-    var tracking_survey = false;
+    var tracking_survey = {{ "true" if survey.survey_type == 'tracking_survey' else "false" }};
   </script>
-  <script src="/static/javascript/survey-editor/radiobutton-checkbox-questions.js"></script>
-  <script src="/static/javascript/survey-editor/question-from-modal.js"></script>
-  <script src="/static/javascript/survey-editor/schedule.js" type="text/javascript"></script>
+  <script src="/static/javascript/survey-editor/schedule.js"></script>
   <script src="/static/javascript/survey-editor/survey-editor.js"></script>
   <script src="/static/javascript/app/app.module.js"></script>
   <script src="/static/javascript/app/survey-builder/constants.js"></script>
@@ -69,9 +67,6 @@
       {% if survey.survey_type == 'tracking_survey' %}
       <div class="row">
         <h3>Questions</h3>
-        <script type="text/javascript">
-          tracking_survey = true;
-        </script>
         <question-summary></question-summary>
         <br>
         <div id="newQuestions">

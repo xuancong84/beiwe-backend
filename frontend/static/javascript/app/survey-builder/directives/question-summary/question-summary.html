@@ -2,9 +2,10 @@
   <div class="panel-body">
     <table>
       <tr>
-        <td style="padding-left: 20px; padding-right: 30px; text-align: center">
+        <td style="min-width: 181px; padding-left: 20px; padding-right: 30px; text-align: center;">
           <h1>Q{{ $index + 1 }}</h1>
-          <span class="label label-success">Always Displayed</span>
+          <span ng-if="question.display_if" class="label label-warning">Conditionally Displayed</span>
+          <span ng-if="!question.display_if" class="label label-success">Always Displayed</span>
         </td>
         <td>
           <h4>{{ question.question_text }}</h4>

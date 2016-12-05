@@ -81,7 +81,7 @@ function end() {
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            content: JSON.stringify(content),
+            content: angular.toJson(content),
             timings: JSON.stringify(survey_times),
             settings: JSON.stringify(get_survey_settings())
         },
