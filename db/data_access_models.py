@@ -9,6 +9,9 @@ class FileProcessingLockedError(Exception): pass
 
 class ChunkRegistry(DatabaseObject):
     PATH = "beiwe.chunk_registry"
+    
+    #study_id, data_type, user_id, survey_id, and time_bin should have indexes,
+    # there is a create_indexes script to do this.
     DEFAULTS = {"study_id":REQUIRED,
                 "user_id":REQUIRED_STRING,
                 "data_type": "",
@@ -64,16 +67,18 @@ class FileProcessLock(DatabaseObject):
     DEFAULTS = {"mark":""}
     @classmethod
     def lock(cls):
-        if len(FileProcessLockCollection()) > 0: raise FileProcessingLockedError
+        if FileProcessLockCollection.count() > 0:
+            raise FileProcessingLockedError
         FileProcessLock.create({"mark":"marked"}, random_id=True)
     @classmethod
     def unlock(cls):
         for f in FileProcessLockCollection(mark="marked"):
             f.remove()
-#     @classmethod
-#     def islocked(cls):
-#         if len(FileProcessLockCollection()) > 0: return False
-#         return True
+    @classmethod
+    def islocked(cls):
+        if FileProcessLockCollection.count() > 0:
+            return True
+        return False
 
 ################################################################################
 

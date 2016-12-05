@@ -11,5 +11,5 @@ config/security.py
 .idea/
 logs*
 download/download_script_credentials.py
-server configuration/apache config.txt
+server_configuration/apache config.txt
 db/mongolia_setup.py
