@@ -15,7 +15,7 @@
 
     /* Array of questions for this survey */
     this.questions = window.questions;
-    this.questionIds = _.map(this.questions, "question_id");
+    // this.questionIds is set below in this.refreshQuestionIds()
 
     /* Current question for displaying/modifying with modal */
     this.currentQuestionFields = {
@@ -124,6 +124,7 @@
        */
       if (index > 0 && index <= this.questions.length-1) {
         this.questions.splice(index - 1, 2, this.questions[index], this.questions[index - 1]);
+        this.refreshQuestionIds();
       }
     };
 
@@ -133,6 +134,7 @@
        */
       if (index >= 0 && index < this.questions.length-1) {
         this.questions.splice(index, 2, this.questions[index + 1], this.questions[index]);
+        this.refreshQuestionIds();
       }
     };
 
@@ -148,25 +150,29 @@
      */
     this.addOrBlock = function(path) {
       /**
-       * Adds an OR block to the display_if nested object at the path specified (path should be a string that's
-       * "/" delimited to where the OR block should be added).
+       * Adds an OR block to the display_if nested object at the path specified
        */
       this.addValueToPath(path, {"or": []})
     };
     
     this.addAndBlock = function(path) {
       /**
-       * Adds an OR block to the display_if nested object at the path specified (path should be a string that's
-       * "/" delimited to where the OR block should be added).
+       * Adds an OR block to the display_if nested object at the path specified
        */
       this.addValueToPath(path, {"and": []})
     };
 
     this.addConditionalBlock = function(path) {
+      /**
+       * Adds a conditional block to the display_if nested object at the path specified
+       */
       this.addValueToPath(path, {"==": [this.questionIds[0], ""]})
     };
 
     this.deleteBlock = function(path) {
+      /**
+       * Deletes the logical or conditional block at the path specified
+       */
       var pathLocationArray = this.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
@@ -208,6 +214,9 @@
     };
     
     this.getValueAtPath = function(path) {
+      /**
+       * Returns the value at the path given.
+       */
       var pathLocationArray = this.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
@@ -216,7 +225,8 @@
     
     this.addValueToPath = function(path, value) {
       /**
-       * Adds the passed value to the path from root this.currentQuestionFields.display_if
+       * Adds the passed value to the path from root this.currentQuestionFields.display_if. The path should be a string
+       * that's delimited with "/" for each level).
        */
       var pathLocationArray = this.getPathLocation(path);
       var parentObject = pathLocationArray[0];
@@ -229,6 +239,14 @@
     };
     
     this.updateOperatorAtPath = function(path, element) {
+      /**
+       * Updates the operator at the path specified (this is because editing an object attribute is non-trivial
+       * compared to editing a value).
+       * 
+       * Args:
+       *   path (string): path to edit
+       *   element (element): logic or conditional block element used to retrieve the operator type from its scope
+       */
       var pathLocationArray = this.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
@@ -240,8 +258,29 @@
     };
     
     this.getOperatorType = function(value) {
+      /**
+       * Returns the type of operation at this level in the skip logics ("AND", "OR", "==", "<", etc.)
+       */
       return _.keys(value)[0];
     };
+    
+    this.getQuestionIds = function() {
+      /**
+       * Returns an array of question_ids from this.questions
+       */
+      return _.map(this.questions, "question_id");
+    };
+    
+    this.refreshQuestionIds = function() {
+      /**
+       * Refreshes this.questionIds
+       */
+      this.questionIds = this.getQuestionIds();
+    };
+    
+    // Set this.questionIds
+    this.refreshQuestionIds();
+    
   }
 
 })();
