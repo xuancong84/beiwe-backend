@@ -11,6 +11,9 @@
         width: 80%;
       }
     }
+    .faded {
+      opacity: 0.3;
+    }
   </style>
 {% endblock %}
 
@@ -22,6 +25,7 @@
     var questions = JSON.parse('{{ survey.content|tojson }}');
     var survey_id = '{{ survey._id }}';
     var survey_times = {{ survey.timings }};
+    var randomize = {{ "true" if survey.settings['randomize'] else "false" }};
     var tracking_survey = {{ "true" if survey.survey_type == 'tracking_survey' else "false" }};
   </script>
   <script src="/static/javascript/survey-editor/schedule.js"></script>
@@ -29,6 +33,7 @@
   <script src="/static/javascript/app/app.module.js"></script>
   <script src="/static/javascript/app/survey-builder/constants.js"></script>
   <script src="/static/javascript/app/survey-builder/services.js"></script>
+  <script src="/static/javascript/app/survey-builder/directives/tooltip/tooltip.js"></script>
   <script src="/static/javascript/app/survey-builder/directives/conditional-block/conditional-block.js"></script>
   <script src="/static/javascript/app/survey-builder/directives/logical-block/logical-block.js"></script>
   <script src="/static/javascript/app/survey-builder/directives/question-summary/question-summary.js"></script>
@@ -76,7 +81,26 @@
                 ng-click="surveyBuilder.resetQuestionModal();">
           <span class="glyphicon glyphicon-plus"></span>Add Question
         </button>
-        {% include 'randomize_questions.html' %}
+        <br><br>
+      
+        <input type="checkbox" name="randomize" id="randomize" ng-model="surveyBuilder.randomize">
+        <b>Randomize</b> which questions are displayed each time the participant takes a survey
+        <br>
+        <div ng-if="surveyBuilder.randomize">
+          <input type="checkbox" name="randomize_with_memory" id="randomize_with_memory"
+            {% if survey.settings['randomize_with_memory'] %}
+              checked
+            {% endif %}
+          >&nbsp; <b>Randomize without replacement</b>, i.e., on each survey, only display questions that haven't appeared yet on a previous survey, until all questions have appeared in a survey, and then start over
+          <br>
+        
+          <input type="number" name="number_of_random_questions" id="number_of_random_questions"
+            {% if survey.settings['number_of_random_questions'] %}
+              value="{{ survey.settings['number_of_random_questions'] }}"
+            {% endif %}
+          >&nbsp; <b>How many questions</b> are displayed in each survey, out of the <b>{% raw %}{{ surveyBuilder.questions.length }}{% endraw %} questions currently</b> in the question bank for this survey
+          <br>
+        </div>
       </div>
 
       {% elif survey.survey_type == 'audio_survey' %}

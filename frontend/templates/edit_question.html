@@ -71,10 +71,15 @@
                 </td>
               </tr>
             </tbody>
-            <tr>
-              <td colspan="2">{{ surveyBuilder.currentQuestionFields.display_if }}</td>
+            <tr ng-if="surveyBuilder.randomize">
+              <td colspan="2">
+                <div class="alert alert-warning" style="margin-bottom: 0;">
+                  Skip logic for this question has been disabled because the survey is randomized. You may still edit
+                  the logic below, but this question will always be displayed as long as the survey remains randomized.
+                </div>
+              </td>
             </tr>
-            <tr>
+            <tr ng-class="{'faded': surveyBuilder.randomize}">
               <td><label for="text">Display If:</label></td>
               <td>
                 <logical-block ng-if="surveyBuilder.currentQuestionFields.display_if"
