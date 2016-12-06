@@ -1,5 +1,5 @@
 import mongolia
-from pymongo import ASCENDING
+from pymongo import ASCENDING, HASHED, DESCENDING
 
 base = mongolia.mongo_connection.CONNECTION.get_connection()['beiwe']
 chunk_registry = base.get_collection("chunk_registry")
@@ -9,22 +9,22 @@ chunk_registry = base.get_collection("chunk_registry")
 # from 1.5 to 1.2, making the index Ascending brought it to 351 micro seconds.
 
 print "indexing study_id..."
-chunk_registry.create_index([('study_id', ASCENDING)])
+chunk_registry.create_index([('study_id', ASCENDING)], background=True)
 
 print "indexing data_type..."
-chunk_registry.create_index([('data_type', ASCENDING)])
+chunk_registry.create_index([('data_type', ASCENDING)], background=True)
 
 print "indexing user_id..."
-chunk_registry.create_index([('user_id', ASCENDING)])
+chunk_registry.create_index([('user_id', ASCENDING)], background=True)
 
 print "indexing survey_id..."
-chunk_registry.create_index([('survey_id', ASCENDING)])
+chunk_registry.create_index([('survey_id', ASCENDING)], background=True)
 
 print "indexing time_bin..."
-chunk_registry.create_index([('time_bin', ASCENDING)])
+chunk_registry.create_index([('time_bin', ASCENDING)], background=True)
 
 print "indexing chunk_path..."
-chunk_registry.create_index([('chunk_path', ASCENDING)])
+chunk_registry.create_index([('chunk_path', ASCENDING)], background=True)
 
 print "these indexes exist"
 indexes = [index.to_dict()['key'].items()[0] for index in chunk_registry.list_indexes()]
