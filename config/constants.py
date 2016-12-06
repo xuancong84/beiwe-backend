@@ -14,6 +14,9 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
+#This string will be printed into non-error hourly reports to improve error filtering.
+DATA_PROCESSING_NO_ERROR_STRING = "2HEnBwlawY"
+
 ## HTML lists ##
 CHECKBOX_TOGGLES = ["accelerometer",
                     "gps",
