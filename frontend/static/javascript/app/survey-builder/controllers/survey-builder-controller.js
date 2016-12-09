@@ -99,8 +99,7 @@
       /**
        * Returns an object with the correct fields for sending to the backend from data in this.currentQuestionFields
        */
-      var questionType = this.currentQuestionFields.question_type;
-      return _.pick(this.currentQuestionFields, QUESTION_FIELDS_LIST[questionType]);
+      return _.pick(this.currentQuestionFields, QUESTION_FIELDS_LIST[this.currentQuestionFields.question_type]);
     };
 
     this.checkSliderValue = function(min_or_max) {
