@@ -8,7 +8,8 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
                               PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API, IOS_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
-                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES, ALL_DATA_STREAMS)
+                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
+                              DATA_PROCESSING_NO_ERROR_STRING)
 from cronutils.error_handler import ErrorHandler, null_error_handler
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
@@ -18,6 +19,7 @@ from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry,
 from db.user_models import User
 
 from libs.s3 import s3_retrieve, s3_upload
+
 
 class EverythingWentFine(Exception): pass
 class ProcessingOverlapError(Exception): pass
@@ -49,7 +51,7 @@ def process_file_chunks():
     FileProcessLock.unlock()
     print FilesToProcess.count()
     error_handler.raise_errors()
-    raise EverythingWentFine("Everything went fine.")
+    raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
 
 def do_process_file_chunks(count, error_handler, skip_count):
     """
