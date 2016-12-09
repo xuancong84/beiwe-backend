@@ -3,16 +3,13 @@ import json
 from config.constants import (COMPARATORS, NUMERIC_COMPARATORS, NUMERIC_QUESTIONS,
                               FREE_RESPONSE, FREE_RESPONSE_NUMERIC)
 
-class BadOperatorError (Exception): pass
-class BadLogicError (Exception): pass
-
-class InvalidLogicError(Exception): pass
+class InvalidLogicError(Exception): pass #this is the super class, it should not show up in any validation check
 
 class NonExistantUUIDReference(InvalidLogicError): pass #the uuid referenced does not exist
 class InvalidOperator(InvalidLogicError): pass #the comparoter provided is not a valid comparitor
 class InvalidNumeric(InvalidLogicError): pass #the value provided (by the admin) to compare against is not numeric
 class NumericPointerInvalid(InvalidLogicError): pass #the answer pointed to should be of a numeric answer type but isn't
-class QuestionReferenceOutOfOrder(InvalidLogicError): pass #
+class QuestionReferenceOutOfOrder(InvalidLogicError): pass #this question references a question that comes after it
 
 #TODO: make an endpoint that returns a dictionary of uuid to any errors that occur
     
@@ -114,7 +111,10 @@ def validate_logic_entry(logic_entry, questions_dict, questions_validated):
 ###############################################################################################
 ##########  THIS IS NEVER GOING TO BE PRODUCTION CODE, IT IS FOR REFERENCE ONLY. ##############
 ###############################################################################################
-
+#
+# class BadOperatorError (Exception): pass
+# class BadLogicError (Exception): pass
+#
 # def logic_tree_parse(logic_entry):
 #     """ Structure and vocab:
 #         A logic entry is a single key dictionary, with allowed keys being the logic operators and comparators.
