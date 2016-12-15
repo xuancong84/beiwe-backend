@@ -88,15 +88,7 @@ def get_users_in_study():
     except InvalidId: study_id = None
     study_obj = Study(study_id)
     if not study_obj: abort(404)
-    #Cases: invalid access creds
-    access_key = request.values["access_key"]
-    access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin: abort(403) #access key DNE
-    if admin._id not in study_obj['admins']:
-        abort(403) #admin is not credentialed for this study
-    if not admin.validate_access_credentials(access_secret):
-        abort(403) #incorrect secret key
+    _ = get_and_validate_admin(study_obj)
     return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
 
 def handle_database_query(study_id, query, registry=None):
