@@ -51,8 +51,5 @@ if not __name__ == '__main__':
 
 #Extra Debugging settings
 if __name__ == '__main__':
-    from gevent.wsgi import WSGIServer
-    http_server = WSGIServer(('', 8080), app)
-    http_server.serve_forever()
-    # app.run(host='0.0.0.0', port=int(os.getenv("PORT", "8080")), debug=True)
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", "8080")), debug=True)
 

@@ -20,6 +20,7 @@ def validate_survey_from_db(survey):
     return do_validate_survey(survey['content'])
 
 def do_validate_survey(questions):
+    # The existence of this key is used to distinguish validation errors from other errors
     errors = { "duplicate_uuids":[] }
     
     #determine duplicate question ids

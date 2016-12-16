@@ -85,8 +85,13 @@ function end() {
     }).done(function() {
         // Don't do anything; this actually gets called BEFORE the statusCode functions
         $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
-    }).fail(function() {
-        alert("There was a problem with updating the survey, sorry!");
+    }).fail(function(response) {
+        var errors = JSON.parse(response.responseText);
+        if (_.has(errors, "duplicate_uuids")) {
+            alert(response.responseText);
+        } else {
+            alert("There was a problem with updating the survey, sorry!");
+        }
         $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
     });
 }
