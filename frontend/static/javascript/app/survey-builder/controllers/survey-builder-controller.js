@@ -4,7 +4,7 @@
     .module("surveyBuilder")
     .controller("SurveyBuilderCtrl", SurveyBuilderCtrl);
   
-  function SurveyBuilderCtrl(_, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
+  function SurveyBuilderCtrl(_, ARITHMETIC_OPERATORS, LOGICAL_OPERATORS, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
                              TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
     /* Constants for use in template */
     this.QUESTION_TYPES = QUESTION_TYPES;
@@ -12,6 +12,8 @@
     this.TEXT_FIELD_TYPES = TEXT_FIELD_TYPES;
     this.TEXT_FIELD_TYPE_LABELS = TEXT_FIELD_TYPE_LABELS;
     this.QUESTION_FIELDS_LIST = QUESTION_FIELDS_LIST;
+    this.LOGICAL_OPERATORS = LOGICAL_OPERATORS;
+    this.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
 
     /* Variables from django template */
     this.questions = window.questions;

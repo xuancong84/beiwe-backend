@@ -1,5 +1,5 @@
 angular.module("surveyBuilder")
-  .directive("logicalBlock", function(_, ARITHMETIC_OPERATORS, LOGICAL_OPERATORS) {
+  .directive("logicalBlock", function(ARITHMETIC_OPERATORS, LOGICAL_OPERATORS, _, logicService) {
     return {
       "link": function(scope) {
         /* Constants */
@@ -9,12 +9,8 @@ angular.module("surveyBuilder")
         
         scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
         scope.getNewPath = function(index) {
-          var newPath = scope.path + "/" + scope.type;
-          if (typeof index != "undefined") {
-            newPath = newPath + "/" + index;
-          }
-          return newPath;
-        }
+          return logicService.getNewPath(scope.path, scope.type, index);
+        };
       },
       "restrict": "E",
       "scope": {

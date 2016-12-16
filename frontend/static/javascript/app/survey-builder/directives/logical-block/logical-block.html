@@ -16,15 +16,7 @@
       </div>
     </li>
     <li class="list-group-item">
-      <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock(getNewPath())">
-        Add "OR" Block
-      </button>
-      <button class="btn btn-info" ng-click="surveyBuilder.addAndBlock(getNewPath())">
-        Add "AND" Block
-      </button>
-      <button class="btn btn-info" ng-click="surveyBuilder.addConditionalBlock(getNewPath())">
-        Add Conditional
-      </button>
+      <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
     </li>
   </ul>
 </div>

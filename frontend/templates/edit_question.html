@@ -82,11 +82,18 @@
             <tr ng-class="{'faded': surveyBuilder.randomize}">
               <td><label for="text">Display If:</label></td>
               <td>
-                <logical-block ng-if="surveyBuilder.currentQuestionFields.display_if"
+                <logical-block ng-if="surveyBuilder.LOGICAL_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1"
                                survey-builder="surveyBuilder" path=""></logical-block>
+                <div ng-if="surveyBuilder.ARITHMETIC_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1">
+                  <div class="alert alert-warning">
+                    If you wish to have any logical statements ("AND" or "OR"), the base statement must be a logical
+                    statement and not a conditional statement. If you only intend to have one conditional statement for
+                    this question, then no change is necessary.
+                  </div>
+                  <conditional-block survey-builder="surveyBuilder" path=""></conditional-block>
+                </div>
                 <div ng-if="!surveyBuilder.currentQuestionFields.display_if">
-                  <button class="btn btn-info" ng-click="surveyBuilder.addOrBlock('')">Add "OR" Block</button>
-                  <button class="btn btn-info" ng-click="surveyBuilder.addAndBlock('')">Add "AND" Block</button>
+                  <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
                 </div>                  
               </td>
             </tr>
