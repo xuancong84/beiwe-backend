@@ -10,6 +10,7 @@ class InvalidOperator(InvalidLogicError): pass #the comparoter provided is not a
 class InvalidNumeric(InvalidLogicError): pass #the value provided (by the admin) to compare against is not numeric
 class NumericPointerInvalid(InvalidLogicError): pass #the answer pointed to should be of a numeric answer type but isn't
 class QuestionReferenceOutOfOrder(InvalidLogicError): pass #this question references a question that comes after it
+class EmptyLogicObject(InvalidLogicError): pass #this question has an empty logic object
 
 #TODO: make an endpoint that returns a dictionary of uuid to any errors that occur
     
@@ -62,25 +63,32 @@ def validate_logic_tree(logic_entry, questions_dict, questions_validated):
     
     invert (not) simply has the inner logic entry, eg: { not: {logic entry} }, and it inverts the output.
     """
+    
+    # case: logic object is empty, raise an empty object.
+    # this covers both cases: top level is empty; inner level is empty
+    if not logic_entry:
+        raise EmptyLogicObject(logic_entry)
+    
+    # case: too many keys (the above case catches 0 keys)
     operators = logic_entry.keys()
     if len(operators) != 1:
         raise InvalidOperator(operators)
     
-    operator = operators[0]
+    operator = operators[0] #just grabbing the key outright to simplify code.
     # any time you see logic_entry[operator] that means we are grabbing the next level in the object
     
-    if operator == 'or' or operator == "and":
+    if operator == 'or' or operator == "and": #handle the container types "or" and "and"
         # print 'and/or'
         for l in logic_entry[operator]:
             validate_logic_tree(l, questions_dict, questions_validated)
         return
     
-    if operator == "not":
+    if operator == "not": #handle the container type "not"
         # print 'not'
         validate_logic_tree(logic_entry[operator], questions_dict, questions_validated)
         return
     
-    if operator in COMPARATORS:
+    if operator in COMPARATORS: #handle the (numerical) logical operators
         # print 'logic!'
         validate_logic_entry(logic_entry, questions_dict, questions_validated)
         return
