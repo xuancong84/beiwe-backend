@@ -33,7 +33,7 @@
         } else {
           console.log(key + " // " + value);
           var index = _.indexOf(vm.questionIds, key) + 1;
-          formattedErrors.push("Question " + index + " has error: " + value[0]);
+          formattedErrors.push("Question " + index + " has an error: " + value[0]);
         }
       });
       return formattedErrors;
