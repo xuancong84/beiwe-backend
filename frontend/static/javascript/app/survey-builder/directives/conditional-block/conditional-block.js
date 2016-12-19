@@ -3,8 +3,9 @@ angular.module("surveyBuilder")
     return {
       "link": function(scope) {
         scope._ = _;
-        scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
         scope.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
+        scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
+        scope.currentQuestionId = scope.surveyBuilder.currentQuestionFields.question_id;
         
         scope.getQuestionNumber = function(questionId) {
           var index = _.indexOf(scope.surveyBuilder.questionIds, questionId);
