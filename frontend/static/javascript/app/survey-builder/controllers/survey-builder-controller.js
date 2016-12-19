@@ -6,24 +6,48 @@
   
   function SurveyBuilderCtrl(_, ARITHMETIC_OPERATORS, LOGICAL_OPERATORS, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
                              TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
+    var vm = this;
     /* Constants for use in template */
-    this.QUESTION_TYPES = QUESTION_TYPES;
-    this.QUESTION_TYPE_LABELS = QUESTION_TYPE_LABELS;
-    this.TEXT_FIELD_TYPES = TEXT_FIELD_TYPES;
-    this.TEXT_FIELD_TYPE_LABELS = TEXT_FIELD_TYPE_LABELS;
-    this.QUESTION_FIELDS_LIST = QUESTION_FIELDS_LIST;
-    this.LOGICAL_OPERATORS = LOGICAL_OPERATORS;
-    this.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
+    vm.QUESTION_TYPES = QUESTION_TYPES;
+    vm.QUESTION_TYPE_LABELS = QUESTION_TYPE_LABELS;
+    vm.TEXT_FIELD_TYPES = TEXT_FIELD_TYPES;
+    vm.TEXT_FIELD_TYPE_LABELS = TEXT_FIELD_TYPE_LABELS;
+    vm.QUESTION_FIELDS_LIST = QUESTION_FIELDS_LIST;
+    vm.LOGICAL_OPERATORS = LOGICAL_OPERATORS;
+    vm.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
+    vm.errors = null;
+    vm.formatErrors = function(errors) {
+      /**
+       * Formats errors returned from validating survey
+       */
+      var formattedErrors = [];
+      if (errors === null) {
+        return formattedErrors;
+      }
+      _.forEach(errors, function(value, key) {
+        if (key == "duplicate_uuids") {
+          if (value.length > 0) {
+            // There are duplicate uuids - almost impossible to happen, but could
+            formattedErrors.push("There are duplicate UUIDs - please refresh the page and try again.");
+          }
+        } else {
+          console.log(key + " // " + value);
+          var index = _.indexOf(vm.questionIds, key) + 1;
+          formattedErrors.push("Question " + index + " has error: " + value[0]);
+        }
+      });
+      return formattedErrors;
+    };
 
     /* Variables from django template */
-    this.questions = window.questions;
-    this.randomize = window.randomize;
-    this.randomizeWithMemory = window.randomizeWithMemory;
-    this.numberOfRandomQuestions = window.numberOfRandomQuestions;
-    // this.questionIds is set below in this.refreshQuestionIds()
+    vm.questions = window.questions;
+    vm.randomize = window.randomize;
+    vm.randomizeWithMemory = window.randomizeWithMemory;
+    vm.numberOfRandomQuestions = window.numberOfRandomQuestions;
+    // vm.questionIds is set below in vm.refreshQuestionIds()
 
     /* Current question for displaying/modifying with modal */
-    this.currentQuestionFields = {
+    vm.currentQuestionFields = {
       "question_text": "",
       "question_type": QUESTION_TYPES.infoTextBox,
       "min": "",
@@ -35,76 +59,76 @@
       "answers": [],
       "display_if": null
     };
-    this.defaultQuestionFields = angular.copy(this.currentQuestionFields);
+    vm.defaultQuestionFields = angular.copy(vm.currentQuestionFields);
 
     /**
      * Edit question modal actions
      */
-    this.addNewQuestion = function() {
+    vm.addNewQuestion = function() {
       /**
-       * Adds a new question based on information from this.currentQuestionFields
+       * Adds a new question based on information from vm.currentQuestionFields
        */
-      var questionObject = this.getCurrentQuestionObject();
+      var questionObject = vm.getCurrentQuestionObject();
       // Generate a new UUID since this is a new question
       questionObject["question_id"] = uuid.generate();
-      this.questions.push(questionObject);
-      this.refreshQuestionIds();
+      vm.questions.push(questionObject);
+      vm.refreshQuestionIds();
     };
 
-    this.editQuestion = function() {
+    vm.editQuestion = function() {
       /**
-       * Edits the question in this.questions based on information in this.currentQuestionFields\
+       * Edits the question in vm.questions based on information in vm.currentQuestionFields\
        */
-      var questionObject = this.getCurrentQuestionObject();
-      this.questions.splice(this.currentQuestionFields.index, 1, questionObject);
+      var questionObject = vm.getCurrentQuestionObject();
+      vm.questions.splice(vm.currentQuestionFields.index, 1, questionObject);
     };
 
-    this.addAnswerField = function() {
+    vm.addAnswerField = function() {
       /**
-       * Adds a field to this.currentQuestionFields.answers array
+       * Adds a field to vm.currentQuestionFields.answers array
        */
-      this.currentQuestionFields.answers.push({"text": ""});
+      vm.currentQuestionFields.answers.push({"text": ""});
     };
 
-    this.deleteAnswerField = function(index) {
+    vm.deleteAnswerField = function(index) {
       /**
-       * Removes the field in this.currentQuestionFields.answers array at the passed index
+       * Removes the field in vm.currentQuestionFields.answers array at the passed index
        */
-      this.currentQuestionFields.answers.splice(index, 1);
+      vm.currentQuestionFields.answers.splice(index, 1);
     };
 
 
     /**
      * Edit question modal helper functions
      */
-    this.resetQuestionModal = function(overrides) {
+    vm.resetQuestionModal = function(overrides) {
       /**
        * Resets the edit question modal to its default, overwriting the default with anything passed to overrides
        *
        * Args:
        *   overrides (object): the question object to overwrite with
        */
-      this.currentQuestionFields = angular.copy(this.defaultQuestionFields);
-      _.extend(this.currentQuestionFields, overrides);
+      vm.currentQuestionFields = angular.copy(vm.defaultQuestionFields);
+      _.extend(vm.currentQuestionFields, overrides);
     };
 
-    this.populateEditQuestionModal = function(index) {
+    vm.populateEditQuestionModal = function(index) {
       /**
-       * Populates the edit question modal with information from the question in this.questions at the passed index
+       * Populates the edit question modal with information from the question in vm.questions at the passed index
        */
-      this.resetQuestionModal(this.questions[index]);
-      this.currentQuestionFields.is_new_question = false;
-      this.currentQuestionFields.index = index;
+      vm.resetQuestionModal(vm.questions[index]);
+      vm.currentQuestionFields.is_new_question = false;
+      vm.currentQuestionFields.index = index;
     };
 
-    this.getCurrentQuestionObject = function() {
+    vm.getCurrentQuestionObject = function() {
       /**
-       * Returns an object with the correct fields for sending to the backend from data in this.currentQuestionFields
+       * Returns an object with the correct fields for sending to the backend from data in vm.currentQuestionFields
        */
-      return _.pick(this.currentQuestionFields, QUESTION_FIELDS_LIST[this.currentQuestionFields.question_type]);
+      return _.pick(vm.currentQuestionFields, QUESTION_FIELDS_LIST[vm.currentQuestionFields.question_type]);
     };
 
-    this.checkSliderValue = function(min_or_max) {
+    vm.checkSliderValue = function(min_or_max) {
       /**
        * Checks if a slider value (min or max) is within the allowed range. If not, sets it to the minimum
        * or maximum depending on which side it is out of range on.
@@ -114,72 +138,72 @@
       var minimumValue = parseInt(input.attr("min"), 10);
       var maximumValue = parseInt(input.attr("max"), 10);
       if (currentValue < minimumValue) {
-        this.currentQuestionFields[min_or_max] = minimumValue;
+        vm.currentQuestionFields[min_or_max] = minimumValue;
       } else if (currentValue > maximumValue) {
-        this.currentQuestionFields[min_or_max] = maximumValue;
+        vm.currentQuestionFields[min_or_max] = maximumValue;
       }
     };
 
     /**
      * Question summary actions
      */
-    this.moveQuestionUp = function(index) {
+    vm.moveQuestionUp = function(index) {
       /**
-       * Move the question at the passed index up in order in this.questions
+       * Move the question at the passed index up in order in vm.questions
        */
-      if (index > 0 && index <= this.questions.length-1) {
-        this.questions.splice(index - 1, 2, this.questions[index], this.questions[index - 1]);
-        this.refreshQuestionIds();
+      if (index > 0 && index <= vm.questions.length-1) {
+        vm.questions.splice(index - 1, 2, vm.questions[index], vm.questions[index - 1]);
+        vm.refreshQuestionIds();
       }
     };
 
-    this.moveQuestionDown = function(index) {
+    vm.moveQuestionDown = function(index) {
       /**
-       * Move the question at the passed index down in order in this.questions
+       * Move the question at the passed index down in order in vm.questions
        */
-      if (index >= 0 && index < this.questions.length-1) {
-        this.questions.splice(index, 2, this.questions[index + 1], this.questions[index]);
-        this.refreshQuestionIds();
+      if (index >= 0 && index < vm.questions.length-1) {
+        vm.questions.splice(index, 2, vm.questions[index + 1], vm.questions[index]);
+        vm.refreshQuestionIds();
       }
     };
 
-    this.deleteQuestion = function(index) {
+    vm.deleteQuestion = function(index) {
       /**
-       * Delete the question at the passed index in this.questions
+       * Delete the question at the passed index in vm.questions
        */
-      this.questions.splice(index, 1);
-      this.refreshQuestionIds();
+      vm.questions.splice(index, 1);
+      vm.refreshQuestionIds();
     };
 
     /**
      * Skip logic actions
      */
-    this.addOrBlock = function(path) {
+    vm.addOrBlock = function(path) {
       /**
        * Adds an OR block to the display_if nested object at the path specified
        */
-      this.addValueToPath(path, {"or": []})
+      vm.addValueToPath(path, {"or": []})
     };
     
-    this.addAndBlock = function(path) {
+    vm.addAndBlock = function(path) {
       /**
        * Adds an OR block to the display_if nested object at the path specified
        */
-      this.addValueToPath(path, {"and": []})
+      vm.addValueToPath(path, {"and": []})
     };
 
-    this.addConditionalBlock = function(path) {
+    vm.addConditionalBlock = function(path) {
       /**
        * Adds a conditional block to the display_if nested object at the path specified
        */
-      this.addValueToPath(path, {"==": [this.questionIds[0], ""]})
+      vm.addValueToPath(path, {"==": [vm.questionIds[0], ""]})
     };
 
-    this.deleteBlock = function(path) {
+    vm.deleteBlock = function(path) {
       /**
        * Deletes the logical or conditional block at the path specified
        */
-      var pathLocationArray = this.getPathLocation(path);
+      var pathLocationArray = vm.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
       if (_.isArray(parentObject)) {
@@ -194,12 +218,12 @@
     /**
      * Skip logic helper functions
      */
-    this.getPathLocation = function(path) {
+    vm.getPathLocation = function(path) {
       /**
-       * Navigates to the passed in path from this.currentQuestionFields.display_if and returns and array with
+       * Navigates to the passed in path from vm.currentQuestionFields.display_if and returns and array with
        * the parent location and last key. For example, if the path is "or/3", the referenced location is
-       * this.currentQuestionFields.display_if["or"]["3"], and this function will return
-       * [this.currentQuestionFields.display_if["or"], "3"].
+       * vm.currentQuestionFields.display_if["or"]["3"], and this function will return
+       * [vm.currentQuestionFields.display_if["or"], "3"].
        *
        * Args:
        *   path (string): the path to navigate to
@@ -208,7 +232,7 @@
        */
       var pathKeys = ["display_if"].concat(path.match(/[^\/]+/g) || []);
       var lastKey = pathKeys.pop();
-      var currentLocation = this.currentQuestionFields;
+      var currentLocation = vm.currentQuestionFields;
       _.forEach(pathKeys, function(key) {
         if (typeof currentLocation === "undefined") {
           alert("Sorry, something went wrong with adding this field (" + path + ").");
@@ -219,22 +243,22 @@
       return [currentLocation, lastKey]
     };
     
-    this.getValueAtPath = function(path) {
+    vm.getValueAtPath = function(path) {
       /**
        * Returns the value at the path given.
        */
-      var pathLocationArray = this.getPathLocation(path);
+      var pathLocationArray = vm.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
       return parentObject[key];
     };
     
-    this.addValueToPath = function(path, value) {
+    vm.addValueToPath = function(path, value) {
       /**
-       * Adds the passed value to the path from root this.currentQuestionFields.display_if. The path should be a string
+       * Adds the passed value to the path from root vm.currentQuestionFields.display_if. The path should be a string
        * that's delimited with "/" for each level).
        */
-      var pathLocationArray = this.getPathLocation(path);
+      var pathLocationArray = vm.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
       if (parentObject[key] == null) {
@@ -244,7 +268,7 @@
       }
     };
     
-    this.updateOperatorAtPath = function(path, element) {
+    vm.updateOperatorAtPath = function(path, element) {
       /**
        * Updates the operator at the path specified (this is because editing an object attribute is non-trivial
        * compared to editing a value).
@@ -253,38 +277,38 @@
        *   path (string): path to edit
        *   element (element): logic or conditional block element used to retrieve the operator type from its scope
        */
-      var pathLocationArray = this.getPathLocation(path);
+      var pathLocationArray = vm.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
-      var currentOperator = this.getOperatorType(parentObject[key]);
+      var currentOperator = vm.getOperatorType(parentObject[key]);
       var updatedOperator = element.type;
       var updatedStatement = {};
       updatedStatement[updatedOperator] = parentObject[key][currentOperator];
       parentObject.splice(key, 1, updatedStatement);
     };
     
-    this.getOperatorType = function(value) {
+    vm.getOperatorType = function(value) {
       /**
        * Returns the type of operation at this level in the skip logics ("AND", "OR", "==", "<", etc.)
        */
       return _.keys(value)[0];
     };
     
-    this.getQuestionIds = function() {
+    vm.getQuestionIds = function() {
       /**
-       * Returns an array of question_ids from this.questions
+       * Returns an array of question_ids from vm.questions
        */
-      return _.map(this.questions, "question_id");
+      return _.map(vm.questions, "question_id");
     };
     
-    this.refreshQuestionIds = function() {
+    vm.refreshQuestionIds = function() {
       /**
-       * Refreshes this.questionIds
+       * Refreshes vm.questionIds
        */
-      this.questionIds = this.getQuestionIds();
+      vm.questionIds = vm.getQuestionIds();
     };
-    // Set this.questionIds
-    this.refreshQuestionIds();
+    // Set vm.questionIds
+    vm.refreshQuestionIds();
     
   }
 

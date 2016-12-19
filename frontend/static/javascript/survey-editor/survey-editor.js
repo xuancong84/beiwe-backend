@@ -55,6 +55,7 @@ function end() {
     var content = "";
     if (tracking_survey) {
         content = scope.surveyBuilder.questions;
+        scope.surveyBuilder.errors = null;  // Reset errors
     } else {
         content_list = [];
         // Remove double-quotes, which break the JSON parser.
@@ -86,9 +87,14 @@ function end() {
         // Don't do anything; this actually gets called BEFORE the statusCode functions
         $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
     }).fail(function(response) {
-        var errors = JSON.parse(response.responseText);
+        try {
+            var errors = JSON.parse(response.responseText);
+        } catch(e) {
+            var errors = "";
+        }
         if (_.has(errors, "duplicate_uuids")) {
-            alert(response.responseText);
+            scope.surveyBuilder.errors = errors;
+            scope.$apply();
         } else {
             alert("There was a problem with updating the survey, sorry!");
         }
