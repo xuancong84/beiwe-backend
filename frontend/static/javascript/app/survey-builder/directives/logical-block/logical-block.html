@@ -6,16 +6,19 @@
     </button>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
-      <div ng-if="!(_.isArray(value))">
-        <!-- These are either logical ("and", "or") or arithmetic ("==", "<", ...) statements -->
-        <logical-block ng-if="_.includes(LOGICAL_OPERATORS, surveyBuilder.getOperatorType(value))"
-                       path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></logical-block>
-        <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, surveyBuilder.getOperatorType(value))"
-                           path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></conditional-block>
-      </div>
+    <li ng-if="type == 'not' && !(_.isEmpty(surveyBuilder.getValueAtPath(path)[type]))" class="list-group-item">
+      <logical-block ng-if="_.includes(LOGICAL_OPERATORS, surveyBuilder.getOperatorType(surveyBuilder.getValueAtPath(path)[type]))"
+                     path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></logical-block>
+      <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, surveyBuilder.getOperatorType(surveyBuilder.getValueAtPath(path)[type]))"
+                         path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></conditional-block>
     </li>
-    <li class="list-group-item">
+    <li ng-if="type != 'not'" class="list-group-item" ng-repeat="value in surveyBuilder.getValueAtPath(path)[type]">
+      <logical-block ng-if="_.includes(LOGICAL_OPERATORS, surveyBuilder.getOperatorType(value))"
+                     path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></logical-block>
+      <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, surveyBuilder.getOperatorType(value))"
+                         path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></conditional-block>
+    </li>
+    <li ng-if="type != 'not' || _.isEmpty(surveyBuilder.getValueAtPath(path)[type])" class="list-group-item">
       <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
     </li>
   </ul>

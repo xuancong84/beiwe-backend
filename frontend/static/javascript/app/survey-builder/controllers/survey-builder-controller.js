@@ -31,9 +31,8 @@
             formattedErrors.push("There are duplicate UUIDs - please refresh the page and try again.");
           }
         } else {
-          console.log(key + " // " + value);
-          var index = _.indexOf(vm.questionIds, key) + 1;
-          formattedErrors.push("Question " + index + ": " + value[0]);
+          var questionNumber = _.indexOf(vm.questionIds, key) + 1;
+          formattedErrors.push("Question " + questionNumber + ": " + value[0]);
         }
       });
       return formattedErrors;
@@ -199,6 +198,13 @@
       vm.addValueToPath(path, {"==": [vm.questionIds[0], ""]})
     };
 
+    vm.addNotBlock = function(path) {
+      /**
+       * Adds a NOT block to the display_if nested object at the path specified
+       */
+      vm.addValueToPath(path, {"not": {}})
+    };
+
     vm.deleteBlock = function(path) {
       /**
        * Deletes the logical or conditional block at the path specified
@@ -261,10 +267,10 @@
       var pathLocationArray = vm.getPathLocation(path);
       var parentObject = pathLocationArray[0];
       var key = pathLocationArray[1];
-      if (parentObject[key] == null) {
-        parentObject[key] = value;
-      } else if (_.isArray(parentObject[key])) {
+      if (_.isArray(parentObject[key])) {
         parentObject[key].push(value);
+      } else {
+        parentObject[key] = value;
       }
     };
     
