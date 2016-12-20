@@ -1,4 +1,4 @@
-<form class="form-inline">
+<div class="form-inline">
   Answer to
   <select class="form-control" ng-model="surveyBuilder.getValueAtPath(path)[type][0]"
           ng-options="getQuestionNumber(questionId) for questionId in surveyBuilder.questionIds|filter: '!' + currentQuestionId">
@@ -11,4 +11,4 @@
           ng-click="surveyBuilder.deleteBlock(path)">
     &times;
   </button>
-</form>
+</div>
