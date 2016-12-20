@@ -83,7 +83,7 @@
               <td><label for="text">Display If:</label></td>
               <td>
                 <logical-block ng-if="surveyBuilder.LOGICAL_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1"
-                               survey-builder="surveyBuilder" path=""></logical-block>
+                               path="" survey-builder="surveyBuilder"></logical-block>
                 <div ng-if="surveyBuilder.ARITHMETIC_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1">
                   <div class="alert alert-warning">
                     If you wish to have any logical statements ("AND" or "OR"), the base statement must be a logical
