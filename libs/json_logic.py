@@ -12,7 +12,14 @@ class NumericPointerInvalid(InvalidLogicError): pass #the answer pointed to shou
 class QuestionReferenceOutOfOrder(InvalidLogicError): pass #this question references a question that comes after it
 class EmptyLogicObject(InvalidLogicError): pass #this question has an empty logic object
 
-#TODO: make an endpoint that returns a dictionary of uuid to any errors that occur
+error_messages = {
+    str(NonExistantUUIDReference().__class__):"contains a reference to a question that does not exist.",
+    str(InvalidOperator().__class__):"contains a logic operator that is not supported.",
+    str(InvalidNumeric().__class__):"contains a value you entered that is not numeric.",
+    str(NumericPointerInvalid().__class__):"contains a reference to a question that is not of a numeric question type.",
+    str(QuestionReferenceOutOfOrder().__class__):"contains a reference to another question that occurs later in the survey.",
+    str(EmptyLogicObject().__class__):"contains a section without any logic in it.",
+}
     
 def validate_survey_json(json_survey_string):
     return do_validate_survey( json.loads(json_survey_string) )
@@ -39,34 +46,32 @@ def do_validate_survey(questions):
     for question in questions:
         questions_validated.add(question['question_id'])
         try:
-            # print question['question_id']
-            if "display_if" in question:
+            #print question
+            if "display_if" in question: #if there is no display logic we will display it in the app.
                 validate_logic_tree(question['display_if'], questions_dict, questions_validated)
-            # else:
-            #     print question
         except InvalidLogicError as e:
-            #the "str(e.__class__).rsplit(".",1)[1][:-2]" below gets string of error type
-            errors[question['question_id']] = [str(e.__class__).rsplit(".",1)[1][:-2], str(e)]
-    
+            # print "found error: %s" % str(e.__class__).rsplit(".",1)[1][:-2], str(e)
+            errors[question['question_id']] = [error_messages[str(e.__class__)], str(e)]
+    # print "\nerrors:\n", errors
     return errors
 
 
-    
 def validate_logic_tree(logic_entry, questions_dict, questions_validated):
     """ Structure and vocab:
     A logic entry is a single key dictionary, with allowed keys being the logic operators and comparators.
     The value associated with that key depends on the value of the key.
-    
-    operators (and, or) must have a list of logic entries, e.g. [{logic entry 1}, {logic entry 2}]
-    
-    comparators (<,>,==,!=) must have a list of 2 values to compare
-    
-    invert (not) simply has the inner logic entry, eg: { not: {logic entry} }, and it inverts the output.
+    operators (and, or): must have a list of logic entries, e.g. [{logic entry 1}, {logic entry 2}]
+    comparators (<,>,==,!=): must have a list of 2 values to compare
+    invert (not): simply has the inner logic entry, eg: { not: {logic entry} }, and it inverts the output.
     """
+
+    # case: top logic object is None, this means it will display; return
+    # (this case sholud be the same as "display if" not being in the survey object)
+    if logic_entry is None:
+        return
     
-    # case: logic object is empty, raise an empty object.
-    # this covers both cases: top level is empty; inner level is empty
-    if not logic_entry:
+    #case: the logic object is empty. (Pretty sure has never triggered)...
+    if len(logic_entry) == 0:
         raise EmptyLogicObject(logic_entry)
     
     # case: too many keys (the above case catches 0 keys)
@@ -76,6 +81,10 @@ def validate_logic_tree(logic_entry, questions_dict, questions_validated):
     
     operator = operators[0] #just grabbing the key outright to simplify code.
     # any time you see logic_entry[operator] that means we are grabbing the next level in the object
+
+    # case: the operator points to an empty list or dictionary or None. That is invalid
+    if not logic_entry[operator]:
+        raise EmptyLogicObject(operator)
     
     if operator == 'or' or operator == "and": #handle the container types "or" and "and"
         # print 'and/or'
@@ -95,26 +104,31 @@ def validate_logic_tree(logic_entry, questions_dict, questions_validated):
     
     raise InvalidOperator(operator)
 
+
 def validate_logic_entry(logic_entry, questions_dict, questions_validated):
     comparator = logic_entry.keys()[0]
     uuid, comparator_value = logic_entry.values()[0]
     
+    #case: uuid does not exist anywhere.
     if uuid not in questions_dict:
         raise NonExistantUUIDReference(uuid)
     
+    #case: uuid is not in any prior question. (this + prior check = exists in future question)
     if uuid not in questions_validated:
         raise QuestionReferenceOutOfOrder(uuid)
     
+    #case: the numerical value entered by the admin is not a numeric.
     if comparator in NUMERIC_COMPARATORS:
         try:
             float(comparator_value)
         except ValueError:
             raise InvalidNumeric(comparator_value)
     
+    #case: conditional logic references another question that is not a numeric type question.
     question_type = questions_dict[uuid]['question_type']
     if (question_type not in NUMERIC_QUESTIONS
-        or (question_type == FREE_RESPONSE and questions_dict[uuid][
-            "text_field_type"] != FREE_RESPONSE_NUMERIC)):
+        or (question_type == FREE_RESPONSE
+            and questions_dict[uuid]["text_field_type"] != FREE_RESPONSE_NUMERIC)):
         raise NumericPointerInvalid(uuid)
         
 ###############################################################################################

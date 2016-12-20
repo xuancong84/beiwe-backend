@@ -109,13 +109,15 @@ VALID_REFERENCE_SURVEY =\
  'timings': [[], [67500], [], [], [], [], []]}
 
 
-# This triggers every invalid error case.
-# yes: Duplicate Question Ids
-# yes: NonExistantUUIDReference
-# yes: InvalidComparator
-# yes: InvalidNumeric
-# yes: NumericPointerInvalid
-# no: QuestionReferenceOutOfOrder
+# This triggers every invalid error case - December 19 2016
+# yes: Duplicate Question Ids - ['cedef218-e1ec-46d3-d8be-e30cb0b2d3aa', 'cedef218-e1ec-46d3-d8be-e30cb0b2d3aa']
+# yes: NonExistantUUIDReference - cedef218-e1ec-46d3-d8be-e30cb0b2d3aa
+# yes: InvalidComparator - 64a2a19b-c3d0-4d6e-9c0d-06089fd00424
+# yes: InvalidNumeric - 166d74ea-af32-487c-96d6-da8d63cfd368, 5cfa06ad-d907-4ba7-a66a-d68ea3c89fba, 9d7f737d-ef55-4231-e901-b3b68ca74190
+# yes: NumericPointerInvalid - 59f05c45-df67-40ed-a299-8796118ad173
+# yes: QuestionReferenceOutOfOrder - 6695d6c4-916b-4225-8688-89b6089a24d1
+# yes: EmptyLogicObject - 059e2f4a-562a-498e-d5f3-f59a2b2a5a5b
+
 INVALID_REFERENCE_SURVEY=\
 {
  'content': [
@@ -219,11 +221,14 @@ INVALID_REFERENCE_SURVEY=\
    'question_id': '166d74ea-af32-487c-96d6-da8d63cfd368',
    'question_text': "What?! No way- that's way too high!",
    'question_type': 'info_text_box'},
+     
   {'max': '5',
    'min': '1',
+   "display_if":{"and":[]}, #invalid contents of an "and" operator (it is empty)
    'question_id': '059e2f4a-562a-498e-d5f3-f59a2b2a5a5b',
    'question_text': 'On a scale of 1 (awful) to 5 (delicious) stars, how would you rate your dinner at Chez Broccoli Restaurant?',
    'question_type': 'slider'},
+     
   {'display_if': {'>=': ['059e2f4a-562a-498e-d5f3-f59a2b2a5a5b', 4]},
    'question_id': '6dd9b20b-9dfc-4ec9-cd29-1b82b330b463',
    'question_text': 'Wow, you are a true broccoli fan.',
