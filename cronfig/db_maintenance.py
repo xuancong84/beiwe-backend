@@ -51,3 +51,7 @@ def optimize_db():
     end = datetime.utcnow()
     delta = end - start
     print str(end), "finished database repair in %s." % delta.total_seconds()
+
+def get_mongo_settings():
+    db = mongolia.mongo_connection.CONNECTION.get_connection()['admin']
+    db.command({"getCmdLineOpts":1})
