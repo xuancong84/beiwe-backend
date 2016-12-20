@@ -85,7 +85,7 @@
                              path="" survey-builder="surveyBuilder"></logical-block>
               <div ng-if="surveyBuilder.ARITHMETIC_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1">
                 <div class="alert alert-warning">
-                  If you wish to have multiple conditional statements inside an AND or OR block you will need to structure your logic with an AND or OR block as the first element, otherwise you will be limited to a single conditional statement.
+                  You will be limited to a single conditional statement if you do not start with an AND or OR block as the first element.
                 </div>
                 <conditional-block survey-builder="surveyBuilder" path=""></conditional-block>
               </div>
