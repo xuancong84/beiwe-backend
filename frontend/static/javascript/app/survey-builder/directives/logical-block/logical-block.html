@@ -1,10 +1,14 @@
 <div class="panel panel-default">
-  <div class="panel-heading">
-    {{ type }}
-    <button class="close pull-right" style="line-height: 20px;" ng-click="surveyBuilder.deleteBlock(path)">
+  <div class="panel-heading" style="line-height: 30px;">
+    {{ type.toUpperCase() }}
+    <button class="close pull-right" ng-click="surveyBuilder.deleteBlock(path)" style="padding-left:13px">
       &times;
     </button>
+    <add-logic-buttons ng-if="type != 'not' || _.isEmpty(surveyBuilder.getValueAtPath(path)[type])"
+                       new-path="{{ getNewPath() }}" survey-builder="surveyBuilder" class="pull-right">
+    </add-logic-buttons>
   </div>
+
   <ul class="list-group">
     <li ng-if="type == 'not' && !(_.isEmpty(surveyBuilder.getValueAtPath(path)[type]))" class="list-group-item">
       <logical-block ng-if="_.includes(LOGICAL_OPERATORS, surveyBuilder.getOperatorType(surveyBuilder.getValueAtPath(path)[type]))"
@@ -17,9 +21,6 @@
                      path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></logical-block>
       <conditional-block ng-if="_.includes(ARITHMETIC_OPERATORS, surveyBuilder.getOperatorType(value))"
                          path="{{ getNewPath($index) }}" survey-builder="surveyBuilder"></conditional-block>
-    </li>
-    <li ng-if="type != 'not' || _.isEmpty(surveyBuilder.getValueAtPath(path)[type])" class="list-group-item">
-      <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
     </li>
   </ul>
 </div>
