@@ -98,7 +98,6 @@ def create_new_patient(study_id=None):
     """ Creates a new user, generates a password and keys, pushes data to s3
     and user database, adds user to the study they are supposed to be attached
     to, returns a string containing password and patient id. """
-    # TODO: Eli, if s3_upload/create_client_key_pair fails, delete the newly-created patient.  also, double check that the comment below is correct.
     patient_id, password = User.create(study_id)
     s3_upload(patient_id, "", study_id) #creates an empty file (folder?) on s3 indicating that this user exists
     create_client_key_pair(patient_id, study_id)

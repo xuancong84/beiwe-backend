@@ -165,6 +165,5 @@ def decrypt_device_line(patient_id, key, data):
 def remove_PKCS5_padding(data):
     """ Unpacks encrypted config from the device that was encypted using the
         PKCS5 padding scheme (which is the ordinal value of the last byte). """
-    #This can raise an indexerror when data is empty? that is not right
-    #TODO: fix.
+    #This can raise an indexerror when data is empty, but that is not expected behavior.
     return  data[0: -ord( data[-1] ) ]

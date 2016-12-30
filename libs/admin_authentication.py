@@ -54,7 +54,7 @@ def is_logged_in():
 class ArgumentMissingException(Exception): pass
 
 #TODO: Low Priority. Josh/Alvin. permission denied page.
-#TODO: Low Priority. Josh/Alvin.  we need a survey does not exist error page.
+#TODO: Low Priority. Josh/Alvin. we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
     """ This authentication decorator checks whether the user has permission to
         to access the study/survey they are accessing.
@@ -116,7 +116,6 @@ def get_admins_allowed_studies():
 ########################## System Administrator ################################
 ################################################################################
 
-#TODO: Low priority. Josh/Alvin. we need a permission denied page.
 def authenticate_system_admin(some_function):
     """ Authenticate system admin checks whether a user is a system admin before
     allowing access to pages marked with this decorator.  If a study_id variable

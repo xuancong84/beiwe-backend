@@ -180,7 +180,7 @@ def validate_logic_entry(logic_entry, questions_dict, questions_validated):
 #     comparator = logic_entry.keys()[0]
 #     a, b = logic_entry.values()[0]
 #     # print operator, a, b
-#     #FIXME: this float(a) is always a uuid value
+#     #code no longer functional, a is always a uuid value.
 #     if comparator in NUMERIC_COMPARATORS:
 #         a = float(a)
 #         b = float(b)

@@ -283,7 +283,7 @@ def determine_time_range_for_db_query(query):
 
 #########################################################################################
 
-#TODO: before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
+#before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
 #this does not affect data downloading because those file times are generated from the chunk registry
 # @data_access_api.route("/data-upload-apiv1", methods=['POST'])
 # def data_upload():

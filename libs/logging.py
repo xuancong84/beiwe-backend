@@ -47,5 +47,5 @@ def email_system_administrators(message, subject, source_email=OTHER_EMAIL_ADDRE
         email_server.sendmail( source_email, SYSADMIN_EMAILS, error_email )
         email_server.quit()
     except Exception as e:
-        # todo: this reraise parameter may be incorrect.
+        # todo: low priority. this reraise parameter may be incorrect.
         log_error(e, message="sysadmin email failed", reraise=False)

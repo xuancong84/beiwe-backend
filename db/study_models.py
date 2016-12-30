@@ -7,8 +7,7 @@ class Study( DatabaseObject ):
     
     DEFAULTS = { "name": REQUIRED,
                  "admins": [],          #admins for the study.
-                 "super_admins":[],     #admins that can add admins.
-                 #TODO: Low Priority. Eli/Josh. the above variable will be used in the yet-to-be-implemented 3-tier user model.
+                 "super_admins":[],     #admins that can add admins. this variable can be used in the yet-to-be-implemented 3-tier user model.
                  "surveys": [],         #the surveys pushed in this study.
                  "device_settings": REQUIRED,  #the device settings for the study.
                  "encryption_key": REQUIRED, #the study's config encryption key.
@@ -146,8 +145,7 @@ class Survey( DatabaseObject ):
         i.e. it is zero-indexed with day 0 of Sunday.  'timings' is a list of 7
         inner-lists, each inner list contains any number of times of the day,
         times of day are integer values indicating the "seconds past 12am". """
-        
-    #TODO: Low priority. Josh. define / document the survey json survey format you created.
+    
     # it doesn't need to be in this document, but this should say where to find it.
     PATH = "beiwe.surveys"
     DEFAULTS = {"content": [],
