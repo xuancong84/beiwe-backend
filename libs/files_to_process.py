@@ -351,7 +351,6 @@ def process_csv_data(data):
     if data["data_type"] == SURVEY_TIMINGS:
         header = fix_survey_timings(header, csv_rows_list, data['ftp']['s3_file_path'])
 
-    #TODO: this is where I stick the strip trailing and leading whitespace per header element.
     header = ",".join([column_name.strip() for column_name in header.split(",")])
     if csv_rows_list:
         return (

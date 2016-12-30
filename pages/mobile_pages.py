@@ -25,7 +25,7 @@ def fetch_graph():
         data.append( get_survey_results(study_id, patient_id, survey_id, 7) )
     return render_template("phone_graphs.html", data=data)
 
-# TODO: production. disable this page.
+
 #  this is a debugging function, it displays the user graph for a given user.
 # @mobile_pages.route("/fake", methods=["GET"] )
 # def fake_survey():
