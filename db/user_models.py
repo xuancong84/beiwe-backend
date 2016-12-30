@@ -32,7 +32,7 @@ class User( DatabaseObject ):
     def create(cls, study_id):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
-        if User(patient_id): return User.create() #fixme: Eli. this is definitely incorrect. create a user if a user with that name (id) already exists?
+        if User(patient_id): cls.create(study_id) #if user exists, recurse.
         
         password, password_hash, salt = generate_user_password_and_salt()
         new_client = { ID_KEY: patient_id, "password":password_hash,
