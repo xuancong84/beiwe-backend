@@ -87,7 +87,7 @@
         <div class="checkbox">
           <label>
             <input type="checkbox" name="randomize" id="randomize" ng-model="surveyBuilder.randomize">
-            <b>Randomize</b> which questions are displayed each time the participant takes a survey
+            <b>Randomize</b> which questions are displayed each time the participant takes a survey. This also randomizes the order in which the questions are displayed. It also causes the survey to ignore all question display logic so that all questions have an equal chance of appearing.
           </label>
         </div>
         <div ng-if="surveyBuilder.randomize">

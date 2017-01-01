@@ -42,7 +42,7 @@
             </td>
           </tr>
           <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
-            <td><label for="tfttxt">Text Field Type:</label></td>
+            <td><label for="tfttxt">Answer Type:</label></td>
             <td>
               <select name="text_field_type" id="tfttxt" class="form-control"
                       ng-model="surveyBuilder.currentQuestionFields.text_field_type"
@@ -53,9 +53,9 @@
           <tbody ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.radio || surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.checkbox"
                  id="fields_div">
             <tr>
-              <td><label>Fields:</label></td>
+              <td><label>Answer Choices:</label></td>
               <td>
-                <button class="btn btn-info" ng-click="surveyBuilder.addAnswerField()">Add new field</button>
+                <button class="btn btn-info" ng-click="surveyBuilder.addAnswerField()">Add new answer choice</button>
               </td>
             </tr>
             <tr ng-repeat="answer in surveyBuilder.currentQuestionFields.answers">
@@ -64,12 +64,18 @@
                   {{ $index }}:
                 </span>
               </td>
-              <td><input type="text" class="form-control" ng-model="answer.text"></td>
               <td>
-                <button class="btn btn-danger" ng-click="surveyBuilder.deleteAnswerField($index)">Delete</button>
+                <input type="text" class="form-control" ng-model="answer.text">
+              </td>
+              <td>
+                <button class="close pull-right" style="line-height: 34px;" ng-click="surveyBuilder.deleteAnswerField($index)">&times;</button>
               </td>
             </tr>
           </tbody>
+
+          <!-- Visual break between the question and the question's skip logic -->
+          <tr><td>&nbsp;</td></tr>
+
           <tr ng-if="surveyBuilder.randomize">
             <td colspan="2">
               <div class="alert alert-warning" style="margin-bottom: 0;">
@@ -79,7 +85,9 @@
             </td>
           </tr>
           <tr ng-class="{'faded': surveyBuilder.randomize}">
-            <td><label for="text">Display If:</label></td>
+            <td class="tablecell-align-top">
+              <label for="text">Display this<br>question if:</label>
+            </td>
             <td>
               <logical-block ng-if="surveyBuilder.LOGICAL_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1"
                              path="" survey-builder="surveyBuilder"></logical-block>
@@ -91,7 +99,7 @@
               </div>
               <div ng-if="!surveyBuilder.currentQuestionFields.display_if">
                 <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
-              </div>                  
+              </div>
             </td>
           </tr>
         </table>
