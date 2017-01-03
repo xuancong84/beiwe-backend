@@ -1,6 +1,11 @@
 from os import getenv
 import json
 
+"""
+To customize any of these values, use the following pattern.
+MONGO_USERNAME = getenv("MONGO_USERNAME") or "username"
+"""
+
 # These are the credentials used to access the MongoDB that contains website
 # usernames and passwords.  If you are configuring your server see the comment
 # at the end of this document.
@@ -28,7 +33,10 @@ S3_BACKUPS_BUCKET = getenv("S3_BACKUPS_BUCKET")
 # Email addresses used on the server.
 E500_EMAIL_ADDRESS = getenv("E500_EMAIL_ADDRESS")
 OTHER_EMAIL_ADDRESS = getenv("OTHER_EMAIL_ADDRESS")
-SYSADMIN_EMAILS = json.loads(getenv("SYSADMIN_EMAILS"))
+
+# A list of email addresses that will receive error emails.
+# this value must be a comma separated list, whitespace before and after addresses will be stripped.
+SYSADMIN_EMAILS = getenv("SYSADMIN_EMAILS")
 
 # MongoDB port number
 MONGO_PORT = getenv("MONGDB_PORT") or 27017

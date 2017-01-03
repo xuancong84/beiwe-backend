@@ -2,24 +2,25 @@ from os import getenv
 
 ### Environment settings ###
 # All settings here can be configured by setting an environment variable, or by editing the default value
-# getenv("") or
+
+# To customize any of these values, use the following pattern.
+# DEFAULT_S3_RETRIES = getenv("DEFAULT_S3_RETRIES") or 10
+# Note that this file is _not_ in the gitignore.
 
 ## Networking
 #This value is used in libs.s3, does what it says.
 DEFAULT_S3_RETRIES = getenv("DEFAULT_S3_RETRIES") or 1
-DEFAULT_S3_RETRIES = int(DEFAULT_S3_RETRIES)
 
 ## File processing directives
 #NOTE: these numbers were determined through trial and error on a C4 Large AWS instance.
 #Used in data download and data processing, base this on CPU core count.
 CONCURRENT_NETWORK_OPS = getenv("CONCURRENT_NETWORK_OPS") or 10
-CONCURRENT_NETWORK_OPS = int(CONCURRENT_NETWORK_OPS)
 #Used in file processing, number of files to be pulled in and processed simultaneously.
 # Higher values reduce s3 usage, reduce processing time, but increase ram requirements.
 FILE_PROCESS_PAGE_SIZE = getenv("FILE_PROCESS_PAGE_SIZE") or 250
-FILE_PROCESS_PAGE_SIZE = int(FILE_PROCESS_PAGE_SIZE )
-#This string will be printed into non-error hourly reports to improve error filtering.
 
+#This string will be printed into non-error hourly reports to improve error filtering.
+DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "2HEnBwlawY"
 
 
 
@@ -39,7 +40,6 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
-DATA_PROCESSING_NO_ERROR_STRING = "2HEnBwlawY"
 
 ## HTML lists ##
 CHECKBOX_TOGGLES = ["accelerometer",

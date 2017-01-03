@@ -1,4 +1,4 @@
-import secure_settings
+import secure_settings, constants
 provided_settings = vars(secure_settings)
 provided_settings.pop("__builtins__")
 
@@ -29,7 +29,15 @@ for mandatory_var in MANDATORY_VARS:
     if mandatory_var not in provided_settings:
         raise ImportError(mandatory_var + " was not provided in your settings.")
 
-# Environment might be unpredictable, so we sanitize the env variables that need to be numeric as ints
+# Environment variables might be unpredictable, so we sanitize the numerical ones as ints.
 secure_settings.MONGO_PORT = int(secure_settings.MONGO_PORT)
 secure_settings.ASYMMETRIC_KEY_LENGTH = int(secure_settings.ASYMMETRIC_KEY_LENGTH)
 secure_settings.ITERATIONS = int(secure_settings.ITERATIONS)
+
+constants.DEFAULT_S3_RETRIES = int(constants.DEFAULT_S3_RETRIES)
+constants.CONCURRENT_NETWORK_OPS = int(constants.CONCURRENT_NETWORK_OPS)
+constants.FILE_PROCESS_PAGE_SIZE = int(constants.FILE_PROCESS_PAGE_SIZE)
+
+# email addresses are parsed from a comma separated list
+# whitespace before and after addresses are stripped
+secure_settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in secure_settings.SYSADMIN_EMAILS.split(",")]
