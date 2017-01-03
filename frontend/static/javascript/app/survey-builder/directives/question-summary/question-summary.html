@@ -36,7 +36,10 @@
             <!-- Radio Button or Checkbox question options array -->
             <tr ng-if="question.answers">
               <td><i>Options:</i></td>
-              <td>{{ _.map(question.answers, "text").join(", ") }}</td>
+              <td>
+                <span ng-repeat-start="answer in question.answers">{{ answer.text }}</span>
+                <span ng-if="!$last" ng-repeat-end>, </span>
+              </td>
             </tr>
             <!-- Free response question text_field_type -->
             <tr ng-if="question.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
