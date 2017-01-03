@@ -6,7 +6,7 @@
 .DS_Store
 .project
 *.pem
-config/security.py
+config/secure_settings.py
 .mongodb
 .idea/
 logs*
