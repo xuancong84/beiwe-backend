@@ -1,6 +1,6 @@
 print "double check that the database backup has been removed from the /tmp folder."
 
-from config.security import MONGO_PASSWORD, MONGO_USERNAME
+from config.secure_settings import MONGO_PASSWORD, MONGO_USERNAME
 from mongobackup import restore
 from subprocess import check_call
 from shlex import split

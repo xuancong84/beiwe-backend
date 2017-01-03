@@ -1,12 +1,11 @@
 import mongolia
 
 from datetime import datetime
-
-from config.security import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
-                             S3_BACKUPS_AWS_SECRET_ACCESS_KEY as BACKUP_KEY,
-                             S3_BACKUPS_BUCKET, MONGO_USERNAME, MONGO_PASSWORD,
-                             LOCAL_BACKUPS_DIRECTORY)
 from mongobackup import backup
+
+from config.secure_settings import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
+         S3_BACKUPS_AWS_SECRET_ACCESS_KEY as BACKUP_KEY,S3_BACKUPS_BUCKET,
+         MONGO_USERNAME, MONGO_PASSWORD, LOCAL_BACKUPS_DIRECTORY)
 
 def run_database_tasks():
     """ Runs a database optimize (which should speed up the backup),

@@ -1,6 +1,6 @@
 import traceback, smtplib
 from datetime import datetime
-from config.security import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+from config.secure_settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
 
 
 def log_and_email_error(e, log_message=None, emails=SYSADMIN_EMAILS ):
