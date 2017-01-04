@@ -1,6 +1,5 @@
 import secure_settings, constants
 provided_settings = vars(secure_settings)
-provided_settings.pop("__builtins__")
 
 #check that all values provided actually contain something
 for attr_name, attr_value in provided_settings.items():
