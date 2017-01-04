@@ -9,3 +9,8 @@ th, td {
 .tablecell-align-top {
 	vertical-align: top;
 }
+
+.add-logic-button {
+	margin-top: 1px;
+	margin-bottom: 2px;
+}
