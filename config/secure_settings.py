@@ -1,5 +1,4 @@
 from os import getenv
-import json
 
 """
 To customize any of these values, use the following pattern.
