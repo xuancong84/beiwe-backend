@@ -18,7 +18,7 @@ FLASK_SECRET_KEY = getenv("FLASK_SECRET_KEY")
 # These are your AWS (Amazon Web Services) access credentials.
 # (Amazon provides you with these credentials, you do not generate them.)
 AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRE`T_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY")
 
 S3_BACKUPS_AWS_KEY_ID = getenv("S3_BACKUPS_AWS_KEY_ID")
 S3_BACKUPS_AWS_SECRET_ACCESS_KEY = getenv("S3_BACKUPS_AWS_SECRET_ACCESS_KEY")
