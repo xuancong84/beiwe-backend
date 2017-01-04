@@ -4,10 +4,8 @@ from boto import connect_s3
 from boto.s3.key import Key
 
 from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
-from config.security import S3_BUCKET, S3_BACKUPS_BUCKET
+from config.secure_settings import S3_BUCKET, S3_BACKUPS_BUCKET, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 from libs import encryption
-
-from config.security import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 
 #Errors
 from httplib import IncompleteRead
