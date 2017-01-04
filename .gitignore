@@ -12,6 +12,7 @@ logs*
 download/download_script_credentials.py
 server_configuration/apache config.txt
 db/mongolia_setup.py
+config/*.backup
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

@@ -37,8 +37,9 @@ OTHER_EMAIL_ADDRESS = getenv("OTHER_EMAIL_ADDRESS")
 # this value must be a comma separated list, whitespace before and after addresses will be stripped.
 SYSADMIN_EMAILS = getenv("SYSADMIN_EMAILS")
 
-# MongoDB port number
-MONGO_PORT = getenv("MONGDB_PORT") or 27017
+# MongoDB port and IP for connecting to database server
+MONGO_PORT = getenv("MONGO_PORT") or 27017
+MONGO_IP = getenv("MONGO_IP") or "127.0.0.1"
 
 ASYMMETRIC_KEY_LENGTH = getenv("ASYMMETRIC_KEY_LENGTH") or 2048
 
