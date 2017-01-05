@@ -2,27 +2,12 @@
  * Functionality to create and edit surveys via a web form
  */
 
-var questions = [];
-
 $(document).ready(function() {
-    questions = JSON.parse(survey_content);
-    if (tracking_survey) { renderQuestionsList(); };
+    window.scope = angular.element($("body")).scope();
     renderSchedule();
     $('.schedule-timepicker').timepicker();
     audioSurveyTypeChange( $("[name='audio_survey_type']:checked").val() )
-    toggle_randomize_inputs_visibility();
-    $('#randomize').change(toggle_randomize_inputs_visibility);
 });
-
-
-function toggle_randomize_inputs_visibility() {
-    if (document.getElementById('randomize').checked) { //this will error on the audio page, its fine
-        $('#additional_randomization_inputs').show();
-    } else {
-        $('#additional_randomization_inputs').hide();
-    };
-}
-
 
 
 // Return the hour number (in 24-hour time) that the user selected in the form
@@ -50,15 +35,14 @@ function getDayOfWeek() {
 function get_survey_settings() {
     var trigger_on_first_download = document.getElementById('trigger_on_first_download').checked;
     if (tracking_survey) {
-        var randomize = document.getElementById('randomize').checked;
-        var randomize_with_memory = document.getElementById('randomize_with_memory').checked;
-        var number_of_random_questions = parseInt($('#number_of_random_questions').val());
-        return {'trigger_on_first_download': trigger_on_first_download,
-                'randomize': randomize,
-                'randomize_with_memory': randomize_with_memory,
-                'number_of_random_questions': number_of_random_questions};
+        return {
+            'trigger_on_first_download': trigger_on_first_download,
+            'randomize': scope.surveyBuilder.randomize,
+            'randomize_with_memory': scope.surveyBuilder.randomizeWithMemory,
+            'number_of_random_questions': scope.surveyBuilder.numberOfRandomQuestions
+        };
     } else {
-        var audioSurveyType = $("[name='audio_survey_type']:checked").val()
+        var audioSurveyType = $("[name='audio_survey_type']:checked").val();
         ret = {'trigger_on_first_download': trigger_on_first_download,
                 'audio_survey_type': audioSurveyType };
         if (audioSurveyType == 'raw') { ret['sample_rate'] = parseInt($('#raw_options').val()); }
@@ -70,7 +54,8 @@ function get_survey_settings() {
 function end() {
     var content = "";
     if (tracking_survey) {
-        content = questions;
+        content = scope.surveyBuilder.questions;
+        scope.surveyBuilder.errors = null;  // Reset errors
     } else {
         content_list = [];
         // Remove double-quotes, which break the JSON parser.
@@ -84,7 +69,7 @@ function end() {
         type: 'POST',
         url: '/update_survey/' + survey_id,
         data: {
-            content: JSON.stringify(content),
+            content: angular.toJson(content),
             timings: JSON.stringify(survey_times),
             settings: JSON.stringify(get_survey_settings())
         },
@@ -101,8 +86,18 @@ function end() {
     }).done(function() {
         // Don't do anything; this actually gets called BEFORE the statusCode functions
         $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
-    }).fail(function() {
-        alert("There was a problem with updating the survey, sorry!");
+    }).fail(function(response) {
+        try {
+            var errors = JSON.parse(response.responseText);
+        } catch(e) {
+            var errors = "";
+        }
+        if (_.has(errors, "duplicate_uuids")) {
+            scope.surveyBuilder.errors = errors;
+            scope.$apply();
+        } else {
+            alert("There was a problem with updating the survey, sorry!");
+        }
         $('.save_and_deploy_button').prop('disabled', false);  // Re-enable the buttons
     });
 }
@@ -113,7 +108,7 @@ function createJsonSurveyObject() {
     survey_id_string = "WeeklySurveyCreatedAt" + new Date().getTime();
     var surveyObject = {
         hour_of_day: getHour(),
-        questions: questions,
+        questions: angular.element($("body")).scope().surveyBuilder.questions,
         survey_id: survey_id_string
     }
     // If it's a weekly survey, add the day of the week to ask the survey
@@ -123,35 +118,6 @@ function createJsonSurveyObject() {
     console.log("surveyObject = ");
     console.log(surveyObject);
     return surveyObject;
-}
-
-// Render a list of the current questions
-function renderQuestionsList() {
-    // Get the question template, and compile it using Handlebars.js
-    var source = $("#question-template").html();
-    var template = Handlebars.compile(source);
-
-    // Use the list of questions as the data list to populate the template
-    var dataList = { questions: questions };
-    var htmlQuestion = template(dataList);
-
-    // Insert the template into the page's HTML
-    $("#listOfCurrentQuestions").html(htmlQuestion);
-    $('#number_of_total_questions').html(questions.length);
-}
-
-// Get the question object from the Edit Question modal, and append it to the questions array
-function addNewQuestion() {
-    var questionObject = getQuestionObjectFromModal();
-    questions.push(questionObject);
-    renderQuestionsList();
-}
-
-// Get the question object from the Edit Question modal, and replace questions[index] with it
-function replaceQuestion(index) {
-    var questionObject = getQuestionObjectFromModal();
-    questions.splice(index, 1, questionObject);
-    renderQuestionsList();
 }
 
 //TODO CDUCMENCDHIsdcoihh
@@ -165,33 +131,3 @@ function audioSurveyTypeChange(audio_survey_type) {
         $("#compressed_options").show();
     }
 }
-
-// Open the Edit Question modal, and pre-populate it with the data from the selected question
-function editQuestion(index) {
-    clearModal();
-    populateEditQuestionModal(questions[index]);
-    document.getElementById("saveQuestion").onclick = function() { replaceQuestion(index); };
-}
-
-// Remove the selected question from the questions array, and re-render the HTML list of questions
-function deleteQuestion(index) {
-    questions.splice(index, 1);
-    renderQuestionsList();
-}
-
-// Swap the question with the one before it, as long as it's not the first in the list
-function moveQuestionUp(index) {
-    if (index > 0) {
-        questions.splice(index - 1, 2, questions[index], questions[index - 1]);
-        renderQuestionsList();
-    };
-}
-
-// Swap the question with the one after it, as long as it's not the last in the list
-function moveQuestionDown(index) {
-    if (index < questions.length - 1) {
-        questions.splice(index, 2, questions[index + 1], questions[index]);
-        renderQuestionsList();
-    };
-}
-

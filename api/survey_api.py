@@ -1,6 +1,7 @@
 from flask import abort, Blueprint, make_response, request, redirect, json
 from libs.admin_authentication import authenticate_admin_study_access
 from db.study_models import Survey, Study
+from libs.json_logic import do_validate_survey
 
 survey_api = Blueprint('survey_api', __name__)
 
@@ -39,6 +40,10 @@ def update_survey(survey_id=None):
     if not survey:
         return abort(404)
     content = json.loads(request.values['content'])
+    if survey.survey_type == "tracking_survey":  # TODO: ELI TURN TRACKINGSURVEYINTOAconsta..
+        errors = do_validate_survey(content)
+        if len(errors) > 1:
+            return make_response(json.dumps(errors), 400)
     timings = json.loads(request.values['timings'])
     settings = json.loads(request.values['settings'])
     survey.update({'content': content, 'timings': timings, 'settings': settings})

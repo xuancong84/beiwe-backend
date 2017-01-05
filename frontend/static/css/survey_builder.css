@@ -5,3 +5,7 @@ th, td {
 .time-label {
 	font-size: 1em;
 }
+
+.tablecell-align-top {
+	vertical-align: top;
+}

@@ -1,63 +1,122 @@
+{% raw %}
 <!-- Modal for question addition/alteration-->
-<div class="modal fade" id="editQuestionModal" tabindex="-1" role="dialog" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+<div id="editQuestionModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
         <h4 class="modal-title" id="editQuestionModalLabel">Edit Question</h4>
       </div>
-      <form id="questionForm" name="question">
-        <div class="modal-body">
-
-          <table>
-            <tr>
-              <td>Question Text:</td>
-              <td><input type="text" id="text" name="question_text"></input></td>
-            </tr>
-            <tr>
-              <td>Question Type:</td>
-              <td><select id="type" name="type" onchange="setQuestionType()">
-                <option value="info_text_box">Informational Text</option>
-                <option value="slider">Slider</option>
-                <option value="radio_button">Radio Button</option>
-                <option value="checkbox">Checkbox</option>
-                <option value="free_response">Free Response</option>
+      <div class="modal-body">
+        <table style="width: 100%;">
+          <tr>
+            <td><label for="text">Question Text:</label></td>
+            <td>
+              <input type="text" name="question_text" id="text" class="form-control"
+                     ng-model="surveyBuilder.currentQuestionFields.question_text">
+            </td>
+          </tr>
+          <tr>
+            <td><label for="type">Question Type:</label></td>
+            <td>
+              <select name="type" id="type" class="form-control"
+                      ng-model="surveyBuilder.currentQuestionFields.question_type"
+                      ng-options="surveyBuilder.QUESTION_TYPE_LABELS[type] for type in surveyBuilder.QUESTION_TYPES track by type">
               </select>
             </td>
           </tr>
-          <tr id="min_value" style="display:none;">
-            <td>Minimum Value:</td>
-            <td><input type="number" id="min" name="min" min="0" max="100"></input></td>
+          <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
+            <td><label for="min">Minimum Value:</label></td>
+            <td>
+              <input type="number" name="min" id="min" class="form-control" min="0" max="100"
+                     ng-keyup="surveyBuilder.checkSliderValue('min')"
+                     ng-model="surveyBuilder.currentQuestionFields.min">
+            </td>
           </tr>
-          <tr id="max_value" style="display:none;">
-            <td>Maximum Value:</td>
-            <td><input type="number" id="max" name="max" min="1" max="100"></input></td>
+          <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
+            <td><label for="max">Maximum Value:</label></td>
+            <td>
+              <input type="number" name="max" id="max" class="form-control" min="1" max="100"
+                     ng-keyup="surveyBuilder.checkSliderValue('max')"
+                     ng-model="surveyBuilder.currentQuestionFields.max">
+            </td>
           </tr>
-          <tr id="text_field_type" style="display:none;">
-            <td>Text Field Type:</td>
-            <td><select id="tfttxt" name="text_field_type">
-              <option value="NUMERIC">Numeric</option>
-              <option value="SINGLE_LINE_TEXT">Single-line text</option>
-              <option value="MULTI_LINE_TEXT">Multi-line text</option>
-            </select>
-          </td>
-        </tr>
-        <tbody id="fields_div" style="display:none;">
-          <tr>
-            <td>Fields:</td>
-            <td id="fieldsDiv"><button type="button" onclick="addField()">Add new field</button></td>
-            <!--<div><div id="fieldsDiv"></div><button type="button" onclick="addField()">Add new field</button></div>-->
+          <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.freeResponse">
+            <td><label for="tfttxt">Answer Type:</label></td>
+            <td>
+              <select name="text_field_type" id="tfttxt" class="form-control"
+                      ng-model="surveyBuilder.currentQuestionFields.text_field_type"
+                      ng-options="surveyBuilder.TEXT_FIELD_TYPE_LABELS[type] for type in surveyBuilder.TEXT_FIELD_TYPES track by type">
+              </select>
+            </td>
           </tr>
-        </tbody>
-      </table>
+          <tbody ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.radio || surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.checkbox"
+                 id="fields_div">
+            <tr>
+              <td><label>Answer Choices:</label></td>
+              <td>
+                <button class="btn btn-info" ng-click="surveyBuilder.addAnswerField()">Add new answer choice</button>
+              </td>
+            </tr>
+            <tr ng-repeat="answer in surveyBuilder.currentQuestionFields.answers">
+              <td class="text-right">
+                <span ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.radio">
+                  {{ $index }}:
+                </span>
+              </td>
+              <td>
+                <input type="text" class="form-control" ng-model="answer.text">
+              </td>
+              <td>
+                <button class="close pull-right" style="line-height: 34px;" ng-click="surveyBuilder.deleteAnswerField($index)">&times;</button>
+              </td>
+            </tr>
+          </tbody>
 
-      <input style="display:none;" id="oldName" name="oldName"></input>
+          <!-- Visual break between the question and the question's skip logic -->
+          <tr><td>&nbsp;</td></tr>
+
+          <tr ng-if="surveyBuilder.randomize">
+            <td colspan="2">
+              <div class="alert alert-warning" style="margin-bottom: 0;">
+                Skip logic for this question has been disabled because the survey is randomized. You may still edit
+                the logic below, but this question will always be displayed as long as the survey remains randomized.
+              </div>
+            </td>
+          </tr>
+          <tr ng-class="{'faded': surveyBuilder.randomize}">
+            <td class="tablecell-align-top">
+              <label for="text">Display this<br>question if:</label>
+            </td>
+            <td>
+              <logical-block ng-if="surveyBuilder.LOGICAL_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1"
+                             path="" survey-builder="surveyBuilder"></logical-block>
+              <div ng-if="surveyBuilder.ARITHMETIC_OPERATORS.indexOf(surveyBuilder.getOperatorType(surveyBuilder.currentQuestionFields.display_if)) > -1">
+                <div class="alert alert-warning">
+                  You will be limited to a single conditional statement if you do not have an AND or OR block as the first element.
+                </div>
+                <conditional-block survey-builder="surveyBuilder" path=""></conditional-block>
+              </div>
+              <div ng-if="!surveyBuilder.currentQuestionFields.display_if">
+                <add-logic-buttons new-path="{{ getNewPath() }}" survey-builder="surveyBuilder"></add-logic-buttons>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button ng-if="surveyBuilder.currentQuestionFields.is_new_question"
+                class="btn btn-primary" data-dismiss="modal" ng-click="surveyBuilder.addNewQuestion()">
+          Add Question
+        </button>
+        <button ng-if="!surveyBuilder.currentQuestionFields.is_new_question"
+                class="btn btn-primary" data-dismiss="modal"
+                ng-click="surveyBuilder.editQuestion()">
+          Save Question
+        </button>
+        <button class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveQuestion">Save</button>
-    </div>
-  </form>
+  </div>
 </div>
-</div>
-</div>
+{% endraw %}

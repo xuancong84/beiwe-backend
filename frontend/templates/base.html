@@ -27,7 +27,7 @@
     {% endblock %}
 </head>
 
-<body>
+<body {% block body_attributes %}{% endblock %}>
     <div class="row">
         {% block navbar %}
             {% include 'navbar.html' %}
@@ -52,6 +52,9 @@
             {% endblock %}
         </div>
     </div>
+
+    {% block javascript %}
+    {% endblock %}
 </body>
 
 </html>
