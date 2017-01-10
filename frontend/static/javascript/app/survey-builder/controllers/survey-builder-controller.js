@@ -290,7 +290,13 @@
       var updatedOperator = element.type;
       var updatedStatement = {};
       updatedStatement[updatedOperator] = parentObject[key][currentOperator];
-      parentObject.splice(key, 1, updatedStatement);
+      if (_.isArray(parentObject)) {
+        // This operator is within an array, so we splice it in
+        parentObject.splice(key, 1, updatedStatement);
+      } else {
+        // This operator is within an object, so we replace the whole object
+        parentObject[key] = updatedStatement;
+      }
     };
     
     vm.getOperatorType = function(value) {
