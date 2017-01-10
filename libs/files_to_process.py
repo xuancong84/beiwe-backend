@@ -35,25 +35,35 @@ def process_file_chunks():
         raise ProcessingOverlapError("Data processing overlapped with a previous data indexing run.")
     FileProcessLock.lock()
     number_bad_files = 0
-    run_count = 0
-    while True:
-        previous_number_bad_files = number_bad_files
-        starting_length = FilesToProcess.count()
-        print str(datetime.now()), starting_length
-        number_bad_files += do_process_file_chunks(FILE_PROCESS_PAGE_SIZE, error_handler, number_bad_files)
-        if starting_length == FilesToProcess.count(): #zero files processed
-            if previous_number_bad_files == number_bad_files:
-                # Cases:
-                # every file broke, would cause infinite loop.
-                # no new files.
-                break
-            else: continue
+
+    user_ids = set(FilesToProcess(field="user_id"))
+    print "processing files for the following users: %s" % ",".join(user_ids)
+    for user_id in user_ids:
+        while True:
+            previous_number_bad_files = number_bad_files
+            starting_length = FilesToProcess.count(user_id=user_id)
+            
+            print str(datetime.now()), "processing %s, %s files remaining" % (user_id, starting_length)
+            
+            number_bad_files += do_process_user_file_chunks(
+                    count=FILE_PROCESS_PAGE_SIZE,
+                    error_handler=error_handler,
+                    skip_count=number_bad_files,
+                    user_id=user_id )
+            
+            if starting_length == FilesToProcess.count(user_id=user_id): #zero files processed
+                if previous_number_bad_files == number_bad_files:
+                    # Cases:
+                    #   every file broke, might as well fail here, and would cause infinite loop otherwise.
+                    #   no new files.
+                    break
+                else: continue
     FileProcessLock.unlock()
-    print FilesToProcess.count()
     error_handler.raise_errors()
     raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
 
-def do_process_file_chunks(count, error_handler, skip_count):
+
+def do_process_user_file_chunks(count, error_handler, skip_count, user_id):
     """
     Run through the files to process, pull their data, put it into s3 bins.
     Run the file through the appropriate logic path based on file type.
@@ -77,7 +87,7 @@ def do_process_file_chunks(count, error_handler, skip_count):
     survey_id_dict = {}
 
     for data in pool.map(batch_retrieve_for_processing,
-                          FilesToProcess(page_size=count+skip_count)[skip_count:],
+                          FilesToProcess(page_size=count+skip_count, user_id=user_id)[skip_count:],
                           chunksize=1):
         with error_handler:
             #raise errors that we encountered in the s3 access threaded operations to the error_handler

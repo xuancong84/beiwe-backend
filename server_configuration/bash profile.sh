@@ -18,19 +18,19 @@ alias pup="cp /var/www/beiwe-backend/server\ configuration/bash\ profile.sh ~/.p
 
 #File Sizes
 alias mongosize="ll -h /mnt/" #prints out the contents with file sizes of the mongodb folder
-alias duu="du -d 1 -ha | sort -h"
+alias duu="sudo adu -d 1 -ha | sort -h"
 
 #Swap
-alias createswap="sudo fallocate -l 2560M /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile; swapon -s"
+alias createswap="sudo fallocate -l 4G /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile; swapon -s"
 alias deleteswap="sudo swapoff /swapfile; sudo rm /swapfile"
 
 #Bash Utility
 alias sudo="sudo " # allows the use of all our aliases with the sudo command
 alias n='nano -c'
 alias sn='sudo nano -c'
-alias ls='ls -h --color=auto'
-alias ll='ls -l'
-alias lh='ls -lX --color=auto'
+alias ls='ls --color=auto'
+alias ll='ls -lh'
+alias lh='ls -lhX --color=auto'
 alias lll="du -ah --max-depth=0 --block-size=MB --time * | sort -nr"
 alias slll="sudo du -ah --max-depth=0 --block-size=MB --time * | sort -nr"
 alias h="cd ~; clear; ls -X; echo"
