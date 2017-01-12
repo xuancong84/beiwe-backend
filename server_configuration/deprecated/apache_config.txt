@@ -1,0 +1,26 @@
+LogLevel warn
+WSGIApplicationGroup %{GLOBAL}
+
+WSGIPythonPath /var/www/beiwe-backend
+<VirtualHost *:443>
+    ServerName staging.beiwe.org
+    SSLEngine on
+    SSLCertificateFile /home/ubuntu/.ssh/beiwe_ssl_certificate.crt
+    SSLCertificateKeyFile /home/ubuntu/.ssh/beiwe_ssl_certificate_key.key
+    SSLCertificateChainFile /home/ubuntu/.ssh/godaddy_ssl_certificate_chain.crt
+    WSGIDaemonProcess beiwe user=ubuntu group=ubuntu threads=10 home=/var/www/beiwe-backend inactivity-timeout=600
+    WSGIProcessGroup beiwe
+    Alias /static /var/www/beiwe-backend/frontend/static
+    WSGIScriptAlias / /var/www/beiwe-backend/wsgi.py
+    <Directory />
+        Options -Indexes
+        Require all granted
+    Allow from all
+    </Directory>
+</VirtualHost>
+
+<VirtualHost *:80>
+    ServerName studies.beiwe.org
+    ServerAlias about.beiwe.org www.beiwe.org beiwe.org beiwe.co www.beiwe.co beiwe.info www.beiwe.info beiwe.net www.beiwe.net
+    RedirectPermanent / https://studies.beiwe.org/
+</VirtualHost>
