@@ -1,4 +1,5 @@
-from sys import argv
+from sys import path, argv
+path.insert(1, "..")
 from cronutils import run_tasks
 from cronfig.db_maintenance import run_database_tasks
 from libs.files_to_process import process_file_chunks
