@@ -7,7 +7,9 @@ angular.module("surveyBuilder")
         scope.ARITHMETIC_OPERATORS = ARITHMETIC_OPERATORS;
         scope.LOGICAL_OPERATORS = LOGICAL_OPERATORS;
         
-        scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
+        scope.$watch("surveyBuilder.currentQuestionFields.question_id", function() {
+          scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
+        });
         scope.getNewPath = function(index) {
           return logicService.getNewPath(scope.path, scope.type, index);
         };
