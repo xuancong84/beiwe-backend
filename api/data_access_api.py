@@ -8,6 +8,7 @@ from bson.errors import InvalidId
 from db.data_access_models import ChunksRegistry, FileToProcess
 from db.study_models import Study, Studies
 from db.user_models import Admin, User, Users
+from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve, s3_list_files, s3_upload
 from libs.streaming_bytes_io import StreamingBytesIO
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
@@ -35,22 +36,22 @@ def get_and_validate_study_id():
         Study id does not exist in our database causes _404_ error."""
     
     if "study_id" not in request.values:
-        abort(400)
+        return abort(400)
     
     if len(request.values["study_id"]) != 24:
         #Don't proceed with large sized input.
         print "Received invalid length objectid as study_id in the data access API."
-        abort(400)
+        return abort(400)
     
     try: #If the ID is of some invalid form, we catch that and return a 400
         study_id = ObjectId(request.values["study_id"])
     except InvalidId:
-        abort(400)
+        return abort(400)
     
-    study_obj = Study(study_id) #(ignore IDE warning, the aborts above cease execution.)
+    study_obj = Study(study_id)
     #Study object will be None if there is no matching study id.
     if not study_obj: #additional case: if study object exists but is empty
-        abort(404)
+        return abort(404)
         
     return study_obj
 
@@ -61,11 +62,11 @@ def get_and_validate_admin(study_obj):
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
     if not admin:
-        abort(403)  # access key DNE
+        return abort(403)  # access key DNE
     if admin._id not in study_obj['admins']:
-        abort(403)  # admin is not credentialed for this study
+        return abort(403)  # admin is not credentialed for this study
     if not admin.validate_access_credentials(access_secret):
-        abort(403)  # incorrect secret key
+        return abort(403)  # incorrect secret key
     return admin
 
 #########################################################################################
@@ -76,9 +77,9 @@ def get_studies():
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
-    if not admin: abort(403) #access key DNE
+    if not admin: return abort(403) #access key DNE
     if not admin.validate_access_credentials(access_secret):
-        abort(403) #incorrect secret key
+        return abort(403) #incorrect secret key
     return json.dumps({str(study._id):study.name for study in Studies( admins=str(admin._id) ) } )
 
 
@@ -87,7 +88,7 @@ def get_users_in_study():
     try: study_id = ObjectId(request.values["study_id"])
     except InvalidId: study_id = None
     study_obj = Study(study_id)
-    if not study_obj: abort(404)
+    if not study_obj: return abort(404)
     _ = get_and_validate_admin(study_obj)
     return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
 
@@ -154,6 +155,9 @@ def zip_generator(files_list, construct_registry=False):
     This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
     almost immediately.
     """
+    
+    processed_files = set()
+    duplicate_files = set()
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     file_registry = {}
     zip_output = StreamingBytesIO()
@@ -169,7 +173,12 @@ def zip_generator(files_list, construct_registry=False):
         for chunk, file_contents in chunks_and_content:
             if construct_registry:
                 file_registry[chunk['chunk_path']] = chunk["chunk_hash"]
-            zip_input.writestr( determine_file_name(chunk), file_contents)
+            file_name = determine_file_name(chunk)
+            if file_name in processed_files:
+                duplicate_files.add((file_name,chunk['chunk_path']))
+                continue
+            processed_files.add(file_name)
+            zip_input.writestr(file_name, file_contents)
             # These can be large, and we don't want them sticking around in memory as we wait for the yield
             del file_contents, chunk
             yield zip_output.getvalue() #yield the (compressed) file information
@@ -183,15 +192,20 @@ def zip_generator(files_list, construct_registry=False):
         yield zip_output.getvalue()
     
     except None:
-        #The try-except-finally block is here to guarantee the Threadpool is closed and terminated.
+        # The try-except-finally block is here to guarantee the Threadpool is closed and terminated.
         # we don't handle any errors, we just re-raise any error that shows up.
+        # (with statement does not work.)
         raise
-    
     finally:
-        #We rely on the finally block to ensure that th threadpool will be closed and terminated.
+        # We rely on the finally block to ensure that the threadpool will be closed and terminated,
+        # and also to print an error to the log if we need to.
         pool.close()
         pool.terminate()
-
+        if duplicate_files:
+            duplcate_file_message =  "encountered duplicate files: %s" % ",".join(str(name_path) for name_path in duplicate_files)
+            email_system_administrators(duplcate_file_message,
+                                        "encountered duplicate files in a data download")
+            
 #########################################################################################
 
 def parse_registry(reg_dat):
@@ -231,7 +245,7 @@ def str_to_datetime(time_string):
     """ Translates a time string to a datetime object, raises a 400 if the format is wrong."""
     try: return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
-        if "does not match format" in e.message: abort(400)
+        if "does not match format" in e.message: return abort(400)
 
 def batch_retrieve_s3(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
@@ -254,7 +268,7 @@ def determine_data_streams_for_db_query(query):
         
         for data_stream in query['data_types']:
             if data_stream not in ALL_DATA_STREAMS:
-                abort(404)
+                return abort(404)
 
 def determine_users_for_db_query(query):
     """ Determines, from the html request, the users that should go into the database query.
@@ -269,7 +283,7 @@ def determine_users_for_db_query(query):
         
         for user_id in query['user_ids']:  # Case: one of the user ids was invalid
             if not User(user_id):
-                abort(404)
+                return abort(404)
 
 def determine_time_range_for_db_query(query):
     """ Determines, from the html request, the time range that should go into the database query.
@@ -292,14 +306,14 @@ def determine_time_range_for_db_query(query):
 #     access_key = request.values["access_key"]
 #     access_secret = request.values["secret_key"]
 #     admin = Admin(access_key_id=access_key)
-#     if not admin: abort(403) #access key DNE
+#     if not admin: return abort(403) #access key DNE
 #     if not admin.validate_access_credentials( access_secret ):
-#         abort( 403 )  # incorrect secret key
+#         return abort( 403 )  # incorrect secret key
 #
 #     if "study_id" in request.values: study_id = request.values["study_id"]
 #     else: return "please provide a study_id"
 #     study_obj = Study( ObjectId( study_id ) )
-#     if admin._id not in study_obj['admins']: abort(403)  # admin is not credentialed for this study
+#     if admin._id not in study_obj['admins']: return abort(403)  # admin is not credentialed for this study
 #
 #     if "user_id" in request.values:user_id = request.values["user_id"]
 #     else: return "please provide a user_id"
