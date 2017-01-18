@@ -124,7 +124,15 @@
       /**
        * Returns an object with the correct fields for sending to the backend from data in vm.currentQuestionFields
        */
-      return _.pick(vm.currentQuestionFields, QUESTION_FIELDS_LIST[vm.currentQuestionFields.question_type]);
+      var currentQuestionObject = _.pick(vm.currentQuestionFields, QUESTION_FIELDS_LIST[vm.currentQuestionFields.question_type]);
+      /* Replace ASCII double-quote characters with Unicode double-quote characters, because even
+      when escaped, ASCII double-quote characters cause problems being passed from AngularJS to
+      Python to MongoDB and back. */
+      currentQuestionObject.question_text = currentQuestionObject.question_text.replace(/"/g, "\u201C").replace(/\t/g, " ");
+      _.forEach(currentQuestionObject.answers, function(answer, index) {
+        currentQuestionObject.answers[index].text = answer.text.replace(/"/g, "\u201C").replace(/\t/g, " ");
+      });
+      return currentQuestionObject;
     };
 
     vm.checkSliderValue = function(min_or_max) {
