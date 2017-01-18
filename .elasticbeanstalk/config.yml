@@ -5,7 +5,7 @@ branch-defaults:
     environment: beiweCluster-staging
 global:
   application_name: Beiwe Cluster
-  default_ec2_keyname: new_beiwe_key_pair
+  default_ec2_keyname: actually_beiwe_key_pair
   default_platform: 64bit Amazon Linux 2016.09 v2.3.0 running Python 2.7
   default_region: us-east-1
   profile: eb-cli
