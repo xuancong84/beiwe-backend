@@ -22,9 +22,7 @@
 {% block javascript %}
   <script src="/static/javascript/libraries/lodash.min.js"></script>
   <script type="text/javascript">
-    var questions_string = '{{ survey.content|tojson }}';
-    var sanitized_questions_string = questions_string.replace(/"/g, "\u201C").replace(/\t/g, " ");
-    var questions = angular.fromJson(sanitized_questions_string);
+    var questions = angular.fromJson('{{ survey.content|tojson }}');
     var survey_id = '{{ survey._id }}';
     var survey_times = {{ survey.timings }};
     var randomize = {{ "true" if survey.settings["randomize"] else "false" }};
