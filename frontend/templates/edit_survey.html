@@ -22,7 +22,8 @@
 {% block javascript %}
   <script src="/static/javascript/libraries/lodash.min.js"></script>
   <script type="text/javascript">
-    var questions = angular.fromJson('{{ survey.content|tojson }}');
+    var raw_questions = '{{ survey.content|tojson }}';
+    var questions = angular.fromJson(raw_questions.replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\\"/, "g"));
     var survey_id = '{{ survey._id }}';
     var survey_times = {{ survey.timings }};
     var randomize = {{ "true" if survey.settings["randomize"] else "false" }};

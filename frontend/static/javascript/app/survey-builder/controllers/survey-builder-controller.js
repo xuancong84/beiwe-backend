@@ -128,9 +128,9 @@
       /* Replace ASCII double-quote characters with Unicode double-quote characters, because even
       when escaped, ASCII double-quote characters cause problems being passed from AngularJS to
       Python to MongoDB and back. */
-      currentQuestionObject.question_text = currentQuestionObject.question_text.replace(/"/g, "\u201C").replace(/\t/g, " ");
+      currentQuestionObject.question_text = currentQuestionObject.question_text.replace(/"/g, "\u201C");
       _.forEach(currentQuestionObject.answers, function(answer, index) {
-        currentQuestionObject.answers[index].text = answer.text.replace(/"/g, "\u201C").replace(/\t/g, " ");
+        currentQuestionObject.answers[index].text = answer.text.replace(/"/g, "\u201C");
       });
       return currentQuestionObject;
     };
