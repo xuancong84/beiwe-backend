@@ -11,14 +11,16 @@ def log_and_email_error(e, log_message=None, emails=SYSADMIN_EMAILS ):
         into the log_error function and appears as part of the email and log statement. """
     try:
         subject = "Beiwe Error: %s" % e.message
-        content = log_error(e, log_message, reraise=True)
-        error_email = 'Subject: %s\n\n%s' % (subject, content)
-        email_server = smtplib.SMTP("localhost")
-        email_server.sendmail( E500_EMAIL_ADDRESS, emails, error_email )
-        email_server.quit()
+        message = log_error(e, log_message, reraise=True)
+        _send_email(E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, message, subject)
+        
     except Exception:
         print("\n!!!! ERROR IN log_and_email_error !!!!")
 
+
+def email_bundled_error(e, subject, emails=SYSADMIN_EMAILS):
+    _send_email(OTHER_EMAIL_ADDRESS, SYSADMIN_EMAILS, e.__repr__(), subject)
+    
 
 def log_error(e, message=None, reraise=False):
     """ Prints an error to the apache log.
@@ -43,9 +45,19 @@ def email_system_administrators(message, subject, source_email=OTHER_EMAIL_ADDRE
     """ Sends an email to the system administrators. """
     error_email = 'Subject: %s\n\n%s' % (subject, message)
     try:
-        email_server = smtplib.SMTP("localhost")
-        email_server.sendmail( source_email, SYSADMIN_EMAILS, error_email )
-        email_server.quit()
+        _send_email(source_email, SYSADMIN_EMAILS, message, subject)
     except Exception as e:
         # todo: low priority. this reraise parameter may be incorrect.
         log_error(e, message="sysadmin email failed", reraise=False)
+
+
+def _send_email(source_email_address, destination_email_addresses, message, subject):
+    email_server = smtplib.SMTP("localhost")
+    try:
+        email_server.sendmail( source_email_address,
+                               destination_email_addresses,
+                               'Subject: %s\n\n%s' % (subject, message) )
+    except Exception:
+        raise
+    finally:
+        email_server.quit()

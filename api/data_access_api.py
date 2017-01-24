@@ -92,23 +92,6 @@ def get_users_in_study():
     _ = get_and_validate_admin(study_obj)
     return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
 
-def handle_database_query(study_id, query, registry=None):
-    """ Does the database query as a generator. """
-    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    # no registry, just return one by one.
-    if not registry:
-        for chunk in chunks:
-            yield chunk
-    
-    # yes registry, we need to filter and then yield
-    else:
-        for chunk in chunks:
-            if (chunk['chunk_path'] in registry
-                and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
-                continue
-            else:
-                yield chunk
-
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
 def grab_data():
@@ -153,8 +136,7 @@ def grab_data():
 def zip_generator(files_list, construct_registry=False):
     """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that data.
     This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
-    almost immediately.
-    """
+    almost immediately."""
     
     processed_files = set()
     duplicate_files = set()
@@ -182,6 +164,7 @@ def zip_generator(files_list, construct_registry=False):
             # These can be large, and we don't want them sticking around in memory as we wait for the yield
             del file_contents, chunk
             yield zip_output.getvalue() #yield the (compressed) file information
+            
             zip_output.empty()
         
         if construct_registry:
@@ -243,7 +226,8 @@ def determine_file_name(chunk):
 
 def str_to_datetime(time_string):
     """ Translates a time string to a datetime object, raises a 400 if the format is wrong."""
-    try: return datetime.strptime(time_string, API_TIME_FORMAT)
+    try:
+        return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
         if "does not match format" in e.message: return abort(400)
 
@@ -251,6 +235,8 @@ def batch_retrieve_s3(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
+#########################################################################################
+################################### DB Query ############################################
 #########################################################################################
 
 def determine_data_streams_for_db_query(query):
@@ -294,6 +280,23 @@ def determine_time_range_for_db_query(query):
         query['start'] = str_to_datetime(request.values['time_start'])
     if 'time_end' in request.values:
         query['end'] = str_to_datetime(request.values['time_end'])
+
+    def handle_database_query(study_id, query, registry=None):
+        """ Does the database query as a generator. """
+        chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
+        # no registry, just return one by one.
+        if not registry:
+            for chunk in chunks:
+                yield chunk
+    
+        # yes registry, we need to filter and then yield
+        else:
+            for chunk in chunks:
+                if (chunk['chunk_path'] in registry
+                    and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
+                    continue
+                else:
+                    yield chunk
 
 #########################################################################################
 
