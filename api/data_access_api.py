@@ -22,8 +22,8 @@ from boto.utils import JSONDecodeError
 
 data_access_api = Blueprint('data_access_api', __name__)
 
-upload_stream_map = { "survey_answers":("surveyAnswers", "csv" ),
-                      "audio":("voiceRecording", "mp4" ) }
+upload_stream_map = {"survey_answers":("surveyAnswers", "csv"),
+                     "audio":("voiceRecording", "mp4")}
 
 
 #########################################################################################
@@ -39,21 +39,22 @@ def get_and_validate_study_id():
         return abort(400)
     
     if len(request.values["study_id"]) != 24:
-        #Don't proceed with large sized input.
+        # Don't proceed with large sized input.
         print "Received invalid length objectid as study_id in the data access API."
         return abort(400)
     
-    try: #If the ID is of some invalid form, we catch that and return a 400
+    try:  # If the ID is of some invalid form, we catch that and return a 400
         study_id = ObjectId(request.values["study_id"])
     except InvalidId:
         return abort(400)
     
     study_obj = Study(study_id)
-    #Study object will be None if there is no matching study id.
-    if not study_obj: #additional case: if study object exists but is empty
+    # Study object will be None if there is no matching study id.
+    if not study_obj:  # additional case: if study object exists but is empty
         return abort(404)
-        
+    
     return study_obj
+
 
 def get_and_validate_admin(study_obj):
     """ Finds admin based on the secret key provided, returns 403 if admin doesn't exist,
@@ -69,18 +70,19 @@ def get_and_validate_admin(study_obj):
         return abort(403)  # incorrect secret key
     return admin
 
+
 #########################################################################################
 
 @data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
 def get_studies():
-    #Cases: invalid access creds
+    # Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
     admin = Admin(access_key_id=access_key)
-    if not admin: return abort(403) #access key DNE
+    if not admin: return abort(403)  # access key DNE
     if not admin.validate_access_credentials(access_secret):
-        return abort(403) #incorrect secret key
-    return json.dumps({str(study._id):study.name for study in Studies( admins=str(admin._id) ) } )
+        return abort(403)  # incorrect secret key
+    return json.dumps({str(study._id):study.name for study in Studies(admins=str(admin._id))})
 
 
 @data_access_api.route("/get-users/v1", methods=['POST', "GET"])
@@ -90,50 +92,33 @@ def get_users_in_study():
     study_obj = Study(study_id)
     if not study_obj: return abort(404)
     _ = get_and_validate_admin(study_obj)
-    return json.dumps([str(user._id) for user in Users(study_id=study_id) ] )
-
-def handle_database_query(study_id, query, registry=None):
-    """ Does the database query as a generator. """
-    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    # no registry, just return one by one.
-    if not registry:
-        for chunk in chunks:
-            yield chunk
-    
-    # yes registry, we need to filter and then yield
-    else:
-        for chunk in chunks:
-            if (chunk['chunk_path'] in registry
-                and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
-                continue
-            else:
-                yield chunk
+    return json.dumps([str(user._id) for user in Users(study_id=study_id)])
 
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
 def grab_data():
     """ Required: access key, access secret, study_id
     JSON blobs: data streams, users - default to all
-    Strings: date-start, date-end - format as "YYYY-MM-DDThh:mm:ss" 
+    Strings: date-start, date-end - format as "YYYY-MM-DDThh:mm:ss"
     optional: top-up = a file (registry.dat)
-    cases handled: 
+    cases handled:
         missing creds or study, invalid admin or study, admin does not have access
-        admin creds are invalid 
+        admin creds are invalid
         (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() )
     Returns a zip file of all data files found by the query. """
-    
-    #uncomment the following line when doing a reindex
-    #return abort(503)
+
+    # uncomment the following line when doing a reindex
+    # return abort(503)
     study_obj = get_and_validate_study_id()
     _ = get_and_validate_admin(study_obj)
     
     query = {}
-    determine_data_streams_for_db_query(query) #select data streams
-    determine_users_for_db_query(query) #select users
-    determine_time_range_for_db_query(query) #construct time ranges
-    
-    #Do query (this is actually a generator)
+    determine_data_streams_for_db_query(query)  # select data streams
+    determine_users_for_db_query(query)  # select users
+    determine_time_range_for_db_query(query)  # construct time ranges
+
+    # Do query (this is actually a generator)
     if "registry" in request.values:
         get_these_files = handle_database_query(study_obj._id, query,
                                                 registry=parse_registry(request.values["registry"]))
@@ -141,27 +126,34 @@ def grab_data():
         get_these_files = handle_database_query(study_obj._id, query, registry=None)
     
     # If the request is from the web form we need to include mime information
-    #and don't want to create a registry file.
+    # and don't want to create a registry file.
     if 'web_form' in request.values:
         return Response(zip_generator(get_these_files, construct_registry=False),
                         mimetype="zip",
                         headers={'Content-Disposition':'attachment; filename="data.zip"'})
     else:
-        return Response( zip_generator(get_these_files, construct_registry=True) )
+        return Response(zip_generator(get_these_files, construct_registry=True))
 
-#Note: you cannot access the request context inside a generator function
+
+from io import BufferedRandom, RawIOBase, BytesIO
+from libs.security import generate_random_string
+
+
+# Note: you cannot access the request context inside a generator function
 def zip_generator(files_list, construct_registry=False):
     """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that data.
     This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
-    almost immediately.
-    """
+    almost immediately."""
     
     processed_files = set()
     duplicate_files = set()
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     file_registry = {}
+    
     zip_output = StreamingBytesIO()
     zip_input = ZipFile(zip_output, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
+    random_id = generate_random_string()[:32]
+    print "returning data for query %s" % random_id
     try:
         # chunks_and_content is a list of tuples, of the chunk and the content of the file.
         # chunksize (which is a keyword argument of imap, not to be confused with Beiwe Chunks)
@@ -169,19 +161,24 @@ def zip_generator(files_list, construct_registry=False):
         # file to retrieve to the pool asap, so we want a chunk size of 1.
         # (In the documentation there are comments about the timeout, it is irrelevant under this construction.)
         chunks_and_content = pool.imap_unordered(batch_retrieve_s3, files_list, chunksize=1)
-        
+        total_size = 0
         for chunk, file_contents in chunks_and_content:
             if construct_registry:
                 file_registry[chunk['chunk_path']] = chunk["chunk_hash"]
             file_name = determine_file_name(chunk)
             if file_name in processed_files:
-                duplicate_files.add((file_name,chunk['chunk_path']))
+                duplicate_files.add((file_name, chunk['chunk_path']))
                 continue
             processed_files.add(file_name)
             zip_input.writestr(file_name, file_contents)
             # These can be large, and we don't want them sticking around in memory as we wait for the yield
             del file_contents, chunk
-            yield zip_output.getvalue() #yield the (compressed) file information
+            # print len(zip_output)
+            x = zip_output.getvalue()
+            total_size += len(x)
+            print "%s: %sK, %sM" % (random_id, total_size / 1024, total_size / 1024 / 1024)
+            yield x  # yield the (compressed) file information
+            del x
             zip_output.empty()
         
         if construct_registry:
@@ -202,10 +199,12 @@ def zip_generator(files_list, construct_registry=False):
         pool.close()
         pool.terminate()
         if duplicate_files:
-            duplcate_file_message =  "encountered duplicate files: %s" % ",".join(str(name_path) for name_path in duplicate_files)
+            duplcate_file_message = "encountered duplicate files: %s" % ",".join(
+                    str(name_path) for name_path in duplicate_files)
             email_system_administrators(duplcate_file_message,
                                         "encountered duplicate files in a data download")
-            
+
+
 #########################################################################################
 
 def parse_registry(reg_dat):
@@ -214,43 +213,50 @@ def parse_registry(reg_dat):
     a list of file names and hashes.) """
     return json.loads(reg_dat)
 
+
 def determine_file_name(chunk):
     """ Generates the correct file name to provide the file with in the zip file.
         (This also includes the folder location files in the zip.) """
-    extension = chunk["chunk_path"][-3:] #get 3 letter file extension from the source.
+    extension = chunk["chunk_path"][-3:]  # get 3 letter file extension from the source.
     if chunk["data_type"] == SURVEY_ANSWERS:
-        #add the survey_id from the file path.
+        # add the survey_id from the file path.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
-                                str(chunk["time_bin"]).replace(":", "_"), extension)
-
+                                   str(chunk["time_bin"]).replace(":", "_"), extension)
+    
     elif chunk["data_type"] == SURVEY_TIMINGS:
-        #add the survey_id from the database entry.
+        # add the survey_id from the database entry.
         return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
-                                str(chunk["time_bin"]).replace(":", "_"), extension)
-
+                                   str(chunk["time_bin"]).replace(":", "_"), extension)
+    
     elif chunk["data_type"] == VOICE_RECORDING:
-        #Due to a bug that was not noticed until July 2016 audio surveys did not have the survey id
+        # Due to a bug that was not noticed until July 2016 audio surveys did not have the survey id
         # that they were associated with.  Later versions of the app (legacy update 1 and Android 6)
         # correct this.  We can identify those files by checking for the existence of the extra /.
         # When we don't find it, we revert to original behavior.
-        if chunk["chunk_path"].count("/") == 4: #
+        if chunk["chunk_path"].count("/") == 4:  #
             return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                        str(chunk["time_bin"]).replace(":", "_"), extension)
 
-    #all other files have this form:
+    # all other files have this form:
     return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
                             str(chunk["time_bin"]).replace(":", "_"), extension)
 
+
 def str_to_datetime(time_string):
     """ Translates a time string to a datetime object, raises a 400 if the format is wrong."""
-    try: return datetime.strptime(time_string, API_TIME_FORMAT)
+    try:
+        return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
         if "does not match format" in e.message: return abort(400)
+
 
 def batch_retrieve_s3(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
     return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
 
+
+#########################################################################################
+################################### DB Query ############################################
 #########################################################################################
 
 def determine_data_streams_for_db_query(query):
@@ -270,6 +276,7 @@ def determine_data_streams_for_db_query(query):
             if data_stream not in ALL_DATA_STREAMS:
                 return abort(404)
 
+
 def determine_users_for_db_query(query):
     """ Determines, from the html request, the users that should go into the database query.
     Modifies the provided query object accordingly, there is no return value.
@@ -285,6 +292,7 @@ def determine_users_for_db_query(query):
             if not User(user_id):
                 return abort(404)
 
+
 def determine_time_range_for_db_query(query):
     """ Determines, from the html request, the time range that should go into the database query.
     Modifies the provided query object accordingly, there is no return value.
@@ -295,10 +303,30 @@ def determine_time_range_for_db_query(query):
     if 'time_end' in request.values:
         query['end'] = str_to_datetime(request.values['time_end'])
 
+
+def handle_database_query(study_id, query, registry=None):
+    """ Runs the database query as a generator/iterator. """
+    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
+    # no registry, just return one by one.
+    if not registry:
+        return chunks
+    
+    # yes registry, we need to filter and then yield
+    else:
+        def do_filtered_query(study_id, query):
+            for chunk in chunks:
+                if (chunk['chunk_path'] in registry
+                    and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
+                    continue
+                else:
+                    yield chunk
+        
+        return do_filtered_query()
+
 #########################################################################################
 
-#TODO: before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
-#this does not affect data downloading because those file times are generated from the chunk registry
+# before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond precision, remove trailing zeros
+# this does not affect data downloading because those file times are generated from the chunk registry
 # @data_access_api.route("/data-upload-apiv1", methods=['POST'])
 # def data_upload():
 #     print "got something!"
