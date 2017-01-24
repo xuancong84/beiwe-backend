@@ -135,9 +135,7 @@ def grab_data():
         return Response(zip_generator(get_these_files, construct_registry=True))
 
 
-from io import BufferedRandom, RawIOBase, BytesIO
 from libs.security import generate_random_string
-
 
 # Note: you cannot access the request context inside a generator function
 def zip_generator(files_list, construct_registry=False):
@@ -313,7 +311,7 @@ def handle_database_query(study_id, query, registry=None):
     
     # yes registry, we need to filter and then yield
     else:
-        def do_filtered_query(study_id, query):
+        def do_filtered_query():
             for chunk in chunks:
                 if (chunk['chunk_path'] in registry
                     and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
