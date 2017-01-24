@@ -7,7 +7,6 @@ angular.module("surveyBuilder")
         scope.$watch("surveyBuilder.currentQuestionFields.question_id", function() {
           scope.currentQuestionId = scope.surveyBuilder.currentQuestionFields.question_id;
           scope.type = _.keys(scope.surveyBuilder.getValueAtPath(scope.path))[0];
-          console.log("run");
         });
         scope.getQuestionNumber = function(questionId) {
           var index = _.indexOf(scope.surveyBuilder.questionIds, questionId);

@@ -4,8 +4,8 @@
     .module("surveyBuilder")
     .controller("SurveyBuilderCtrl", SurveyBuilderCtrl);
   
-  function SurveyBuilderCtrl(_, ARITHMETIC_OPERATORS, LOGICAL_OPERATORS, QUESTION_FIELDS_LIST, QUESTION_TYPE_LABELS, QUESTION_TYPES,
-                             TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
+  function SurveyBuilderCtrl($compile, $scope, _, ARITHMETIC_OPERATORS, LOGICAL_OPERATORS, QUESTION_FIELDS_LIST,
+                             QUESTION_TYPE_LABELS, QUESTION_TYPES, TEXT_FIELD_TYPES, TEXT_FIELD_TYPE_LABELS, uuid) {
     var vm = this;
     /* Constants for use in template */
     vm.QUESTION_TYPES = QUESTION_TYPES;
@@ -81,7 +81,7 @@
       var questionObject = vm.getCurrentQuestionObject();
       vm.questions.splice(vm.currentQuestionFields.index, 1, questionObject);
     };
-
+    
     vm.addAnswerField = function() {
       /**
        * Adds a field to vm.currentQuestionFields.answers array
@@ -107,8 +107,10 @@
        * Args:
        *   overrides (object): the question object to overwrite with
        */
+      $("edit-question").remove();
       vm.currentQuestionFields = angular.copy(vm.defaultQuestionFields);
       _.extend(vm.currentQuestionFields, overrides);
+      $("body").append($compile('<edit-question survey-builder="surveyBuilder" show="true"></edit-question>')($scope));
     };
 
     vm.populateEditQuestionModal = function(index) {

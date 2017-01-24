@@ -50,10 +50,7 @@
             <!-- Action buttons -->
             <tr>
               <td colspan="2">
-                <button class="btn btn-default btn-sm" data-toggle="modal" data-target="#editQuestionModal"
-                        ng-click="surveyBuilder.populateEditQuestionModal($index)">
-                  Edit
-                </button>
+                <button class="btn btn-default btn-sm" ng-click="surveyBuilder.populateEditQuestionModal($index)">Edit</button>
                 <button class="btn btn-default btn-sm" ng-click="surveyBuilder.deleteQuestion($index)">Delete</button>
                 <button ng-class="{'disabled': $first}" class="btn btn-default btn-sm"
                         ng-click="surveyBuilder.moveQuestionUp($index)">

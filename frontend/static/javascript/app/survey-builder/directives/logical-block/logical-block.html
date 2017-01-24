@@ -9,6 +9,15 @@
                          new-path="{{ getNewPath() }}" survey-builder="surveyBuilder" class="pull-right">
       </add-logic-buttons>
     </div>
+    <!-- Temp for debugging -->
+    <div style="color: #eaeaea; font-size: 12px; line-height: 12px;">
+      <br>
+      var path = '{{ path }}';
+      var type = '{{ type }}';
+      var valueAtPath = '{{ surveyBuilder.getValueAtPath(path) }}';
+      var newPath = '{{ getNewPath() }}';
+    </div>
+    <!-- /Temp for debugging -->
   </div>
 
   <ul class="list-group">
