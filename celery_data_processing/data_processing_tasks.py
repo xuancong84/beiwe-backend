@@ -1,20 +1,22 @@
-from sys import path
+# We need to execute this file directly, so we always run the import hack
+from os.path import abspath as _abspath
+import imp as _imp
+_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+_imp.load_source("__init__", _current_folder_init)
 
-from config.constants import FILE_PROCESS_PAGE_SIZE
-from libs.logging import email_bundled_error
-
-path.insert(1,"..")
+from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING
+from libs.logging import email_bundled_error, email_system_administrators
 
 #worker command: celery -A data_processing_tasks worker --loglevel=info
 
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from cronutils import ErrorHandler
 from celery import Celery
 
 from db.data_access_models import FilesToProcess, FileProcessLock
-from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks
+from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
 
 STARTED_OR_WAITING = [ "STARTED", "whatever the state is that means queued"]
 
@@ -56,16 +58,15 @@ def create_file_processing_tasks():
     FileProcessLock.lock()
     
     now = datetime.now()
-    expiry = datetime(now.year, now.month, now.day, hour=now.hour + 1)
+    expiry = now + timedelta(hours=1)
     #set an expiry time for the next hour boundary
     
     user_ids = set(FilesToProcess(field="user_id"))
     running = []
-
     
     for user_id in user_ids: #queue all users, get list of futures to check
         running.append(
-                queue_user.delay(user_id, max_retries=0, expires=expiry)
+                queue_user.apply_async(args=[user_id], max_retries=0, expires=expiry)
             #should be able to use all options from apply_async: http://docs.celeryproject.org/en/latest/reference/celery.app.task.html#celery.app.task.Task.apply_async
         )
     
@@ -81,9 +82,10 @@ def create_file_processing_tasks():
                 failed.append(future)
             if future.state in STARTED_OR_WAITING:
                 new_running.append(future)
-        
+        print running
         running = new_running
         sleep(5)
+        print running
     
     FileProcessLock.unlock()
 
@@ -116,11 +118,14 @@ def celery_process_file_chunks(user_id):
                 #   no new files.
                 break
             else: continue
-    #
+    
     if error_handler.errors:
         try:
             error_handler.raise_errors()
         except Exception as e:
             #TODO: in the middle of making this email appropriately upon failure.
             email_bundled_error(e, "Data Processing Error")
-        
+
+    email_system_administrators("Everything went fine",
+                                "No Data Processing Error",
+                                source_email="processing.status@studies.beiwe.org" )
