@@ -1,3 +1,9 @@
+if __name__ == "__main__":
+    from os.path import abspath as _abspath
+    import imp as _imp
+    _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+    _imp.load_source("__init__", _current_folder_init)
+
 from libs.s3 import s3_list_files
 from db.data_access_models import FileToProcess, FilesToProcess
 from bson import ObjectId
