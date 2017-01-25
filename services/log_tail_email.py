@@ -1,7 +1,7 @@
 #heart: http://stackoverflow.com/questions/12523044/how-can-i-tail-a-log-file-in-python
 
 import subprocess
-from libs.logging import log_and_email_error
+from libs.logging import log_and_email_500_error
 
 class ModWSGIError(Exception): pass
 class SegfaultError(Exception): pass
@@ -15,13 +15,13 @@ while True:
     line = f.stdout.readline()
 
     if "End of script output before headers" in line:
-        log_and_email_error( ModWSGIError("WSGI timeout error"),
-                             log_message=line )
+        log_and_email_500_error(ModWSGIError("WSGI timeout error"),
+                                log_message=line)
         continue
 
     if "Segmentation fault" in line:
-        log_and_email_error( SegfaultError("Apache encountered a segfault"),
-                             log_message=line )
+        log_and_email_500_error(SegfaultError("Apache encountered a segfault"),
+                                log_message=line)
         continue
 
     # As of Feb 19 2016 there are no complaints about function of the data access api.

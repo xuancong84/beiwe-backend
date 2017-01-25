@@ -7,7 +7,7 @@ from db.study_models import Study
 from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error, log_and_email_error, email_system_administrators
+from libs.logging import log_error, log_and_email_500_error, email_system_administrators
 from libs.http_utils import determine_os_api
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
@@ -113,7 +113,7 @@ def upload(OS_API=""):
             error_message += "contains an invalid extension, it was interpretted as "
             error_message += grab_file_extension(file_name)
         else: error_message += "AN UNKNOWN ERROR OCCURRED."
-        log_and_email_error( Exception("upload error"), error_message )
+        log_and_email_500_error(Exception("upload error"), error_message)
         return abort(400)
 
 
