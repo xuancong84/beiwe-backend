@@ -1,7 +1,13 @@
 import gc
+
 from boto.exception import S3ResponseError
 from bson.objectid import ObjectId
 from collections import defaultdict, deque
+from datetime import datetime
+from multiprocessing.pool import ThreadPool
+from traceback import format_tb, format_exc, extract_tb
+from cronutils.error_handler import ErrorHandler, null_error_handler
+
 from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
@@ -10,14 +16,9 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
                               DATA_PROCESSING_NO_ERROR_STRING)
-from cronutils.error_handler import ErrorHandler, null_error_handler
-from datetime import datetime
-from multiprocessing.pool import ThreadPool
 
-from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry,
-                                   FileProcessLock)
+from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry, FileProcessLock)
 from db.user_models import User
-
 from libs.s3 import s3_retrieve, s3_upload
 
 
@@ -93,6 +94,8 @@ def do_process_user_file_chunks(count, error_handler, skip_count, user_id):
         with error_handler:
             #raise errors that we encountered in the s3 access threaded operations to the error_handler
             if data['exception']:
+                print "\n" + data['ftp']['s3_file_path']
+                print data['traceback']
                 raise data['exception']
 
             if data['chunkable']:
@@ -239,13 +242,13 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                 raise
             ftps_to_retire.update(ftp_deque)
 
-    # pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    # pool = ThreadPool(1)
-    pool = dummy_threadpool()
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    # pool = dummy_threadpool()
     errors = pool.map(batch_upload, upload_these, chunksize=1)
-    for e in errors:
-        if isinstance(e, Exception):
-            raise e
+    for err_ret in errors:
+        if err_ret['exception']:
+            print err_ret['traceback']
+            raise err_ret['exception']
 
     pool.close()
     pool.terminate()
@@ -532,7 +535,8 @@ def batch_retrieve_for_processing(ftp):
     ret = {'ftp':ftp,
            "data_type":data_type,
            'exception':None,
-           "file_contents":"" }
+           "file_contents":"",
+           "traceback": None }
     if data_type in CHUNKABLE_FILES:
         ret['chunkable'] = True
         try: #handle s3 errors
@@ -540,6 +544,7 @@ def batch_retrieve_for_processing(ftp):
             ret['file_contents'] = s3_retrieve(ftp['s3_file_path'], ftp["study_id"], raw_path=True)
             # print "finished getting data"
         except Exception as e:
+            ret['traceback'] = format_exc(e)
             ret['exception'] = e
     else:
         #We don't do anything with unchunkable data.
@@ -549,6 +554,8 @@ def batch_retrieve_for_processing(ftp):
 
 def batch_upload(upload):
     """ Used for mapping an s3_upload function. """
+    ret = {'exception': None,
+           'traceback': None}
     try:
         if len(upload) != 4:
             print upload
@@ -568,16 +575,18 @@ def batch_upload(upload):
                                         file_contents=new_contents, #unlikely to be huge.
                                         survey_id=chunk['survey_id'])
     except Exception as e:
-        return e
+        ret['traceback'] = format_exc(e)
+        ret['exception'] = e
+    return ret
 
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
 class ChunkFailedToExist(Exception): pass
 
 
-class dummy_threadpool():
-    def map(self, *args, **kwargs): #the existance of that self variable is key
-        # we actually want to cut off any threadpool args, which is conveniently easy because map does not use kwargs!
-        return map(*args)
-    def terminate(self): pass
-    def close(self): pass
+# class dummy_threadpool():
+#     def map(self, *args, **kwargs): #the existance of that self variable is key
+#         # we actually want to cut off any threadpool args, which is conveniently easy because map does not use kwargs!
+#         return map(*args)
+#     def terminate(self): pass
+#     def close(self): pass
