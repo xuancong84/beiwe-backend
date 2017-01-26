@@ -8,6 +8,7 @@ from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_ST
 from libs.logging import email_bundled_error, email_system_administrators
 
 #worker command: celery -A data_processing_tasks worker --loglevel=info
+# celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
 
 from time import sleep
 from datetime import datetime, timedelta
