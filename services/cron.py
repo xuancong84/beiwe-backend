@@ -1,8 +1,8 @@
-from sys import path, argv
-path.insert(1, "..")
+from sys import argv
 from cronutils import run_tasks
 from cronfig.db_maintenance import run_database_tasks
-from libs.files_to_process import process_file_chunks
+# from libs.files_to_process import process_file_chunks
+from celery_data_processing.data_processing_tasks import celery_process_file_chunks
 
 FIVE_MINUTES = "five_minutes"
 HOURLY = "hourly"
@@ -11,8 +11,8 @@ DAILY = "daily"
 WEEKLY = "weekly"
 
 TASKS = {
-    FIVE_MINUTES: [],
-    HOURLY: [process_file_chunks],
+    FIVE_MINUTES: [celery_process_file_chunks],
+    HOURLY: [],
     FOUR_HOURLY: [],
     DAILY: [run_database_tasks],
     WEEKLY: []

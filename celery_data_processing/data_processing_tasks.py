@@ -18,7 +18,7 @@ from celery import Celery
 from db.data_access_models import FilesToProcess, FileProcessLock
 from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
 
-STARTED_OR_WAITING = [ "STARTED", "whatever the state is that means queued"]
+STARTED_OR_WAITING = [ "PENDING" ]
 
 celery_app = Celery("data_processing_tasks",
                     broker='pyamqp://guest@localhost//',
@@ -66,7 +66,7 @@ def create_file_processing_tasks():
     
     for user_id in user_ids: #queue all users, get list of futures to check
         running.append(
-                queue_user.apply_async(args=[user_id], max_retries=0, expires=expiry)
+                queue_user.apply_async(args=[user_id], max_retries=0, expires=expiry, task_track_started=True, task_publish_retry=False)
             #should be able to use all options from apply_async: http://docs.celeryproject.org/en/latest/reference/celery.app.task.html#celery.app.task.Task.apply_async
         )
     
@@ -75,19 +75,24 @@ def create_file_processing_tasks():
         failed = []
         successful = []
         for future in running:
+            
             #TODO: make sure these strings match.
             if future.state == "SUCCESS":
                 successful.append(future)
-            if future.state == "FAILURE":
+            elif future.state == "FAILURE":
                 failed.append(future)
-            if future.state in STARTED_OR_WAITING:
+            elif future.state in STARTED_OR_WAITING:
                 new_running.append(future)
-        print running
+            else:
+                print future.state
+                new_running.append(future)
+        print "old:", running
         running = new_running
+        print "new:", running
         sleep(5)
-        print running
     
     FileProcessLock.unlock()
+    raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
 
 
 def celery_process_file_chunks(user_id):
@@ -124,8 +129,9 @@ def celery_process_file_chunks(user_id):
             error_handler.raise_errors()
         except Exception as e:
             #TODO: in the middle of making this email appropriately upon failure.
-            email_bundled_error(e, "Data Processing Error")
+            email_bundled_error(e, "Data Processing Error: %s" % user_id)
+            return
 
-    email_system_administrators("Everything went fine",
-                                "No Data Processing Error",
+    email_system_administrators("Everything went fine %s" % DATA_PROCESSING_NO_ERROR_STRING,
+                                "No Data Processing Error: %s" % user_id,
                                 source_email="processing.status@studies.beiwe.org" )
