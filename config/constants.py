@@ -202,3 +202,10 @@ NUMERIC_COMPARATORS = {"<",
                        ">",
                        "<=",
                        ">=" }
+
+## Password Check Regexes
+SYMBOL_REGEX = "[^a-zA-Z0-9]"
+LOWERCASE_REGEX = "[a-z]"
+UPPERCASE_REGEX = "[A-Z]"
+NUMBER_REGEX = "[0-9]"
+PASSWORD_REQUIREMENT_REGEX_LIST = [SYMBOL_REGEX, LOWERCASE_REGEX, UPPERCASE_REGEX, NUMBER_REGEX]
