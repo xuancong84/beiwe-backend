@@ -1,3 +1,8 @@
+from os.path import abspath as _abspath
+import imp as _imp
+_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+_imp.load_source("__init__", _current_folder_init)
+
 from sys import argv
 from cronutils import run_tasks
 from cronfig.db_maintenance import run_database_tasks
