@@ -1,10 +1,9 @@
 import traceback, smtplib
 from datetime import datetime
-try:
-    from config.security import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
-except ImportError:
-    from config.secure_settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+
 from cronutils.error_handler import BundledError
+from config.secure_settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+
 
 def log_and_email_500_error(e, log_message=None, emails=SYSADMIN_EMAILS):
     """ Prints in the server logs (defaults to Apache if not specified),

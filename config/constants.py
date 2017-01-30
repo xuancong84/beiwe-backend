@@ -1,3 +1,29 @@
+from os import getenv
+
+### Environment settings ###
+# All settings here can be configured by setting an environment variable, or by editing the default value
+
+# To customize any of these values, use the following pattern.
+# DEFAULT_S3_RETRIES = getenv("DEFAULT_S3_RETRIES") or 10
+# Note that this file is _not_ in the gitignore.
+
+## Networking
+#This value is used in libs.s3, does what it says.
+DEFAULT_S3_RETRIES = getenv("DEFAULT_S3_RETRIES") or 1
+
+## File processing directives
+#NOTE: these numbers were determined through trial and error on a C4 Large AWS instance.
+#Used in data download and data processing, base this on CPU core count.
+CONCURRENT_NETWORK_OPS = getenv("CONCURRENT_NETWORK_OPS") or 10
+#Used in file processing, number of files to be pulled in and processed simultaneously.
+# Higher values reduce s3 usage, reduce processing time, but increase ram requirements.
+FILE_PROCESS_PAGE_SIZE = getenv("FILE_PROCESS_PAGE_SIZE") or 250
+
+#This string will be printed into non-error hourly reports to improve error filtering.
+DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "2HEnBwlawY"
+
+
+
 """ This file contains values used throughout the codebase.
     Don't change values if you don't know what they do. """
 
@@ -14,8 +40,6 @@ FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLo
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
 
-#This string will be printed into non-error hourly reports to improve error filtering.
-DATA_PROCESSING_NO_ERROR_STRING = "2HEnBwlawY"
 
 ## HTML lists ##
 CHECKBOX_TOGGLES = ["accelerometer",
@@ -52,13 +76,7 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "devicemotion_off_duration_seconds",
                 "devicemotion_on_duration_seconds" ]
 
-## Networking
-DEFAULT_S3_RETRIES = 1 #This value is used in libs.s3, does what it says.
-CONCURRENT_NETWORK_OPS = 10 #Used in data download and data processing, base this on CPU core count.
-FILE_PROCESS_PAGE_SIZE = 250 #Used in file processing, number of files to be pulled in and processed simultaneously.
-                             # Higher values reduce s3 usage, reduce processing time, but increase ram requirements.
-#NOTE: these numbers were determined through trial and error on a C4 Large AWS instance.
-
+#The format that dates should be in throughout the
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
@@ -185,7 +203,7 @@ NUMERIC_COMPARATORS = {"<",
                        "<=",
                        ">=" }
 
-## Regexes
+## Password Check Regexes
 SYMBOL_REGEX = "[^a-zA-Z0-9]"
 LOWERCASE_REGEX = "[a-z]"
 UPPERCASE_REGEX = "[A-Z]"

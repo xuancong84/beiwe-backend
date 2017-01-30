@@ -2,9 +2,10 @@ import base64, hashlib, re
 
 from flask import flash
 
+from config.secure_settings import (MONGO_PASSWORD, MONGO_USERNAME,
+                                    FLASK_SECRET_KEY, ITERATIONS)
 from config.constants import PASSWORD_REQUIREMENT_REGEX_LIST
-from config.security import MONGO_PASSWORD, MONGO_USERNAME, FLASK_SECRET_KEY,\
-                            ITERATIONS
+
 from os import urandom
 from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
