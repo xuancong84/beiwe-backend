@@ -7,4 +7,3 @@ flask
 cronutils>=0.1.9
 python-dateutil
 raven[flask]
-raven[celery]
