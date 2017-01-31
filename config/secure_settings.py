@@ -46,3 +46,7 @@ ASYMMETRIC_KEY_LENGTH = getenv("ASYMMETRIC_KEY_LENGTH") or 2048
 # The number of iterations used in password hashing. You CANNOT change this
 # value once people have created passwords, because then the hashes won't match!
 ITERATIONS = getenv("ITERATIONS") or 1000
+
+#Sentry DSN
+# from raven.contrib.flask import Sentry
+SENTRY_DSN = getenv("SENTRY_DSN") or "USE_EMAIL_FALLBACK"

@@ -5,7 +5,10 @@ provided_settings = vars(secure_settings)
 for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
         raise ImportError(attr_name + " was not provided with a value.")
-    
+
+if provided_settings['SENTRY_DSN'] == "USE_EMAIL_FALLBACK":
+    print "\nBeiwe will be running email error reporting as a fallback.\n"
+
 MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'AWS_ACCESS_KEY_ID',
                   'AWS_SECRET_ACCESS_KEY',
