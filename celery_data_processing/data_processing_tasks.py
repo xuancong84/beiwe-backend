@@ -7,15 +7,10 @@ _imp.load_source("__init__", _current_folder_init)
 #worker command: celery -A data_processing_tasks worker --loglevel=info
 # celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
 
-from time import sleep
-from datetime import datetime, timedelta
+################################################################################
+############################### Celery Config ##################################
+################################################################################
 
-from db.data_access_models import FilesToProcess, FileProcessLock
-from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
-from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING
-from libs.logging import email_bundled_error, email_system_administrators
-
-from cronutils import ErrorHandler
 from celery import Celery, states
 from celery.states import SUCCESS
 
@@ -42,6 +37,47 @@ celery_app = Celery("data_processing_tasks",
     #todo: research worker_direct
     #worker_direct
 # )
+
+################################################################################
+################################### Sentry #####################################
+################################################################################
+
+import logging
+from raven import Client
+from raven.contrib.celery import register_signal, register_logger_signal
+from config.secure_settings import SENTRY_DSN
+
+client = Client(SENTRY_DSN)
+
+# register a custom filter to filter out duplicate logs
+register_logger_signal(client)
+
+# The register_logger_signal function can also take an optional argument
+# `loglevel` which is the level used for the handler created.
+# Defaults to `logging.ERROR`
+register_logger_signal(client, loglevel=logging.INFO)
+
+# hook into the Celery error handler
+register_signal(client)
+
+# The register_signal function can also take an optional argument
+# `ignore_expected` which causes exception classes specified in Task.throws
+# to be ignored
+register_signal(client, ignore_expected=True)
+
+################################################################################
+############################# Data Processing ##################################
+################################################################################
+from time import sleep
+from datetime import datetime, timedelta
+
+from cronutils import ErrorHandler
+from libs.logging import email_bundled_error, email_system_administrators
+
+from db.data_access_models import FilesToProcess, FileProcessLock
+from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
+from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING
+
 
 @celery_app.task
 def queue_user(name):
