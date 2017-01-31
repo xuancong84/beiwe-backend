@@ -25,6 +25,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'S3_BACKUPS_AWS_SECRET_ACCESS_KEY',
                   'S3_BACKUPS_BUCKET',
                   'S3_BUCKET',
+                  'SENTRY_DSN',
                   'SYSADMIN_EMAILS' }
 
 #Check that all the mandatory variables exist...
