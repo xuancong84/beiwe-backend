@@ -3,6 +3,8 @@ branch-defaults:
     environment: beiweCluster-staging
   elastic:
     environment: beiweCluster-staging
+  sentry:
+    environment: beiweCluster-staging
 global:
   application_name: Beiwe Cluster
   default_ec2_keyname: actually_beiwe_key_pair
