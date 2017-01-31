@@ -48,5 +48,4 @@ ASYMMETRIC_KEY_LENGTH = getenv("ASYMMETRIC_KEY_LENGTH") or 2048
 ITERATIONS = getenv("ITERATIONS") or 1000
 
 #Sentry DSN
-# from raven.contrib.flask import Sentry
 SENTRY_DSN = getenv("SENTRY_DSN") or "USE_EMAIL_FALLBACK"
