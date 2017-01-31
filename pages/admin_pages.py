@@ -14,7 +14,7 @@ admin_pages = Blueprint('admin_pages', __name__)
 @admin_pages.route('/do_error', methods=['GET'])
 def do_error():
     from datetime import datetime
-    raise ("this is a test error %s" % str(datetime.now()))
+    raise Exception("this is a test error %s" % str(datetime.now()))
 
 
 @admin_pages.route('/choose_study', methods=['GET'])
