@@ -6,9 +6,6 @@ for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
         raise ImportError(attr_name + " was not provided with a value.")
 
-if provided_settings['SENTRY_DSN'] != "USE_EMAIL_FALLBACK":
-    print "\nBeiwe will run with Sentry as the primary error reporting mechanism, and email as a fallback.\n"
-
 MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'AWS_ACCESS_KEY_ID',
                   'AWS_SECRET_ACCESS_KEY',
@@ -41,6 +38,7 @@ secure_settings.ITERATIONS = int(secure_settings.ITERATIONS)
 constants.DEFAULT_S3_RETRIES = int(constants.DEFAULT_S3_RETRIES)
 constants.CONCURRENT_NETWORK_OPS = int(constants.CONCURRENT_NETWORK_OPS)
 constants.FILE_PROCESS_PAGE_SIZE = int(constants.FILE_PROCESS_PAGE_SIZE)
+constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 
 # email addresses are parsed from a comma separated list
 # whitespace before and after addresses are stripped

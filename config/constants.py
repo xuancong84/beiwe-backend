@@ -22,7 +22,9 @@ FILE_PROCESS_PAGE_SIZE = getenv("FILE_PROCESS_PAGE_SIZE") or 250
 #This string will be printed into non-error hourly reports to improve error filtering.
 DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "2HEnBwlawY"
 
-
+#The number of minutes after which a queued celery task will be invalidated.
+# (this is not a timeout, it only invalidates tasks that have not yet run.)
+CELERY_EXPIRY_MINUTES = getenv("CELERY_EXPIRY_MINUTES") or 59
 
 """ This file contains values used throughout the codebase.
     Don't change values if you don't know what they do. """
@@ -39,6 +41,7 @@ MEDIA_EXTENSIONS = [".mp4", ".wav"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
 SURVEY_TYPES = ['audio_survey', 'tracking_survey']
+
 
 
 ## HTML lists ##
