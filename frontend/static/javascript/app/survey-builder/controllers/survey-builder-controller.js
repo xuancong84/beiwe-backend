@@ -120,6 +120,9 @@
       vm.resetQuestionModal(vm.questions[index]);
       vm.currentQuestionFields.is_new_question = false;
       vm.currentQuestionFields.index = index;
+      /* If the min and max values are strings, turn them into ints */
+      vm.currentQuestionFields.min = parseInt(vm.currentQuestionFields.min);
+      vm.currentQuestionFields.max = parseInt(vm.currentQuestionFields.max);
     };
 
     vm.getCurrentQuestionObject = function() {
