@@ -40,6 +40,7 @@ def update_survey(survey_id=None):
     if not survey:
         return abort(404)
     content = json.loads(request.values['content'])
+    content = make_slider_min_max_values_strings(content)
     if survey.survey_type == "tracking_survey":  # TODO: ELI TURN TRACKINGSURVEYINTOAconsta..
         errors = do_validate_survey(content)
         if len(errors) > 1:
@@ -48,3 +49,15 @@ def update_survey(survey_id=None):
     settings = json.loads(request.values['settings'])
     survey.update({'content': content, 'timings': timings, 'settings': settings})
     return make_response("", 201)
+
+
+def make_slider_min_max_values_strings(json_content):
+    """ Turns min/max int values into strings, because the iOS app expects
+    strings. This is for backwards compatibility; when all the iOS apps
+    involved in studies can handle ints, we can remove this function. """
+    for question in json_content:
+        if 'max' in question:
+            question['max'] = str(question['max'])
+        if 'min' in question:
+            question['min'] = str(question['min'])
+    return json_content
