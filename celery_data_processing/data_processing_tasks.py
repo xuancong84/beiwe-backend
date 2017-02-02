@@ -114,8 +114,10 @@ def celery_process_file_chunks(user_id):
     # not really using the log for anything anymore, but it is there if we need it in future
     log = logging_list()
     
-    error_sentry = ErrorSentry(sentry_dsn=SENTRY_DSN)
-    error_sentry.sentry_client.user_context( { "user_id": user_id } )
+    error_sentry = ErrorSentry(sentry_dsn=SENTRY_DSN,
+                               sentry_client_kwargs = {"tags":{ "user_id": user_id } }
+    )
+    
     number_bad_files = 0
     
     log.append("processing files for %s" % user_id)
