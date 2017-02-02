@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="well">
-      If you encounter a problem with the app or a message stating that Beiwe has stopped working, please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using (Beta or Production, Study Debugger or Regular), the date you downloaded the app on, the version of Android OS on the device, and the full model name of the device you were using in addition to a description of your activity before the problem or crash occurred.
+      If you encounter a problem with the Beiwe App please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using, whether it was the Study Debugger or regular App release, the version of Android OS on the device, the user ID and study you were enrolled in, the full model name of the device you were using, and a description of your activity before experiencing the issue.
     </div>
     <h2> Data API Status </h2>
     <div class="well">
@@ -54,7 +54,26 @@
 
     <h3> Changelog: </h3>
     <div class="well">
-      <b> 10/27/16 - Significant Update </b>
+    <h4> Beiwe 2.1 </h4>
+      <p>
+        <b> 1/27/16 - Significant Update </b>
+      </p>
+      <p>
+        <b>Feature:</b> Beiwe has been updated so that researchers can attach conditional display logic to survey questions.<br>
+        <b>Feature:</b> Survey questions now support Markdown formatting syntax.</p>
+      <p>
+        <b>UI Change:</b> In order to support conditional question display logic, survey questions are now viewed one-at-a-time.
+      <p>
+        <b>Fixed:</b> A potential hang condition if a user exited an audio survey before data encryption was complete has been resolved.<br>
+        <b>Fixed:</b> An issue where, under certain study data stream configurations, the app could hang if a user pressed either of the Beiwe App Menu's Call buttons has been resolved.<br>
+        <b>Fixed:</b> A bug where some crash reports may not have been successfully reported has been resolved.<br>
+        <b>Fixed:</b> A crash that could occur when a user opened a survey has been resolved.
+      </p>
+      <p> The version identifier in the Device Identifiers data stream for Beiwe version 2.1 is <b>12</b>. </p>
+    </div>
+    <div class="well">
+      <h4> Beiwe 2.0 </h4>
+      <b> 10/27/16 - Major Update </b>
       <p> This update to Beiwe includes compatibility with Android 6 and several new features. </p>
       <p>
         <b>Feature: </b> Android 6 App Standby has been bypassed to improve functionality on Android 6.<br>
@@ -62,7 +81,7 @@
         <b>Feature: </b> Enhanced (uncompressed) audio surveys have been introduced, as well as additional controls over regular audio surveys. <br>
         <b>Feature: </b> There is a new device setting that allows Beiwe to upload data over the cellular connection.<br>
       </p>
-      <p> <b>Fix: </b> Audio survey files now provide a survey ID when uploaded. <br> </p>
+      <p> <b>Fixed: </b> Audio survey files now provide a survey ID when uploaded. <br> </p>
       <p> <b> Data Stream Changes </b> </p>
       Due to limitations imposed in Bluetooth on Android 6+, the Bluetooth data stream may not be reliable. Please review the following to determine if this affects you:
       <ul class="list">
@@ -82,9 +101,10 @@
     <p> <b> Known Issue: </b> Due to a bug in Android the Beiwe app may not uninstall properly. To bypass this we recommend uninstalling and then rebooting the device if you plan to reinstall Beiwe, or you can manually fix this issue by assigning all necessary permissions in the Beiwe app's settings page in system settings.  This issue presents as an immediate crash of the Beiwe app after installation but before registering under a study. </p>
     <p>The UI for audio surveys has been streamlined.</p>
 
-    This is version 2.0 of the Beiwe app, the version identifier in the Device Identifiers data stream is <b>10</b>.
+    The version identifier in the Device Identifiers data stream for Beiwe version 2.0 is <b>10</b>.
   </div>
   <div class="well">
+   <h4> Older Beiwe releases</h4>
     <p style='margin-bottom:0px'>3/24/16 - (Beiwe Android App version 4) Added further device and software information fields to the identifiers file gathered at user registration.
       <div style='margin-left:18px'>
         <b>Feature</b>: The Beiwe app now has a built-in crash reporter. When the app encounters a bug that would cause it to crash it, instead creates a crash report. Beiwe then restarts itself so that background data gathering and functionality are not significantly interrupted. This crash report will be uploaded to the Beiwe server during the next upload operation. <br>
