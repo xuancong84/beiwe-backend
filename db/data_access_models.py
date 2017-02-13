@@ -64,12 +64,12 @@ class FileToProcess(DatabaseObject):
 
 class FileProcessLock(DatabaseObject):
     PATH = "beiwe.file_process_running"
-    DEFAULTS = {"mark":""}
+    DEFAULTS = {"mark":None}
     @classmethod
     def lock(cls):
         if FileProcessLockCollection.count() > 0:
             raise FileProcessingLockedError
-        FileProcessLock.create({"mark":"marked"}, random_id=True)
+        FileProcessLock.create({"mark":datetime.utcnow()}, random_id=True)
     @classmethod
     def unlock(cls):
         for f in FileProcessLockCollection(mark="marked"):
@@ -79,6 +79,10 @@ class FileProcessLock(DatabaseObject):
         if FileProcessLockCollection.count() > 0:
             return True
         return False
+    @classmethod
+    def get_time_since_locked(cls):
+        return datetime.utcnow() - FileProcessLockCollection(mark="marked")[0]["mark"]
+        
 
 ################################################################################
 
