@@ -53,6 +53,7 @@ class FileToProcess(DatabaseObject):
     DEFAULTS = { "s3_file_path":REQUIRED_STRING,
                  "study_id": REQUIRED,
                  "user_id": REQUIRED_STRING }
+    
     @classmethod
     def append_file_for_processing(cls, file_path, study_id, user_id):
         if file_path[:24] == str(study_id): 
