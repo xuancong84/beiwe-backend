@@ -1,6 +1,9 @@
 # We need to execute this file directly, so we always run the import hack
 from os.path import abspath as _abspath
 import imp as _imp
+
+from libs.logging import email_system_administrators
+
 _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
 
@@ -31,10 +34,9 @@ celery_app = Celery("data_processing_tasks",
 from time import sleep
 from datetime import datetime, timedelta
 
-# from cronutils import ErrorSentry
-from error_handler import ErrorSentry
+from cronutils import ErrorSentry
 
-from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING, CELERY_EXPIRY_MINUTES
+from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
 from db.data_access_models import FilesToProcess, FileProcessLock
 from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
@@ -47,11 +49,11 @@ def queue_user(name):
 queue_user.max_retries = 0
 
 def create_file_processing_tasks():
-    #literally wrapping the entire thing in an ErrorSentry.
-    with ErrorSentry(sentry_dsn=SENTRY_DSN):
+    #literally wrapping the entire thing in an ErrorSentry...
+    with ErrorSentry(SENTRY_DSN) as error_sentry:
         
         if FileProcessLock.islocked():
-            raise ProcessingOverlapError("Data processing overlapped with a previous data indexing run.")
+            handle_locked()
         FileProcessLock.lock()
         
         now = datetime.now()
@@ -72,7 +74,6 @@ def create_file_processing_tasks():
                 #should be able to use all options from apply_async: http://docs.celeryproject.org/en/latest/reference/celery.app.task.html#celery.app.task.Task.apply_async
             )
         print "tasks:", running
-        
         
         while running:
             new_running = []
@@ -96,6 +97,23 @@ def create_file_processing_tasks():
         FileProcessLock.unlock()
 
 
+def handle_locked():
+    """ Creates a useful error report with information about the run time. """
+    timedelta_since_last_run = FileProcessLock.get_time_since_locked()
+    if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS:
+        error_msg =\
+            "Data processing has overlapped with a prior data index run that started more than %s minutes ago.\n"\
+            "That prior run has been going for %s hour(s), %s minute(s)"
+        error_msg = error_msg % (CELERY_ERROR_REPORT_TIMEOUT_SECONDS / 60,
+                                 str(int(timedelta_since_last_run.total_seconds() / 60 / 60)),
+                                 str(int(timedelta_since_last_run.total_seconds() / 60 % 60)))
+        
+        if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS * 4:
+            email_system_administrators(error_msg, "DATA PROCESSING OVERLOADED, CHECK SERVER")
+        raise ProcessingOverlapError(error_msg)
+
+
+# we are not really using the this class for much anymore, but it is there if we need it in future
 class logging_list(list):
     def append(self, p_object):
         super(logging_list, self).append(p_object)
@@ -110,16 +128,11 @@ def celery_process_file_chunks(user_id):
     """ This is the function that is called from cron.  It runs through all new
     files that have been uploaded and 'chunks' them. Handles logic for skipping
     bad files, raising errors appropriately. """
-
-    # not really using the log for anything anymore, but it is there if we need it in future
     log = logging_list()
-    
+    number_bad_files = 0
     error_sentry = ErrorSentry(sentry_dsn=SENTRY_DSN,
                                sentry_client_kwargs = {"tags":{ "user_id": user_id } }
     )
-    
-    number_bad_files = 0
-    
     log.append("processing files for %s" % user_id)
     
     while True:
