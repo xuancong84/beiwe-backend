@@ -15,6 +15,7 @@ HOURLY = "hourly"
 FOUR_HOURLY = "four_hourly"
 DAILY = "daily"
 WEEKLY = "weekly"
+VALID_ARGS = [FIVE_MINUTES, HOURLY, FOUR_HOURLY, DAILY, WEEKLY]
 
 TASKS = {
     FIVE_MINUTES: [create_file_processing_tasks],
@@ -35,10 +36,12 @@ TIME_LIMITS = {
     WEEKLY: 60*60,                 # 1 hour - if database cleanup takes... time, we have problems.
 }
 
-VALID_ARGS = [FIVE_MINUTES, HOURLY, FOUR_HOURLY, DAILY, WEEKLY]
-
 KILL_TIMES = {
-    HOURLY: 60*60*24*365, # 1 year, we never want to kill the file processing task
+    FIVE_MINUTES: 60*60*24*365,    # 1 year (never kill)
+    HOURLY: 60*60*24*365,          # 1 year (never kill)
+    FOUR_HOURLY: 60*60*24*365,     # 1 year (never kill)
+    DAILY: 60*60*24*365,           # 1 year (never kill)
+    WEEKLY: 60*60,                 # 1 hour - if database cleanup takes... time, we have problems.
 }
 
 if __name__ == "__main__":
