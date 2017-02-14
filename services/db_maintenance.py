@@ -31,7 +31,6 @@ def run_backup():
            s3_bucket=S3_BACKUPS_BUCKET, s3_access_key_id=BACKUP_ID,
            s3_secret_key=BACKUP_KEY, purge_local=1)
 
-
 def optimize_db():
     """ Performs operations that improve database performance, and reduce drive usage. """
     db = mongolia.mongo_connection.CONNECTION.get_connection()['beiwe']
@@ -43,13 +42,14 @@ def optimize_db():
         db.command("compact", name)
         delta = datetime.utcnow() - start
         print delta.total_seconds()
-
-    start = datetime.utcnow()
-    print str(datetime.now()), "running repair database..."
-    db.command("repairDatabase")
-    end = datetime.utcnow()
-    delta = end - start
-    print str(end), "finished database repair in %s." % delta.total_seconds()
+    
+    #This command can take time, causes a write-block.
+    # start = datetime.utcnow()
+    # print str(datetime.now()), "running repair database..."
+    # db.command("repairDatabase")
+    # end = datetime.utcnow()
+    # delta = end - start
+    # print str(end), "finished database repair in %s." % delta.total_seconds()
 
 def get_mongo_settings():
     db = mongolia.mongo_connection.CONNECTION.get_connection()['admin']

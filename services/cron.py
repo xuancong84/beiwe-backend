@@ -1,11 +1,12 @@
-from os.path import abspath as _abspath
 import imp as _imp
+from os.path import abspath as _abspath
+
 _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
 
 from sys import argv
 from cronutils import run_tasks
-from cronfig.db_maintenance import run_database_tasks
+from services.db_maintenance import run_database_tasks
 # from libs.files_to_process import process_file_chunks
 from celery_data_processing.data_processing_tasks import create_file_processing_tasks
 
@@ -27,11 +28,11 @@ TASKS = {
 # we disallow it and get the error report notification. So, we set the
 # time limit very high to avoid the extra notification.
 TIME_LIMITS = {
-    FIVE_MINUTES: 180,    # 3 minutes
-    HOURLY: 60*60*24*365, # 1 year
-    FOUR_HOURLY: 60*60*2, # 2 hours
-    DAILY: 60*60*12,      # 12 hours
-    WEEKLY: 60*60*24,     # 1 day
+    FIVE_MINUTES: 60*60*24*365,    # 1 year (never kill)
+    HOURLY: 60*60*24*365,          # 1 year (never kill)
+    FOUR_HOURLY: 60*60*24*365,     # 1 year (never kill)
+    DAILY: 60*60*24*365,           # 1 year (never kill)
+    WEEKLY: 60*60,                 # 1 hour - if database cleanup takes... time, we have problems.
 }
 
 VALID_ARGS = [FIVE_MINUTES, HOURLY, FOUR_HOURLY, DAILY, WEEKLY]
