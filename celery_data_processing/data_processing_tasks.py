@@ -35,6 +35,7 @@ from time import sleep
 from datetime import datetime, timedelta
 
 from cronutils import ErrorSentry
+from raven.transport import HTTPTransport
 
 from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
@@ -50,16 +51,19 @@ queue_user.max_retries = 0
 
 def create_file_processing_tasks():
     #literally wrapping the entire thing in an ErrorSentry...
-    with ErrorSentry(SENTRY_DSN) as error_sentry:
-        
+    with ErrorSentry(SENTRY_DSN,
+                     sentry_client_kwargs={'transport':HTTPTransport}) as error_sentry:
+        print error_sentry.sentry_client.is_enabled()
         if FileProcessLock.islocked():
-            handle_locked()
-        FileProcessLock.lock()
-        
+            report_file_processing_locked_and_exit()
+            print "unreachable code abcdefg"
+            exit(0) #This is really a safety check, this code should not actually be reachable.
+        else:
+            FileProcessLock.lock()
+            
+        print "starting."
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        #set an expiry time for the next hour boundary
-        
         user_ids = set(FilesToProcess(field="user_id"))
         running = []
         
@@ -70,9 +74,7 @@ def create_file_processing_tasks():
                                            expires=expiry,
                                            task_track_started=True,
                                            task_publish_retry=False,
-                                           retry=False)
-                #should be able to use all options from apply_async: http://docs.celeryproject.org/en/latest/reference/celery.app.task.html#celery.app.task.Task.apply_async
-            )
+                                           retry=False) )
         print "tasks:", running
         
         while running:
@@ -80,6 +82,7 @@ def create_file_processing_tasks():
             failed = []
             successful = []
             for future in running:
+                
                 #TODO: make sure these strings match.
                 if future.state == SUCCESS:
                     successful.append(future)
@@ -92,14 +95,17 @@ def create_file_processing_tasks():
                 
             running = new_running
             print "tasks:", running
-            sleep(5)
-    
-        FileProcessLock.unlock()
+            if running:
+                sleep(5)
+            
+        print "Finished, unlocking."
+        FileProcessLock.unlock() #This must be ___inside___ the with statement
 
 
-def handle_locked():
+def report_file_processing_locked_and_exit():
     """ Creates a useful error report with information about the run time. """
     timedelta_since_last_run = FileProcessLock.get_time_since_locked()
+    print "timedelta %s" % timedelta_since_last_run.total_seconds()
     if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS:
         error_msg =\
             "Data processing has overlapped with a prior data index run that started more than %s minutes ago.\n"\
@@ -114,24 +120,25 @@ def handle_locked():
 
 
 # we are not really using the this class for much anymore, but it is there if we need it in future
-class logging_list(list):
+class LogList(list):
     def append(self, p_object):
-        super(logging_list, self).append(p_object)
+        super(LogList, self).append(p_object)
         print p_object
         
     def extend(self, iterable):
         print (str(i) for i in iterable)
-        super(logging_list, self).extend(iterable)
+        super(LogList, self).extend(iterable)
         
         
 def celery_process_file_chunks(user_id):
     """ This is the function that is called from cron.  It runs through all new
     files that have been uploaded and 'chunks' them. Handles logic for skipping
     bad files, raising errors appropriately. """
-    log = logging_list()
+    log = LogList()
     number_bad_files = 0
-    error_sentry = ErrorSentry(sentry_dsn=SENTRY_DSN,
-                               sentry_client_kwargs = {"tags":{ "user_id": user_id } }
+    error_sentry = ErrorSentry(SENTRY_DSN,
+                               sentry_client_kwargs = {"tags":{ "user_id": user_id },
+                                                       'transport':HTTPTransport }
     )
     log.append("processing files for %s" % user_id)
     
