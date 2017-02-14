@@ -72,7 +72,7 @@ class FileProcessLock(DatabaseObject):
         FileProcessLock.create({"mark":datetime.utcnow()}, random_id=True)
     @classmethod
     def unlock(cls):
-        for f in FileProcessLockCollection(mark="marked"):
+        for f in FileProcessLockCollection():
             f.remove()
     @classmethod
     def islocked(cls):
@@ -81,7 +81,7 @@ class FileProcessLock(DatabaseObject):
         return False
     @classmethod
     def get_time_since_locked(cls):
-        return datetime.utcnow() - FileProcessLockCollection(mark="marked")[0]["mark"]
+        return datetime.utcnow() - FileProcessLockCollection()[0]["mark"]
         
 
 ################################################################################
