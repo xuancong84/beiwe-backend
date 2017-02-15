@@ -1,9 +1,7 @@
 branch-defaults:
   master:
     environment: beiweCluster-staging
-  elastic:
-    environment: beiweCluster-staging
-  sentry:
+  development:
     environment: beiweCluster-staging
 global:
   application_name: Beiwe Cluster
