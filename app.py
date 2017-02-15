@@ -5,7 +5,7 @@ from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages
     data_access_web_form
 from api import mobile_api, survey_api, admin_api, data_access_api
 from libs.admin_authentication import is_logged_in
-from libs.logging import log_error, log_and_email_500_error
+# from libs.logging import log_error, log_and_email_500_error
 from libs.security import set_secret_key
 from config.secure_settings import SENTRY_DSN
 
@@ -30,6 +30,7 @@ app.register_blueprint(survey_api.survey_api)
 app.register_blueprint(data_access_api.data_access_api)
 app.register_blueprint(data_access_web_form.data_access_web_form)
 
+
 if SENTRY_DSN != "USE_EMAIL_FALLBACK":
     from raven.contrib.flask import Sentry
     print "Beiwe is now running with Sentry as the error handler"
@@ -42,11 +43,11 @@ def strip_dot_html(page):
     return redirect("/%s" % page)
 
 
-# Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
-@app.errorhandler(500)
-def e500_handler(e):
-    log_and_email_500_error(e)
-    return abort(500)
+# # Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
+# @app.errorhandler(500)
+# def e500_handler(e):
+#     log_and_email_500_error(e)
+#     return abort(500)
 
 
 #Extra Production settings
