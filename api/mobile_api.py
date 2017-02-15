@@ -4,6 +4,7 @@ from flask import Blueprint, request, abort, render_template, json
 from config.constants import ALLOWED_EXTENSIONS, ANDROID_API, IOS_API
 from db.user_models import User
 from db.study_models import Study
+from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
@@ -75,9 +76,7 @@ def upload(OS_API=""):
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
     if "crashlog" in file_name.lower():
-        email_system_administrators(uploaded_file,
-                                    "Beiwe Android Crash Log: %s" % user._id,
-                                    source_email="android_errors@studies.beiwe.org")
+        send_android_error_report( user._id, uploaded_file)
         return render_template('blank.html'), 200
 
     client_private_key = get_client_private_key(patient_id, user['study_id'])
