@@ -23,6 +23,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'S3_BACKUPS_BUCKET',
                   'S3_BUCKET',
                   'SENTRY_DSN',
+                  'SENTRY_JAVASCRIPT_DSN',
                   'SYSADMIN_EMAILS' }
 
 #Check that all the mandatory variables exist...

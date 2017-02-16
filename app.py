@@ -7,7 +7,7 @@ from api import mobile_api, survey_api, admin_api, data_access_api
 from libs.admin_authentication import is_logged_in
 # from libs.logging import log_error, log_and_email_500_error
 from libs.security import set_secret_key
-from config.secure_settings import SENTRY_DSN
+from config.secure_settings import SENTRY_DSN, SENTRY_JAVASCRIPT_DSN
 
 
 def subdomain(directory):
@@ -48,6 +48,10 @@ def strip_dot_html(page):
 # def e500_handler(e):
 #     log_and_email_500_error(e)
 #     return abort(500)
+
+@app.context_processor
+def inject_dict_for_all_templates():
+    return {"SENTRY_JAVASCRIPT_DSN":SENTRY_JAVASCRIPT_DSN}
 
 
 #Extra Production settings

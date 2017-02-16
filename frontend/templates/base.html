@@ -20,6 +20,12 @@
         {# <link rel="stylesheet" href="/static/css/libraries/bootstrap.css" media="all" type="text/css"> #}
         <link rel="stylesheet" href="/static/css/libraries/bootstrap-timepicker.css" type="text/css">
 
+        <!-- Sentry Configuration -->
+        <script src="https://cdn.ravenjs.com/3.10.0/angular/raven.min.js" crossorigin="anonymous"></script>
+        <script>Raven.config('{{SENTRY_JAVASCRIPT_DSN}}', {
+            debug:true
+            }).install();</script>
+
         {# TODO: get a favicon #}
         <link rel="icon" type="image/ico" href="/frontend/static/img/favicon_64.ico">
 
