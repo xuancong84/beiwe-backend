@@ -117,23 +117,28 @@ def download_page():
 
 @admin_api.route("/download")
 def download_current():
-    return send_file("Beiwe.apk", as_attachment=True)
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe.apk")
+    # return send_file("Beiwe.apk", as_attachment=True)
 
 @admin_api.route("/download_debug")
 @authenticate_admin_login
 def download_current_debug():
-    return send_file("Beiwe_debug.apk", as_attachment=True)
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-debug.apk")
+    # return send_file("Beiwe_debug.apk", as_attachment=True)
 
 @admin_api.route("/download_beta")
 @authenticate_admin_login
 def download_beta():
-    return send_file("Beiwe_beta.apk", as_attachment=True)
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe.apk")
+    # return send_file("Beiwe_beta.apk", as_attachment=True)
 
 @admin_api.route("/download_beta_debug")
 @authenticate_admin_login
 def download_beta_debug():
-    return send_file("Beiwe_beta_debug.apk", as_attachment=True)
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/beta/Beiwe-debug.apk")
+    # return send_file("Beiwe_beta_debug.apk", as_attachment=True)
 
 @admin_api.route("/privacy_policy")
 def download_privacy_policy():
-    return send_file("Beiwe Data Privacy and Security.pdf", as_attachment=True)
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/Beiwe+Data+Privacy+and+Security.pdf")
+    # return send_file("Beiwe Data Privacy and Security.pdf", as_attachment=True)
