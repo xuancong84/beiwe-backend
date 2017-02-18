@@ -3,6 +3,7 @@ from os.path import abspath as _abspath
 import imp as _imp
 
 from libs.logging import email_system_administrators
+from config.secure_settings import MONGO_IP
 
 _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
@@ -23,7 +24,7 @@ FAILED = [ states.REVOKED,
            states.FAILURE ]
 
 celery_app = Celery("data_processing_tasks",
-                    broker='pyamqp://guest@localhost//',
+                    broker='pyamqp://guest@MONGO_IP//',
                     backend='rpc://',
                     task_publish_retry=False,
                     task_track_started=True )
