@@ -17,6 +17,7 @@ def send_android_error_report(user_id, error_report):
     contents = [line for line in error_report.splitlines() if line.strip() ]
     
     # the first line contains a unix millisecond timestamp, contruct a datetime
+    # The printed value in the crash report is in UTC
     timestamp = datetime.fromtimestamp(float(contents[0]) / 1000)
     contents[0] = str(timestamp) #make the timestamp human-readable
     
