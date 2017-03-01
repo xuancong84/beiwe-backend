@@ -15,7 +15,6 @@ alias a="alias"
 alias p="nano ~/.profile; source ~/.profile"
 alias pup="cp /var/www/beiwe-backend/server\ configuration/bash\ profile.sh ~/.profile; source ~/.profile"
 
-
 #File Sizes
 alias mongosize="ll -h /mnt/" #prints out the contents with file sizes of the mongodb folder
 alias duu="sudo adu -d 1 -ha | sort -h"
@@ -27,7 +26,9 @@ alias deleteswap="sudo swapoff /swapfile; sudo rm /swapfile"
 #Bash Utility
 alias sudo="sudo " # allows the use of all our aliases with the sudo command
 alias n='nano -c'
+alias no="nano -Iwn"
 alias sn='sudo nano -c'
+alias sno="sudo nano -Iwn"
 alias ls='ls --color=auto'
 alias ll='ls -lh'
 alias lh='ls -lhX --color=auto'
@@ -47,6 +48,7 @@ alias df="df -h"
 #Git
 alias s='git status'
 alias gs='git status'
+alias gd='git diff'
 alias pull="git pull"
 alias master="git checkout master"
 alias prod="git checkout production"
@@ -63,11 +65,17 @@ alias pyc='find . -type f -name "*.pyc" -delete -print'
 alias up='update'
 alias update='cd /var/www/beiwe-backend; pyc; git pull; touch /var/www/beiwe-backend/wsgi.py'
 
+#supervisord (data processing)
+alias processing-start="supervisord"
+alias processing-stop="killall supervisord"
+
 #Logs
-alias logt='tail -f /var/log/apache2/error.log | cut -d " " -f 4,10-' #tail follow apache log
 alias log='nano +1000000000 /var/log/apache2/error.log' #open log, go to end
+alias logt='tail -f /var/log/apache2/error.log | cut -d " " -f 4,10-' #tail follow apache log
 alias logm='nano +1000000000 /var/log/mongodb/mongodb.log' #open mongo log, go to end
 alias logmt='tail -f /var/log/mongodb/mongodb.log' #tail follow mongo log
+alias logct='nano +1000000000 /var/log/celery/celeryd.err'
+alias logct='tail -f /var/log/celery/celeryd.err'
 
 alias relog='restart; logt'
 alias uplog='up;logt'
@@ -75,7 +83,6 @@ alias uplog='up;logt'
 #Configuration files
 alias conf='sudo nano /etc/apache2/sites-enabled/beiwe.org.conf'
 alias monconf='sudo nano /etc/mongodb.conf'
-alias nanorc="nano ~/.nanorc"
 
 #Services configuration files
 alias boot="sudo sysv-rc-conf"
