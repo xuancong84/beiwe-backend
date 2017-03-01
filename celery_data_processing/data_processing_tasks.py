@@ -24,7 +24,7 @@ FAILED = [ states.REVOKED,
            states.FAILURE ]
 
 celery_app = Celery("data_processing_tasks",
-                    broker='pyamqp://guest@MONGO_IP//',
+                    broker='pyamqp://guest@%s//' % MONGO_IP,
                     backend='rpc://',
                     task_publish_retry=False,
                     task_track_started=True )
