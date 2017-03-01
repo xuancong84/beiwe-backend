@@ -13,7 +13,7 @@
 #Alias aliases
 alias a="alias"
 alias p="nano ~/.profile; source ~/.profile"
-alias pup="cp /var/www/beiwe-backend/miscellaneous/bash\ profile.sh ~/.profile; source ~/.profile"
+alias pup="cp /var/www/beiwe-backend/miscellaneous/bash_profile.sh ~/.profile; source ~/.profile"
 
 #File Sizes
 alias mongosize="ll -h /mnt/" #prints out the contents with file sizes of the mongodb folder
