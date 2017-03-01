@@ -10,6 +10,9 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# Mounting the database drive
+alias mount-db-drive="mount /dev/xvdb /mnt"
+
 #Alias aliases
 alias a="alias"
 alias p="nano ~/.profile; source ~/.profile"
