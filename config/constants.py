@@ -24,7 +24,7 @@ DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "
 
 #The number of minutes after which a queued celery task will be invalidated.
 # (this is not a timeout, it only invalidates tasks that have not yet run.)
-CELERY_EXPIRY_MINUTES = getenv("CELERY_EXPIRY_MINUTES") or 59
+CELERY_EXPIRY_MINUTES = getenv("CELERY_EXPIRY_MINUTES") or 4
 CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECONDS") or 60*15
 
 """ This file contains values used throughout the codebase.
