@@ -77,7 +77,7 @@ alias log='nano +1000000000 /var/log/apache2/error.log' #open log, go to end
 alias logt='tail -f /var/log/apache2/error.log | cut -d " " -f 4,10-' #tail follow apache log
 alias logm='nano +1000000000 /var/log/mongodb/mongodb.log' #open mongo log, go to end
 alias logmt='tail -f /var/log/mongodb/mongodb.log' #tail follow mongo log
-alias logct='nano +1000000000 /var/log/celery/celeryd.err'
+alias logc='nano +1000000000 /var/log/celery/celeryd.err'
 alias logct='tail -f /var/log/celery/celeryd.err'
 
 alias relog='restart; logt'
