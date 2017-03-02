@@ -2,6 +2,8 @@
 from os.path import abspath as _abspath
 import imp as _imp
 
+from kombu.exceptions import OperationalError
+
 from libs.logging import email_system_administrators
 from config.secure_settings import MONGO_IP
 
@@ -49,6 +51,16 @@ def queue_user(name):
 #Fixme: does this work? also doing a
 queue_user.max_retries = 0
 
+def safe_queue_user(*args, **kwargs):
+    for i in range(100):
+        try:
+            return queue_user.apply_async( *args, **kwargs)
+        except OperationalError:
+            if i < 3:
+                pass
+            else:
+                raise
+
 def create_file_processing_tasks():
     #literally wrapping the entire thing in an ErrorSentry...
     with ErrorSentry(SENTRY_DSN,
@@ -67,9 +79,11 @@ def create_file_processing_tasks():
         user_ids = set(FilesToProcess(field="user_id"))
         running = []
         
-        for user_id in user_ids: #queue all users, get list of futures to check
-            running.append(
-                    queue_user.apply_async(args=[user_id],
+        for user_id in user_ids:
+            # queue all users, get list of futures to check
+            #Apparently this can fail sometimes deep inside amqp/transport.py in read_frame at line 237
+            # with an OperationalError, so we are wrapping it in a function to do some retries if it fails.
+            running.append(safe_queue_user(args=[user_id],
                                            max_retries=0,
                                            expires=expiry,
                                            task_track_started=True,
