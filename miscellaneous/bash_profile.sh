@@ -69,7 +69,7 @@ alias up='update'
 alias update='cd /var/www/beiwe-backend; pyc; git pull; touch /var/www/beiwe-backend/wsgi.py'
 
 #supervisord (data processing)
-alias processing-start="supervisord"
+alias processing-start="sudo service rabbitmq-server restart; supervisord"
 alias processing-stop="killall supervisord"
 
 #Logs
