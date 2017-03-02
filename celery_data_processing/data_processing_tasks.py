@@ -13,7 +13,6 @@ _imp.load_source("__init__", _current_folder_init)
 # celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
 
 from celery import Celery, states
-from celery.states import SUCCESS
 
 STARTED_OR_WAITING = [ states.PENDING,
                        states.RECEIVED,
@@ -85,14 +84,14 @@ def create_file_processing_tasks():
             for future in running:
                 
                 #TODO: make sure these strings match.
-                if future.state == SUCCESS:
+                if future.state == states.SUCCESS:
                     successful.append(future)
                 elif future.state in FAILED:
                     failed.append(future)
                 elif future.state in STARTED_OR_WAITING:
                     new_running.append(future)
                 else:
-                    raise Exception("Encountered unknown celery task state: %s" % future.state)
+                    raise Exception("Encountered unknown celery task state: '%s'" % future.state)
                 
             running = new_running
             print "tasks:", running
