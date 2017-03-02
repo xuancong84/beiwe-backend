@@ -4,7 +4,7 @@
 #literally just run this script and celery will work.
 # tails the celery log, ctrl-c to exit the tail
 
-
+#sudo apt-get install -y rabbitmq-server
 sudo pip install supervisor celery
 
 #this is almost definitely overkill/unnegessary
@@ -34,10 +34,10 @@ childlogdir = /tmp
 strip_ansi = false
 
 [inet_http_server]
-port = 127.0.0.1:50000
+port = 127.0.0.1:50001
 
 [supervisorctl]
-serverurl = http://127.0.0.1:50000
+serverurl = http://127.0.0.1:50001
 
 [program:celery]
 directory = /var/www/beiwe-backend/
@@ -47,5 +47,8 @@ stderr_logfile = /var/log/celery/celeryd.err
 autostart = true
 EOL
 
-supervisord
-tail -f /var/log/celery/celeryd.err
+echo "Use 'supervisord' or 'processing-start' to start the celery data processing service,"
+echo "use 'killall supervisord' or 'processing-stop' to stop it."
+echo "Note: you should not run supervisord as the superuser."
+#supervisord
+#tail -f /var/log/celery/celeryd.err
