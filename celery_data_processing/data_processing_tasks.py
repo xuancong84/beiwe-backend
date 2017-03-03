@@ -39,10 +39,10 @@ from datetime import datetime, timedelta
 from cronutils import ErrorSentry
 from raven.transport import HTTPTransport
 
-from config.constants import FILE_PROCESS_PAGE_SIZE, DATA_PROCESSING_NO_ERROR_STRING, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
+from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
 from db.data_access_models import FilesToProcess, FileProcessLock
-from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks, EverythingWentFine
+from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks
 
 @celery_app.task
 def queue_user(name):
@@ -96,23 +96,40 @@ def create_file_processing_tasks():
             failed = []
             successful = []
             for future in running:
+                success = False
+                fail = False
+                waiting = False
                 
                 #TODO: make sure these strings match.
-                if future.state == states.SUCCESS or future.state == u'SUCCESS':
+                if future.state == states.SUCCESS:
                     #we are getting some very weird errors where this string does not match.
                     successful.append(future)
-                elif future.state in FAILED:
+                    success = True
+                if future.state in FAILED:
                     failed.append(future)
-                elif future.state in STARTED_OR_WAITING:
+                    fail = True
+                if future.state in STARTED_OR_WAITING:
                     new_running.append(future)
-                else:
-                    raise Exception("Encountered unknown celery task state: '%s'" % future.state)
+                    waiting = True
+                
+                if not success and not fail and not waiting:
+                    lc = future.state == 'SUCCESS'
+                    msg = "Encountered unknown celery task state: '%s' \n " % future.state
+                    msg = msg + "success: %s\n" % success
+                    msg = msg + "fail: %s\n" % fail
+                    msg = msg + "waiting: %s\n" % waiting
+                    msg = msg + "literal comparison: %s\n" % lc
+                    msg = msg + "success constant value: %s\n" % states.SUCCESS
+                    msg = msg + "future.state: %s\n" % future.state
+                    msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
+                    msg = msg + "FAILED states: %s\n" % str(FAILED)
+                    raise Exception(msg)
                 
             running = new_running
             print "tasks:", running
             if running:
                 sleep(5)
-            
+                
         print "Finished, unlocking."
         FileProcessLock.unlock() #This must be ___inside___ the with statement
 
