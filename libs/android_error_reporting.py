@@ -1,10 +1,10 @@
 from datetime import datetime
+from flask import request
 
 from raven import Client as SentryClient
 from raven.transport import HTTPTransport
 
 from config.secure_settings import SENTRY_DSN
-from libs.logging import email_system_administrators
 
 #old email error code:
 # email_system_administrators(error_report,
@@ -18,8 +18,12 @@ def send_android_error_report(user_id, error_report):
     
     # the first line contains a unix millisecond timestamp, contruct a datetime
     # The printed value in the crash report is in UTC
-    timestamp = datetime.fromtimestamp(float(contents[0]) / 1000)
-    contents[0] = str(timestamp) #make the timestamp human-readable
+    try: #Beiwe version greater than 4
+        timestamp = datetime.fromtimestamp(float(contents[0]) / 1000)
+        contents[0] = str(timestamp)
+    except ValueError: #Beiwe version 4
+        timestamp = datetime.fromtimestamp(float(request.values['file_name'].split("_")[0]) / 1000)
+        contents.insert(0, str(timestamp))
     
     # Insert the actual error message as the first line
     contents.insert(0, "Android Error: %s" % contents[2].split(":",1)[1].strip())
