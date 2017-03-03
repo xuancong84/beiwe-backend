@@ -98,7 +98,8 @@ def create_file_processing_tasks():
             for future in running:
                 
                 #TODO: make sure these strings match.
-                if future.state == states.SUCCESS:
+                if future.state == states.SUCCESS or future.state == u'SUCCESS':
+                    #we are getting some very weird errors where this string does not match.
                     successful.append(future)
                 elif future.state in FAILED:
                     failed.append(future)
