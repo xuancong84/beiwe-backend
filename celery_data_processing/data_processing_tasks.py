@@ -108,13 +108,30 @@ def create_file_processing_tasks():
                 if future.state in FAILED:
                     failed.append(future)
                     fail = True
+                    
                 if future.state in STARTED_OR_WAITING:
                     new_running.append(future)
                     waiting = True
                 
                 if not success and not fail and not waiting:
-                    lc = future.state == 'SUCCESS'
+                    lc1 = future.state == 'SUCCESS'
+                    lc2 = states.SUCCESS == 'SUCCESS'
+                    lc3 = states.SUCCESS == future.state
+                    lc4 = future.state == u'SUCCESS'
+                    lc5 = states.SUCCESS == u'SUCCESS'
+                    lc6 = states.SUCCESS == unicode(future.state)
+                    lc7 = states.SUCCESS == str(future.state)
+                    
                     msg = "Encountered unknown celery task state: '%s' \n " % future.state
+
+                    msg = msg + "literal comparison future.state == 'SUCCESS': %s\n" % lc1
+                    msg = msg + "literal comparison states.SUCCESS == 'SUCCESS': %s\n" % lc2
+                    msg = msg + "literal comparison states.SUCCESS == future.state: %s\n" % lc3
+                    msg = msg + "literal comparison future.state == u'SUCCESS': %s\n" % lc4
+                    msg = msg + "literal comparison states.SUCCESS == u'SUCCESS': %s\n" % lc5
+                    msg = msg + "literal comparison states.SUCCESS == unicode(future.state): %s\n" % lc6
+                    msg = msg + "literal comparison states.SUCCESS == str(future.state): %s\n" % lc7
+                    
                     msg = msg + "success: %s\n" % success
                     msg = msg + "fail: %s\n" % fail
                     msg = msg + "waiting: %s\n" % waiting
@@ -123,7 +140,8 @@ def create_file_processing_tasks():
                     msg = msg + "future.state: %s\n" % future.state
                     msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
                     msg = msg + "FAILED states: %s\n" % str(FAILED)
-                    raise Exception(msg)
+                    with error_sentry:
+                        raise Exception(msg)
                 
             running = new_running
             print "tasks:", running
