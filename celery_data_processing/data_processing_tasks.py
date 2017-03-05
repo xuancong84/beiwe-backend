@@ -135,7 +135,6 @@ def create_file_processing_tasks():
                     msg = msg + "success: %s\n" % success
                     msg = msg + "fail: %s\n" % fail
                     msg = msg + "waiting: %s\n" % waiting
-                    msg = msg + "literal comparison: %s\n" % lc
                     msg = msg + "success constant value: %s\n" % states.SUCCESS
                     msg = msg + "future.state: %s\n" % future.state
                     msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
