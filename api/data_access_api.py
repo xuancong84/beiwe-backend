@@ -175,7 +175,7 @@ def zip_generator(files_list, construct_registry=False):
             # print len(zip_output)
             x = zip_output.getvalue()
             total_size += len(x)
-            print "%s: %sK, %sM" % (random_id, total_size / 1024, total_size / 1024 / 1024)
+            # print "%s: %sK, %sM" % (random_id, total_size / 1024, total_size / 1024 / 1024)
             yield x  # yield the (compressed) file information
             del x
             zip_output.empty()
