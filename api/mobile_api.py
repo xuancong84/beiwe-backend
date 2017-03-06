@@ -79,6 +79,9 @@ def upload(OS_API=""):
         send_android_error_report( user._id, uploaded_file)
         return render_template('blank.html'), 200
 
+    if file_name[:6] == "rList-":
+        return render_template('blank.html'), 200
+    
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key )
@@ -100,7 +103,7 @@ def upload(OS_API=""):
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
-            #it appears that very occasionally the app creates some spurious files 
+            #it appears that occasionally the app creates some spurious files
             #with a name like "rList-org.beiwe.app.LoadingActivity"
             error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
             log_error( Exception("upload error"), error_message )
