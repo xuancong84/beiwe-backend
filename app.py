@@ -33,7 +33,6 @@ app.register_blueprint(data_access_web_form.data_access_web_form)
 
 if SENTRY_DSN != "USE_EMAIL_FALLBACK":
     from raven.contrib.flask import Sentry
-    print "Beiwe is now running with Sentry as the error handler"
     sentry = Sentry(app, dsn=SENTRY_DSN)
 
 
