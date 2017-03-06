@@ -1,11 +1,11 @@
-import mongolia
-
 from datetime import datetime
 from mongobackup import backup
 
 from config.secure_settings import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
          S3_BACKUPS_AWS_SECRET_ACCESS_KEY as BACKUP_KEY,S3_BACKUPS_BUCKET,
          MONGO_USERNAME, MONGO_PASSWORD, LOCAL_BACKUPS_DIRECTORY)
+
+from db.mongolia_setup import db_connection
 
 def run_database_tasks():
     """ Runs a database optimize (which should speed up the backup),
@@ -33,17 +33,16 @@ def run_backup():
 
 def optimize_db():
     """ Performs operations that improve database performance, and reduce drive usage. """
-    db = mongolia.mongo_connection.CONNECTION.get_connection()['beiwe']
     
-    names = [name for name in db.collection_names() if "system.indexes" != name]
+    names = [name for name in db_connection.collection_names() if "system.indexes" != name]
     for name in names:
         start = datetime.utcnow()
         print str(start), "compacting %s..." % name,
-        db.command("compact", name)
+        db_connection.command("compact", name)
         delta = datetime.utcnow() - start
         print delta.total_seconds()
     
-    #This command can take time, causes a write-block.
+    #This command can take time, causes a write-block, not necessary if sufficient space is allocated to DB drive.
     # start = datetime.utcnow()
     # print str(datetime.now()), "running repair database..."
     # db.command("repairDatabase")
@@ -51,6 +50,7 @@ def optimize_db():
     # delta = end - start
     # print str(end), "finished database repair in %s." % delta.total_seconds()
 
-def get_mongo_settings():
-    db = mongolia.mongo_connection.CONNECTION.get_connection()['admin']
-    db.command({"getCmdLineOpts":1})
+#for debugging command line issues in a live database
+#def get_mongo_settings():
+#    return db_connection.command({"getCmdLineOpts":1})
+
