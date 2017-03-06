@@ -3,6 +3,8 @@ branch-defaults:
     environment: beiweCluster-staging
   development:
     environment: beiweCluster-staging
+  production:
+    environment: beiweCluster-production
 global:
   application_name: Beiwe Cluster
   default_ec2_keyname: actually_beiwe_key_pair
