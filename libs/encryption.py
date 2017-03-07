@@ -5,11 +5,13 @@ from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from werkzeug.datastructures import FileStorage
 
-from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_PRODUCTION
+from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_PRODUCTION as _IS_PRODUCTION
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study
-from db.profiling import DecryptionKeyError as DecryptionKeyErrorDB
+from db.profiling import DecryptionKeyError as DecryptionKeyErrorDB, LineEncryptionError
+
+IS_STAGING = not _IS_PRODUCTION
 
 class DecryptionKeyError(Exception): pass
 class HandledError(Exception): pass
@@ -66,9 +68,22 @@ def decrypt_server(data, study_id):
 
 ########################### User/Device Decryption #############################
 
+
+
 def decrypt_device_file(patient_id, data, private_key, user):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #This is a special handler for iOS file uploads.
+    
+    def create_line_error_db_entry(error_type):
+        # declaring this inside decrypt device file to access its function-global variables
+        LineEncryptionError.create(
+                type=error_type,
+                line=line,
+                base64_decryption_key=private_key.decrypt(decoded_key),
+                prev_line=file_data[i - 1] if i > 0 else None,
+                next_line=file_data[i + 1] if i < len(file_data) - 1 else None
+        )
+    
     if isinstance(type(data), FileStorage):
         file_data = data.read()
     elif isinstance(data, str):
@@ -88,7 +103,7 @@ def decrypt_device_file(patient_id, data, private_key, user):
         #TODO: data is sometimes an empty list, we get an index error.  Fix, don't catch.
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
     except (TypeError, IndexError) as e:
-        if not IS_PRODUCTION:
+        if IS_STAGING:
             DecryptionKeyErrorDB.create(
                 file_path=request.values['file_name'],
                 key=file_data[0].encode("utf-8"),
@@ -96,13 +111,16 @@ def decrypt_device_file(patient_id, data, private_key, user):
                 user_id=user._id
             )
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
-
+    
     #(we have an inefficiency in this encryption process, this might not need
     # to be doubly encoded in base64.  It works, not fixing it.)
     #The following is all error catching code for bugs we encountered (and solved)
     # in development.
     # print "length decrypted key", len(decrypted_key)
-    for i, line in enumerate(file_data[1:]):
+    for i, line in enumerate(file_data):
+        #we need to skip the first line (the decryption key), but need real index values in i
+        if i==0: continue
+        
         if line is None:
             tracking.append([i])
             print "encountered empty line of data, ignoring."
@@ -116,38 +134,53 @@ def decrypt_device_file(patient_id, data, private_key, user):
             if isinstance(e, IndexError):
                 error_message += "Something is wrong with data padding:\n\tline: %s" % line
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.PADDING_ERROR)
                 continue
 
             if isinstance(e, TypeError) and decrypted_key is None:
                 error_message += "The key was empty:\n\tline: %s" % line
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.EMPTY_KEY)
                 continue
 
             ################### skip these errors ##############################
             if "unpack" in e.message:
                 error_message += "malformed line of config, dropping it and continuing."
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.MALFORMED_CONFIG)
                 #the config is not colon separated correctly, this is a single
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
                 continue
+                
             if "Input strings must be a multiple of 16 in length" in e.message:
                 error_message += "Line was of incorrect length, dropping it and continuing."
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.INVALID_LENGTH)
                 continue
+                
             if isinstance(e, InvalidData):
                 error_message += "Line contained no data, skipping: " + str(line)
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.LINE_EMPTY)
                 continue
+                
             if isinstance(e, InvalidIV):
                 error_message += "Line contained no iv, skipping: " + str(line)
                 log_error(e, error_message)
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.IV_MISSING)
                 continue
+                
             ##################### flip out on these errors #####################
-            if 'AES key' in e.message: error_message += "AES key has bad length."
-            elif 'IV must be' in e.message: error_message += "iv has bad length."
+            if 'AES key' in e.message:
+                error_message += "AES key has bad length."
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.AES_KEY_BAD_LENGTH)
+            elif 'IV must be' in e.message:
+                error_message += "iv has bad length."
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.IV_BAD_LENGTH)
             elif 'Incorrect padding' in e.message:
                 error_message += "base64 padding error, config is truncated."
+                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.MP4_PADDING)
                 # this is only seen in mp4 files. possibilities:
                 #  upload during write operation.
                 #  broken base64 conversion in the app

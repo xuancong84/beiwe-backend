@@ -5,7 +5,6 @@ from db.user_models import User
 from libs.s3 import get_client_private_key
 from libs.security import decode_base64
 
-
 class EncryptionError(DatabaseObject):
     PATH = "beiwe.encryption_errors"
     
@@ -19,7 +18,24 @@ class EncryptionError(DatabaseObject):
     
 class LineEncryptionError(DatabaseObject):
     PATH = "beiwe.line_encryption_errors"
-    DEFAULTS
+
+    PADDING_ERROR = "PADDING_ERROR"
+    MP4_PADDING = "MP4_PADDING"
+    EMPTY_KEY = "EMPTY_KEY"
+    MALFORMED_CONFIG = "MALFORMED_CONFIG"
+    IV_MISSING = "IV_MISSING"
+    LINE_EMPTY = "LINE_EMPTY"
+    INVALID_LENGTH = "INVALID_LENGTH"
+    AES_KEY_BAD_LENGTH = "AES_KEY_BAD_LENGTH"
+    IV_BAD_LENGTH = "IV_BAD_LENGTH"
+    
+    DEFAULTS = {
+        "type": REQUIRED_STRING,
+        "line":REQUIRED_STRING,
+        "base64_decryption_key": REQUIRED_STRING,
+        "prev_line": "",
+        "next_line": ""
+    }
     
     
 class DecryptionKeyError(DatabaseObject):
