@@ -22,7 +22,7 @@ def send_android_error_report(user_id, error_report):
         timestamp = datetime.fromtimestamp(float(contents[0]) / 1000)
         contents[0] = str(timestamp)
     except ValueError: #Beiwe version 4
-        timestamp = datetime.fromtimestamp(float(request.values['file_name'].split("_")[0]) / 1000)
+        timestamp = datetime.fromtimestamp(float(request.values['file_name'].split("_")[1]) / 1000)
         contents.insert(0, str(timestamp))
     
     # Insert the actual error message as the first line
