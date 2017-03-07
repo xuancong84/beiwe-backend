@@ -12,6 +12,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'E500_EMAIL_ADDRESS',
                   'FLASK_SECRET_KEY',
                   'ITERATIONS',
+                  'IS_PRODUCTION',
                   'LOCAL_BACKUPS_DIRECTORY',
                   'MONGO_PASSWORD',
                   'MONGO_USERNAME',
@@ -24,7 +25,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'S3_BUCKET',
                   'SENTRY_DSN',
                   'SENTRY_JAVASCRIPT_DSN',
-                  'SYSADMIN_EMAILS' }
+                  'SYSADMIN_EMAILS'}
 
 #Check that all the mandatory variables exist...
 for mandatory_var in MANDATORY_VARS:
@@ -44,3 +45,9 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 # email addresses are parsed from a comma separated list
 # whitespace before and after addresses are stripped
 secure_settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in secure_settings.SYSADMIN_EMAILS.split(",")]
+
+# IS_PRODUCTION needs to resolve to False except under very specific settings
+if secure_settings.IS_PRODUCTION.upper() == "TRUE" or secure_settings.IS_PRODUCTION is True:
+    secure_settings.IS_PRODUCTION = True
+else:
+    secure_settings.IS_PRODUCTION = False

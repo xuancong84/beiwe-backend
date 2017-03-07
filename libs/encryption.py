@@ -1,17 +1,21 @@
 from os import urandom
+from flask import request
 
-from werkzeug.datastructures import FileStorage
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
-from config.secure_settings import ASYMMETRIC_KEY_LENGTH
+from werkzeug.datastructures import FileStorage
+
+from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_PRODUCTION
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study
+from db.profiling import DecryptionKeyError as DecryptionKeyErrorDB
 
 class DecryptionKeyError(Exception): pass
 class HandledError(Exception): pass
 class InvalidIV(Exception): pass
 class InvalidData(Exception): pass
+class DefinitelyInvalidFile(Exception):pass
 
 """ The private keys are stored server-side (S3), and the public key is sent to
     the android device. """
@@ -62,19 +66,35 @@ def decrypt_server(data, study_id):
 
 ########################### User/Device Decryption #############################
 
-def decrypt_device_file(patient_id, data, private_key):
+def decrypt_device_file(patient_id, data, private_key, user):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #This is a special handler for iOS file uploads.
-    if type(data) is FileStorage:
-        data = data.read()
-    data = [line for line in data.split('\n') if line != "" ]
+    if isinstance(type(data), FileStorage):
+        file_data = data.read()
+    elif isinstance(data, str):
+        #namespace is immediately overwritten, this is fine.
+        file_data = data
+    else:
+        raise TypeError("expected string or werkzeug.datastructures.FileStorage")
+    
+    tracking=[]
+    error_count = 0
+    
+    file_data = [line for line in file_data.split('\n') if line != ""]
     return_data = ""
     
     try: #get the decryption key from the file.
-        decoded_key = decode_base64( data[0].encode( "utf-8" ) )
+        decoded_key = decode_base64(file_data[0].encode("utf-8"))
         #TODO: data is sometimes an empty list, we get an index error.  Fix, don't catch.
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
     except (TypeError, IndexError) as e:
+        if not IS_PRODUCTION:
+            DecryptionKeyErrorDB.create(
+                file_path=request.values['file_name'],
+                key=file_data[0].encode("utf-8"),
+                contents=file_data[1:],
+                user_id=user._id
+            )
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
 
     #(we have an inefficiency in this encryption process, this might not need
@@ -82,13 +102,16 @@ def decrypt_device_file(patient_id, data, private_key):
     #The following is all error catching code for bugs we encountered (and solved)
     # in development.
     # print "length decrypted key", len(decrypted_key)
-    for line in data[1:]:
+    for i, line in enumerate(file_data[1:]):
         if line is None:
+            tracking.append([i])
             print "encountered empty line of data, ignoring."
             continue
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
+            error_count += 1
+            
             error_message = "There was an error in user decryption: "
             if isinstance(e, IndexError):
                 error_message += "Something is wrong with data padding:\n\tline: %s" % line
@@ -132,6 +155,7 @@ def decrypt_device_file(patient_id, data, private_key):
             else:
                 raise #If none of the above errors happened, raise the error.
             raise HandledError(error_message) #if any of them did happen, raise a HandledError to cease execution.
+    
     return return_data
 
 def decrypt_device_line(patient_id, key, data):
