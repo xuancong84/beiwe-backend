@@ -2,7 +2,6 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from mongolia.constants import REQUIRED_STRING, REQUIRED, REQUIRED_INT, REQUIRED_LIST
 
 from db.user_models import User
-from libs.s3 import get_client_private_key
 from libs.security import decode_base64
 
 class EncryptionError(DatabaseObject):
@@ -52,6 +51,7 @@ class DecryptionKeyError(DatabaseObject):
         return decode_base64(self.contents)
     
     def decrypt(self):
+        from libs.s3 import get_client_private_key
         private_key = get_client_private_key(self.user_id, User(self.user_id).study_id)
         return private_key.decrypt( self.decode() )
 
