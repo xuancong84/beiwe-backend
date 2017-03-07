@@ -46,8 +46,8 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 # whitespace before and after addresses are stripped
 secure_settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in secure_settings.SYSADMIN_EMAILS.split(",")]
 
-# IS_PRODUCTION needs to resolve to False except under very specific settings
-if secure_settings.IS_PRODUCTION.upper() == "TRUE" or secure_settings.IS_PRODUCTION is True:
-    secure_settings.IS_PRODUCTION = True
+# IS_STAGING needs to resolve to False except under specific settings; the default needs to be production.
+if (secure_settings.IS_STAGING.upper() == "TRUE" or secure_settings.IS_STAGING is True):
+    secure_settings.IS_STAGING = True
 else:
-    secure_settings.IS_PRODUCTION = False
+    secure_settings.IS_STAGING = False

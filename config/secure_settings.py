@@ -52,4 +52,4 @@ SENTRY_DSN = getenv("SENTRY_DSN") or "USE_EMAIL_FALLBACK"
 SENTRY_JAVASCRIPT_DSN = getenv("SENTRY_JAVASCRIPT_DSN") or None
 
 #Production/Staging - set to "TRUE"
-IS_PRODUCTION = getenv("IS_PRODUCTION") or "STAGING"
+IS_STAGING = getenv("IS_PRODUCTION") or False
