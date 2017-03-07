@@ -5,13 +5,11 @@ from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from werkzeug.datastructures import FileStorage
 
-from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_PRODUCTION as _IS_PRODUCTION
+from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study
 from db.profiling import DecryptionKeyError as DecryptionKeyErrorDB, LineEncryptionError
-
-IS_STAGING = not _IS_PRODUCTION
 
 class DecryptionKeyError(Exception): pass
 class HandledError(Exception): pass
