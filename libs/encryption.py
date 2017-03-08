@@ -84,7 +84,7 @@ def decrypt_device_file(patient_id, data, private_key, user):
     
     if isinstance(type(data), FileStorage):
         file_data = data.read()
-    elif isinstance(data, str):
+    elif isinstance(data, (unicode, str)):
         #namespace is immediately overwritten, this is fine.
         file_data = data
     else:

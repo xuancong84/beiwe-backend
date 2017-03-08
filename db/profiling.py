@@ -64,3 +64,6 @@ class EncryptionErrors(DatabaseCollection):
 
 class DecryptionKeyErrors(DatabaseCollection):
     OBJTYPE = DecryptionKeyError
+
+class LineEncryptionErrors(DatabaseCollection):
+    OBJTYPE = LineEncryptionError
