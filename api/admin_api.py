@@ -149,9 +149,7 @@ def download_privacy_policy():
 
 """########################## Debugging Code ###########################"""
 
-@admin_api.route("/is_staging")
-def is_staging():
-    if IS_STAGING:
+if IS_STAGING:
+    @admin_api.route("/is_staging")
+    def is_staging():
         return "yes"
-    else:
-        return "no"
