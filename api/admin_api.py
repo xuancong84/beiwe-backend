@@ -1,4 +1,6 @@
 from flask import abort, Blueprint, make_response, redirect, request, send_file
+
+from config.secure_settings import IS_STAGING
 from libs.admin_authentication import authenticate_admin_study_access,\
     authenticate_system_admin, authenticate_admin_login, admin_is_system_admin,\
     get_admins_allowed_studies
@@ -31,6 +33,7 @@ def remove_admin_from_study():
     study = Study(ObjectId(request.form.get('study_id')))
     study.remove_admin(admin._id)
     return '200'
+
 
 @admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
 @authenticate_system_admin
@@ -142,3 +145,13 @@ def download_beta_debug():
 def download_privacy_policy():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/Beiwe+Data+Privacy+and+Security.pdf")
     # return send_file("Beiwe Data Privacy and Security.pdf", as_attachment=True)
+
+
+"""########################## Debugging Code ###########################"""
+
+@admin_api.route("/is_staging"):
+def is_staging():
+    if IS_STAGING:
+        return "yes"
+    else:
+    return "no"
