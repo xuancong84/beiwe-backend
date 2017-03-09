@@ -30,7 +30,7 @@ def send_android_error_report(user_id, error_report):
     
     # the second line contains all the identifiers. Clean it up and parse into a dictionary.
     identifiers = {id.strip().split(":",1)[0] : id.strip().split(":",1)[1]
-                                          for id in contents[1].split(',')}
+                                          for id in contents[2].split(',')}
     
     #construct some useful tags for this error report, add all identifiers as tags.
     tags = {"Android Error": "android error",
