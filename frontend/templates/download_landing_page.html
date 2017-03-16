@@ -2,11 +2,11 @@
 {% block title %} Download Page{% endblock %}
 {% block content %}
   <div class="container">
-    <h2>Downloads </h2>
+    <h2><b>Downloads</b> - points at studies.beiwe.org </h2>
     <div class="well">
       <div class="row">
         <div class="col-xs-12">
-          <a href="/download" class="btn btn-primary btn-block"> <b>Download The Beiwe App</b></a>
+          <a href="/download" class="btn btn-primary btn-block"> <b>Download Beiwe version 2.0 for Android</b></a>
           <div class="text-center">
             You can also enter <b>studies.beiwe.org/download</b> directly into the browser of any device running the Android OS.
           </div>
@@ -16,48 +16,48 @@
       The Study Debugger is a special version of the Beiwe App that includes several useful features for debugging and testing your surveys.  You must be logged in to download the Study Debugger.
       <div class="row">
         <div class="col-xs-12">
-          <a href="/download_debug" class="btn btn-primary btn-block">Download Study Debugger </a>
+          <a href="/download_debug" class="btn btn-primary btn-block">Download the Study Debugger for Beiwe <b>version 2.0</b></a>
         </div>
       </div>
     </div>
-    <div class="well">
-      If you encounter a problem with the Beiwe App please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using, whether it was the Study Debugger or regular App release, the version of Android OS on the device, the user ID and study you were enrolled in, the full model name of the device you were using, and a description of your activity before experiencing the issue.
-    </div>
-    <h2> Data API Status </h2>
-    <div class="well">
-      In the event of planned downtime there will be a notice here stating when the Data Access API and download page will be unavailable.
-      {# There is downtime planned starting the evening of Friday March 4th and continuing until data processing tasks are completed. Expected downtime is a limited to a few hours. #}
-    </div>
 
-    {# <h2> Beiwe Betas </h2>
+    <h2> <b>Beiwe Betas </b> - points at staging.beiwe.org </h2>
     <div class="well">
-      The Beta versions of the Beiwe and Study Debugger apps are in-development and may change without warning.  They may contain updates and bug-fixes, or they may contain unfinished or undocumented features.  Make sure to read the description below of how the current beta differs from the production version, and what features in the app will require testing.
-    </div> #}
-    <h3> Beta Status: </h3>
-    <div class="well">
+      <p>The Beta versions of the Beiwe and Study Debugger apps are in-development.  They may contain updates and bug-fixes, or they may contain unfinished or buggy features.  Make sure to read the descriptions and changelog below the links to understand how the current Beta differs from production.</p>
+{#       <p><b>Note:</b> beta versions of the Beiwe Android app are directed at <a href="https://staging.beiwe.org">staging.beiwe.org</a>, and will only work on with users in studies on that website.</p>
+ #}    
       {# this text is going to change whenever we upload a new version of the app, keep it simple #}
-      There is currently no Beta version of the Beiwe app.
-      {# <div class="row">
+      {# There is currently no Beta version of the Beiwe app. #}
+{#        <div class="row">
         <div class="col-xs-12">
-          <a href="/download_beta" class="btn btn-primary btn-block">Download the BETA version of the Beiwe app </a>
+          <a href="/download_beta" class="btn btn-primary btn-block">Download Beiwe <b>version 2.1.3 </b> </a>
           <div class="text-center">
             You must be logged in to download either of the Beta apps.
           </div>
         </div>
-      </div>
+      </div> #}
       <div class="row">
         <div class="col-xs-12">
-          <a href="/download_beta_debug" class="btn btn-primary btn-block">Download the BETA version of the Study Debugger </a>
+          <a href="/download_beta_debug" class="btn btn-primary btn-block">Download the Study Debugger for Beiwe <b>version 2.1.3</b> </a>
         </div>
-      </div> #}
+      </div>
     </div>
 
     <h3> Changelog: </h3>
+
+        <div class="well">
+    <h4> Beiwe 2.1.3 </h4>
+      <p><b> 3/15/17 - Bug Fixes </b></p>
+      <p>
+        <b>Bug Fix:</b> Fixed a bug in the error reporting code that could cause Beiwe to crash. <br>
+        <b>Bug Fix:</b> Fixed issue in which extremely slow network behavior could cause Beiwe to enter a non-responsive state when trying to upload data.
+      </p>
+      <p> The version identifier in the Device Identifiers data stream for Beiwe version 2.1.3 is <b>16</b>. </p>
+    </div>
+
     <div class="well">
     <h4> Beiwe 2.1.2 </h4>
-      <p>
-        <b> 2/28/17 - Minor Update </b>
-      </p>
+      <p><b> 2/28/17 - Bug Fix </b></p>
       <p>
         <b>Bug Fix:</b> Fixed extremely rare crash in the app UI.
       </p>
@@ -66,9 +66,7 @@
 
     <div class="well">
     <h4> Beiwe 2.1.1 </h4>
-      <p>
-        <b> 2/22/17 - Minor Update </b>
-      </p>
+      <p><b> 2/22/17 - Minor Update </b></p>
         <b>Bug Fix:</b> GPS and WiFi data scans should run more consistently, especially when running with problematic permissions under Android 6.
       </p>
       <p> <b> Data Stream Changes </b> </p>
@@ -81,9 +79,7 @@
 
     <div class="well">
     <h4> Beiwe 2.1 </h4>
-      <p>
-        <b> 1/27/17 - Significant Update </b>
-      </p>
+      <p><b> 1/27/17 - Significant Update </b></p>
       <p>
         <b>Feature:</b> Beiwe has been updated so that researchers can attach conditional display logic to survey questions.<br>
         <b>Feature:</b> Survey questions now support Markdown formatting syntax.</p>
@@ -142,4 +138,15 @@
       <p> 9/23/15 - Feature: the Beiwe app is now compatible with the Randomize Survey Questions feature.</p>
     </div>
   </div>
+
+  <div class="well">
+    If you encounter a problem with the Beiwe App please send the Beiwe Administrators a bug report.  Remember to include the version of the app you were using, whether it was the Study Debugger or regular App release, the version of Android OS on the device, the user ID and study you were enrolled in, the full model name of the device you were using, and a description of your activity before experiencing the issue.
+  </div>
+
+
+  {# <h2> Data API Status </h2>
+    <div class="well">
+      In the event of planned downtime there will be a notice here stating when the Data Access API and download page will be unavailable.
+      {# There is downtime planned starting the evening of Friday March 4th and continuing until data processing tasks are completed. Expected downtime is a limited to a few hours.
+    </div> #}
 {% endblock %}
