@@ -27,8 +27,9 @@ def send_android_error_report(user_id, error_report):
     
     # Insert the actual error message as the first line
     report_title = contents[2].split(":", 1)[1].strip()
-    report_title = report_title.split("}", 1)[0] + "}" #cut title at end of file name
-    contents.insert(0, "Android Error: %s" % report_title)
+    if "}" in report_title:  #cut title at end of file name
+        report_title = report_title.split("}", 1)[0] + "}"
+    # contents.insert(0, "Android Error: %s" % report_title)
     
     # the second line contains all the identifiers. Clean it up and parse into a dictionary.
     identifiers = {ID.strip().split(":",1)[0] : ID.strip().split(":",1)[1]
@@ -40,9 +41,13 @@ def send_android_error_report(user_id, error_report):
             "date": str(timestamp.date()) }
     tags.update(identifiers)
     
+    
     sentry_client = SentryClient(dsn=SENTRY_DSN,
                                  tags=tags,
-                                 transport=HTTPTransport)
+                                 transport=HTTPTransport,
+                                 )
     
-    sentry_client.captureMessage("\n".join(contents))
+    
+    sentry_client.captureMessage(report_title,
+                                 extra={"error":"\n".join(contents)})
     
