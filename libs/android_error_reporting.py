@@ -26,11 +26,13 @@ def send_android_error_report(user_id, error_report):
         contents.insert(0, str(timestamp))
     
     # Insert the actual error message as the first line
-    contents.insert(0, "Android Error: %s" % contents[2].split(":",1)[1].strip())
+    report_title = contents[2].split(":", 1)[1].strip()
+    report_title = report_title.split("}", 1)[0] + "}" #cut title at end of file name
+    contents.insert(0, "Android Error: %s" % report_title)
     
     # the second line contains all the identifiers. Clean it up and parse into a dictionary.
-    identifiers = {id.strip().split(":",1)[0] : id.strip().split(":",1)[1]
-                                          for id in contents[2].split(',')}
+    identifiers = {ID.strip().split(":",1)[0] : ID.strip().split(":",1)[1]
+                                          for ID in contents[2].split(',')}
     
     #construct some useful tags for this error report, add all identifiers as tags.
     tags = {"Android Error": "android error",
