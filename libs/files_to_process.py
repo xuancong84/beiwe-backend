@@ -147,7 +147,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     failed_ftps = set([])
     ftps_to_retire = set([])
     upload_these = []
-    for data_bin, (data_rows_deque, ftp_deque) in binified_data.items():
+    for data_bin, (data_rows_deque, ftp_deque) in binified_data.iteritems():
         # print 3
         with error_handler:
             try:
@@ -328,7 +328,7 @@ def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
 def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
     """ Appends binified rows to an existing binified row data structure.
         Should be in-place. """
-    for data_bin, rows in new_binified_rows.items():
+    for data_bin, rows in new_binified_rows.iteritems():
         old_binified_rows[data_bin][0].extend(rows)  #Add data rows
         old_binified_rows[data_bin][1].append(file_to_process._id)  #add ftp
 
