@@ -138,7 +138,7 @@ def download_beta():
 @admin_api.route("/download_beta_debug")
 @authenticate_admin_login
 def download_beta_debug():
-    return redirect("https://s3.amazonaws.com/beiwe-app-backups/beta/Beiwe-debug.apk")
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/debug/Beiwe-debug.apk")
     # return send_file("Beiwe_beta_debug.apk", as_attachment=True)
 
 @admin_api.route("/privacy_policy")

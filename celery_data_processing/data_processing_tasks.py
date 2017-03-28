@@ -1,20 +1,17 @@
 # We need to execute this file directly, so we always run the import hack
 from os.path import abspath as _abspath
 import imp as _imp
+_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+_imp.load_source("__init__", _current_folder_init)
 
 from kombu.exceptions import OperationalError
+from pymongo.errors import CursorNotFound
 
 from libs.logging import email_system_administrators
 from config.secure_settings import MONGO_IP
 
-_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
-_imp.load_source("__init__", _current_folder_init)
-
-#worker commands:
-# celery -A data_processing_tasks worker --loglevel=info
-# celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
-
 from celery import Celery, states
+from celery.states import FAILURE, SUCCESS
 
 STARTED_OR_WAITING = [ states.PENDING,
                        states.RECEIVED,
@@ -61,6 +58,17 @@ def safe_queue_user(*args, **kwargs):
             else:
                 raise
 
+def get_user_list_safely(retries=10):
+    """ This error started occurring on occasionally on Mar 22, 2017, we don't know why. """
+    try:
+        return set(FilesToProcess(field="user_id"))
+    except CursorNotFound:
+        if retries < 1:
+            raise
+        print "encountered cursor error, retrying..."
+        sleep(0.1)
+        return get_user_list_safely(retries=retries - 1)
+
 def create_file_processing_tasks():
     #literally wrapping the entire thing in an ErrorSentry...
     with ErrorSentry(SENTRY_DSN,
@@ -68,7 +76,6 @@ def create_file_processing_tasks():
         print error_sentry.sentry_client.is_enabled()
         if FileProcessLock.islocked():
             report_file_processing_locked_and_exit()
-            print "unreachable code abcdefg"
             exit(0) #This is really a safety check, this code should not actually be reachable.
         else:
             FileProcessLock.lock()
@@ -76,7 +83,7 @@ def create_file_processing_tasks():
         print "starting."
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        user_ids = set(FilesToProcess(field="user_id"))
+        user_ids = get_user_list_safely()
         running = []
         
         for user_id in user_ids:
@@ -96,51 +103,55 @@ def create_file_processing_tasks():
             failed = []
             successful = []
             for future in running:
-                success = False
-                fail = False
-                waiting = False
+                # success = False
+                # fail = False
+                # waiting = False
+                state = future.state
                 
-                #TODO: make sure these strings match.
-                if future.state == states.SUCCESS:
+                if state == SUCCESS:
                     #we are getting some very weird errors where this string does not match.
                     successful.append(future)
-                    success = True
-                if future.state in FAILED:
-                    failed.append(future)
-                    fail = True
-                    
-                if future.state in STARTED_OR_WAITING:
-                    new_running.append(future)
-                    waiting = True
+                    # success = True
                 
-                if not success and not fail and not waiting:
-                    lc1 = future.state == 'SUCCESS'
-                    lc2 = states.SUCCESS == 'SUCCESS'
-                    lc3 = states.SUCCESS == future.state
-                    lc4 = future.state == u'SUCCESS'
-                    lc5 = states.SUCCESS == u'SUCCESS'
-                    lc6 = states.SUCCESS == unicode(future.state)
-                    lc7 = states.SUCCESS == str(future.state)
+                if state in FAILED:
+                    failed.append(future)
+                    # fail = True
                     
-                    msg = "Encountered unknown celery task state: '%s' \n " % future.state
-
-                    msg = msg + "literal comparison future.state == 'SUCCESS': %s\n" % lc1
-                    msg = msg + "literal comparison states.SUCCESS == 'SUCCESS': %s\n" % lc2
-                    msg = msg + "literal comparison states.SUCCESS == future.state: %s\n" % lc3
-                    msg = msg + "literal comparison future.state == u'SUCCESS': %s\n" % lc4
-                    msg = msg + "literal comparison states.SUCCESS == u'SUCCESS': %s\n" % lc5
-                    msg = msg + "literal comparison states.SUCCESS == unicode(future.state): %s\n" % lc6
-                    msg = msg + "literal comparison states.SUCCESS == str(future.state): %s\n" % lc7
-                    
-                    msg = msg + "success: %s\n" % success
-                    msg = msg + "fail: %s\n" % fail
-                    msg = msg + "waiting: %s\n" % waiting
-                    msg = msg + "success constant value: %s\n" % states.SUCCESS
-                    msg = msg + "future.state: %s\n" % future.state
-                    msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
-                    msg = msg + "FAILED states: %s\n" % str(FAILED)
-                    with error_sentry:
-                        raise Exception(msg)
+                if state in STARTED_OR_WAITING:
+                    new_running.append(future)
+                    # waiting = True
+                
+                # if not success and not fail and not waiting:
+                #     #this is all debugging code to try to identify what is going on with a specific
+                #     # bug in which future.state IS DEFINITELY EQUAL to "SUCCESS", but the check above
+                #     # fails to catch that. The value is probably changing between checks.
+                #     lc1 = future.state == 'SUCCESS'
+                #     lc2 = states.SUCCESS == 'SUCCESS'
+                #     lc3 = states.SUCCESS == future.state
+                #     lc4 = future.state == u'SUCCESS'
+                #     lc5 = states.SUCCESS == u'SUCCESS'
+                #     lc6 = states.SUCCESS == unicode(future.state)
+                #     lc7 = states.SUCCESS == str(future.state)
+                #
+                #     msg = "Encountered unknown celery task state: '%s' \n " % future.state
+                #
+                #     msg = msg + "literal comparison future.state == 'SUCCESS': %s\n" % lc1
+                #     msg = msg + "literal comparison states.SUCCESS == 'SUCCESS': %s\n" % lc2
+                #     msg = msg + "literal comparison states.SUCCESS == future.state: %s\n" % lc3
+                #     msg = msg + "literal comparison future.state == u'SUCCESS': %s\n" % lc4
+                #     msg = msg + "literal comparison states.SUCCESS == u'SUCCESS': %s\n" % lc5
+                #     msg = msg + "literal comparison states.SUCCESS == unicode(future.state): %s\n" % lc6
+                #     msg = msg + "literal comparison states.SUCCESS == str(future.state): %s\n" % lc7
+                #
+                #     msg = msg + "success: %s\n" % success
+                #     msg = msg + "fail: %s\n" % fail
+                #     msg = msg + "waiting: %s\n" % waiting
+                #     msg = msg + "success constant value: %s\n" % states.SUCCESS
+                #     msg = msg + "future.state: %s\n" % future.state
+                #     msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
+                #     msg = msg + "FAILED states: %s\n" % str(FAILED)
+                #     with error_sentry:
+                #         raise Exception(msg)
                 
             running = new_running
             print "tasks:", running
