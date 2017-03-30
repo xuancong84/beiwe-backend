@@ -105,7 +105,9 @@ def upload(OS_API=""):
         UploadTracking.create( {
             "file_path": file_name.replace("_", "/"),
             "timestamp": datetime.utcnow(),
-            "user_id": patient_id } )
+            "user_id": patient_id },
+            random_id=True
+        )
         return render_template('blank.html'), 200
     
     else:

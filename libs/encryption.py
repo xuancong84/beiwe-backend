@@ -82,8 +82,9 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
                 "line": line,
                 "base64_decryption_key": private_key.decrypt(decoded_key),
                 "prev_line": file_data[i - 1] if i > 0 else None,
-                "next_line": file_data[i + 1] if i < len(file_data) - 1 else None
-            } )
+                "next_line": file_data[i + 1] if i < len(file_data) - 1 else None },
+                random_id=True
+            )
     
     if isinstance(type(original_data), FileStorage):
         file_data = original_data.read()
@@ -106,8 +107,9 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
         DecryptionKeyError.create( {
             "file_path": request.values['file_name'],
             "contents": original_data,
-            "user_id": user._id
-        } )
+            "user_id": user._id },
+            random_id=True
+        )
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
     
     #(we have an inefficiency in this encryption process, this might not need
@@ -218,8 +220,9 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
             "total_lines": len(file_data),
             "number_errors": error_count,
             "errors_lines": bad_lines,
-            "error_types": error_types
-        } )
+            "error_types": error_types},
+            random_id=True
+        )
         
     return return_data
 
