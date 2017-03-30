@@ -9,7 +9,9 @@ from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
 from security import decode_base64
 from db.study_models import Study
-from db.profiling import DecryptionKeyError as DecryptionKeyErrorDB, LineEncryptionError
+from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErrorMetadata,\
+    PADDING_ERROR, EMPTY_KEY, MALFORMED_CONFIG, INVALID_LENGTH, LINE_EMPTY, IV_MISSING,\
+    AES_KEY_BAD_LENGTH, IV_BAD_LENGTH, MP4_PADDING, LINE_IS_NONE
 
 class DecryptionKeyError(Exception): pass
 class HandledError(Exception): pass
@@ -68,46 +70,44 @@ def decrypt_server(data, study_id):
 
 
 
-def decrypt_device_file(patient_id, data, private_key, user):
+def decrypt_device_file(patient_id, original_data, private_key, user):
     """ Runs the line-by-line decryption of a file encrypted by a device. """
     #This is a special handler for iOS file uploads.
     
     def create_line_error_db_entry(error_type):
         # declaring this inside decrypt device file to access its function-global variables
-        LineEncryptionError.create(
-                type=error_type,
-                line=line,
-                base64_decryption_key=private_key.decrypt(decoded_key),
-                prev_line=file_data[i - 1] if i > 0 else None,
-                next_line=file_data[i + 1] if i < len(file_data) - 1 else None
-        )
+        if IS_STAGING:
+            LineEncryptionError.create( {
+                "type": error_type,
+                "line": line,
+                "base64_decryption_key": private_key.decrypt(decoded_key),
+                "prev_line": file_data[i - 1] if i > 0 else None,
+                "next_line": file_data[i + 1] if i < len(file_data) - 1 else None
+            } )
     
-    if isinstance(type(data), FileStorage):
-        file_data = data.read()
-    elif isinstance(data, (unicode, str)):
+    if isinstance(type(original_data), FileStorage):
+        file_data = original_data.read()
+    elif isinstance(original_data, (unicode, str)):
         #namespace is immediately overwritten, this is fine.
-        file_data = data
+        file_data = original_data
     else:
         raise TypeError("expected string or werkzeug.datastructures.FileStorage")
     
-    tracking=[]
+    bad_lines = []
+    error_types = []
     error_count = 0
-    
-    file_data = [line for line in file_data.split('\n') if line != ""]
     return_data = ""
+    file_data = [line for line in file_data.split('\n') if line != ""]
     
     try: #get the decryption key from the file.
         decoded_key = decode_base64(file_data[0].encode("utf-8"))
-        #TODO: data is sometimes an empty list, we get an index error.  Fix, don't catch.
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
     except (TypeError, IndexError) as e:
-        if IS_STAGING:
-            DecryptionKeyErrorDB.create(
-                file_path=request.values['file_name'],
-                key=file_data[0].encode("utf-8"),
-                contents=file_data[1:],
-                user_id=user._id
-            )
+        DecryptionKeyError.create( {
+            "file_path": request.values['file_name'],
+            "contents": original_data,
+            "user_id": user._id
+        } )
         raise DecryptionKeyError("invalid decryption key. %s" % e.message)
     
     #(we have an inefficiency in this encryption process, this might not need
@@ -115,14 +115,20 @@ def decrypt_device_file(patient_id, data, private_key, user):
     #The following is all error catching code for bugs we encountered (and solved)
     # in development.
     # print "length decrypted key", len(decrypted_key)
+    
     for i, line in enumerate(file_data):
         #we need to skip the first line (the decryption key), but need real index values in i
         if i==0: continue
         
         if line is None:
-            tracking.append([i])
+            #this case causes weird behavior inside decrypt_device_line, so we test for it instead.
+            error_count += 1
+            create_line_error_db_entry(LINE_IS_NONE)
+            error_types.append(LINE_IS_NONE)
+            bad_lines.append(line)
             print "encountered empty line of data, ignoring."
             continue
+            
         try:
             return_data += decrypt_device_line(patient_id, decrypted_key, line) + "\n"
         except Exception as e:
@@ -132,20 +138,26 @@ def decrypt_device_file(patient_id, data, private_key, user):
             if isinstance(e, IndexError):
                 error_message += "Something is wrong with data padding:\n\tline: %s" % line
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.PADDING_ERROR)
+                create_line_error_db_entry(PADDING_ERROR)
+                error_types.append(PADDING_ERROR)
+                bad_lines.append(line)
                 continue
 
             if isinstance(e, TypeError) and decrypted_key is None:
                 error_message += "The key was empty:\n\tline: %s" % line
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.EMPTY_KEY)
+                create_line_error_db_entry(EMPTY_KEY)
+                error_types.append(EMPTY_KEY)
+                bad_lines.append(line)
                 continue
 
             ################### skip these errors ##############################
             if "unpack" in e.message:
                 error_message += "malformed line of config, dropping it and continuing."
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.MALFORMED_CONFIG)
+                create_line_error_db_entry(MALFORMED_CONFIG)
+                error_types.append(MALFORMED_CONFIG)
+                bad_lines.append(line)
                 #the config is not colon separated correctly, this is a single
                 # line error, we can just drop it.
                 # implies an interrupted write operation (or read)
@@ -154,39 +166,61 @@ def decrypt_device_file(patient_id, data, private_key, user):
             if "Input strings must be a multiple of 16 in length" in e.message:
                 error_message += "Line was of incorrect length, dropping it and continuing."
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.INVALID_LENGTH)
+                create_line_error_db_entry(INVALID_LENGTH)
+                error_types.append(INVALID_LENGTH)
+                bad_lines.append(line)
                 continue
                 
             if isinstance(e, InvalidData):
                 error_message += "Line contained no data, skipping: " + str(line)
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.LINE_EMPTY)
+                create_line_error_db_entry(LINE_EMPTY)
+                error_types.append(LINE_EMPTY)
+                bad_lines.append(line)
                 continue
                 
             if isinstance(e, InvalidIV):
                 error_message += "Line contained no iv, skipping: " + str(line)
                 log_error(e, error_message)
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.IV_MISSING)
+                create_line_error_db_entry(IV_MISSING)
+                error_types.append(IV_MISSING)
+                bad_lines.append(line)
                 continue
                 
             ##################### flip out on these errors #####################
             if 'AES key' in e.message:
                 error_message += "AES key has bad length."
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.AES_KEY_BAD_LENGTH)
+                create_line_error_db_entry(AES_KEY_BAD_LENGTH)
+                error_types.append(AES_KEY_BAD_LENGTH)
+                bad_lines.append(line)
             elif 'IV must be' in e.message:
                 error_message += "iv has bad length."
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.IV_BAD_LENGTH)
+                create_line_error_db_entry(IV_BAD_LENGTH)
+                error_types.append(IV_BAD_LENGTH)
+                bad_lines.append(line)
             elif 'Incorrect padding' in e.message:
                 error_message += "base64 padding error, config is truncated."
-                if IS_STAGING: create_line_error_db_entry(LineEncryptionError.MP4_PADDING)
+                create_line_error_db_entry(MP4_PADDING)
+                error_types.append(MP4_PADDING)
+                bad_lines.append(line)
                 # this is only seen in mp4 files. possibilities:
                 #  upload during write operation.
                 #  broken base64 conversion in the app
                 #  some unanticipated error in the file upload
             else:
                 raise #If none of the above errors happened, raise the error.
-            raise HandledError(error_message) #if any of them did happen, raise a HandledError to cease execution.
+            raise HandledError(error_message)
+            # if any of them did happen, raise a HandledError to cease execution.
     
+    if error_count:
+        EncryptionErrorMetadata.create( {
+            "file_name": request.values['file_name'],
+            "total_lines": len(file_data),
+            "number_errors": error_count,
+            "errors_lines": bad_lines,
+            "error_types": error_types
+        } )
+        
     return return_data
 
 def decrypt_device_line(patient_id, key, data):

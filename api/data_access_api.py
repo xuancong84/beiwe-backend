@@ -9,7 +9,7 @@ from db.data_access_models import ChunksRegistry, FileToProcess
 from db.study_models import Study, Studies
 from db.user_models import Admin, User, Users
 from libs.logging import email_system_administrators
-from libs.s3 import s3_retrieve, s3_list_files, s3_upload
+from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS)
