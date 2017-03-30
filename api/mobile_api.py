@@ -1,14 +1,16 @@
 import calendar, time
 
+from datetime import datetime
 from flask import Blueprint, request, abort, render_template, json
-from config.constants import ALLOWED_EXTENSIONS, ANDROID_API, IOS_API
+from config.constants import ALLOWED_EXTENSIONS
+from db.profiling import UploadTracking
 from db.user_models import User
 from db.study_models import Study
 from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error, log_and_email_500_error, email_system_administrators
+from libs.logging import log_error, log_and_email_500_error
 from libs.http_utils import determine_os_api
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
@@ -100,6 +102,10 @@ def upload(OS_API=""):
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
         FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user["study_id"], patient_id)
+        UploadTracking.create( {
+            "file_path": file_name.replace("_", "/"),
+            "timestamp": datetime.utcnow(),
+            "user_id": user._id } )
         return render_template('blank.html'), 200
     
     else:

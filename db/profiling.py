@@ -1,5 +1,5 @@
-from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
-from mongolia.constants import REQUIRED_STRING, REQUIRED, REQUIRED_INT, REQUIRED_LIST
+from db.mongolia_setup import DatabaseObject, DatabaseCollection
+from mongolia.constants import REQUIRED_STRING, REQUIRED, REQUIRED_INT, REQUIRED_LIST, REQUIRED_DATETIME
 
 from libs.security import decode_base64
 
@@ -44,7 +44,7 @@ class DecryptionKeyError(DatabaseObject):
     DEFAULTS = {
         "file_path": REQUIRED_STRING,
         "contents": REQUIRED,
-        "user_id": REQUIRED_STRING,
+        "user_id": REQUIRED_STRING
     }
     
     def decode(self):
@@ -56,15 +56,23 @@ class DecryptionKeyError(DatabaseObject):
     #     return private_key.decrypt( self.decode() )
 
 
-class EncryptionErrorCount(DatabaseObject):
-    PATH = "beiwe.encryption_error_count"
-    DEFAULTS = ""
-        
-class EncryptionErrors(DatabaseCollection):
-    OBJTYPE = EncryptionError
+class UploadTracking(DatabaseObject):
+    PATH = "beiwe.updload_tracking"
+    
+    DEFAULTS = {
+        "file_path": REQUIRED_STRING,
+        "timestamp": REQUIRED_DATETIME,
+        "user": REQUIRED_STRING
+    }
+    
+class EncryptionErrorMetadatas(DatabaseCollection):
+    OBJTYPE = EncryptionErrorMetadata
 
 class DecryptionKeyErrors(DatabaseCollection):
     OBJTYPE = DecryptionKeyError
 
 class LineEncryptionErrors(DatabaseCollection):
     OBJTYPE = LineEncryptionError
+
+class Uploads(DatabaseCollection):
+    OBJTYPE = UploadTracking
