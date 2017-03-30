@@ -57,7 +57,7 @@ class DecryptionKeyError(DatabaseObject):
 
 
 class UploadTracking(DatabaseObject):
-    PATH = "beiwe.updload_tracking"
+    PATH = "beiwe.upload_tracking"
     
     DEFAULTS = {
         "file_path": REQUIRED_STRING,
