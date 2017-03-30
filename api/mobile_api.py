@@ -95,7 +95,7 @@ def upload(OS_API=""):
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
         return render_template('blank.html'), 200
     except DecryptionKeyError:
-        return abort(400)
+        return render_template('blank.html'), 200
 
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
