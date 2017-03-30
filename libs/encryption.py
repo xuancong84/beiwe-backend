@@ -13,7 +13,7 @@ from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErro
     PADDING_ERROR, EMPTY_KEY, MALFORMED_CONFIG, INVALID_LENGTH, LINE_EMPTY, IV_MISSING,\
     AES_KEY_BAD_LENGTH, IV_BAD_LENGTH, MP4_PADDING, LINE_IS_NONE
 
-class DecryptionKeyError(Exception): pass
+class DecryptionKeyInvalidError(Exception): pass
 class HandledError(Exception): pass
 class InvalidIV(Exception): pass
 class InvalidData(Exception): pass
@@ -110,7 +110,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
             "user_id": user._id },
             random_id=True
         )
-        raise DecryptionKeyError("invalid decryption key. %s" % e.message)
+        raise DecryptionKeyInvalidError("invalid decryption key. %s" % e.message)
     
     #(we have an inefficiency in this encryption process, this might not need
     # to be doubly encoded in base64.  It works, not fixing it.)

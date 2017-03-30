@@ -7,7 +7,7 @@ from db.profiling import UploadTracking
 from db.user_models import User
 from db.study_models import Study
 from libs.android_error_reporting import send_android_error_report
-from libs.encryption import decrypt_device_file, DecryptionKeyError, HandledError
+from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error, log_and_email_500_error
@@ -94,7 +94,7 @@ def upload(OS_API=""):
         print "the following error was handled:"
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
         return render_template('blank.html'), 200
-    except DecryptionKeyError:
+    except DecryptionKeyInvalidError:
         return render_template('blank.html'), 200
 
     #print "decryption success:", file_name
