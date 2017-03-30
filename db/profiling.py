@@ -62,7 +62,7 @@ class UploadTracking(DatabaseObject):
     DEFAULTS = {
         "file_path": REQUIRED_STRING,
         "timestamp": REQUIRED_DATETIME,
-        "user": REQUIRED_STRING
+        "user_id": REQUIRED_STRING
     }
     
 class EncryptionErrorMetadatas(DatabaseCollection):
