@@ -30,7 +30,7 @@
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="min">Minimum Value:</label></td>
               <td>
-                <input type="number" name="min" id="min" class="form-control" min="0" max="100"
+                <input type="number" name="min" id="min" class="form-control" min="-100" max="100"
                        ng-keyup="surveyBuilder.checkSliderValue('min')"
                        ng-model="surveyBuilder.currentQuestionFields.min">
               </td>
@@ -38,7 +38,7 @@
             <tr ng-if="surveyBuilder.currentQuestionFields.question_type == surveyBuilder.QUESTION_TYPES.slider">
               <td><label for="max">Maximum Value:</label></td>
               <td>
-                <input type="number" name="max" id="max" class="form-control" min="1" max="100"
+                <input type="number" name="max" id="max" class="form-control" min="-100" max="100"
                        ng-keyup="surveyBuilder.checkSliderValue('max')"
                        ng-model="surveyBuilder.currentQuestionFields.max">
               </td>
