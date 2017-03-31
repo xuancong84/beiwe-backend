@@ -106,7 +106,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
     except (TypeError, IndexError) as e:
         DecryptionKeyError.create( {
             "file_path": request.values['file_name'],
-            "contents": original_data,
+            "contents": "\n".join(file_data),
             "user_id": user._id },
             random_id=True
         )
