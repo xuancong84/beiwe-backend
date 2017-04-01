@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db.mongolia_setup import DatabaseObject, DatabaseCollection
 from mongolia.constants import REQUIRED_STRING, REQUIRED, REQUIRED_INT, REQUIRED_LIST, REQUIRED_DATETIME
 
@@ -77,3 +79,7 @@ class LineEncryptionErrors(DatabaseCollection):
 
 class Uploads(DatabaseCollection):
     OBJTYPE = UploadTracking
+    
+    @classmethod
+    def get_trailing(cls, time_delta):
+        return cls(query={"timestamp":{"$gte":datetime.utcnow() - time_delta}})
