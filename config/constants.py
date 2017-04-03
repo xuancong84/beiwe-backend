@@ -130,6 +130,26 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
 
 SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
+UPLOAD_FILE_TYPE_MAPPING = {
+    "accel": ACCELEROMETER,
+    "bluetoothLog": BLUETOOTH,
+    "callLog": CALL_LOG,
+    "devicemotion": DEVICEMOTION,
+    "gps": GPS,
+    "gyro": GYRO,
+    "logFile": LOG_FILE,
+    "magnetometer": MAGNETOMETER,
+    "powerState": POWER_STATE,
+    "reachability": REACHABILITY,
+    "surveyAnswers": SURVEY_ANSWERS,
+    "surveyTimings": SURVEY_TIMINGS,
+    "textsLog": TEXTS_LOG,
+    "voiceRecording": VOICE_RECORDING,
+    "wifiLog": WIFI,
+    "proximity": PROXIMITY,
+}
+
+
 def data_stream_to_s3_file_name_string(data_type):
     """Maps a data type to the internal string representation used throughout the codebase.
         (could be a dict mapping, but it is fine) """
