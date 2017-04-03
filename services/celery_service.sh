@@ -10,8 +10,11 @@ sudo pip install supervisor celery
 #this is almost definitely overkill/unnegessary
 sudo mkdir -p /etc/supervisor/conf.d/
 sudo mkdir -p /var/log/celery/
+sudo rm /var/log/celery/celeryd.log
 sudo touch /var/log/celery/celeryd.log
+sudo rm /var/log/celery/celeryd.err
 sudo touch /var/log/celery/celeryd.err
+sudo rm /var/log/supervisor/supervisord.log
 sudo touch /var/log/supervisor/supervisord.log
 sudo chmod 666 /var/log/celery/celeryd.err
 sudo chmod 666 /var/log/celery/celeryd.log
