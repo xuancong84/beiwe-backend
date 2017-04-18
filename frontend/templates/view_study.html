@@ -50,16 +50,20 @@
                   {% endif %}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{study._id}}','{{ patient['_id'] }}')" >Reset Password</button>
+                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{study._id}}','{{ patient['_id'] }}')" >Reset password</button>
                 </td>
               </tr>
             {% endfor %}
 
           </tbody>
         </table>
-        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study._id }}')">Add New Patient</button>
 
-        </br></br>
+        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study._id }}')" title="Enable one new patient to enroll in {{ study_name }}: create a new Patient ID-registration password pair">Add new patient</button>
+
+        <button type="button" class="btn btn-warning add_many_patients_button" data-toggle="modal" data-target="#addManyPatientsModal" title="Enable a number of new patients to enroll in {{ study_name }}: download a file of new Patient IDs and registration passwords">Add many new patients</button>
+        {% include 'create_many_patients_modal.html' %}
+
+        </br><hr></br>
 
         <div class="row">
           <h3>Surveys</h3>

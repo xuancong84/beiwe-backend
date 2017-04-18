@@ -1,15 +1,18 @@
 $(document).ready(function(){
     // Set up the main list of patients using DataTables
     $("#patients_list").DataTable();
-});
 
+    $('#createManyPatientsForm').on('submit', function(e){
+        $('#createManyPatientsButton').prop('disabled', true);  // Disable the button so they can't click it twice
+    });
+});
 
 function logout() {
     window.location.href="/logout";
 }
 
 function create_new_patient(study_id) {
-    $('.add_new_patient_button').prop('disabled', true);  // Disable the button
+    $('.add_new_patient_button').prop('disabled', true);  // Disable the button so they can't click it twice
     $.ajax({
         type: 'POST',
         url: '/create_new_patient/' + study_id,

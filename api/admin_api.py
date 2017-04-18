@@ -1,4 +1,7 @@
+from csv import writer
 from flask import abort, Blueprint, make_response, redirect, request, send_file
+from re import sub
+from StringIO import StringIO
 
 from config.secure_settings import IS_STAGING
 from libs.admin_authentication import authenticate_admin_study_access,\
@@ -106,6 +109,33 @@ def create_new_patient(study_id=None):
     create_client_key_pair(patient_id, study_id)
     response_string = "patient_id: " + patient_id + "\npassword: " + password
     return make_response(response_string, 201)
+
+
+@admin_api.route('/create_many_patients/<string:study_id>', methods=["POST"])
+@authenticate_admin_study_access
+def create_many_new_patients(study_id=None):
+    """ Creates a number of new users at once for a study.  Generates a
+    password and keys for each one, pushes data to S3 and the user database,
+    adds users to the study they're supposed to be attached to, and returns
+    a CSV file for download with a mapping of Patient IDs and passwords."""
+    number_of_new_patients = int(request.form.get('number_of_new_patients'))
+    desired_filename = request.form.get('desired_filename')
+    filename_spaces_to_underscores = sub(r'[\ =]', '_', desired_filename)
+    filename = sub(r'[^a-zA-Z0-9_\.=]', '', filename_spaces_to_underscores)
+    if not filename.endswith('.csv'):
+        filename += ".csv"
+    si = StringIO()
+    filewriter = writer(si)
+    filewriter.writerow(['Patient ID', "Registration password"])
+    for _ in range(0, number_of_new_patients):
+        patient_id, password = User.create(study_id)
+        s3_upload(patient_id, "", study_id) #creates an empty file (folder?) on s3 indicating that this user exists
+        create_client_key_pair(patient_id, study_id)
+        filewriter.writerow([patient_id, password])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=" + filename
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 """##### Methods responsible for distributing APK file of Android app. #####"""
