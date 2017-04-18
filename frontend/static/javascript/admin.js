@@ -5,6 +5,10 @@ $(document).ready(function(){
     $('#createManyPatientsForm').on('submit', function(e){
         $('#createManyPatientsButton').prop('disabled', true);  // Disable the button so they can't click it twice
     });
+
+    $('#addManyPatientsModal').on("hidden.bs.modal", function() {
+        location.reload();
+    });
 });
 
 function logout() {
