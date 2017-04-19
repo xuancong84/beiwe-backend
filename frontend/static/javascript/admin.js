@@ -2,8 +2,12 @@ $(document).ready(function(){
     // Set up the main list of patients using DataTables
     $("#patients_list").DataTable();
 
+    $('#many-new-patients-loading-spinner').hide();
+
     $('#createManyPatientsForm').on('submit', function(e){
         $('#createManyPatientsButton').prop('disabled', true);  // Disable the button so they can't click it twice
+        $('#many-new-patients-loading-spinner').show();
+        $('#many-new-patients-submit-and-cancel-buttons').hide();
     });
 
     $('#addManyPatientsModal').on("hidden.bs.modal", function() {

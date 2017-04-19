@@ -1,7 +1,6 @@
 from csv import writer
-from flask import abort, Blueprint, make_response, redirect, request, send_file
+from flask import abort, Blueprint, g, make_response, redirect, request, Response, session
 from re import sub
-from StringIO import StringIO
 
 from config.secure_settings import IS_STAGING
 from libs.admin_authentication import authenticate_admin_study_access,\
@@ -11,6 +10,7 @@ from db.user_models import User, Admin
 from db.study_models import Study, Studies
 from bson.objectid import ObjectId
 from libs.s3 import s3_upload, create_client_key_pair
+from libs.streaming_bytes_io import StreamingBytesIO
 from flask.templating import render_template
 
 from libs.security import check_password_requirements
@@ -124,18 +124,22 @@ def create_many_new_patients(study_id=None):
     filename = sub(r'[^a-zA-Z0-9_\.=]', '', filename_spaces_to_underscores)
     if not filename.endswith('.csv'):
         filename += ".csv"
-    si = StringIO()
+    return Response(csv_generator(study_id, number_of_new_patients),
+                    mimetype="csv",
+                    headers={'Content-Disposition':'attachment; filename="%s"' % filename})
+
+
+def csv_generator(study_id, number_of_new_patients):
+    si = StreamingBytesIO()
     filewriter = writer(si)
     filewriter.writerow(['Patient ID', "Registration password"])
-    for _ in range(0, number_of_new_patients):
+    for _ in xrange(0, number_of_new_patients):
         patient_id, password = User.create(study_id)
         s3_upload(patient_id, "", study_id) #creates an empty file (folder?) on s3 indicating that this user exists
         create_client_key_pair(patient_id, study_id)
         filewriter.writerow([patient_id, password])
-    output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=" + filename
-    output.headers["Content-type"] = "text/csv"
-    return output
+        yield si.getvalue()
+        si.empty()
 
 
 """##### Methods responsible for distributing APK file of Android app. #####"""
