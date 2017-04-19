@@ -22,13 +22,14 @@
 
         <!-- Sentry Configuration -->
         <script src="https://cdn.ravenjs.com/3.10.0/angular/raven.min.js" crossorigin="anonymous"></script>
-        <script>Raven.config('{{SENTRY_JAVASCRIPT_DSN}}', {
-            debug:true
-            }).install();</script>
+        {% if SENTRY_JAVASCRIPT_DSN != 'USE_EMAIL_FALLBACK' %}
+            <script>Raven.config('{{SENTRY_JAVASCRIPT_DSN}}', {
+                debug:true
+                }).install();</script>
 
-        {# TODO: get a favicon #}
-        <link rel="icon" type="image/ico" href="/frontend/static/img/favicon_64.ico">
-
+            {# TODO: get a favicon #}
+            <link rel="icon" type="image/ico" href="/frontend/static/img/favicon_64.ico">
+        {% endif %}
         <title>Beiwe | {% block title %}{% endblock %}</title>
     {% endblock %}
 </head>
