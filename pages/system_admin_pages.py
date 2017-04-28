@@ -6,6 +6,7 @@ from db.user_models import Admin, Admins
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
+from libs.copy_study import copy_existing_study_if_asked_to
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
     string_to_int
 from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
@@ -77,20 +78,26 @@ def edit_study(study_id=None):
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 
+
 @system_admin_pages.route('/create_study', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_study():
     if request.method == 'GET':
-        return render_template('create_study.html')
+        return render_template('create_study.html',
+                               studies=Studies.get_all_studies(),
+                               allowed_studies=get_admins_allowed_studies(),
+                               system_admin=admin_is_system_admin())
     name = request.form.get('name')
     encryption_key = request.form.get('encryption_key')
     try:
         study = Study.create_default_study(name, encryption_key)
         flash("Successfully created a new study.", 'success')
+        copy_existing_study_if_asked_to(study)
         return redirect('/device_settings/' + str(study._id))
     except (InvalidEncryptionKeyError, StudyAlreadyExistsError) as e:
         flash(e.message, 'danger')
         return redirect('/create_study')
+
 
 @system_admin_pages.route('/delete_study/<string:study_id>', methods=['POST'])
 @authenticate_system_admin

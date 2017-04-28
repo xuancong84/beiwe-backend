@@ -2,6 +2,11 @@
 
 {% block title %}Create Study{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block content %}
 
     <div class="row">
@@ -23,6 +28,48 @@
 
             <p><i>Note: You MUST copy down the encryption key somewhere; if you lose it, you cannot access any data from this study!</i></p>
             <p><i>We recommend you use a random string generator (like the one on <a href="https://www.random.org/strings/">random.org</a>) to create the 32-character encryption key.</i></p>
+            <br>
+
+            {# Copy settings and surveys from an existing study #}
+            <div id="filterableList" ng-controller="FilterableListController">
+                <div class="checkbox">
+                    {# Checkbox: do you want to copy an existing study? #}
+                    <label>
+                        <input type="checkbox" name="copy_existing_study" ng-model="copy_existing_study" value="true">
+                        Copy App Settings or Surveys from an existing study into this new study that you're creating
+                    </label>
+                </div>
+                {# Only show these inputs if they checked that yes, they do want to copy an existing study #}
+                <div ng-if="copy_existing_study == true">
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Filter by study name" ng-model="studyFilterText">
+                    </div>
+                    {# Search field to filter studies #}
+                    <div ng-init="filterable_studies = [
+                        {% for study in studies %}
+                            {name: '{{study['name']}}', study_id: '{{study['_id']}}'},
+                        {% endfor %}
+                    ]"></div>
+                    {# Dropdown menu to select a study #}
+                    <div class="form-group">
+                        <select class="form-control" ng-model="existing_study" name="existing_study_id" ng-options="study.name for study in (filterable_studies | filter:{name: studyFilterText}) track by study.study_id"></select>
+                    </div>
+                    {# Checkbox: copy app settings? #}
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="device_settings" value="true" checked>
+                            Copy {%raw%}{{ existing_study['name'] }}{%endraw%} App Settings into this new study that you're creating
+                        </label>
+                    </div>
+                    {# Checkbox: copy surveys? #}
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="surveys" value="true" checked>
+                            Copy {%raw%}{{ existing_study['name'] }}{%endraw%} Surveys and Audio Surveys into this new study that you're creating
+                        </label>
+                    </div>
+                </div>
+            </div>
             <br>
 
             <input type="submit" class="btn btn-success" value="Create Study">
