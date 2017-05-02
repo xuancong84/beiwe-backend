@@ -108,8 +108,7 @@ class Uploads(DatabaseCollection):
             #global stats
             data["totals"]["total_count"] += 1
             data["totals"]["total_megabytes"] += upload['file_size'] / 1024. / 1024.
-            if get_usernames:
-                data["totals"]["users"].add(upload['user_id'])
+            data["totals"]["users"].add(upload['user_id'])
             
             #get data stream type from file_path
             file_type = UPLOAD_FILE_TYPE_MAPPING[upload['file_path'].split("/", 2)[1]]
@@ -121,6 +120,7 @@ class Uploads(DatabaseCollection):
                 data[file_type]["users"].add(upload["user_id"])
             if i % 10000 == 0:
                 print "processed %s uploads..." % i
+        
         data["totals"]["user_count"] = len(data["totals"]["users"])
         
         if not get_usernames: #purge usernames if we don't need them.
