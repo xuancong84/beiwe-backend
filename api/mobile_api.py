@@ -15,6 +15,12 @@ from libs.http_utils import determine_os_api
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
 
+from raven import Client as SentryClient
+from raven.transport import HTTPTransport
+
+from config.secure_settings import SENTRY_DSN
+
+
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
@@ -126,8 +132,15 @@ def upload(OS_API=""):
         elif file_name and not contains_valid_extension( file_name ):
             error_message += "contains an invalid extension, it was interpretted as "
             error_message += grab_file_extension(file_name)
-        else: error_message += "AN UNKNOWN ERROR OCCURRED."
-        log_and_email_500_error(Exception("upload error"), error_message)
+        else:
+            error_message += "AN UNKNOWN ERROR OCCURRED."
+
+        sentry_client = SentryClient(dsn=SENTRY_DSN,
+                                     tags={"upload_error": "upload error", "user_id": user._id },
+                                     transport=HTTPTransport)
+        sentry_client.captureMessage(error_message)
+        
+        # log_and_email_500_error(Exception("upload error"), error_message)
         return abort(400)
 
 
