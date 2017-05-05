@@ -8,3 +8,4 @@ cronutils>=0.1.9
 python-dateutil
 raven[flask]
 pytz
+werkzeug
