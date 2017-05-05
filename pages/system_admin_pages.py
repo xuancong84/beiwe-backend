@@ -107,7 +107,8 @@ def delete_study(study_id=None):
         study = Study(study_id)
         study.update({'admins': [],
                       'deleted': True})
-    return redirect('/manage_studies')
+    flash ("Deleted study '%s'" % study['name'], 'success')
+    return "success"
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])

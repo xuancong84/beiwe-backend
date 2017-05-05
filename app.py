@@ -1,6 +1,7 @@
 import os
 import jinja2, traceback
 from flask import Flask, render_template, redirect, abort
+from werkzeug.contrib.fixers import ProxyFix
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
     data_access_web_form
 from api import admin_api, copy_study_api, data_access_api, mobile_api, survey_api
@@ -15,6 +16,7 @@ def subdomain(directory):
     set_secret_key(app)
     loader = [app.jinja_loader, jinja2.FileSystemLoader(directory + "/templates")]
     app.jinja_loader = jinja2.ChoiceLoader(loader)
+    app.wsgi_app = ProxyFix(app.wsgi_app)
     return app
 
 
