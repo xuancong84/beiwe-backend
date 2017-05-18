@@ -82,7 +82,7 @@ def get_studies():
     if not admin: return abort(403)  # access key DNE
     if not admin.validate_access_credentials(access_secret):
         return abort(403)  # incorrect secret key
-    return json.dumps({str(study._id):study.name for study in Studies(admins=str(admin._id))})
+    return json.dumps({str(study._id): study.name for study in Studies(admins=str(admin._id))})
 
 
 @data_access_api.route("/get-users/v1", methods=['POST', "GET"])

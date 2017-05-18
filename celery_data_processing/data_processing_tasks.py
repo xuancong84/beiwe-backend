@@ -175,6 +175,7 @@ def report_file_processing_locked_and_exit():
                                  str(int(timedelta_since_last_run.total_seconds() / 60 % 60)))
         
         if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS * 4:
+            error_msg = "DATA PROCESSING OVERLOADED, CHECK SERVER.\n" + error_msg
             email_system_administrators(error_msg, "DATA PROCESSING OVERLOADED, CHECK SERVER")
         raise ProcessingOverlapError(error_msg)
 
