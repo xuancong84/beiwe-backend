@@ -7,7 +7,7 @@
 #sudo apt-get install -y rabbitmq-server
 sudo pip install supervisor celery
 
-#this is almost definitely overkill/unnegessary
+#this is almost definitely overkill/unnecessary
 sudo mkdir -p /etc/supervisor/conf.d/
 sudo mkdir -p /var/log/celery/
 sudo rm /var/log/celery/celeryd.log
