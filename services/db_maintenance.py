@@ -43,6 +43,7 @@ def optimize_db():
         print delta.total_seconds()
     
     #This command can take time, causes a write-block, not necessary if sufficient space is allocated to DB drive.
+    # db = mongolia.mongo_connection.CONNECTION.get_connection()['beiwe']
     # start = datetime.utcnow()
     # print str(datetime.now()), "running repair database..."
     # db.command("repairDatabase")
