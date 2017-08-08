@@ -321,8 +321,11 @@ def binify_csv_rows(rows_list, study_id, user_id, data_type, header):
         Returns a dict of form {(study_id, user_id, data_type, time_bin, heeder):rows_lists}. """
     ret = defaultdict(deque)
     for row in rows_list:
-        ret[(study_id, user_id, data_type,
-             binify_from_timecode(row[0]), header)].append(row)
+        # discovered August 7 2017, looks like there was an empty line at the end
+        # of a file? row was a [''].
+        if row and row[0]:
+            ret[(study_id, user_id, data_type,
+                 binify_from_timecode(row[0]), header)].append(row)
     return ret
 
 def append_binified_csvs(old_binified_rows, new_binified_rows, file_to_process):
