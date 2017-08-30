@@ -41,7 +41,8 @@ def chunk_hash( data ):
     return hashlib.md5( data ).digest().encode('base64')
 
 def low_memory_chunk_hash( data ):
-    """ We need to hash data in a data stream chunk and store the hash in mongo. """
+    """ as chunk_hash, but expects the object to contain an index-0 accessible string, which is
+    passed by reference to reduce memory usage. """
     return hashlib.md5( data[0] ).digest().encode('base64')
 
 

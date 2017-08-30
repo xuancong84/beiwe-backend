@@ -30,6 +30,15 @@ mobile_api = Blueprint('mobile_api', __name__)
 ################################ UPLOADS #######################################
 ################################################################################
 
+# @mobile_api.route('/loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb/')
+# def temp():
+#     from io import StringIO
+#     from flask import Response
+#     return Response(StringIO(u"loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb"),
+#                     mimetype="txt",
+#                     headers={'Content-Disposition':'attachment; filename="loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb.txt"'})
+
+
 @mobile_api.route('/upload', methods=['POST'])
 @mobile_api.route('/upload/ios/', methods=['GET', 'POST'])
 @determine_os_api
@@ -92,6 +101,7 @@ def upload(OS_API=""):
     
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
+        uploaded_file = uploaded_file.replace(r'\n', '\n')
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user )
     except HandledError as e:
         # when decrypting fails, regardless of why, we rely on the decryption code
