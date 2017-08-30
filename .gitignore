@@ -3,6 +3,7 @@
 .settings
 .project
 .idea/
+.python-version
 
 # Beiwe Excluded Files
 config/security.py
