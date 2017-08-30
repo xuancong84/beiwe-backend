@@ -101,7 +101,6 @@ def upload(OS_API=""):
     
     client_private_key = get_client_private_key(patient_id, user['study_id'])
     try:
-        uploaded_file = uploaded_file.replace(r'\n', '\n')
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user )
     except HandledError as e:
         # when decrypting fails, regardless of why, we rely on the decryption code
