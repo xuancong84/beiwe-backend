@@ -8,17 +8,13 @@ class StreamingBytesIO(BytesIO):
     _position = 0
 
     def empty(self):
-        """
-        Clears the BytesIO object while retaining the current virtual position
-        """
+        """ Clears the BytesIO object while retaining the current virtual position """
         self._position = self.tell()
         # order does not matter for truncate and seek
         self.truncate(0)
         self.seek(0)
 
     def tell(self):
-        """
-        Returns the current stream's virtual position (where the stream would be if it had
-        been running contiguously and self.empty() is not called)
-        """
+        """ Returns the current stream's virtual position (where the stream would be if it had
+        been running contiguously and self.empty() is not called) """
         return self._position + super(StreamingBytesIO, self).tell()

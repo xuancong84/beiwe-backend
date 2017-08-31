@@ -45,13 +45,15 @@ from libs.files_to_process import ProcessingOverlapError, do_process_user_file_c
 def queue_user(name):
     return celery_process_file_chunks(name)
 
-#Fixme: does this work? also doing a
+#Fixme: does this work?
 queue_user.max_retries = 0
 
 def safe_queue_user(*args, **kwargs):
-    for i in range(100):
+    """ Enqueuing can fail deep inside amqp/transport.py with an OperationalError. We
+    wrap it in some retry logic when this occurs. """
+    for i in xrange(10):
         try:
-            return queue_user.apply_async( *args, **kwargs)
+            return queue_user.apply_async(*args, **kwargs)
         except OperationalError:
             if i < 3:
                 pass
@@ -75,8 +77,9 @@ def create_file_processing_tasks():
                      sentry_client_kwargs={'transport':HTTPTransport}) as error_sentry:
         print error_sentry.sentry_client.is_enabled()
         if FileProcessLock.islocked():
+            # This is really a safety check to ensure that no code executes if this runs
             report_file_processing_locked_and_exit()
-            exit(0) #This is really a safety check, this code should not actually be reachable.
+            exit(0)
         else:
             FileProcessLock.lock()
             
@@ -88,14 +91,13 @@ def create_file_processing_tasks():
         
         for user_id in user_ids:
             # queue all users, get list of futures to check
-            #Apparently this can fail sometimes deep inside amqp/transport.py in read_frame at line 237
-            # with an OperationalError, so we are wrapping it in a function to do some retries if it fails.
             running.append(safe_queue_user(args=[user_id],
                                            max_retries=0,
                                            expires=expiry,
                                            task_track_started=True,
                                            task_publish_retry=False,
                                            retry=False) )
+            
         print "tasks:", running
         
         while running:
@@ -103,55 +105,17 @@ def create_file_processing_tasks():
             failed = []
             successful = []
             for future in running:
-                # success = False
-                # fail = False
-                # waiting = False
+                ####################################################################################
+                # This variable can mutate on a separate thread.  We need the value as it was at
+                # this snapshot in time, so we store it.  (The object is a string, passed by value.)
+                ####################################################################################
                 state = future.state
-                
                 if state == SUCCESS:
-                    #we are getting some very weird errors where this string does not match.
                     successful.append(future)
-                    # success = True
-                
                 if state in FAILED:
                     failed.append(future)
-                    # fail = True
-                    
                 if state in STARTED_OR_WAITING:
                     new_running.append(future)
-                    # waiting = True
-                
-                # if not success and not fail and not waiting:
-                #     #this is all debugging code to try to identify what is going on with a specific
-                #     # bug in which future.state IS DEFINITELY EQUAL to "SUCCESS", but the check above
-                #     # fails to catch that. The value is probably changing between checks.
-                #     lc1 = future.state == 'SUCCESS'
-                #     lc2 = states.SUCCESS == 'SUCCESS'
-                #     lc3 = states.SUCCESS == future.state
-                #     lc4 = future.state == u'SUCCESS'
-                #     lc5 = states.SUCCESS == u'SUCCESS'
-                #     lc6 = states.SUCCESS == unicode(future.state)
-                #     lc7 = states.SUCCESS == str(future.state)
-                #
-                #     msg = "Encountered unknown celery task state: '%s' \n " % future.state
-                #
-                #     msg = msg + "literal comparison future.state == 'SUCCESS': %s\n" % lc1
-                #     msg = msg + "literal comparison states.SUCCESS == 'SUCCESS': %s\n" % lc2
-                #     msg = msg + "literal comparison states.SUCCESS == future.state: %s\n" % lc3
-                #     msg = msg + "literal comparison future.state == u'SUCCESS': %s\n" % lc4
-                #     msg = msg + "literal comparison states.SUCCESS == u'SUCCESS': %s\n" % lc5
-                #     msg = msg + "literal comparison states.SUCCESS == unicode(future.state): %s\n" % lc6
-                #     msg = msg + "literal comparison states.SUCCESS == str(future.state): %s\n" % lc7
-                #
-                #     msg = msg + "success: %s\n" % success
-                #     msg = msg + "fail: %s\n" % fail
-                #     msg = msg + "waiting: %s\n" % waiting
-                #     msg = msg + "success constant value: %s\n" % states.SUCCESS
-                #     msg = msg + "future.state: %s\n" % future.state
-                #     msg = msg + "STARTED_OR_WAITING states: %s\n" % str(STARTED_OR_WAITING)
-                #     msg = msg + "FAILED states: %s\n" % str(FAILED)
-                #     with error_sentry:
-                #         raise Exception(msg)
                 
             running = new_running
             print "tasks:", running
@@ -159,7 +123,7 @@ def create_file_processing_tasks():
                 sleep(5)
                 
         print "Finished, unlocking."
-        FileProcessLock.unlock() #This must be ___inside___ the with statement
+        FileProcessLock.unlock() #  This MUST be ___inside___ the with statement.
 
 
 def report_file_processing_locked_and_exit():
@@ -192,9 +156,9 @@ class LogList(list):
         
         
 def celery_process_file_chunks(user_id):
-    """ This is the function that is called from cron.  It runs through all new
-    files that have been uploaded and 'chunks' them. Handles logic for skipping
-    bad files, raising errors appropriately. """
+    """ This is the function that is called from cron.  It runs through all new files that have
+    been uploaded and 'chunks' them. Handles logic for skipping bad files, raising errors
+    appropriately. """
     log = LogList()
     number_bad_files = 0
     error_sentry = ErrorSentry(SENTRY_DSN,

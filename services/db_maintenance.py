@@ -9,9 +9,8 @@ from config.secure_settings import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
 from db.mongolia_setup import db_connection
 
 def run_database_tasks():
-    """ Runs a database optimize (which should speed up the backup),
-        and then runs a backup.  If the optimize fails we run the backup
-        anyway and raise the failure at the end. """
+    """ Runs a database optimize (which should speed up the backup), and then runs a backup.  If
+    the optimize fails we run the backup anyway and raise the failure at the end. """
     error = None
     try:
         optimize_db()

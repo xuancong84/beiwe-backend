@@ -11,6 +11,8 @@ from libs.security import check_password_requirements
 
 admin_pages = Blueprint('admin_pages', __name__)
 
+#TODO: Document.
+
 @admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
@@ -57,8 +59,7 @@ def logout():
 
 @admin_pages.route("/validate_login", methods=["GET", "POST"])
 def login():
-    """ Authenticates administrator login, redirects to login page
-        if authentication fails."""
+    """ Authenticates administrator login, redirects to login page if authentication fails. """
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]

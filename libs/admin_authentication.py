@@ -56,13 +56,12 @@ class ArgumentMissingException(Exception): pass
 #TODO: Low Priority. Josh/Alvin. permission denied page.
 #TODO: Low Priority. Josh/Alvin. we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
-    """ This authentication decorator checks whether the user has permission to
-        to access the study/survey they are accessing.
-        This decorator requires the specific keywords "survey_id" or "study_id"
-        be provided as keywords to the function, and will error if one is not.
-        The pattern is for a url with <string:survey/study_id> to pass in this
-        value.
-        A system admin is always able to access a study or survey. """
+    """ This authentication decorator checks whether the user has permission to to access the
+    study/survey they are accessing.
+    This decorator requires the specific keywords "survey_id" or "study_id" be provided as
+    keywords to the function, and will error if one is not.
+    The pattern is for a url with <string:survey/study_id> to pass in this value.
+    A system admin is always able to access a study or survey. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         if not is_logged_in(): #check for regular login requirement
@@ -117,13 +116,14 @@ def get_admins_allowed_studies():
 ################################################################################
 
 def authenticate_system_admin(some_function):
-    """ Authenticate system admin checks whether a user is a system admin before
-    allowing access to pages marked with this decorator.  If a study_id variable
-    is supplied as a keyword argument, the decoator will automatically grab the
-    ObjectId in place of the string provided in a route.
-    NOTE: if you are using this function along with the authenticate_admin_study_access
-    decorator you must place this decorator below it, otherwise behavior is undefined
-    and probably causes a 500 error inside the authenticate_admin_study_access decorator."""
+    """ Authenticate system admin checks whether a user is a system admin before allowing access
+    to pages marked with this decorator.  If a study_id variable is supplied as a keyword
+    argument, the decoator will automatically grab the ObjectId in place of the string provided
+    in a route.
+    
+    NOTE: if you are using this function along with the authenticate_admin_study_access decorator
+    you must place this decorator below it, otherwise behavior is undefined and probably causes a
+    500 error inside the authenticate_admin_study_access decorator. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         if not is_logged_in(): #check for regular login requirement
@@ -134,9 +134,9 @@ def authenticate_system_admin(some_function):
             return abort(403)
         if 'study_id' in kwargs:
             study_id = kwargs['study_id']
-            if not isinstance(study_id, ObjectId):#make an extra check in case
-                study_id = ObjectId(study_id)     #authenticate_admin_study_access
-                kwargs['study_id'] = study_id     #has already converted the id.
+            if not isinstance(study_id, ObjectId): # make an extra check in case
+                study_id = ObjectId(study_id)      # authenticate_admin_study_access
+                kwargs['study_id'] = study_id      # has already converted the id.
             if not Studies(_id=study_id):
                 return redirect("/")
         return some_function(*args, **kwargs)

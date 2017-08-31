@@ -28,8 +28,7 @@ def data_api_web_form_page():
 
 def warn_admin_if_hasnt_yet_generated_access_key(admin):
     if 'access_key_id' not in admin or not admin['access_key_id']:
-        msg = """You need to generate an <b>Access Key</b> and a <b>Secret Key
-        </b> before you can download data. Go to <a href='/manage_credentials'>
-        Manage Credentials</a> and click 'Reset Data-Download API Access
-        Credentials'."""
+        msg = """You need to generate an <b>Access Key</b> and a <b>Secret Key </b> before you
+        can download data. Go to <a href='/manage_credentials'> Manage Credentials</a> and click
+        'Reset Data-Download API Access Credentials'. """
         flash(Markup(msg), 'danger')

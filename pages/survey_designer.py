@@ -6,8 +6,8 @@ from libs.admin_authentication import authenticate_admin_study_access,\
 
 survey_designer = Blueprint('survey_designer', __name__)
 
-#TODO: Low Priority. josh/alvin. implement "study does not exist" page.
-#TODO: Low Priority. josh/alvin. implement "survey does not exist" page.
+#TODO: Low Priority. implement "study does not exist" page.
+#TODO: Low Priority. implement "survey does not exist" page.
 
 @survey_designer.route('/edit_survey/<string:survey_id>')
 @authenticate_admin_study_access

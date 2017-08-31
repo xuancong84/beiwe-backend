@@ -3,7 +3,6 @@ from flask import flash, request
 
 from db.study_models import Study, StudyDeviceSettings, Survey
 
-
 def copy_existing_study_if_asked_to(new_study):
     if ((request.form.get('copy_existing_study') == "true") and
         (ObjectId.is_valid(request.form.get('existing_study_id')))):
@@ -16,7 +15,7 @@ def copy_existing_study_if_asked_to(new_study):
 
 
 def allowed_filename(filename):
-    """ Does filename end with ".json" (case-insensitive)? """
+    """ Does filename end with ".json" (case-insensitive) """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'json'
 
 

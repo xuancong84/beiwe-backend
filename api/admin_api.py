@@ -1,5 +1,5 @@
 from csv import writer
-from flask import abort, Blueprint, g, make_response, redirect, request, Response, session
+from flask import abort, Blueprint, make_response, redirect, request, Response
 from re import sub
 
 from config.secure_settings import IS_STAGING
@@ -16,7 +16,6 @@ from flask.templating import render_template
 from libs.security import check_password_requirements
 
 admin_api = Blueprint('admin_api', __name__)
-
 
 """######################### Study Administration ###########################"""
 
@@ -88,8 +87,8 @@ def reset_user_password(study_id=None):
 @admin_api.route('/reset_device/<string:study_id>', methods=["POST"])
 @authenticate_admin_study_access
 def reset_device(study_id=None):
-    """ Resets a patient's device.  The patient will not be able to connect
-        until expect to register a new device. """
+    """ Resets a patient's device.  The patient will not be able to connect until expect to
+    register a new device. """
     patient_id = request.values["patient_id"]
     if User.exists(patient_id) and User(patient_id).study_id == study_id:
         user = User(patient_id)
@@ -101,9 +100,9 @@ def reset_device(study_id=None):
 @admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])
 @authenticate_admin_study_access
 def create_new_patient(study_id=None):
-    """ Creates a new user, generates a password and keys, pushes data to s3
-    and user database, adds user to the study they are supposed to be attached
-    to, returns a string containing password and patient id. """
+    """ Creates a new user, generates a password and keys, pushes data to s3 and user database,
+    adds user to the study they are supposed to be attached to, returns a string containing
+    password and patient id. """
     patient_id, password = User.create(study_id)
     s3_upload(patient_id, "", study_id) #creates an empty file (folder?) on s3 indicating that this user exists
     create_client_key_pair(patient_id, study_id)
@@ -114,10 +113,10 @@ def create_new_patient(study_id=None):
 @admin_api.route('/create_many_patients/<string:study_id>', methods=["POST"])
 @authenticate_admin_study_access
 def create_many_new_patients(study_id=None):
-    """ Creates a number of new users at once for a study.  Generates a
-    password and keys for each one, pushes data to S3 and the user database,
-    adds users to the study they're supposed to be attached to, and returns
-    a CSV file for download with a mapping of Patient IDs and passwords."""
+    """ Creates a number of new users at once for a study.  Generates a password and keys for
+    each one, pushes data to S3 and the user database, adds users to the study they're supposed
+    to be attached to, and returns a CSV file for download with a mapping of Patient IDs and
+    passwords. """
     number_of_new_patients = int(request.form.get('number_of_new_patients'))
     desired_filename = request.form.get('desired_filename')
     filename_spaces_to_underscores = sub(r'[\ =]', '_', desired_filename)
@@ -155,31 +154,25 @@ def download_page():
 @admin_api.route("/download")
 def download_current():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe.apk")
-    # return send_file("Beiwe.apk", as_attachment=True)
 
 @admin_api.route("/download_debug")
 @authenticate_admin_login
 def download_current_debug():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-debug.apk")
-    # return send_file("Beiwe_debug.apk", as_attachment=True)
 
 @admin_api.route("/download_beta")
 @authenticate_admin_login
 def download_beta():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe.apk")
-    # return send_file("Beiwe_beta.apk", as_attachment=True)
 
 @admin_api.route("/download_beta_debug")
 @authenticate_admin_login
 def download_beta_debug():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/debug/Beiwe-debug.apk")
-    # return send_file("Beiwe_beta_debug.apk", as_attachment=True)
 
 @admin_api.route("/privacy_policy")
 def download_privacy_policy():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/Beiwe+Data+Privacy+and+Security.pdf")
-    # return send_file("Beiwe Data Privacy and Security.pdf", as_attachment=True)
-
 
 """########################## Debugging Code ###########################"""
 

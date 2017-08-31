@@ -1,4 +1,3 @@
-import os
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED, ID_KEY
 from libs.security import (generate_hash_and_salt, generate_user_hash_and_salt,
                            compare_password, device_hash, generate_user_password_and_salt,
@@ -8,16 +7,17 @@ from libs.security import (generate_hash_and_salt, generate_user_hash_and_salt,
 ################################### USER STUFF #################################
 #############################################################################"""
 
+#TODO: get rid of the pbkdf2 install requirement, swap to the python 2.7.10+ builtin, and confirm that this swap breaks nothing.
+
 class User( DatabaseObject ):
-    """ The User database object contains the password hashes and unique user names
-        of any patients in the study.  Elements in the database have the functionality
-        described here, and two convenience method static methods that can be run
-        on the User class/object itself.
-        Users have passwords hashed once with sha256 and a many times (as defined
-        in security.py) with PBKDF2, and salted using a cryptographically secure
-        random number generator.  The sha256 check duplicates the storage of the
-        password on the mobile device, so that the user's password is never stored
-        in a reversible manner. """
+    """ The User database object contains the password hashes and unique user names of any
+    patients in the study.  Elements in the database have the functionality described here,
+    and two convenience method static methods that can be run on the User class/object itself.
+    
+    Users have passwords hashed once with sha256 and a many times (as defined in security.py)
+    with PBKDF2, and salted using a cryptographically secure random number generator.  The sha256
+    check duplicates the storage of the password on the mobile device, so that the user's
+    password is never stored in a reversible manner. """
     PATH = "beiwe.users"
     
     # Column Name:Default Value.  Use REQUIRED to indicate a non-nullable value.

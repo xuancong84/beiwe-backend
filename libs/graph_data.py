@@ -4,9 +4,9 @@ from libs.s3 import s3_list_files, s3_retrieve
 ################################ CSV HANDLER ###################################
 def csv_to_dict(csv_string):
     """ Converts a string formatted as a csv into a dictionary with the format
-        {Column Name: [list of sequential points] }. Data are in their original
-        order, empty entries are dropped."""
-    #grab a list of every line in the file, strips off trailing whitespace.
+        {Column Name: [list of sequential points] }.
+        Data are in their original order, empty entries are dropped. """
+    # grab a list of every line in the file, strips off trailing whitespace.
     lines = [ line for line in csv_string.splitlines() ]
     header_list = lines[0].split(',')
     list_of_entries = []
@@ -27,8 +27,8 @@ def grab_file_names(study_id, survey_id, user_id, number_points):
     return sorted( all_files[ -number_points: ] )
 
 def compile_question_data(surveys):
-    """ creates a double nested dict of question ids containing dict with
-    question text, and an empty list. """
+    """ creates a double nested dict of question ids containing dict with question text,
+    and an empty list. """
     #Note: we want to keep the question text around so it can be displayed on the page.
     if not surveys:
         return {}
@@ -38,8 +38,8 @@ def compile_question_data(surveys):
     return all_questions
 
 def pull_answers(surveys, all_questions):
-    """ Runs through questions and pull out answers, append them to the lists in
-        the container constructed by compile_question_data. """
+    """ Runs through questions and pull out answers, append them to the lists in the container
+    constructed by compile_question_data. """
     for survey in surveys:
         for question in survey:
             question_id = question['question id']
@@ -53,10 +53,10 @@ def pull_answers(surveys, all_questions):
 
 
 def get_survey_results( study_id, user_id, survey_id, number_points=7 ):
-    """ Compiles 2 weeks (14 points) of config from s3 for a given patient into
-        config points for displaying on the device.
-        result is a list of lists, inner list[0] is the title/question text,
-        inner list[1] is a list of y coordinates. """
+    """ Compiles 2 weeks (14 points) of config from s3 for a given patient into config points for
+    displaying on the device.
+    Result is a list of lists, inner list[0] is the title/question text, inner list[1] is a
+    list of y coordinates. """
     # Get files from s3 for user answers, convert each csv_file to a list of dicts,
     # pull the questions and corresponding answers.
     files = grab_file_names( study_id, survey_id, user_id, number_points )
@@ -76,8 +76,7 @@ def get_survey_results( study_id, user_id, survey_id, number_points=7 ):
 
 
 def jsonify_survey_results(results):
-    """ Transforms output of get_survey_results into a list that javascript can
-        actually handle."""
+    """ Transforms output of get_survey_results into a list that javascript can actually handle. """
     return_data = []
     for pair in results:
         coordinates = [json.dumps(coordinate) for coordinate in pair[1] ]

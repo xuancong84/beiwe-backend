@@ -5,14 +5,13 @@ To customize any of these values, use the following pattern.
 MONGO_USERNAME = getenv("MONGO_USERNAME") or "username"
 """
 
-# These are the credentials used to access the MongoDB that contains website
-# usernames and passwords.  If you are configuring your server see the comment
-# at the end of this document.
+# These are the credentials used to access the MongoDB that contains website usernames and
+# passwords.  If you are configuring your server see the comment at the end of this document.
 MONGO_USERNAME = getenv("MONGO_USERNAME")
 MONGO_PASSWORD = getenv("MONGO_PASSWORD")
 
-# This is the secret key for the website. Mostly it is used to sign cookies.
-# You should provide a cryptographically secure string to this value.
+# This is the secret key for the website. Mostly it is used to sign cookies. You should provide a
+#  cryptographically secure string to this value.
 FLASK_SECRET_KEY = getenv("FLASK_SECRET_KEY")
 
 # These are your AWS (Amazon Web Services) access credentials.
@@ -24,8 +23,8 @@ S3_BACKUPS_AWS_KEY_ID = getenv("S3_BACKUPS_AWS_KEY_ID")
 S3_BACKUPS_AWS_SECRET_ACCESS_KEY = getenv("S3_BACKUPS_AWS_SECRET_ACCESS_KEY")
 LOCAL_BACKUPS_DIRECTORY = getenv("LOCAL_BACKUPS_DIRECTORY") or "/tmp/beiwe_backups/"
 
-# the name of the s3 bucket that will be used to store user generated data, and
-# backups of local database information.
+# the name of the s3 bucket that will be used to store user generated data, and backups of local
+# database information.
 S3_BUCKET = getenv("S3_BUCKET")
 S3_BACKUPS_BUCKET = getenv("S3_BACKUPS_BUCKET")
 
@@ -43,8 +42,8 @@ MONGO_IP = getenv("MONGO_IP") or "127.0.0.1"
 
 ASYMMETRIC_KEY_LENGTH = getenv("ASYMMETRIC_KEY_LENGTH") or 2048
 
-# The number of iterations used in password hashing. You CANNOT change this
-# value once people have created passwords, because then the hashes won't match!
+# The number of iterations used in password hashing. You CANNOT change this value once people
+# have created passwords, because then the hashes won't match!
 ITERATIONS = getenv("ITERATIONS") or 1000
 
 #Sentry DSN

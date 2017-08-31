@@ -6,9 +6,7 @@ from db.study_models import Study, StudyDeviceSettings, Survey
 from libs.admin_authentication import authenticate_system_admin
 from libs.copy_study import add_new_surveys, allowed_filename, update_device_settings
 
-
 copy_study_api = Blueprint('copy_study_api', __name__)
-
 
 """ JSON structure for exporting and importing study surveys and settings:
     {
