@@ -29,10 +29,9 @@ def _get_bucket(name):
 
 
 def s3_upload(key_path, data_string, study_id, raw_path=False):
-    """ Uploads data to s3, ensures data is encrypted with the key from the
-        provided study.  Takes an optional argument, raw_path, which defaults to
-        false.  When false the study_id is prepended to the S3 file path (key_path),
-        placing the file in the appropriate study folder. """
+    """ Uploads data to s3, ensures data is encrypted with the key from the provided study.
+    Takes an optional argument, raw_path, which defaults to false.  When false the study_id is
+    prepended to the S3 file path (key_path), placing the file in the appropriate study folder. """
     if not raw_path: key_path = str(study_id) + "/" + key_path
     data = encryption.encrypt_for_server(data_string, study_id)
     key = _get_bucket(S3_BUCKET).new_key(key_path)
@@ -46,9 +45,9 @@ def s3_upload(key_path, data_string, study_id, raw_path=False):
 
 
 def s3_retrieve(key_path, study_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):
-    """ Takes an S3 file path (key_path), and a study ID.  Takes an optional
-        argument, raw_path, which defaults to false.  When set to false the
-        path is prepended to place the file in the appropriate study_id  folder. """
+    """ Takes an S3 file path (key_path), and a study ID.  Takes an optional argument, raw_path,
+    which defaults to false.  When set to false the path is prepended to place the file in the
+    appropriate study_id folder. """
     if not raw_path: key_path = str(study_id) + "/" + key_path
     encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)
     return encryption.decrypt_server(encrypted_data, study_id)

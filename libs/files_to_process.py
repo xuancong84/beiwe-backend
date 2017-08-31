@@ -5,14 +5,14 @@ from bson.objectid import ObjectId
 from collections import defaultdict, deque
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
-from traceback import format_tb, format_exc, extract_tb
-from cronutils.error_handler import ErrorHandler, null_error_handler
+from traceback import format_exc
+from cronutils.error_handler import ErrorHandler
 
 from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
-                              PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API, IOS_API,
+                              PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
                               DATA_PROCESSING_NO_ERROR_STRING)
@@ -29,9 +29,9 @@ class ProcessingOverlapError(Exception): pass
 
 
 def process_file_chunks():
-    """ This is the function that is called from cron.  It runs through all new
-    files that have been uploaded and 'chunks' them. Handles logic for skipping
-    bad files, raising errors appropriately. """
+    """ This is the function that is called from cron.  It runs through all new files that have
+    been uploaded and 'chunks' them. Handles logic for skipping bad files, raising errors
+    appropriately. """
     error_handler = ErrorHandler()
     if FileProcessLock.islocked():
         raise ProcessingOverlapError("Data processing overlapped with a previous data indexing run.")
@@ -67,18 +67,17 @@ def process_file_chunks():
 
 def do_process_user_file_chunks(count, error_handler, skip_count, user_id):
     """
-    Run through the files to process, pull their data, put it into s3 bins.
-    Run the file through the appropriate logic path based on file type.
+    Run through the files to process, pull their data, put it into s3 bins. Run the file through
+    the appropriate logic path based on file type.
 
-    If a file is empty put its ftp object to the empty_files_list, we can't
-        delete objects in-place while iterating over the db.
+    If a file is empty put its ftp object to the empty_files_list, we can't delete objects
+    in-place while iterating over the db.
 
-    All files except for the audio recording files are in the form of CSVs,
-    most of those files can be separated by "time bin" (separated into one-hour
-    chunks) and concatenated and sorted trivially. A few files, call log,
-    identifier file, and wifi log, require some triage beforehand.  The debug log
-    cannot be correctly sorted by time for all elements, because it was not
-    actually expected to be used by researchers, but is apparently quite useful.
+    All files except for the audio recording files are in the form of CSVs, most of those files
+    can be separated by "time bin" (separated into one-hour chunks) and concatenated and sorted
+    trivially. A few files, call log, identifier file, and wifi log, require some triage
+    beforehand.  The debug log cannot be correctly sorted by time for all elements, because it
+    was not actually expected to be used by researchers, but is apparently quite useful.
 
     Any errors are themselves concatenated using the passed in error handler.
     """
@@ -208,10 +207,11 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     # print 10
                     old_header, old_rows = csv_to_list(s3_file_data)
                     if old_header != updated_header:
-#to handle the case where a file was on an hour boundry and placed in two separate
-#chunks we need to FAIL to retire this file. If this happens AND ONE of the files
-#DOES NOT have a header mismatch this may (will?) cause data duplication in the
-#chunked file whenever the file processing occurs run.
+                        # to handle the case where a file was on an hour boundry and placed in
+                        # two separate chunks we need to FAIL to retire this file. If this
+                        # happens AND ONE of the files DOES NOT have a header mismatch this may (
+                        # will?) cause data duplication in the chunked file whenever the file
+                        # processing occurs run.
                         raise HeaderMismatchException('%s\nvs.\n%s\nin\n%s' %
                                                       (old_header, updated_header, chunk_path) )
                     # print 11
@@ -456,10 +456,9 @@ def insert_timestamp_single_row_csv(header, rows_list, time_stamp):
     return ",".join(header_list)
 
 def csv_to_list(csv_string):
-    """ Grab a list elements from of every line in the csv, strips off trailing
-        whitespace. dumps them into a new list (of lists), and returns the header
-        line along with the list of rows. """
-    #rewitten to be more memory efficient than fast by making it a generator
+    """ Grab a list elements from of every line in the csv, strips off trailing whitespace. dumps
+    them into a new list (of lists), and returns the header line along with the list of rows. """
+    # rewitten to be more memory efficient than fast by making it a generator
     # Note that almost all of the time is spent in the per-row for-loop
     def split_yielder(l):
         for row in l:
@@ -473,9 +472,8 @@ def csv_to_list(csv_string):
 def construct_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv.
         Now handles unicode errors.  :D :D :D """
-    # the list comprehension was, it turned out, both nonperformant and of an incomprehensible memory order.
-    # this is ~1.5x faster, and has a very clear
-    #also, the unicode modification is an order of magnitude slower.
+    # The old, compact list comprehension was, it turned out, both nonperformant and of an
+    # incomprehensible memory order. This is ~1.5x faster, and has a much clearer memory order.
     def deduplicate(seq):
         #highly optimized order preserving deduplication function.
         # print "dedupling"
@@ -499,11 +497,9 @@ def construct_csv_string(header, rows_list):
 def construct_utf_safe_csv_string(header, rows_list):
     """ Takes a header list and a csv and returns a single string of a csv.
         Poor memory performances, but handles unicode errors.  :D :D :D """
-    """ Takes a header list and a csv and returns a single string of a csv.
-        Now handles unicode errors.  :D :D :D """
-    # the list comprehension was, it turned out, both nonperformant and of an incomprehensible memory order.
-    # this is ~1.5x faster, and has a very clear
-    #also, the unicode modification is an order of magnitude slower.
+    # This is almost identical to the above construct_csv_string, but it handles unicode
+    # characters correctly, and is therefore an order of magnitude slower.  We only use this on
+    # data files that have user-entered strings, and it is an order
     def deduplicate(seq):
         #highly optimized order preserving deduplication function.
         # print "dedupling"
@@ -587,6 +583,8 @@ class HeaderMismatchException(Exception): pass
 class ChunkFailedToExist(Exception): pass
 
 
+# This is useful for performance testing, replace the real threadpool with this one and everything
+# will suddenly be single-threaded, making it much easier to profile.
 # class dummy_threadpool():
 #     def map(self, *args, **kwargs): #the existance of that self variable is key
 #         # we actually want to cut off any threadpool args, which is conveniently easy because map does not use kwargs!

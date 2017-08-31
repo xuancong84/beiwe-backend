@@ -10,7 +10,7 @@ from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error, log_and_email_500_error
+from libs.logging import log_error
 from libs.http_utils import determine_os_api
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
@@ -44,40 +44,36 @@ mobile_api = Blueprint('mobile_api', __name__)
 @determine_os_api
 @authenticate_user
 def upload(OS_API=""):
-    """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log,
-        Texts Log, Survey Response, and debugging files to s3.
+    """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log,
+    Survey Response, and debugging files to s3.
 
-        Behavior:
-        The Beiwe app is supposed to delete the uploaded file if it receives an
-        html 200 response.  The API returns a 200 response when the file has A) been
-        successfully handled, B) the file it has been sent is empty, C) the file did
-        not decrypt properly.  We encountered problems in production with incorrectly
-        encrypted files (as well as Android generating "rList" files under unknown
-        circumstances) and the app then uploads them.  The source of encryption
-        errors is not well understood and could not be tracked down.  In order to
-        salvage partial data the server decrypts files to the best of its ability and
-        uploads it to S3.  In order to delete these files we still send a 200 response.
+    Behavior:
+    The Beiwe app is supposed to delete the uploaded file if it receives an html 200 response.
+    The API returns a 200 response when the file has A) been successfully handled, B) the file it
+    has been sent is empty, C) the file did not decrypt properly.  We encountered problems in
+    production with incorrectly encrypted files (as well as Android generating "rList" files
+    under unknown circumstances) and the app then uploads them.  The source of encryption errors
+    is not well understood and could not be tracked down.  In order to salvage partial data the
+    server decrypts files to the best of its ability and uploads it to S3.  In order to delete
+    these files we still send a 200 response.
 
-        (The above about encryption is awful, in a theoretical version 2.0 the 200
-        response would be replaced with a difference response code to allow for
-        better debugging and less/fewer ... hax.)
+    (The above about encryption is awful, in a theoretical version 2.0 the 200 response would be
+    replaced with a difference response code to allow for better debugging and less/fewer ... hax.)
 
-        A 400 error means there is something is wrong with the uploaded file or its
-        parameters, administrators will be emailed regarding this upload, the event
-        will be logged to the apache log.  The app should not delete the file,
-        it should try to upload it again at some point.
+    A 400 error means there is something is wrong with the uploaded file or its parameters,
+    administrators will be emailed regarding this upload, the event will be logged to the apache
+    log.  The app should not delete the file, it should try to upload it again at some point.
 
-        If a 500 error occurs that means there is something wrong server side,
-        administrators will be emailed and the event will be logged. The app should
-        not delete the file, it should try to upload it again at some point.
+    If a 500 error occurs that means there is something wrong server side, administrators will be
+    emailed and the event will be logged. The app should not delete the file, it should try to
+    upload it again at some point.
 
-        Request format:
-        send an http post request to studies.beiwe.org/upload, remember to include
-        security parameters (see user_authentication for documentation).
-        Provide the contents of the file, encrypted (see encryption specification)
-        and properly converted to Base64 encoded text, as a request parameter
-        entitled "file".
-        Provide the file name in a request parameter entitled "file_name". """
+    Request format:
+    send an http post request to studies.beiwe.org/upload, remember to include security
+    parameters (see user_authentication for documentation). Provide the contents of the file,
+    encrypted (see encryption specification) and properly converted to Base64 encoded text,
+    as a request parameter entitled "file".
+    Provide the file name in a request parameter entitled "file_name". """
     patient_id = request.values['patient_id']
     user = User(patient_id)
 
@@ -161,15 +157,12 @@ def upload(OS_API=""):
 @mobile_api.route( '/register_user/ios/', methods=['GET', 'POST'] )
 @determine_os_api
 @authenticate_user_registration
-def register_user(OS_API=""):
-    """ Checks that the patient id has been granted, and that there is no device
-        registered with that id.  If the patient id has no device registered it
-        registers this device and logs the bluetooth mac address.
-
-        Check the documentation in user_authentication to ensure you have provided
-        the proper credentials.
-
-        Returns the encryption key for this patient/user. """
+def register_user(OS_API="", DEVICE_IDENTIFIERS_HEADER=None):
+    """ Checks that the patient id has been granted, and that there is no device registered with
+    that id.  If the patient id has no device registered it registers this device and logs the
+    bluetooth mac address.
+    Check the documentation in user_authentication to ensure you have provided the proper credentials.
+    Returns the encryption key for this patient/user. """
 
     #CASE: If the id and password combination do not match, the decorator returns a 403 error.
     #the following parameter values are required.
@@ -202,34 +195,30 @@ def register_user(OS_API=""):
     study_id = user['study_id']
 
     if user['device_id'] is not None and user['device_id'] != request.values['device_id']:
-        # CASE: this patient has a registered a device already and it does not
-        # match this device.  They need to contact the study and unregister
-        # their their other device.  The device will receive a 405 error and
-        # should alert the user accordingly.
-        # Provided a user does not completely reset their device (which resets
-        # the device's unique identifier) they user CAN reregister an existing
-        # device, the unlock key they need to enter to at registration is their\
-        # old password.
+        # CASE: this patient has a registered a device already and it does not match this device.
+        #   They need to contact the study and unregister their their other device.  The device
+        #   will receive a 405 error and should alert the user accordingly.
+        # Provided a user does not completely reset their device (which resets the device's
+        # unique identifier) they user CAN reregister an existing device, the unlock key they
+        # need to enter to at registration is their old password.
         # KG: 405 is good for IOS and Android, no need to check OS_API
-            return abort(405)
+        return abort(405)
 
     if user['os_type'] is not None and user['os_type'] != OS_API:
-        # CASE: this patient has registered, but the user was previously registered
-        # with a different device type. To keep the CSV munging code sane and data
-        # consistent (don't cross the iOS and Android data streams!) we disallow it.
+        # CASE: this patient has registered, but the user was previously registered with a
+        # different device type. To keep the CSV munging code sane and data consistent (don't
+        # cross the iOS and Android data streams!) we disallow it.
         return abort(400)
 
-    # At this point the device has been checked for validity and will be
-    # registered successfully.  Any errors after this point will be server errors
-    # and return 500 codes
-    # the final return will be the encryption key associated with this user.
+    # At this point the device has been checked for validity and will be registered successfully.
+    # Any errors after this point will be server errors and return 500 codes. the final return
+    # will be the encryption key associated with this user.
     
     #Upload the user's various identifiers.
     unix_time = str(calendar.timegm(time.gmtime() ) )
     file_name = patient_id + '/identifiers_' + unix_time + ".csv"
     #construct a manual csv of the device attributes
-    header = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model,beiwe_version\n"
-    file_contents = (header + "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" %
+    file_contents = (DEVICE_IDENTIFIERS_HEADER + "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" %
                      (patient_id, mac_address, phone_number, device_id, device_os,
                       os_version, product, brand, hardware_id, manufacturer, model,
                       beiwe_version) )
@@ -273,8 +262,7 @@ def grab_file_extension(file_name):
     return file_name.rsplit('.', 1)[1]
     
 def contains_valid_extension(file_name):
-    """ Checks if string has a recognized file extension, this is not necessarily
-        limited to 4 characters."""
+    """ Checks if string has a recognized file extension, this is not necessarily limited to 4 characters. """
     return '.' in file_name and grab_file_extension(file_name) in ALLOWED_EXTENSIONS
 
 ################################################################################

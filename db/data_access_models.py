@@ -91,11 +91,10 @@ class ChunksRegistry(DatabaseCollection):
     OBJTYPE = ChunkRegistry
     
     @classmethod
-    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None,
-                              start=None, end=None):
-        """ This function uses mongo query syntax to provide datetimes and have
-            mongo do the comparison operation, and the 'in' operator to have
-            mongo only match the user list provided. """
+    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None, start=None, end=None):
+        """ This function uses mongo query syntax to provide datetimes and have mongo do the
+        comparison operation, and the 'in' operator to have mongo only match the user list
+        provided. """
         query = {"study_id":study_id}
         if user_ids: query["user_id"] = { "$in":user_ids }
         if data_types: query["data_type"] = { "$in":data_types }

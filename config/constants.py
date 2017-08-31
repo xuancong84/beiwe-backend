@@ -27,8 +27,6 @@ DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "
 CELERY_EXPIRY_MINUTES = getenv("CELERY_EXPIRY_MINUTES") or 4
 CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECONDS") or 60*15
 
-""" This file contains values used throughout the codebase.
-    Don't change values if you don't know what they do. """
 
 # API differences
 # use_these aliases to determine if the incoming url was for an api version
@@ -233,3 +231,5 @@ LOWERCASE_REGEX = "[a-z]"
 UPPERCASE_REGEX = "[A-Z]"
 NUMBER_REGEX = "[0-9]"
 PASSWORD_REQUIREMENT_REGEX_LIST = [SYMBOL_REGEX, LOWERCASE_REGEX, UPPERCASE_REGEX, NUMBER_REGEX]
+
+DEVICE_IDENTIFIERS_HEADER = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model,beiwe_version\n"

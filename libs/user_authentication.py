@@ -5,14 +5,13 @@ from db.user_models import User
 from config.constants import ANDROID_API, IOS_API
 
 def authenticate_user(some_function):
-    """Decorator for functions (pages) that require a user to provide identification.
-       Returns 403 (forbidden) or 401 (depending on beiwei-api-version) if the identifying info (usernames, passwords
-       device IDs are invalid.
+    """Decorator for functions (pages) that require a user to provide identification. Returns 403
+    (forbidden) or 401 (depending on beiwei-api-version) if the identifying info (usernames,
+    passwords device IDs are invalid.
 
-       In any funcion wrapped with this decorator provide a parameter named
-       "patient_id" (with the user's id), a parameter named "password" with an SHA256
-       hashed instance of the user's password, a parameter named "device_id" with a
-       unique identifier derived from that device. """
+   In any funcion wrapped with this decorator provide a parameter named "patient_id" (with the
+   user's id), a parameter named "password" with an SHA256 hashed instance of the user's
+   password, a parameter named "device_id" with a unique identifier derived from that device. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         check_for_basic_auth( *args, **kwargs );
@@ -32,26 +31,30 @@ def validate_post( *args, **kwargs ):
         or "password" not in request.values
         or "device_id" not in request.values):
         return False
-    if not User.exists(request.values['patient_id']): return False
+    if not User.exists(request.values['patient_id']):
+        return False
     user = User( request.values['patient_id'] )
-    if not user.validate_password( request.values['password'] ): return False
-    if not user['device_id'] == request.values['device_id']: return False
+    if not user.validate_password( request.values['password'] ):
+        return False
+    if not user['device_id'] == request.values['device_id']:
+        return False
     return True
 
 
 def authenticate_user_registration(some_function):
-    """Decorator for functions (pages) that require a user to provide identification.
-       Returns 403 (forbidden)  or 401 (depending on beiwei-api-version) if the identifying info (usernames, passwords
-       device IDs are invalid.
+    """ Decorator for functions (pages) that require a user to provide identification. Returns
+    403 (forbidden) or 401 (depending on beiwei-api-version) if the identifying info (usernames,
+    passwords device IDs are invalid.
 
-       In any funcion wrapped with this decorator provide a parameter named
-       "patient_id" (with the user's id) and a parameter named "password" with an
-       SHA256 hashed instance of the user's password. """
+   In any funcion wrapped with this decorator provide a parameter named "patient_id" (with the
+   user's id) and a parameter named "password" with an SHA256 hashed instance of the user's
+   password. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        check_for_basic_auth( *args, **kwargs );
+        check_for_basic_auth(*args, **kwargs)
         is_this_user_valid = validate_registration( *args, **kwargs )
-        if is_this_user_valid: return some_function(*args, **kwargs)
+        if is_this_user_valid:
+            return some_function(*args, **kwargs)
         return abort(401 if (kwargs["OS_API"] == IOS_API) else 403)
     return authenticate_and_call
 
@@ -61,15 +64,19 @@ def validate_registration( *args, **kwargs ):
     if ("patient_id" not in request.values or "password" not in request.values
         or "device_id" not in request.values):
         return False
-    if not User.exists(request.values['patient_id']): return False
+    if not User.exists(request.values['patient_id']):
+        return False
     user = User( request.values['patient_id'] )
-    if not user.validate_password( request.values['password'] ): return False
+    if not user.validate_password( request.values['password'] ):
+        return False
     return True
 
-def check_for_basic_auth( *args, **kwargs ):
-    """If basic authentication exists and is in the correct format, move the
-     patient_id, device_id and password into request.values for processing by the
-     existing user authentication functions"""
+#KG
+def check_for_basic_auth(*args, **kwargs):
+    """If basic authentication exists and is in the correct format, move the patient_id,
+    device_id, and password into request.values for processing by the existing user
+    authentication functions """
+    
     # Flask automatically parses a Basic authentication header into request.authorization
     #
     # If this is set, and the username portion is in the form xxxxxx@yyyyyyy, then assume
@@ -78,8 +85,8 @@ def check_for_basic_auth( *args, **kwargs ):
     # Parse out the patient_id, device_id from username, and then store patient_id, device_id and
     # password as if they were passed as parameters (into request.values)
     #
-    # Note:  Because request.values is immutable in Flask, copy it and replace with
-    # a mutable dict first.
+    # Note:  Because request.values is immutable in Flask, copy it and replace with a mutable
+    # dict first.
     """Check if user exists, check if the provided passwords match"""
     auth = request.authorization
     if not auth:

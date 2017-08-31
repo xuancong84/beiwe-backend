@@ -140,9 +140,9 @@ def grab_data():
 
 # Note: you cannot access the request context inside a generator function
 def zip_generator(files_list, construct_registry=False):
-    """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that data.
-    This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
-    almost immediately."""
+    """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that
+    data. This is a generator, advantage is it starts returning data (file by file, but wrapped
+    in zip compression) almost immediately. """
     
     processed_files = set()
     duplicate_files = set()
