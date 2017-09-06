@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 
 import json
 
-from django.db import models
 from django.core.validators import RegexValidator
+from django.db import models
+from django.db.models.fields.related import RelatedField
 
-from study.text_constants import (
+from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
 )
@@ -30,7 +31,38 @@ url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
 standard_base_64_validator = RegexValidator('^[0-9a-zA-Z+/]+$')
 
 
+class JSONTextField(models.TextField):
+    """
+    A TextField for holding JSON-serialized data. This is only different from models.TextField
+    in AbstractModel.as_native_json, in that this is not JSON serialized an additional time.
+    """
+    pass
+
+
 class AbstractModel(models.Model):
+
+    def as_native_json(self):
+        field_list = self._meta.fields
+        field_dict = {}
+        for field in field_list:
+            field_name = field.name
+            if isinstance(field, RelatedField):
+                field_dict[field_name + '_id'] = getattr(self, field_name).id
+            elif isinstance(field, JSONTextField):
+                field_raw_val = getattr(self, field_name)
+                field_dict[field_name] = json.loads(field_raw_val)
+            else:
+                field_dict[field_name] = getattr(self, field_name)
+
+        return json.dumps(field_dict)
+
+    def __str__(self):
+        if hasattr(self, 'study'):
+            return '{} {} of Study {}'.format(self.__class__.__name__, self.pk, self.study.name)
+        elif hasattr(self, 'name'):
+            return '{} {}'.format(self.__class__.__name__, self.name)
+        else:
+            return '{} {}'.format(self.__class__.__name__, self.pk)
 
     class Meta:
         abstract = True
@@ -38,7 +70,7 @@ class AbstractModel(models.Model):
 
 # AJK TODO add annotations and help_texts (copy annotations from old _models.py files)
 # AJK TODO reorder fields cleanly
-class Study(models.Model):
+class Study(AbstractModel):
     name = models.TextField()
     encryption_key = models.CharField(max_length=32)
     deleted = models.BooleanField(default=False)
@@ -55,11 +87,11 @@ class Survey(AbstractModel):
     )
 
     # AJK TODO test that the TextField can deal with arbitrarily large text (e.g. 1MB)
-    content = models.TextField(default='[]', help_text='JSON blob containing information about the survey questions.')
-    timings = models.TextField(default=json.dumps([[], [], [], [], [], [], []]),
-                               help_text='JSON blob containing the times at which the survey is sent.')
+    content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
+    timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
+                            help_text='JSON blob containing the times at which the survey is sent.')
     survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES)
-    settings = models.TextField(default='{}', help_text='JSON blob containing settings for the survey.')
+    settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
     deleted = models.BooleanField(default=False)
@@ -157,7 +189,7 @@ class DeviceSettings(AbstractModel):
     survey_submit_success_toast_text = models.TextField(default=SURVEY_SUBMIT_SUCCESS_TOAST_TEXT)
 
     # Consent sections
-    consent_sections = models.TextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
+    consent_sections = JSONTextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
 
     study = models.OneToOneField('Study', on_delete=models.PROTECT, related_name='device_settings')
     deleted = models.BooleanField(default=False)
