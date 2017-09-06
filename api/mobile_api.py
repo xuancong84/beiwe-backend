@@ -21,6 +21,35 @@ from raven.transport import HTTPTransport
 from config.secure_settings import SENTRY_DSN
 
 
+
+
+
+##### django stuff
+import django
+from django.conf import settings
+from config.django_db_config import *
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.django_db_config")
+
+settings.configure(
+    SECRET_KEY=SECRET_KEY,
+    DATABASES=DATABASES,
+    TIME_ZONE=TIME_ZONE,
+    INSTALLED_APPS=INSTALLED_APPS
+)
+
+django.setup()
+
+from db2.models import Study as wakawaka
+print "\nif the following doesn't crash then you have ... django'd?"
+print "django study table:", wakawaka.objects.all()
+print
+
+##### end django stuff
+
+
+
+
+
 ################################################################################
 ############################# GLOBALS... #######################################
 ################################################################################
