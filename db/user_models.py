@@ -9,6 +9,8 @@ from libs.security import (generate_hash_and_salt, generate_user_hash_and_salt,
 
 #TODO: get rid of the pbkdf2 install requirement, swap to the python 2.7.10+ builtin, and confirm that this swap breaks nothing.
 
+
+# AJK TODO rename this to Participant or something
 class User( DatabaseObject ):
     """ The User database object contains the password hashes and unique user names of any
     patients in the study.  Elements in the database have the functionality described here,
@@ -33,8 +35,14 @@ class User( DatabaseObject ):
         """ Creates a new patient with random patient_id and password."""
         patient_id = generate_easy_alphanumeric_string()
         if User(patient_id): cls.create(study_id) #if user exists, recurse.
-        
+
+        # AJK TODO look into doing password stuff automatically through Django:
+        # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
         password, password_hash, salt = generate_user_password_and_salt()
+
+        # AJK TODO give the user a default Django PK instead of patient_id.
+        # Also look for any other models that may be using a non-default PK, and
+        # unless there is a *very* good reason to do so, change it.
         new_client = { ID_KEY: patient_id, "password":password_hash,
                       'device_id':None, "salt":salt, 'study_id':study_id }
         super(User, cls).create(new_client)

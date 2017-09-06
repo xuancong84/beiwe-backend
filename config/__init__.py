@@ -1,4 +1,4 @@
-import secure_settings, constants
+from config import secure_settings, constants
 provided_settings = vars(secure_settings)
 
 #check that all values provided actually contain something

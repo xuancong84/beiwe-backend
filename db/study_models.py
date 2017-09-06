@@ -2,6 +2,10 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from config.constants import SURVEY_TYPES
 
 
+# AJK TODO move the database over to Postgres and Django 1.11.
+# Specify Django 1.11 in requirements.txt. Django 2.0 isn't Python 2 compatible.
+# We're keeping Flask for the frontend stuff; Django is only for the database interactions.
+
 class Study( DatabaseObject ):
     PATH = "beiwe.studies"
     
@@ -120,7 +124,7 @@ class StudyDeviceSettings( DatabaseObject ):
         "call_clinician_button_text":"Call My Clinician",
         "consent_form_text":" I have read and understood the information about the study and all of my questions about the study have been answered by the study researchers.",
         "survey_submit_success_toast_text":"""Thank you for completing the survey.  A clinician will not see your answers immediately, so if you need help or are thinking about harming yourself, please contact your clinician.  You can also press the "Call My Clinician" button.""",
-        #Consent ections
+        #Consent sections
         "consent_sections": { "welcome": { "text": "", "more": "" }, "data_gathering": { "text": "", "more": "" }, "privacy": { "text": "", "more": "" }, "data_use": { "text": "", "more": "" }, "time_commitment": { "text": "", "more": "" }, "study_survey": { "text": "", "more": "" }, "study_tasks": { "text": "", "more": "" }, "withdrawing": { "text": "", "more": "" } }
     }
     @classmethod

@@ -95,13 +95,17 @@ class ChunksRegistry(DatabaseCollection):
         """ This function uses mongo query syntax to provide datetimes and have mongo do the
         comparison operation, and the 'in' operator to have mongo only match the user list
         provided. """
+
+        # AJK TODO in Django, this is like saying cls.filter(**query)
+        # AJK TODO the $ is similar to Django dunderscore. For example, the first
+        # if statement corresponds to Django query['user_id__in'] = user_ids.
         query = {"study_id":study_id}
         if user_ids: query["user_id"] = { "$in":user_ids }
         if data_types: query["data_type"] = { "$in":data_types }
         if start and end: query["time_bin"] = {"$gte": start, "$lte": end }
         if start and not end: query["time_bin"] = { "$gte": start}
         if end and not start: query["time_bin"] = { "$lte": end }
-        print query
+        print(query)
         return cls.iterator(query=query, page_size=10*CONCURRENT_NETWORK_OPS)
 
 class FilesToProcess(DatabaseCollection):
