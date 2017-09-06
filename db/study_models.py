@@ -2,10 +2,6 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from config.constants import SURVEY_TYPES
 
 
-# AJK TODO move the database over to Postgres and Django 1.11.
-# Specify Django 1.11 in requirements.txt. Django 2.0 isn't Python 2 compatible.
-# We're keeping Flask for the frontend stuff; Django is only for the database interactions.
-
 class Study( DatabaseObject ):
     PATH = "beiwe.studies"
     

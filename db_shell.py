@@ -7,17 +7,3 @@ from bson import ObjectId
 
 # AJK TODO look into whether this can be replaced by Django's manage.py shell_plus.
 # The reason it might not is because we're still using Flask for the frontend.
-
-# import django
-# from django.conf import settings
-# from config.django_db_config import *
-# settings.configure(
-#     SECRET_KEY=SECRET_KEY,
-#     DATABASES=DATABASES,
-#     TIME_ZONE=TIME_ZONE,
-#     INSTALLED_APPS=INSTALLED_APPS
-# )
-#
-# django.setup()
-#
-# from db2.models import Study

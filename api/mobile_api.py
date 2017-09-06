@@ -1,8 +1,15 @@
 import calendar, time
-
 from datetime import datetime
+import os
+
 from flask import Blueprint, request, abort, render_template, json
+from raven import Client as SentryClient
+from raven.transport import HTTPTransport
+from werkzeug.exceptions import BadRequestKeyError
+
 from config.constants import ALLOWED_EXTENSIONS
+from config.secure_settings import SENTRY_DSN
+from db.data_access_models import FileToProcess
 from db.profiling import UploadTracking
 from db.user_models import User
 from db.study_models import Study
@@ -12,42 +19,6 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from libs.http_utils import determine_os_api
-from werkzeug.exceptions import BadRequestKeyError
-from db.data_access_models import FileToProcess
-
-from raven import Client as SentryClient
-from raven.transport import HTTPTransport
-
-from config.secure_settings import SENTRY_DSN
-
-
-
-
-
-##### django stuff
-import django
-from django.conf import settings
-from config.django_db_config import *
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.django_db_config")
-
-settings.configure(
-    SECRET_KEY=SECRET_KEY,
-    DATABASES=DATABASES,
-    TIME_ZONE=TIME_ZONE,
-    INSTALLED_APPS=INSTALLED_APPS
-)
-
-django.setup()
-
-from db2.models import Study as wakawaka
-print "\nif the following doesn't crash then you have ... django'd?"
-print "django study table:", wakawaka.objects.all()
-print
-
-##### end django stuff
-
-
-
 
 
 ################################################################################
