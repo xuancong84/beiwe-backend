@@ -44,7 +44,7 @@ class Study(models.Model):
     deleted = models.BooleanField(default=False)
 
 
-# AJK TODO idea: add SurveyArchive model that gets created on Survey.save()
+# AJK TODO idea: add SurveyArchive model that gets created on Survey.save() (or with a signal)
 class Survey(AbstractModel):
     # AJK TODO ensure that JSON-blobbification returns the _survey version of the type
     AUDIO = 'audio'
@@ -159,6 +159,5 @@ class DeviceSettings(AbstractModel):
     # Consent sections
     consent_sections = models.TextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
 
-    # AJK TODO add a signals.py to ensure a DeviceSettings object is created upon Study creation
     study = models.OneToOneField('Study', on_delete=models.PROTECT, related_name='device_settings')
     deleted = models.BooleanField(default=False)
