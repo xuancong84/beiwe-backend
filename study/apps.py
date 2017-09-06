@@ -4,5 +4,5 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 
-class Db2Config(AppConfig):
-    name = 'db2'
+class StudyConfig(AppConfig):
+    name = 'study'
