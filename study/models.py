@@ -7,6 +7,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.fields.related import RelatedField
 
+from config.constants import IOS_API, ANDROID_API, SURVEY_TYPES
 from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
@@ -42,16 +43,22 @@ class JSONTextField(models.TextField):
 class AbstractModel(models.Model):
 
     def as_native_json(self):
+        """
+        Collect all of the fields of the model and return their values in a JSON dict.
+        """
         field_list = self._meta.fields
         field_dict = {}
         for field in field_list:
             field_name = field.name
             if isinstance(field, RelatedField):
+                # If the field is a relation, return the related object's primary key
                 field_dict[field_name + '_id'] = getattr(self, field_name).id
             elif isinstance(field, JSONTextField):
+                # If the field is a JSONTextField, load the field's value before returning
                 field_raw_val = getattr(self, field_name)
                 field_dict[field_name] = json.loads(field_raw_val)
             else:
+                # Otherwise, just return the field's value
                 field_dict[field_name] = getattr(self, field_name)
 
         return json.dumps(field_dict)
@@ -78,13 +85,7 @@ class Study(AbstractModel):
 
 # AJK TODO idea: add SurveyArchive model that gets created on Survey.save() (or with a signal)
 class Survey(AbstractModel):
-    # AJK TODO ensure that JSON-blobbification returns the _survey version of the type
-    AUDIO = 'audio'
-    TRACKING = 'tracking'
-    SURVEY_TYPE_CHOICES = (
-        (AUDIO, 'audio_survey'),
-        (TRACKING, 'tracking_survey'),
-    )
+    SURVEY_TYPE_CHOICES = [(val, val) for val in SURVEY_TYPES]
 
     # AJK TODO test that the TextField can deal with arbitrarily large text (e.g. 1MB)
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
@@ -98,11 +99,9 @@ class Survey(AbstractModel):
 
 
 class Participant(AbstractModel):
-    ANDROID = 'ANDROID'
-    IOS = 'IOS'
     OS_TYPE_CHOICES = (
-        (ANDROID, 'ANDROID'),
-        (IOS, 'IOS'),
+        (IOS_API, IOS_API),
+        (ANDROID_API, ANDROID_API),
     )
 
     patient_id = models.CharField(max_length=8, unique=True, validators=[id_validator],
