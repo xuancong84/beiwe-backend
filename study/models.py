@@ -6,6 +6,11 @@ import json
 from django.db import models
 from django.core.validators import RegexValidator
 
+from study.text_constants import (
+    ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
+    SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
+)
+
 # AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
 # AJK TODO create profiling models (see db/profiling.py)
 # AJK TODO when all that is done, collapse migrations
@@ -16,7 +21,13 @@ from django.core.validators import RegexValidator
 # test that everything still works.
 
 
-# AJK TODO add annotations and help_texts
+class AbstractModel(models.Model):
+
+    class Meta:
+        abstract = True
+
+
+# AJK TODO add annotations and help_texts (copy annotations from old _models.py files)
 # AJK TODO reorder fields cleanly
 class Study(models.Model):
     name = models.TextField()
@@ -24,7 +35,9 @@ class Study(models.Model):
     deleted = models.BooleanField(default=False)
 
 
-class Survey(models.Model):
+# AJK TODO idea: add SurveyArchive model that gets created on Survey.save()
+class Survey(AbstractModel):
+    # AJK TODO ensure that JSON-blobbification returns the _survey version of the type
     AUDIO = 'audio'
     TRACKING = 'tracking'
     SURVEY_TYPE_CHOICES = (
@@ -33,15 +46,17 @@ class Survey(models.Model):
     )
 
     # AJK TODO test that the TextField can deal with arbitrarily large text (e.g. 1MB)
-    content = models.TextField(help_text='JSON blob containing information about the survey questions')
-    timings = []  # int-list of length 7. maybe also a JSON blob, maybe a seven-part field
-    survey_type = models.CharField(max_length=8, choices=SURVEY_TYPE_CHOICES)
-    settings = models.TextField(help_text='JSON blob containing settings for the survey')
+    content = models.TextField(default='[]', help_text='JSON blob containing information about the survey questions.')
+    timings = models.TextField(default=json.dumps([[], [], [], [], [], [], []]),
+                               help_text='JSON blob containing the times at which the survey is sent.')
+    survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES)
+    settings = models.TextField(default='{}', help_text='JSON blob containing settings for the survey.')
 
-    study = models.ForeignKey('Study', on_delete=models.CASCADE, related_name='surveys')
+    study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
+    deleted = models.BooleanField(default=False)
 
 
-class Participant(models.Model):
+class Participant(AbstractModel):
     ANDROID = 'ANDROID'
     IOS = 'IOS'
     OS_TYPE_CHOICES = (
@@ -49,39 +64,46 @@ class Participant(models.Model):
         (IOS, 'IOS'),
     )
 
-    id_validator = RegexValidator('^[1-9a-z]{8}$', message='Invalid Participant ID')
+    id_validator = RegexValidator('^[1-9a-z]+$', message='Invalid Participant ID')
     patient_id = models.CharField(max_length=8, unique=True, validators=[id_validator],
                                   help_text='Eight-character unique ID with characters chosen from 1-9 and a-z')
 
     device_id = models.CharField(
-        max_length=64,
+        max_length=256,
+        null=True,
         help_text='The ID of the device that the participant is using for the study, provided by the mobile API.',
     )
-    os_type = models.CharField(max_length=7, choices=OS_TYPE_CHOICES, null=True)
+    os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, null=True)
 
     # AJK TODO look into doing password stuff automatically through Django:
     # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
-    password = []
-    salt = []
+    url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
+    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
+    salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
-    study = models.ForeignKey('Study', on_delete=models.CASCADE, related_name='participants')
+    study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
+    deleted = models.BooleanField(default=False)
 
 
-class Admin(models.Model):
+class Admin(AbstractModel):
     username = models.CharField(max_length=32, unique=True)
     system_admin = models.BooleanField(default=False, help_text='Whether the admin is also a sysadmin')
 
-    password = []  # use Django passwords, see Participant
-    salt = []  # ditto
+    # AJK TODO annotation explaining the validators, make them local to models.py
+    url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
+    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
+    salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
-    access_key_id = []  # uh maybe make a model for this?
-    access_key_secret = []  # this should be Django passwords again
-    access_key_secret_salt = []
+    standard_base_64_validator = RegexValidator('^[0-9a-zA-Z+/]+$')
+    access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator])
+    access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
+    access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
     studies = models.ManyToManyField('Study', related_name='admins')
+    deleted = models.BooleanField(default=False)
 
 
-class DeviceSettings(models.Model):
+class DeviceSettings(AbstractModel):
     # Whether various device options are turned on
     accelerometer = models.BooleanField(default=True)
     gps = models.BooleanField(default=True)
@@ -125,47 +147,14 @@ class DeviceSettings(models.Model):
     devicemotion_on_duration_seconds = models.PositiveIntegerField(default=60)
 
     # Text strings
-    about_page_text = models.TextField(
-        default='The Beiwe application runs on your phone and helps researchers collect information about '
-                'your behaviors. Beiwe may ask you to fill out short surveys or to record your voice. '
-                'It may collect information about your location (using phone GPS) and how much you move '
-                '(using phone accelerometer). Beiwe may also monitor how much you use your phone for '
-                'calling and texting and keep track of the people you communicate with. Importantly, '
-                'Beiwe never records the names or phone numbers of anyone you communicate with. While '
-                'it can tell if you call the same person more than once, it does not know who that '
-                'person is. Beiwe also does not record the content of your text messages or phone calls. '
-                'Beiwe may keep track of the different Wi-Fi networks and Bluetooth devices around your '
-                'phone, but the names of those networks are replaced with random codes.\n\n'
-                'Although Beiwe collects large amounts of data, the data is processed to protect your '
-                'privacy. This means that it does not know your name, your phone number, or anything '
-                'else that could identify you. Beiwe only knows you by an identification number. '
-                'Because Beiwe does not know who you are, it cannot communicate with your clinician '
-                'if you are ill or in danger. Researchers will not review the data Beiwe collects '
-                'until the end of the study. To make it easier for you to connect with your '
-                'clinician, the \'Call my Clinician\' button appears at the bottom of every page.\n\n'
-                'Beiwe was conceived and designed by Dr. Jukka-Pekka \'JP\' Onnela at the Harvard '
-                'T.H. Chan School of Public Health. Development of the Beiwe smartphone application '
-                'and data analysis software is funded by NIH grant 1DP2MH103909-01 to Dr. Onnela. '
-                'The smartphone application was built by Zagaran, Inc., in Cambridge, Massachusetts.'
-    )
+    about_page_text = models.TextField(default=ABOUT_PAGE_TEXT)
     call_clinician_button_text = models.TextField(default='Call My Clinician')
-    consent_form_text = models.TextField(
-        default='I have read and understood the information about the study and all of my '
-                'questions about the study have been answered by the study researchers.'
-    )
-    survey_submit_success_toast_text = models.TextField(
-        default='Thank you for completing the survey. A clinician will not see your answers '
-                'immediately, so if you need help or are thinking about harming yourself, '
-                'please contact your clinician. You can also press the \'Call My Clinician\' button.'
-    )
+    consent_form_text = models.TextField(default=CONSENT_FORM_TEXT)
+    survey_submit_success_toast_text = models.TextField(default=SURVEY_SUBMIT_SUCCESS_TOAST_TEXT)
 
     # Consent sections
-    default_consent_sections = {
-        "welcome": {"text": "", "more": ""}, "data_gathering": {"text": "", "more": ""},
-        "privacy": {"text": "", "more": ""}, "data_use": {"text": "", "more": ""},
-        "time_commitment": {"text": "", "more": ""}, "study_survey": {"text": "", "more": ""},
-        "study_tasks": {"text": "", "more": ""}, "withdrawing": {"text": "", "more": ""}
-    }
-    consent_sections = models.TextField(default=json.dumps(default_consent_sections))
+    consent_sections = models.TextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
 
-    study = models.OneToOneField('Study', on_delete=models.CASCADE, related_name='device_settings')
+    # AJK TODO add a signals.py to ensure a DeviceSettings object is created upon Study creation
+    study = models.OneToOneField('Study', on_delete=models.PROTECT, related_name='device_settings')
+    deleted = models.BooleanField(default=False)
