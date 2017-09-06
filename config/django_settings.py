@@ -19,8 +19,8 @@ DATABASES = {
 TIME_ZONE = 'America/New_York'
 
 INSTALLED_APPS = [
-    "study",
-    "django_extensions"
+    'study.apps.StudyConfig',
+    'django_extensions'
 ]
 
 SHELL_PLUS = "ipython"
