@@ -20,6 +20,15 @@ from study.text_constants import (
 # AJK TODO move from the installed pbkdf2 to the python 2.7.10+ builtin, and
 # test that everything still works.
 
+# These validators are used by CharFields in the Admin and Participant models to ensure
+# that those fields' values fit the regex below. The length requirement is handled by
+# the CharField, but the validator ensures that only certain characters are present
+# in the field value. If the ID or hashes are changed, be sure to modify or create a new
+# validator accordingly.
+id_validator = RegexValidator('^[1-9a-z]+$', message='Invalid Participant ID')
+url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
+standard_base_64_validator = RegexValidator('^[0-9a-zA-Z+/]+$')
+
 
 class AbstractModel(models.Model):
 
@@ -64,7 +73,6 @@ class Participant(AbstractModel):
         (IOS, 'IOS'),
     )
 
-    id_validator = RegexValidator('^[1-9a-z]+$', message='Invalid Participant ID')
     patient_id = models.CharField(max_length=8, unique=True, validators=[id_validator],
                                   help_text='Eight-character unique ID with characters chosen from 1-9 and a-z')
 
@@ -77,7 +85,6 @@ class Participant(AbstractModel):
 
     # AJK TODO look into doing password stuff automatically through Django:
     # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
-    url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
     password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
     salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
@@ -89,12 +96,9 @@ class Admin(AbstractModel):
     username = models.CharField(max_length=32, unique=True)
     system_admin = models.BooleanField(default=False, help_text='Whether the admin is also a sysadmin')
 
-    # AJK TODO annotation explaining the validators, make them local to models.py
-    url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
     password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
     salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
-    standard_base_64_validator = RegexValidator('^[0-9a-zA-Z+/]+$')
     access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator])
     access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
     access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])

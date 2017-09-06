@@ -118,11 +118,13 @@ def generate_admin_password_and_salt():
 def generate_easy_alphanumeric_string():
     """ Generates a pretty easy alphanumeric (lower case) string, this string
         will not contain the number 0. """
-    random_string = hashlib.md5( urandom(16) ).digest().encode('base64')
-    return re.sub(r'[^A-Z1-9]', "", random_string)[:8].lower()
+    random_string = hashlib.md5(urandom(24)).digest().encode('base64')
+    return re.sub(r'[^a-zA-Z1-9]', "", random_string)[:8].lower()
+
 
 def generate_random_string():
     return hashlib.sha512( urandom(16) ).digest().encode('base64')
+
 
 def check_password_requirements(password, flash_message=False):
     if len(password) < 8:
