@@ -3,12 +3,10 @@ from __future__ import unicode_literals
 
 import json
 
-from django.core.exeptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.fields.related import RelatedField
 
-from config.constants import IOS_API, ANDROID_API, AUDIO_SURVEY, TRACKING_SURVEY
+from config.constants import IOS_API, ANDROID_API, NULL_OS, AUDIO_SURVEY, TRACKING_SURVEY
 from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT, AUDIO_SURVEY_SETTINGS
@@ -16,6 +14,9 @@ from config.study_constants import (
 from libs.security import (
     compare_password, device_hash, generate_easy_alphanumeric_string, generate_hash_and_salt,
     generate_random_string, generate_user_hash_and_salt
+)
+from study.validators import (
+    id_validator, length_32_validator, standard_base_64_validator, url_safe_base_64_validator
 )
 
 # AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
@@ -25,19 +26,6 @@ from libs.security import (
 # We're keeping Flask for the frontend stuff; Django is only for the database interactions.
 # AJK TODO write a script to convert the Mongolia database to Django
 # Do chunked bulk_creates for speed, because there are a lot of files
-
-
-# These validators are used by CharFields in the Researcher and Participant models to ensure
-# that those fields' values fit the regex below. The length requirement is handled by
-# the CharField, but the validator ensures that only certain characters are present
-# in the field value. If the ID or hashes are changed, be sure to modify or create a new
-# validator accordingly.
-def encryption_key_validator(value):
-    if len(value) != 32:
-        raise ValidationError('Invalid Encryption Key', 'invalid')
-id_validator = RegexValidator('^[1-9a-z]+$', message='Invalid Participant ID')
-url_safe_base_64_validator = RegexValidator('^[0-9a-zA-Z_\-]+$')
-standard_base_64_validator = RegexValidator('^[0-9a-zA-Z+/]+$')
 
 
 class JSONTextField(models.TextField):
@@ -86,6 +74,13 @@ class AbstractModel(models.Model):
     def as_native_json(self):
         return json.dumps(self.as_native_python())
 
+    def save(self, *args, **kwargs):
+        # TODO if we encounter ValidationErrors here after the SQL migration, allow
+        # invalid data but add a Sentry error.
+        # Raise a ValidationError if any data is invalid
+        self.full_clean()
+        super(AbstractModel, self).save(*args, **kwargs)
+
     def __str__(self):
         if hasattr(self, 'study'):
             return '{} {} of Study {}'.format(self.__class__.__name__, self.pk, self.study.name)
@@ -104,7 +99,7 @@ class Study(AbstractModel):
     # in the view (cf. db.study_models.Study.create_default_study). This is a concern for all
     # models and fields that have restrictions on them.
     name = models.TextField(unique=True, help_text='Name of the study; can be of any length')
-    encryption_key = models.CharField(max_length=32, validators=[encryption_key_validator],
+    encryption_key = models.CharField(max_length=32, validators=[length_32_validator],
                                       help_text='Key used for encrypting the study data')
 
     def add_researcher(self, researcher):
@@ -246,17 +241,15 @@ class Participant(AbstractPasswordUser):
     OS_TYPE_CHOICES = (
         (IOS_API, IOS_API),
         (ANDROID_API, ANDROID_API),
+        (NULL_OS, NULL_OS),
     )
 
     patient_id = models.CharField(max_length=8, unique=True, validators=[id_validator],
                                   help_text='Eight-character unique ID with characters chosen from 1-9 and a-z')
 
-    device_id = models.CharField(
-        max_length=256,
-        null=True,
-        help_text='The ID of the device that the participant is using for the study, provided by the mobile API.',
-    )
-    os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, null=True,
+    device_id = models.CharField(max_length=256, blank=True,
+                                 help_text='The ID of the device that the participant is using for the study, if any.')
+    os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, blank=True,
                                help_text='The type of device the participant is using, if any.')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
@@ -321,9 +314,9 @@ class Researcher(AbstractPasswordUser):
     username = models.CharField(max_length=32, unique=True, help_text='User-chosen username, stored in plain text')
     admin = models.BooleanField(default=False, help_text='Whether the researcher is also an admin')
 
-    access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator], null=True)
-    access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator], null=True)
-    access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator], null=True)
+    access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator], blank=True)
+    access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator], blank=True)
+    access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator], blank=True)
 
     studies = models.ManyToManyField('Study', related_name='researchers')
 

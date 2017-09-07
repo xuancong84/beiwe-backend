@@ -32,6 +32,7 @@ CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECOND
 # use_these aliases to determine if the incoming url was for an api version
 IOS_API = "IOS"
 ANDROID_API = "ANDROID"
+NULL_OS = ''
 
 ## Data streams and survey types ##
 ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
