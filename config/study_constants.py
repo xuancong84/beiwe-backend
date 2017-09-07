@@ -44,3 +44,9 @@ DEFAULT_CONSENT_SECTIONS = {
     "withdrawing": {"text": "", "more": ""}
 }
 DEFAULT_CONSENT_SECTIONS_JSON = json.dumps(DEFAULT_CONSENT_SECTIONS)
+
+AUDIO_SURVEY_SETTINGS = {
+    'audio_survey_type': 'compressed',
+    'bit_rate': 64000,
+    'sample_rate': 44100,
+}

@@ -39,7 +39,10 @@ PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 MEDIA_EXTENSIONS = [".mp4", ".wav"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-SURVEY_TYPES = ['audio_survey', 'tracking_survey']
+
+AUDIO_SURVEY = 'audio_survey'
+TRACKING_SURVEY = 'tracking_survey'
+SURVEY_TYPES = [AUDIO_SURVEY, TRACKING_SURVEY]
 
 
 

@@ -26,7 +26,7 @@ class DataAccessModelTests(TestCase):
 class ResearcherModelTests(TestCase):
     
     # Participant tests
-    def test_participant_create(self): pass
+    def test_participant_create_with_password(self): pass
     
     def test_participant_validate_password(self): pass
     
@@ -44,7 +44,7 @@ class ResearcherModelTests(TestCase):
     
     
     # Researcher Tests
-    def test_researcher_create(self): pass
+    def test_researcher_create_with_password(self): pass
 
     def test_researcher_check_password(self): pass
         
@@ -62,8 +62,6 @@ class ResearcherModelTests(TestCase):
 class StudyModelTests(TestCase):
     
     # Study model tests:
-    def test_create_default_study(self): pass
-    
     def test_add_researcher(self): pass
     
     def test_remove_researcher(self): pass
@@ -78,13 +76,8 @@ class StudyModelTests(TestCase):
     
     def test_get_study_device_settings(self): pass
     
-    
-    # StudyDeviceSettings model tests:
-    def test_create_default(self):   pass
-        # does this even need a test? the django default values work.
-    
     # Survey model tests:
-    def test_create_default_survey(self): pass
+    def test_survey_create_with_settings(self): pass
         # this one is potentially complex and therefore needs a test.
     
 
