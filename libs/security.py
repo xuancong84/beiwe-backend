@@ -6,12 +6,14 @@ from config.secure_settings import (MONGO_PASSWORD, MONGO_USERNAME,
                                     FLASK_SECRET_KEY, ITERATIONS)
 from config.constants import PASSWORD_REQUIREMENT_REGEX_LIST
 
-from os import urandom
-from pbkdf2 import PBKDF2
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
+from hashlib import pbkdf2_hmac as pbkdf2
+from os import urandom
+
 
 class DatabaseIsDownError(Exception): pass
 class PaddingException(Exception): pass
+
 
 def set_secret_key(app):
     """grabs the Flask secret key"""
@@ -68,31 +70,33 @@ def decode_base64(data):
         if "Incorrect padding" == e.message:
             raise PaddingException
 
-def generate_user_hash_and_salt( password ):
+
+def generate_user_hash_and_salt(password):
     """ Generates a hash and salt that will match a given input string, and also
         matches the hashing that is done on a user's device. 
         Input is anticipated to be any arbitrary string."""
-    salt = encode_base64( urandom(16) )
+    salt = encode_base64(urandom(16))
     password = device_hash(password)
-    password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
-    return ( password_hashed, salt )
+    password_hashed = encode_base64(pbkdf2('sha1', password, salt, iterations=ITERATIONS, dklen=32))
+    return password_hashed, salt
 
-def generate_hash_and_salt( password ):
+
+def generate_hash_and_salt(password):
     """ Generates a hash and salt that will match for a given input string.
         Input is anticipated to be any arbitrary string."""
-    salt = encode_base64( urandom(16) )
-    password_hashed =  encode_base64( PBKDF2(password, salt, iterations=ITERATIONS).read(32) )
-    return ( password_hashed, salt )
+    salt = encode_base64(urandom(16))
+    password_hashed = encode_base64(pbkdf2('sha1', password, salt, iterations=ITERATIONS, dklen=32))
+    return password_hashed, salt
 
-def compare_password( proposed_password, salt, real_password_hash ):
+
+def compare_password(proposed_password, salt, real_password_hash):
     """ Compares a proposed password with a salt and a real password, returns
         True if the hash results are identical.
         Expects the proposed password to be a base64 encoded string.
         Expects the real password to be a base64 encoded string. """
-    proposed_hash = encode_base64( PBKDF2( proposed_password, salt, iterations=ITERATIONS).read(32) )
-    if  proposed_hash == real_password_hash :
-        return True
-    return False
+    proposed_hash = encode_base64(pbkdf2('sha1', proposed_password, salt, iterations=ITERATIONS, dklen=32))
+    return proposed_hash == real_password_hash
+
 
 def generate_user_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
@@ -101,6 +105,7 @@ def generate_user_password_and_salt():
     password = generate_easy_alphanumeric_string()
     password_hash, salt = generate_user_hash_and_salt( password )
     return password, password_hash, salt
+
 
 def generate_admin_password_and_salt():
     """ Generates a random password, and an associated hash and salt.
