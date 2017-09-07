@@ -25,7 +25,7 @@ from libs.security import (
 # AJK TODO write a script to convert the Mongolia database to Django
 
 
-# These validators are used by CharFields in the Admin and Participant models to ensure
+# These validators are used by CharFields in the Researcher and Participant models to ensure
 # that those fields' values fit the regex below. The length requirement is handled by
 # the CharField, but the validator ensures that only certain characters are present
 # in the field value. If the ID or hashes are changed, be sure to modify or create a new
@@ -91,12 +91,12 @@ class Study(AbstractModel):
     name = models.TextField()
     encryption_key = models.CharField(max_length=32)
 
-    def add_admin(self, admin):
-        # This takes either an actual Admin object, or the primary key of such an object
-        self.admins.add(admin)
+    def add_researcher(self, researcher):
+        # This takes either an actual Researcher object, or the primary key of such an object
+        self.researchers.add(researcher)
 
-    def remove_admin(self, admin):
-        self.admins.remove(admin)
+    def remove_researcher(self, researcher):
+        self.researchers.remove(researcher)
 
     def add_survey(self, survey):
         self.surveys.add(survey)
@@ -215,15 +215,15 @@ class Participant(AbstractPasswordUser):
         self.save()
 
 
-class Admin(AbstractPasswordUser):
+class Researcher(AbstractPasswordUser):
     username = models.CharField(max_length=32, unique=True)
-    system_admin = models.BooleanField(default=False, help_text='Whether the admin is also a sysadmin')
+    admin = models.BooleanField(default=False, help_text='Whether the researcher is also an admin')
 
     access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator])
     access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
     access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
-    studies = models.ManyToManyField('Study', related_name='admins')
+    studies = models.ManyToManyField('Study', related_name='researchers')
 
     def generate_hash_and_salt(self, password):
         return generate_hash_and_salt(password)
@@ -231,15 +231,15 @@ class Admin(AbstractPasswordUser):
     @classmethod
     def check_password(cls, username, compare_me):
         """
-        Checks if the provided password matches the hash of the provided Admin's password.
+        Checks if the provided password matches the hash of the provided Researcher's password.
         """
-        if not Admin.objects.filter(username=username).exists():
+        if not Researcher.objects.filter(username=username).exists():
             return False
-        admin = Admin.objects.get(username=username)
-        return admin.validate_password(compare_me)
+        researcher = Researcher.objects.get(username=username)
+        return researcher.validate_password(compare_me)
 
-    def elevate_to_system_admin(self):
-        self.system_admin = True
+    def elevate_to_admin(self):
+        self.admin = True
         self.save()
 
     def validate_access_credentials(self, proposed_secret_key):

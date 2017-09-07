@@ -6,6 +6,7 @@ import unittest
 
 from db import data_access_models, user_models, study_models, profiling
 
+
 class DataAccessModelTests(unittest.TestCase):
     
     # ChunkRegistry model tests:
@@ -48,20 +49,20 @@ class UserModelTests(unittest.TestCase):
     def test_participant_set_password(self): pass
     
     
-    # Admin Tests
-    def test_admin_create(self): pass
+    # Researcher Tests
+    def test_researcher_create(self): pass
 
-    def test_admin_check_password(self): pass
+    def test_researcher_check_password(self): pass
         
-    def test_admin_validate_password(self): pass
+    def test_researcher_validate_password(self): pass
         
-    def test_admin_set_password(self): pass
+    def test_researcher_set_password(self): pass
         
-    def test_admin_elevate_to_system_admin(self): pass
+    def test_researcher_elevate_to_admin(self): pass
         
-    def test_admin_validate_access_credentials(self): pass
+    def test_researcher_validate_access_credentials(self): pass
         
-    def test_admin_reset_access_credentials(self): pass
+    def test_researcher_reset_access_credentials(self): pass
 
 
 class StudyModelTests(unittest.TestCase):
@@ -69,9 +70,9 @@ class StudyModelTests(unittest.TestCase):
     # Study model tests:
     def test_create_default_study(self): pass
     
-    def test_add_admin(self): pass
+    def test_add_researcher(self): pass
     
-    def test_remove_admin(self): pass
+    def test_remove_researcher(self): pass
     
     def test_add_survey(self): pass
     
