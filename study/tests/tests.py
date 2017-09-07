@@ -1,13 +1,7 @@
-# nosetests -v --nocapture
-import unittest
-
-# import flask
-# app = flask.Flask(__name__)
-
-from db import data_access_models, user_models, study_models, profiling
+from django.test import TestCase
 
 
-class DataAccessModelTests(unittest.TestCase):
+class DataAccessModelTests(TestCase):
     
     # ChunkRegistry model tests:
     def test_add_new_chunk(self): pass
@@ -29,7 +23,7 @@ class DataAccessModelTests(unittest.TestCase):
     def test_get_time_since_locked(self): pass
     
 
-class UserModelTests(unittest.TestCase):
+class ResearcherModelTests(TestCase):
     
     # Participant tests
     def test_participant_create(self): pass
@@ -65,7 +59,7 @@ class UserModelTests(unittest.TestCase):
     def test_researcher_reset_access_credentials(self): pass
 
 
-class StudyModelTests(unittest.TestCase):
+class StudyModelTests(TestCase):
     
     # Study model tests:
     def test_create_default_study(self): pass
@@ -94,7 +88,7 @@ class StudyModelTests(unittest.TestCase):
         # this one is potentially complex and therefore needs a test.
     
 
-class ProfilingModelTests(unittest.TestCase):
+class ProfilingModelTests(TestCase):
     
     # Upload model tests
     def test_get_trailing(self): pass
