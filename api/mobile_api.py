@@ -1,6 +1,5 @@
 import calendar, time
 from datetime import datetime
-import os
 
 from flask import Blueprint, request, abort, render_template, json
 from raven import Client as SentryClient
