@@ -23,6 +23,7 @@ from libs.security import (
 # AJK TODO when all that is done, collapse migrations
 # We're keeping Flask for the frontend stuff; Django is only for the database interactions.
 # AJK TODO write a script to convert the Mongolia database to Django
+# Do chunked bulk_creates for speed, because there are a lot of files
 
 
 # These validators are used by CharFields in the Researcher and Participant models to ensure
@@ -44,8 +45,19 @@ class JSONTextField(models.TextField):
 
 
 class AbstractModel(models.Model):
+    """
+    The AbstractModel is used to enable basic functionality for all database tables.
+
+    AbstractModel descendants have a delete flag and function to mark as deleted, because
+    we rarely want to truly delete an object. They also have a function to express the
+    object as a JSON dict containing all fields and values of the object.
+    """
 
     deleted = models.BooleanField(default=False)
+
+    def mark_deleted(self):
+        self.deleted = True
+        self.save()
 
     def as_native_json(self):
         """
@@ -68,10 +80,6 @@ class AbstractModel(models.Model):
 
         return json.dumps(field_dict)
 
-    def mark_deleted(self):
-        self.deleted = True
-        self.save()
-
     def __str__(self):
         if hasattr(self, 'study'):
             return '{} {} of Study {}'.format(self.__class__.__name__, self.pk, self.study.name)
@@ -84,12 +92,11 @@ class AbstractModel(models.Model):
         abstract = True
 
 
-# AJK TODO add annotations and help_texts (copy annotations from old _models.py files)
-# AJK TODO reorder fields cleanly
 # AJK TODO add the create methods, or don't
+# AJK TODO annotate
 class Study(AbstractModel):
-    name = models.TextField()
-    encryption_key = models.CharField(max_length=32)
+    name = models.TextField(help_text='Name of the study; can be of any length')
+    encryption_key = models.CharField(max_length=32, help_text='Key used for encrypting the study data')
 
     def add_researcher(self, researcher):
         # This takes either an actual Researcher object, or the primary key of such an object
@@ -119,29 +126,51 @@ class Study(AbstractModel):
 
 # AJK TODO idea: add SurveyArchive model that gets created on Survey.save() (or with a signal)
 class Survey(AbstractModel):
+    """
+    Surveys contain all information the app needs to display the survey correctly to a participant,
+    and when it should push the notifications to take the survey.
+
+    Surveys must have a 'survey_type', which is a string declaring the type of survey it
+    contains, which the app uses to display the correct interface.
+
+    Surveys contain 'content', which is a JSON blob that is unpacked on the app and displayed
+    to the participant in the form indicated by the survey_type.
+
+    Timings schema: a survey must indicate the day of week and time of day on which to trigger;
+    by default it contains no values. The timings schema mimics the Java.util.Calendar.DayOfWeek
+    specification: it is zero-indexed with day 0 as Sunday. 'timings' is a list of 7 lists, each
+    inner list containing any number of times of the day. Times of day are integer values
+    indicating the number of seconds past midnight.
+    """
+
     SURVEY_TYPE_CHOICES = [(val, val) for val in SURVEY_TYPES]
 
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
+    survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES,
+                                   help_text='What type of survey this is.')
+    settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
     timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
                             help_text='JSON blob containing the times at which the survey is sent.')
-    survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES)
-    settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
 
 
 class AbstractPasswordUser(AbstractModel):
+    """
+    The AbstractPasswordUser (APU) model is used to enable basic password functionality for human
+    users of the database, whatever variety of user they may be.
+
+    APU descendants have passwords hashed once with sha256 and many times (as defined in
+    secure_settings.py) with PBKDF2, and salted using a cryptographically secure random number
+    generator. The sha256 check duplicates the storage of the password on the mobile device, so
+    that the APU's password is never stored in a reversible manner.
+    """
 
     # AJK TODO look into doing password stuff automatically through Django:
     # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
-    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
+    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator],
+                                help_text='A hash of the user\'s password')
     salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
-
-    def validate_password(self, compare_me):
-        """
-        Checks if the input matches the instance's password hash.
-        """
-        return compare_password(compare_me, self.salt, self.password)
 
     def generate_hash_and_salt(self, password):
         """
@@ -167,11 +196,25 @@ class AbstractPasswordUser(AbstractModel):
         self.set_password(password)
         return password
 
+    def validate_password(self, compare_me):
+        """
+        Checks if the input matches the instance's password hash.
+        """
+        return compare_password(compare_me, self.salt, self.password)
+
     class Meta:
         abstract = True
 
 
 class Participant(AbstractPasswordUser):
+    """
+    The Participant database object contains the password hashes and unique usernames of any
+    participants in the study, as well as information about the device the participant is using.
+    A Participant uses mobile, so their passwords are hashed accordingly.
+    """
+
+    # AJK TODO possibly move their definitions *back* from constants.py to here
+    # Same for survey types
     OS_TYPE_CHOICES = (
         (IOS_API, IOS_API),
         (ANDROID_API, ANDROID_API),
@@ -185,7 +228,8 @@ class Participant(AbstractPasswordUser):
         null=True,
         help_text='The ID of the device that the participant is using for the study, provided by the mobile API.',
     )
-    os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, null=True)
+    os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, null=True,
+                               help_text='The type of device the participant is using, if any.')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
 
@@ -216,7 +260,14 @@ class Participant(AbstractPasswordUser):
 
 
 class Researcher(AbstractPasswordUser):
-    username = models.CharField(max_length=32, unique=True)
+    """
+    The Researcher database object contains the password hashes and unique usernames of any
+    researchers, as well as their data access credentials. A Researcher can be attached to
+    multiple Studies, and a Researcher may also be an admin who has extra permissions.
+    A Researcher uses web, so their passwords are hashed accordingly.
+    """
+
+    username = models.CharField(max_length=32, unique=True, help_text='User-chosen username, stored in plain text')
     admin = models.BooleanField(default=False, help_text='Whether the researcher is also an admin')
 
     access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator])
@@ -262,6 +313,11 @@ class Researcher(AbstractPasswordUser):
 
 
 class DeviceSettings(AbstractModel):
+    """
+    The DeviceSettings database contains the structure that defines
+    settings pushed to devices of users in of a study.
+    """
+
     # Whether various device options are turned on
     accelerometer = models.BooleanField(default=True)
     gps = models.BooleanField(default=True)
