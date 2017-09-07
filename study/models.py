@@ -59,7 +59,7 @@ class AbstractModel(models.Model):
         self.deleted = True
         self.save()
 
-    def as_native_json(self):
+    def as_native_python(self):
         """
         Collect all of the fields of the model and return their values in a JSON dict.
         """
@@ -77,8 +77,10 @@ class AbstractModel(models.Model):
             else:
                 # Otherwise, just return the field's value
                 field_dict[field_name] = getattr(self, field_name)
-
-        return json.dumps(field_dict)
+        return field_dict
+    
+    def as_native_json(self):
+        return json.dumps(self.as_native())
 
     def __str__(self):
         if hasattr(self, 'study'):
