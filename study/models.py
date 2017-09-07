@@ -13,18 +13,17 @@ from config.study_constants import (
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
 )
 from libs.security import (
-    compare_password, generate_easy_alphanumeric_string, generate_hash_and_salt,
+    compare_password, device_hash, generate_easy_alphanumeric_string, generate_hash_and_salt,
     generate_random_string, generate_user_hash_and_salt
 )
 
 # AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
 # AJK TODO create profiling models (see db/profiling.py)
+# AJK TODO possibly shove models into different files and have this one call them all
 # AJK TODO when all that is done, collapse migrations
 # We're keeping Flask for the frontend stuff; Django is only for the database interactions.
 # AJK TODO write a script to convert the Mongolia database to Django
 
-# AJK TODO move from the installed pbkdf2 to the python 2.7.10+ builtin, and
-# test that everything still works.
 
 # These validators are used by CharFields in the Admin and Participant models to ensure
 # that those fields' values fit the regex below. The length requirement is handled by
@@ -70,7 +69,6 @@ class AbstractModel(models.Model):
         return json.dumps(field_dict)
 
     def mark_deleted(self):
-        # AJK TODO maybe use .update
         self.deleted = True
         self.save()
 
@@ -96,23 +94,18 @@ class Study(AbstractModel):
     def add_admin(self, admin):
         # This takes either an actual Admin object, or the primary key of such an object
         self.admins.add(admin)
-        # AJK TODO I'm pretty sure this .save() isn't necessary
-        self.save()
 
     def remove_admin(self, admin):
         self.admins.remove(admin)
-        self.save()
 
     def add_survey(self, survey):
         self.surveys.add(survey)
-        self.save()
 
     def remove_survey(self, survey):
         # AJK TODO not sure if I want to raise this error
         if not self.surveys.filter(pk=survey.pk).exists():
             raise RuntimeError('Survey does not exist.')
         self.surveys.remove(survey)
-        self.save()
 
     def get_surveys_for_study(self):
         return [json.loads(survey.as_native_json()) for survey in self.surveys.all()]
@@ -150,21 +143,19 @@ class AbstractPasswordUser(AbstractModel):
         """
         return compare_password(compare_me, self.salt, self.password)
 
-    # AJK TODO this isn't used anywhere
-    # def debug_validate_password(self, compare_me):
-    #     """
-    #     Checks if the input matches the instance's password hash, but does
-    #     the hashing for you for use on the command line.
-    #     """
-    #     compare_me = device_hash(compare_me)
-    #     return compare_password(compare_me, self['salt'], self['password'])
+    def generate_hash_and_salt(self, password):
+        """
+        Generate a password hash and random salt from a given password. This is different
+        for different types of APUs, depending on whether they use mobile or web.
+        """
+        raise NotImplementedError
 
     def set_password(self, password):
         """
         Sets the instance's password hash to match the hash of the provided string.
         """
-        password, salt = generate_user_hash_and_salt(password)
-        self.password = password
+        password_hash, salt = self.generate_hash_and_salt(password)
+        self.password = password_hash
         self.salt = salt
         self.save()
 
@@ -198,8 +189,20 @@ class Participant(AbstractPasswordUser):
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
 
+    def generate_hash_and_salt(self, password):
+        return generate_user_hash_and_salt(password)
+
+    def debug_validate_password(self, compare_me):
+        """
+        Checks if the input matches the instance's password hash, but does
+        the hashing for you for use on the command line. This is necessary
+        for manually checking that setting and validating passwords work.
+        """
+        compare_me = device_hash(compare_me)
+        return compare_password(compare_me, self.salt, self.password)
+
     def set_device(self, device_id):
-        # AJK TODO this might be served better by an .update
+        # AJK TODO once this works, get rid of it (and brethren)
         self.device_id = device_id
         self.save()
 
@@ -222,15 +225,17 @@ class Admin(AbstractPasswordUser):
 
     studies = models.ManyToManyField('Study', related_name='admins')
 
-    # AJK TODO this is a weird function...do I need it? If I do, can it be in AbstractPasswordUser?
+    def generate_hash_and_salt(self, password):
+        return generate_hash_and_salt(password)
+
     @classmethod
     def check_password(cls, username, compare_me):
         """
         Checks if the provided password matches the hash of the provided Admin's password.
         """
-        if not Admin.filter(username=username).exists():
+        if not Admin.objects.filter(username=username).exists():
             return False
-        admin = Admin.get(username=username)
+        admin = Admin.objects.get(username=username)
         return admin.validate_password(compare_me)
 
     def elevate_to_system_admin(self):
