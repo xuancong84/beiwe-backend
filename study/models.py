@@ -84,7 +84,7 @@ class AbstractModel(models.Model):
         return field_dict
     
     def as_native_json(self):
-        return json.dumps(self.as_native())
+        return json.dumps(self.as_native_python())
 
     def __str__(self):
         if hasattr(self, 'study'):
