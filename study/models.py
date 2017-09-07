@@ -12,7 +12,10 @@ from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
 )
-from db.study_models import SurveyDoesNotExistError
+from libs.security import (
+    compare_password, generate_easy_alphanumeric_string, generate_hash_and_salt,
+    generate_random_string, generate_user_hash_and_salt
+)
 
 # AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
 # AJK TODO create profiling models (see db/profiling.py)
@@ -43,6 +46,8 @@ class JSONTextField(models.TextField):
 
 class AbstractModel(models.Model):
 
+    deleted = models.BooleanField(default=False)
+
     def as_native_json(self):
         """
         Collect all of the fields of the model and return their values in a JSON dict.
@@ -64,6 +69,11 @@ class AbstractModel(models.Model):
 
         return json.dumps(field_dict)
 
+    def mark_deleted(self):
+        # AJK TODO maybe use .update
+        self.deleted = True
+        self.save()
+
     def __str__(self):
         if hasattr(self, 'study'):
             return '{} {} of Study {}'.format(self.__class__.__name__, self.pk, self.study.name)
@@ -82,7 +92,6 @@ class AbstractModel(models.Model):
 class Study(AbstractModel):
     name = models.TextField()
     encryption_key = models.CharField(max_length=32)
-    deleted = models.BooleanField(default=False)
 
     def add_admin(self, admin):
         # This takes either an actual Admin object, or the primary key of such an object
@@ -101,7 +110,7 @@ class Study(AbstractModel):
     def remove_survey(self, survey):
         # AJK TODO not sure if I want to raise this error
         if not self.surveys.filter(pk=survey.pk).exists():
-            raise SurveyDoesNotExistError
+            raise RuntimeError('Survey does not exist.')
         self.surveys.remove(survey)
         self.save()
 
@@ -126,10 +135,52 @@ class Survey(AbstractModel):
     settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
-    deleted = models.BooleanField(default=False)
 
 
-class Participant(AbstractModel):
+class AbstractPasswordUser(AbstractModel):
+
+    # AJK TODO look into doing password stuff automatically through Django:
+    # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
+    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
+    salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
+
+    def validate_password(self, compare_me):
+        """
+        Checks if the input matches the instance's password hash.
+        """
+        return compare_password(compare_me, self.salt, self.password)
+
+    # AJK TODO this isn't used anywhere
+    # def debug_validate_password(self, compare_me):
+    #     """
+    #     Checks if the input matches the instance's password hash, but does
+    #     the hashing for you for use on the command line.
+    #     """
+    #     compare_me = device_hash(compare_me)
+    #     return compare_password(compare_me, self['salt'], self['password'])
+
+    def set_password(self, password):
+        """
+        Sets the instance's password hash to match the hash of the provided string.
+        """
+        password, salt = generate_user_hash_and_salt(password)
+        self.password = password
+        self.salt = salt
+        self.save()
+
+    def reset_password(self):
+        """
+        Resets the patient's password to match an sha256 hash of a randomly generated string.
+        """
+        password = generate_easy_alphanumeric_string()
+        self.set_password(password)
+        return password
+
+    class Meta:
+        abstract = True
+
+
+class Participant(AbstractPasswordUser):
     OS_TYPE_CHOICES = (
         (IOS_API, IOS_API),
         (ANDROID_API, ANDROID_API),
@@ -145,28 +196,64 @@ class Participant(AbstractModel):
     )
     os_type = models.CharField(max_length=16, choices=OS_TYPE_CHOICES, null=True)
 
-    # AJK TODO look into doing password stuff automatically through Django:
-    # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
-    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
-    salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
-
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
-    deleted = models.BooleanField(default=False)
+
+    def set_device(self, device_id):
+        # AJK TODO this might be served better by an .update
+        self.device_id = device_id
+        self.save()
+
+    def set_os_type(self, os_type):
+        self.os_type = os_type
+        self.save()
+
+    def clear_device(self):
+        self.device_id = None
+        self.save()
 
 
-class Admin(AbstractModel):
+class Admin(AbstractPasswordUser):
     username = models.CharField(max_length=32, unique=True)
     system_admin = models.BooleanField(default=False, help_text='Whether the admin is also a sysadmin')
-
-    password = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
-    salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
     access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator])
     access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator])
     access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])
 
     studies = models.ManyToManyField('Study', related_name='admins')
-    deleted = models.BooleanField(default=False)
+
+    # AJK TODO this is a weird function...do I need it? If I do, can it be in AbstractPasswordUser?
+    @classmethod
+    def check_password(cls, username, compare_me):
+        """
+        Checks if the provided password matches the hash of the provided Admin's password.
+        """
+        if not Admin.filter(username=username).exists():
+            return False
+        admin = Admin.get(username=username)
+        return admin.validate_password(compare_me)
+
+    def elevate_to_system_admin(self):
+        self.system_admin = True
+        self.save()
+
+    def validate_access_credentials(self, proposed_secret_key):
+        """ Returns True/False if the provided secret key is correct for this user."""
+        return compare_password(
+            proposed_secret_key,
+            self.access_key_secret_salt,
+            self.access_key_secret
+        )
+
+    def reset_access_credentials(self):
+        access_key = generate_random_string()[:64]
+        secret_key = generate_random_string()[:64]
+        secret_hash, secret_salt = generate_hash_and_salt(secret_key)
+        self.access_key_id = access_key
+        self.access_key_secret = secret_hash
+        self.access_key_secret_salt = secret_salt
+        self.save()
+        return access_key, secret_key
 
 
 class DeviceSettings(AbstractModel):
@@ -222,4 +309,3 @@ class DeviceSettings(AbstractModel):
     consent_sections = JSONTextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
 
     study = models.OneToOneField('Study', on_delete=models.PROTECT, related_name='device_settings')
-    deleted = models.BooleanField(default=False)
