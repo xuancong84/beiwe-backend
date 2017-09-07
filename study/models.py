@@ -12,6 +12,7 @@ from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT
 )
+from db.study_models import SurveyDoesNotExistError
 
 # AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
 # AJK TODO create profiling models (see db/profiling.py)
@@ -77,17 +78,47 @@ class AbstractModel(models.Model):
 
 # AJK TODO add annotations and help_texts (copy annotations from old _models.py files)
 # AJK TODO reorder fields cleanly
+# AJK TODO add the create methods, or don't
 class Study(AbstractModel):
     name = models.TextField()
     encryption_key = models.CharField(max_length=32)
     deleted = models.BooleanField(default=False)
+
+    def add_admin(self, admin):
+        # This takes either an actual Admin object, or the primary key of such an object
+        self.admins.add(admin)
+        # AJK TODO I'm pretty sure this .save() isn't necessary
+        self.save()
+
+    def remove_admin(self, admin):
+        self.admins.remove(admin)
+        self.save()
+
+    def add_survey(self, survey):
+        self.surveys.add(survey)
+        self.save()
+
+    def remove_survey(self, survey):
+        # AJK TODO not sure if I want to raise this error
+        if not self.surveys.filter(pk=survey.pk).exists():
+            raise SurveyDoesNotExistError
+        self.surveys.remove(survey)
+        self.save()
+
+    def get_surveys_for_study(self):
+        return [json.loads(survey.as_native_json()) for survey in self.surveys.all()]
+
+    def get_survey_ids_for_study(self, survey_type='tracking_survey'):
+        return self.surveys.filter(survey_type=survey_type).values_list('id', flat=True)
+
+    def get_study_device_settings(self):
+        return self.device_settings
 
 
 # AJK TODO idea: add SurveyArchive model that gets created on Survey.save() (or with a signal)
 class Survey(AbstractModel):
     SURVEY_TYPE_CHOICES = [(val, val) for val in SURVEY_TYPES]
 
-    # AJK TODO test that the TextField can deal with arbitrarily large text (e.g. 1MB)
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
     timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
                             help_text='JSON blob containing the times at which the survey is sent.')
