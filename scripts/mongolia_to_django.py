@@ -188,7 +188,7 @@ def migrate_surveys_admins_and_settings(study_referents):
 
 def migrate_users(study_id_dict):
 
-    m_user_list = MUserSet()[:18]
+    m_user_list = MUserSet()
     d_user_list = []
 
     for m_user in m_user_list:
