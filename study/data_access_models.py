@@ -1,12 +1,10 @@
-# AJK TODO not clear how exactly I want to do this. Options include:
-# 1. have multiple Django apps (be sure to rename the ForeignKeys in that case)
-# B. make a single /models directory and put several X_models.py files in it, then have models.py call them all
-# iii. keep everything in one models.py file (this seems like a bad idea)
-
 from django.db import models
 
+from study.base_models import AbstractModel
 
-class ChunkRegistry(models.Model):
+
+# AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
+class ChunkRegistry(AbstractModel):
 
     # {u'audio_recordings', u'gps', u'identifiers', u'power_state', u'proximity', u'reachability', u'survey_answers',
     #  u'survey_timings'} and others. It's in a constants file.
@@ -25,7 +23,7 @@ class ChunkRegistry(models.Model):
     survey = models.ForeignKey('Survey', on_delete=models.PROTECT, related_name='chunk_registries', db_index=True)
 
 
-class FileToProcess(models.Model):
+class FileToProcess(AbstractModel):
 
     # AJK TODO maybe add a validator that it's a valid S3 path or at least looks like a filepath ([0-9a-zA-z/]+\.csv)
     s3_file_path = models.CharField(max_length=256, blank=False)
