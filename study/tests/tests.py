@@ -1,3 +1,4 @@
+from bson import ObjectId
 import json
 
 from django.test import TestCase
@@ -63,8 +64,8 @@ class CommonTestCase(TestCase):
             'name': 'something, anything',
             'encryption_key': '12345678901234567890123456789012',
             'deleted': False,
+            '_id': ObjectId('556677889900aabbccddeeff'),
             # The rest are refactored totally
-            '_id': IsMongoID,
             'admins': ReferenceReversed,
             'device_settings': ReferenceReversed,
             'super_admins': ReferenceReversed,
@@ -74,7 +75,7 @@ class CommonTestCase(TestCase):
     @property
     def translated_reference_study(self):
         reference_study = self.reference_study
-        reference_study.pop("_id")
+        reference_study["object_id"] = str(reference_study.pop("_id"))
         reference_study.pop("admins")
         reference_study.pop("super_admins")
         reference_study.pop("surveys")
@@ -152,6 +153,7 @@ class CommonTestCase(TestCase):
         settings = self.reference_device_settings
         settings.pop("_id")
         return settings
+
 
 class ResearcherModelTests(CommonTestCase):
     

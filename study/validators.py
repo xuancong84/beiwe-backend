@@ -38,11 +38,6 @@ class LengthValidator(object):
         return not (self == other)
 
 
-# This validator is used by a CharField in the Study model to ensure that the encryption
-# key is of the proper length. If the encryption key is changed, be sure to modify the
-# validator accordingly.
-length_32_validator = LengthValidator(32)
-
 # These validators are used by CharFields in the Researcher and Participant models to ensure
 # that those fields' values fit the given regex. The max length requirement is handled by
 # the CharField, but the validator ensures that only certain characters are present

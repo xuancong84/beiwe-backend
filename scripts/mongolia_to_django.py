@@ -27,7 +27,8 @@ from study.models import (
 # AJK TODO chunk bulk_creation, especially for the green models (ChunkRegistry, FileToProcess)
 def migrate_studies():
 
-    m_study_list = MStudySet()
+    m_study_list = MStudySet.iterator()
+
     d_study_list = []
     study_referents = {}
 
@@ -37,6 +38,7 @@ def migrate_studies():
         d_study = DStudy(
             name=study_name,
             encryption_key=m_study['encryption_key'],
+            object_id=m_study['_id'],
             deleted=m_study['deleted'],
         )
 
@@ -61,7 +63,7 @@ def migrate_studies():
     # Create a reference from Mongolia Study IDs to Django Studies that doesn't require
     # any future database calls.
     study_id_dict = {}
-    for m_study in m_study_list:
+    for m_study in MStudySet.iterator():
         m_study_id = m_study['_id']
         d_study_id = DStudy.objects.filter(name=m_study['name']).values('pk', 'deleted').get()
         study_id_dict[m_study_id] = d_study_id
@@ -188,7 +190,7 @@ def migrate_surveys_admins_and_settings(study_referents):
 
 def migrate_users(study_id_dict):
 
-    m_user_list = MUserSet()
+    m_user_list = MUserSet.iterator()
     d_user_list = []
 
     for m_user in m_user_list:

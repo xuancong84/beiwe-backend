@@ -15,7 +15,7 @@ from libs.security import (
     generate_random_string, generate_user_hash_and_salt
 )
 from study.validators import (
-    id_validator, length_32_validator, standard_base_64_validator, url_safe_base_64_validator
+    id_validator, standard_base_64_validator, url_safe_base_64_validator, LengthValidator
 )
 
 from study.base_models import AbstractModel, JSONTextField
@@ -32,8 +32,25 @@ class Study(AbstractModel):
     # in the view (cf. db.study_models.Study.create_default_study). This is a concern for all
     # models and fields that have restrictions on them.
     name = models.TextField(unique=True, help_text='Name of the study; can be of any length')
-    encryption_key = models.CharField(max_length=32, validators=[length_32_validator],
+    encryption_key = models.CharField(max_length=32, validators=[LengthValidator(32)],
                                       help_text='Key used for encrypting the study data')
+    object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)],
+                                 help_text='ID used for naming S3 files')
+
+    @classmethod
+    def create_with_object_id(cls, **kwargs):
+        """
+        Creates a new study with an object ID
+        """
+
+        # FIXME Eli this must be implemented. See
+        # data_access_models.FileToProcess.append_file_for_processing for the reason why.
+        object_id = 'Not yet implemented :\'-('
+        raise NotImplementedError
+
+        study = cls(object_id=object_id, **kwargs)
+
+        return study
 
     def add_researcher(self, researcher):
         # This takes either an actual Researcher object, or the primary key of such an object
@@ -46,9 +63,6 @@ class Study(AbstractModel):
         self.surveys.add(survey)
 
     def remove_survey(self, survey):
-        # AJK TODO not sure if I want to raise this error
-        if not self.surveys.filter(pk=survey.pk).exists():
-            raise RuntimeError('Survey does not exist.')
         self.surveys.remove(survey)
 
     def get_surveys_for_study(self):
@@ -96,14 +110,14 @@ class Survey(AbstractModel):
 
     @classmethod
     # AJK TODO this needs some testing
-    def create_with_settings(cls, survey_type, study, **kwargs):
+    def create_with_settings(cls, survey_type, **kwargs):
         """
         Create a new Survey with the provided survey type and attached to the given Study,
         as well as any other given keyword arguments. If the Survey is audio and no other
         settings are given, give it the default audio survey settings.
         """
 
-        survey = cls(survey_type=survey_type, study=study, **kwargs)
+        survey = cls(survey_type=survey_type, **kwargs)
         if survey_type == AUDIO_SURVEY and 'settings' not in kwargs:
             survey.settings = json.dumps(AUDIO_SURVEY_SETTINGS)
 
@@ -188,9 +202,9 @@ class Participant(AbstractPasswordUser):
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
 
     @classmethod
-    def create_with_password(cls, study):
+    def create_with_password(cls, **kwargs):
         """
-        Creates a new patient with randomly generated patient_id and password.
+        Creates a new participant with randomly generated patient_id and password.
         """
 
         # Ensure that a unique patient_id is generated. If it is not after
@@ -205,8 +219,8 @@ class Participant(AbstractPasswordUser):
             raise RuntimeError('Could not generate unique Patient ID for new Participant.')
 
         # Create a Participant, and generate for them a password
-        participant = cls(patient_id=patient_id, study=study)
-        password = participant.reset_password()
+        participant = cls(patient_id=patient_id, **kwargs)
+        password = participant.reset_password()  # this saves participant
 
         return patient_id, password
 
@@ -254,13 +268,13 @@ class Researcher(AbstractPasswordUser):
     studies = models.ManyToManyField('Study', related_name='researchers')
 
     @classmethod
-    def create_with_password(cls, username, password):
+    def create_with_password(cls, username, password, **kwargs):
         """
         Creates a new Researcher with provided username and password. They will initially
         not be associated with any Study.
         """
 
-        researcher = cls(username=username)
+        researcher = cls(username=username, **kwargs)
         researcher.set_password(password)
         return researcher
 
