@@ -106,6 +106,9 @@ class Survey(AbstractModel):
     timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
                             help_text='JSON blob containing the times at which the survey is sent.')
 
+    # AJK TODO this is only for use during the Mongolia -> Django migration and will be deleted after
+    object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)])
+
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
 
     @classmethod

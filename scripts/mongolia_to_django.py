@@ -12,19 +12,21 @@ import json
 from config import load_django
 
 # Import Mongolia models
-from db.study_models import StudyDeviceSettings as MSettings, Studies as MStudySet, Survey as MSurvey
+from db.data_access_models import ChunksRegistry as MChunks
+from db.study_models import (
+    StudyDeviceSettings as MSettings, Studies as MStudySet,
+    Survey as MSurvey, Surveys as MSurveySet
+)
 from db.user_models import Admin as MAdmin, Users as MUserSet
 
 # Import Django models
 from study.models import (
     Researcher as DAdmin, DeviceSettings as DSettings, Participant as DUser,
-    Study as DStudy, Survey as DSurvey
+    Study as DStudy, Survey as DSurvey, ChunkRegistry as DChunks
 )
 
 
 # Actual code begins here
-# AJK TODO maximize for efficiency
-# AJK TODO chunk bulk_creation, especially for the green models (ChunkRegistry, FileToProcess)
 def migrate_studies():
 
     m_study_list = MStudySet.iterator()
@@ -62,13 +64,12 @@ def migrate_studies():
 
     # Create a reference from Mongolia Study IDs to Django Studies that doesn't require
     # any future database calls.
-    study_id_dict = {}
     for m_study in MStudySet.iterator():
         m_study_id = m_study['_id']
         d_study_id = DStudy.objects.filter(name=m_study['name']).values('pk', 'deleted').get()
         study_id_dict[m_study_id] = d_study_id
 
-    return study_referents, study_id_dict
+    return study_referents
 
 
 def migrate_surveys_admins_and_settings(study_referents):
@@ -100,6 +101,7 @@ def migrate_surveys_admins_and_settings(study_referents):
                 survey_type=m_survey['survey_type'],
                 settings=json.dumps(m_survey['settings']),
                 timings=json.dumps(m_survey['timings']),
+                object_id=m_survey['_id'],
                 study_id=d_study.pk,
                 deleted=d_study.deleted,
             )
@@ -182,13 +184,18 @@ def migrate_surveys_admins_and_settings(study_referents):
     DSurvey.objects.bulk_create(d_survey_list)
     DSettings.objects.bulk_create(d_settings_list)
 
+    for m_survey in MSurveySet.iterator():
+        m_survey_id = m_survey['_id']
+        d_survey_id = DSurvey.objects.filter(object_id=m_survey['_id']).values('pk').get()
+        survey_id_dict[m_survey_id] = d_survey_id
+
     # Now that the Researchers have primary keys, fill in the Study-Researcher ManyToMany relationship
     for study, admin_username_list in d_study_admin_list:
         admin_id_set = DAdmin.objects.filter(username__in=admin_username_list).values_list('pk', flat=True)
         study.researchers.add(*admin_id_set)  # add takes *args, not an iterable
 
 
-def migrate_users(study_id_dict):
+def migrate_users():
 
     m_user_list = MUserSet.iterator()
     d_user_list = []
@@ -221,6 +228,46 @@ def migrate_users(study_id_dict):
     # Bulk_create the Participants
     DUser.objects.bulk_create(d_user_list)
 
+    for m_user in MUserSet.iterator():
+        m_user_id = m_user['_id']
+        d_user_id = DUser.objects.filter(patient_id=m_user['_id']).values('pk').get()
+        user_id_dict[m_user_id] = d_user_id
+
+
+def migrate_chunk_registries():
+
+    # AJK TODO chunk it with CHUNK_SIZE
+    m_chunk_list = MChunks.iterator()
+    d_chunk_list = []
+
+    for m_chunk in m_chunk_list:
+
+        d_study_info = study_id_dict[m_chunk.study_id]
+        d_user_info = user_id_dict[m_chunk.user_id]
+        if m_chunk.survey_id:
+            d_survey_info = survey_id_dict[m_chunk.survey_id]
+        else:
+            d_survey_info = {'pk': None}
+
+        chunk_hash = m_chunk.chunk_hash or ''
+
+        d_chunk = DChunks(
+            is_chunkable=m_chunk.is_chunkable,
+            chunk_path=m_chunk.chunk_path,
+            chunk_hash=chunk_hash,
+            data_type=m_chunk.data_type,
+            time_bin=m_chunk.time_bin,
+            study_id=d_study_info['pk'],
+            participant_id=d_user_info['pk'],
+            survey_id=d_survey_info['pk'],
+            deleted=d_study_info['deleted'],
+        )
+
+        d_chunk.full_clean()
+        d_chunk_list.append(d_chunk)
+
+    DChunks.objects.bulk_create(d_chunk_list)
+
 
 def run_all_migrations():
     """
@@ -228,12 +275,18 @@ def run_all_migrations():
     being passed through here from being global and possibly causing issues in the other
     functions.
     """
-    study_referents, study_id_dict = migrate_studies()
+    study_referents = migrate_studies()
     migrate_surveys_admins_and_settings(study_referents)
-    migrate_users(study_id_dict)
+    migrate_users()
+    migrate_chunk_registries()
 
 
 if __name__ == '__main__':
-    print(DStudy.objects.count(), DUser.objects.count())
+    study_id_dict = {}
+    user_id_dict = {}
+    survey_id_dict = {}
+    CHUNK_SIZE = 10
+
+    print(DStudy.objects.count(), DUser.objects.count(), DChunks.objects.count())
     run_all_migrations()
-    print(DStudy.objects.count(), DUser.objects.count())
+    print(DStudy.objects.count(), DUser.objects.count(), DChunks.objects.count())

@@ -86,7 +86,7 @@ class CommonTestCase(TestCase):
     @property
     def reference_survey(self):
         return {
-            '_id': IsMongoID,
+            '_id': ObjectId('556677889900aabbccddeeff'),
             'content': [{'prompt': ''}],
             'settings': {'audio_survey_type': 'compressed',
                           'bit_rate': 64000,
@@ -99,7 +99,7 @@ class CommonTestCase(TestCase):
     @property
     def translated_reference_survey(self):
         survey = self.reference_survey
-        survey.pop("_id")
+        survey['object_id'] = str(survey.pop("_id"))
         survey["timings"] = json.dumps(survey.pop("timings"))
         survey["content"] = json.dumps(survey.pop("content"))
         survey["settings"] = json.dumps(survey.pop("settings"))
