@@ -24,8 +24,6 @@ from study.validators import (
 # AJK TODO possibly shove models into different files and have this one call them all
 # AJK TODO when all that is done, collapse migrations
 # We're keeping Flask for the frontend stuff; Django is only for the database interactions.
-# AJK TODO write a script to convert the Mongolia database to Django
-# Do chunked bulk_creates for speed, because there are a lot of files
 
 
 class JSONTextField(models.TextField):
