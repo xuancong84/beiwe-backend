@@ -51,17 +51,22 @@ class AbstractModel(models.Model):
         self.deleted = True
         self.save()
 
+    def as_dict(self):
+        """ Provides a dictionary representation of the object """
+        return {field.name: getattr(self, field.name) for field in self._meta.fields}
+
     def as_native_python(self):
         """
-        Collect all of the fields of the model and return their values in a JSON dict.
+        Collect all of the fields of the model and return their values in a python dict,
+        with json fields appropriately deserialized.
         """
-        field_list = self._meta.fields
         field_dict = {}
-        for field in field_list:
+        for field in self._meta.fields:
             field_name = field.name
             if isinstance(field, RelatedField):
                 # If the field is a relation, return the related object's primary key
-                field_dict[field_name + '_id'] = getattr(self, field_name).id
+                # field_dict[field_name + '_id'] = getattr(self, field_name).id
+                pass
             elif isinstance(field, JSONTextField):
                 # If the field is a JSONTextField, load the field's value before returning
                 field_raw_val = getattr(self, field_name)
@@ -72,6 +77,10 @@ class AbstractModel(models.Model):
         return field_dict
     
     def as_native_json(self):
+        """
+        Collect all of the fields of the model and return their values in a python dict,
+        with json fields appropriately serialized.
+        """
         return json.dumps(self.as_native_python())
 
     def save(self, *args, **kwargs):
