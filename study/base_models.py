@@ -1,7 +1,14 @@
-import json
+import json, string
+
+from random import choice as random_choice
 
 from django.db import models
+from django.db.models.base import ModelBase
 from django.db.models.fields.related import RelatedField
+
+
+ALPHANUMERICS = string.ascii_uppercase + string.ascii_lowercase + string.digits
+class ObjectIdError(Exception): pass
 
 
 class JSONTextField(models.TextField):
@@ -20,12 +27,29 @@ class AbstractModel(models.Model):
     we rarely want to truly delete an object. They also have a function to express the
     object as a JSON dict containing all fields and values of the object.
     """
-
     deleted = models.BooleanField(default=False)
 
     def mark_deleted(self):
         self.deleted = True
         self.save()
+
+    @classmethod
+    def generate_objectid_string(cls, field_name):
+        """
+        Takes a django database class and a field name, generates a unique BSON-ObjectId-like
+        string for that field.
+        In order to preserve functionality throughout the codebase we need to generate a random
+        string of exactly 24 characters.  The value must be typeable, and special characters
+        should be avoided.
+        """
+        for i in range(15):
+            print i
+            object_id = ''.join(random_choice(ALPHANUMERICS) for _ in range(24))
+            if cls.objects.filter(**{field_name:object_id}).count() == 0:
+                break
+            if i > 10:
+                raise ObjectIdError("Could not generate unique id for %s." % cls.__name__)
+        return object_id
 
     def as_dict(self):
         """ Provides a dictionary representation of the object """

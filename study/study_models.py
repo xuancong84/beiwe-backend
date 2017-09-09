@@ -40,16 +40,10 @@ class Study(AbstractModel):
     @classmethod
     def create_with_object_id(cls, **kwargs):
         """
-        Creates a new study with an object ID
+        Creates a new study with a populated object_id field
         """
-
-        # FIXME Eli this must be implemented. See
-        # data_access_models.FileToProcess.append_file_for_processing for the reason why.
-        object_id = 'Not yet implemented :\'-('
-        raise NotImplementedError
-
-        study = cls(object_id=object_id, **kwargs)
-
+        # AJK TODO: please implement a check for
+        study = cls(object_id=cls.generate_objectid_string("object_id"), **kwargs)
         return study
 
     def add_researcher(self, researcher):
@@ -105,8 +99,8 @@ class Survey(AbstractModel):
     settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
     timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
                             help_text='JSON blob containing the times at which the survey is sent.')
-
-    # AJK TODO this is only for use during the Mongolia -> Django migration and will be deleted after
+    
+    # Do not delete after migration, this is required for file name and path generation
     object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)])
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
