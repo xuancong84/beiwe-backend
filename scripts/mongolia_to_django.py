@@ -120,9 +120,9 @@ def migrate_surveys_admins_and_settings(study_referents):
                 d_admin = DAdmin(
                     username=m_admin_id,
                     admin=m_admin['system_admin'],
-                    access_key_id=m_admin['access_key_id'],
-                    access_key_secret=m_admin['access_key_secret'],
-                    access_key_secret_salt=m_admin['access_key_secret_salt'],
+                    access_key_id=m_admin['access_key_id'] or '',
+                    access_key_secret=m_admin['access_key_secret'] or '',
+                    access_key_secret_salt=m_admin['access_key_secret_salt'] or '',
                     password=m_admin['password'],
                     salt=m_admin['salt'],
                     deleted=d_study.deleted,
@@ -253,9 +253,12 @@ def migrate_chunk_registries():
 
             d_study_info = study_id_dict[m_chunk.study_id]
             d_user_info = user_id_dict[m_chunk.user_id]
-            if m_chunk.survey_id:
+            if m_chunk.survey_id in survey_id_dict:
                 d_survey_info = survey_id_dict[m_chunk.survey_id]
             else:
+                # If there is no such survey, either because the MChunk has no MSurvey
+                # or because it has one that has been deleted.
+                # AJK TODO ask Eli if there's something else I should do in case 2
                 d_survey_info = {'pk': None}
 
             chunk_hash = m_chunk.chunk_hash or ''
@@ -275,7 +278,6 @@ def migrate_chunk_registries():
             d_chunk.full_clean()
             d_chunk_list.append(d_chunk)
 
-        print(CHUNK_SIZE, d_chunk_list)
         DChunks.objects.bulk_create(d_chunk_list)
 
 
