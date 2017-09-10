@@ -236,37 +236,47 @@ def migrate_users():
 
 def migrate_chunk_registries():
 
-    # AJK TODO chunk it with CHUNK_SIZE
-    m_chunk_list = MChunks.iterator()
-    d_chunk_list = []
+    m_chunk_iter = MChunks.iterator()
 
-    for m_chunk in m_chunk_list:
+    # Calculate the number of chunks that will be used to go through all of MChunks()
+    num_chunks = (MChunks.count() // CHUNK_SIZE) + 1
+    for _ in xrange(num_chunks):
 
-        d_study_info = study_id_dict[m_chunk.study_id]
-        d_user_info = user_id_dict[m_chunk.user_id]
-        if m_chunk.survey_id:
-            d_survey_info = survey_id_dict[m_chunk.survey_id]
-        else:
-            d_survey_info = {'pk': None}
+        # Empty d_chunk_list to ensure low memory usage
+        d_chunk_list = []
+        for _ in xrange(CHUNK_SIZE):
+            try:
+                m_chunk = m_chunk_iter.next()
+            except StopIteration:
+                # If the iterator is out of MChunk objects
+                break
 
-        chunk_hash = m_chunk.chunk_hash or ''
+            d_study_info = study_id_dict[m_chunk.study_id]
+            d_user_info = user_id_dict[m_chunk.user_id]
+            if m_chunk.survey_id:
+                d_survey_info = survey_id_dict[m_chunk.survey_id]
+            else:
+                d_survey_info = {'pk': None}
 
-        d_chunk = DChunks(
-            is_chunkable=m_chunk.is_chunkable,
-            chunk_path=m_chunk.chunk_path,
-            chunk_hash=chunk_hash,
-            data_type=m_chunk.data_type,
-            time_bin=m_chunk.time_bin,
-            study_id=d_study_info['pk'],
-            participant_id=d_user_info['pk'],
-            survey_id=d_survey_info['pk'],
-            deleted=d_study_info['deleted'],
-        )
+            chunk_hash = m_chunk.chunk_hash or ''
 
-        d_chunk.full_clean()
-        d_chunk_list.append(d_chunk)
+            d_chunk = DChunks(
+                is_chunkable=m_chunk.is_chunkable,
+                chunk_path=m_chunk.chunk_path,
+                chunk_hash=chunk_hash,
+                data_type=m_chunk.data_type,
+                time_bin=m_chunk.time_bin,
+                study_id=d_study_info['pk'],
+                participant_id=d_user_info['pk'],
+                survey_id=d_survey_info['pk'],
+                deleted=d_study_info['deleted'],
+            )
 
-    DChunks.objects.bulk_create(d_chunk_list)
+            d_chunk.full_clean()
+            d_chunk_list.append(d_chunk)
+
+        print(CHUNK_SIZE, d_chunk_list)
+        DChunks.objects.bulk_create(d_chunk_list)
 
 
 def run_all_migrations():
@@ -285,7 +295,9 @@ if __name__ == '__main__':
     study_id_dict = {}
     user_id_dict = {}
     survey_id_dict = {}
-    CHUNK_SIZE = 10
+
+    # AJK TODO temporary value: ask Eli for advice on the actual one
+    CHUNK_SIZE = 1000
 
     print(DStudy.objects.count(), DUser.objects.count(), DChunks.objects.count())
     run_all_migrations()
