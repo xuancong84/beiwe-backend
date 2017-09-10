@@ -44,6 +44,7 @@ class Study(AbstractModel):
         """
         # AJK TODO: please implement a check for
         study = cls(object_id=cls.generate_objectid_string("object_id"), **kwargs)
+        study.save()
         return study
 
     def add_researcher(self, researcher):
@@ -99,14 +100,13 @@ class Survey(AbstractModel):
     settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
     timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
                             help_text='JSON blob containing the times at which the survey is sent.')
-    
+
     # Do not delete after migration, this is required for file name and path generation
     object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)])
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
 
     @classmethod
-    # AJK TODO this needs some testing
     def create_with_settings(cls, survey_type, **kwargs):
         """
         Create a new Survey with the provided survey type and attached to the given Study,
@@ -114,7 +114,9 @@ class Survey(AbstractModel):
         settings are given, give it the default audio survey settings.
         """
 
-        survey = cls(survey_type=survey_type, **kwargs)
+        object_id = cls.generate_objectid_string("object_id")
+        survey = cls(object_id=object_id, survey_type=survey_type, **kwargs)
+
         if survey_type == AUDIO_SURVEY and 'settings' not in kwargs:
             survey.settings = json.dumps(AUDIO_SURVEY_SETTINGS)
 

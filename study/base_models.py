@@ -1,13 +1,12 @@
-import json, string
-
+import json
 from random import choice as random_choice
 
 from django.db import models
-from django.db.models.base import ModelBase
 from django.db.models.fields.related import RelatedField
 
+from config.study_constants import OBJECT_ID_ALLOWED_CHARS
 
-ALPHANUMERICS = string.ascii_uppercase + string.ascii_lowercase + string.digits
+
 class ObjectIdError(Exception): pass
 
 
@@ -42,13 +41,14 @@ class AbstractModel(models.Model):
         string of exactly 24 characters.  The value must be typeable, and special characters
         should be avoided.
         """
-        for i in range(15):
-            print i
-            object_id = ''.join(random_choice(ALPHANUMERICS) for _ in range(24))
-            if cls.objects.filter(**{field_name:object_id}).count() == 0:
+
+        for _ in xrange(10):
+            object_id = ''.join(random_choice(OBJECT_ID_ALLOWED_CHARS) for _ in xrange(24))
+            if not cls.objects.filter(**{field_name: object_id}).exists():
                 break
-            if i > 10:
-                raise ObjectIdError("Could not generate unique id for %s." % cls.__name__)
+        else:
+            raise ObjectIdError("Could not generate unique id for %s." % cls.__name__)
+
         return object_id
 
     def as_dict(self):

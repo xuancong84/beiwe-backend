@@ -6,15 +6,13 @@ from django.utils.deconstruct import deconstructible
 @deconstructible
 class LengthValidator(object):
     length = None  # If length is None, no validation is done
-    message = 'Invalid length'
+    message = 'Ensure this value has exactly {} characters (it has {}).'
     code = 'invalid'
 
     def __init__(self, length=None, message=None, code=None):
         if length is not None:
             self.length = length
-        if message is None:
-            self.message = 'Ensure this value has exactly {} characters.'.format(self.length)
-        else:
+        if message is not None:
             self.message = message
         if code is not None:
             self.code = code
@@ -24,7 +22,8 @@ class LengthValidator(object):
         Validate that the input is of the proper length, otherwise raise ValidationError.
         """
         if self.length is not None and len(value) != self.length:
-            raise ValidationError(self.message, code=self.code)
+            message = self.message.format(self.length, len(value))
+            raise ValidationError(message, code=self.code)
 
     def __eq__(self, other):
         return (

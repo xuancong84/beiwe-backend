@@ -1,4 +1,5 @@
 import json
+import string
 
 ABOUT_PAGE_TEXT = (
     'The Beiwe application runs on your phone and helps researchers collect information about your '
@@ -50,3 +51,5 @@ AUDIO_SURVEY_SETTINGS = {
     'bit_rate': 64000,
     'sample_rate': 44100,
 }
+
+OBJECT_ID_ALLOWED_CHARS = string.ascii_uppercase + string.ascii_lowercase + string.digits

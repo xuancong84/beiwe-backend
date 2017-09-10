@@ -239,6 +239,8 @@ class StudyModelTests(CommonTestCase):
     
     def compare_participant(self, researcher): pass
 
+    def test_survey_create_with_object_id(self): pass
+
 
 class SurveyModelTests(CommonTestCase):
     
