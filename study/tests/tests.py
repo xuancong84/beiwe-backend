@@ -1,6 +1,7 @@
 from bson import ObjectId
 import json
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from study.models import Researcher, Study, Survey, DeviceSettings, Participant
@@ -223,9 +224,51 @@ class StudyModelTests(CommonTestCase):
         self.assertTrue(x)
     
     # Study model tests:
-    def test_survey_create_with_object_id(self): pass
+    def test_study_create_with_object_id(self):
+        self.assertEqual(Study.objects.count(), 0)
+        self.assertEqual(DeviceSettings.objects.count(), 0)
+        study_name = 'my study'
+        encryption_key = 'aabbccddeeffgghhiijjkkllmmnnoopp'
+        Study.create_with_object_id(name=study_name, encryption_key=encryption_key)
+        new_study = Study.objects.get()
+        new_ds = DeviceSettings.objects.get()
+        self.assertEqual(Study.objects.count(), 1)
+        self.assertEqual(DeviceSettings.objects.count(), 1)
+        self.assertEqual(new_study.name, study_name)
+        self.assertEqual(new_study.encryption_key, encryption_key)
+        self.assertEqual(len(new_study.object_id), 24)
+        self.assertEqual(new_study.device_settings, new_ds)
+        self.assertFalse(new_study.deleted)
 
-    def test_get_all_studies_by_name(self): pass
+    def test_study_validation(self):
+        study_name = 'my study'
+        good_encryption_key = 'aabbccddeeffgghhiijjkkllmmnnoopp'
+        short_encryption_key = 'aabbccddeeffgghhiijjkkllmm'
+        long_encryption_key = 'aabbccddeeffgghhiijjkkllmmnnooppqqrrsstt'
+        with self.assertRaises(ValidationError):
+            Study.create_with_object_id(name=study_name, encryption_key=short_encryption_key)
+        with self.assertRaises(ValidationError):
+            Study.create_with_object_id(name=study_name, encryption_key=long_encryption_key)
+
+        bad_object_id = 'I am too long to be an ObjectID'
+        with self.assertRaises(ValidationError):
+            Study.objects.create(name=study_name, encryption_key=good_encryption_key, object_id=bad_object_id)
+
+        Study.create_with_object_id(name=study_name, encryption_key=good_encryption_key)
+        with self.assertRaises(ValidationError):
+            Study.create_with_object_id(name=study_name, encryption_key=good_encryption_key)
+
+    def test_get_all_studies_by_name(self):
+        study_names = ['My studies', 'MY STUDY', 'my_study', 'your study']
+        encryption_key = 'aabbccddeeffgghhiijjkkllmmnnoopp'
+        for name in study_names:
+            good_study = Study.create_with_object_id(name=name, encryption_key=encryption_key)
+
+        self.assertIn(good_study, Study.get_all_studies_by_name())
+        self.assertEqual(list(Study.get_all_studies_by_name().values_list('name', flat=True)), study_names)
+
+        bad_study = Study.create_with_object_id(name='name', encryption_key=encryption_key, deleted=True)
+        self.assertNotIn(bad_study, Study.get_all_studies_by_name())
 
     def test_add_researcher(self): pass
     
@@ -261,15 +304,14 @@ class SurveyModelTests(CommonTestCase):
                                  ignore=['deleted', 'id'])
         self.assertTrue(x)
 
+    # Survey model tests:
+    def test_survey_create_with_settings(self): pass
+
     def test_get_surveys_for_study(self): pass
     
     def test_get_survey_ids_for_study(self): pass
     
     def test_get_study_device_settings(self): pass
-
-    # Survey model tests:
-    def test_survey_create_with_settings(self): pass
-        # this one is potentially complex and therefore needs a test.
 
 
 class DeviceSettingsTests(CommonTestCase):
