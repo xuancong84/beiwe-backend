@@ -96,9 +96,6 @@ class ChunksRegistry(DatabaseCollection):
         comparison operation, and the 'in' operator to have mongo only match the user list
         provided. """
 
-        # AJK TODO in Django, this is like saying cls.filter(**query)
-        # AJK TODO the $ is similar to Django dunderscore. For example, the first
-        # if statement corresponds to Django query['user_id__in'] = user_ids.
         query = {"study_id":study_id}
         if user_ids: query["user_id"] = { "$in":user_ids }
         if data_types: query["data_type"] = { "$in":data_types }

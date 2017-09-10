@@ -8,7 +8,6 @@ from study.base_models import AbstractModel
 from study.study_models import Study
 
 
-# AJK TODO create file processing models and FKs: ChunkRegistry, FileToProcess
 class ChunkRegistry(AbstractModel):
 
     DATA_TYPE_CHOICES = tuple([(stream_name, stream_name) for stream_name in ALL_DATA_STREAMS])
@@ -40,6 +39,25 @@ class ChunkRegistry(AbstractModel):
             time_bin=datetime.fromtimestamp(time_bin),
             **kwargs
         )
+
+    @classmethod
+    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None, start=None, end=None):
+        """
+        This function uses Django query syntax to provide datetimes and have Django do the
+        comparison operation, and the 'in' operator to have Django only match the user list
+        provided.
+        """
+
+        query = {'study_id': study_id}
+        if user_ids:
+            query['user_id__in'] = user_ids
+        if data_types:
+            query['data_type__in'] = data_types
+        if start:
+            query['time_bin__gte'] = start
+        if end:
+            query['time_bin__lte'] = end
+        return cls.objects.filter(**query)
 
     def update_chunk_hash(self, data_to_hash):
         self.chunk_hash = chunk_hash(data_to_hash)

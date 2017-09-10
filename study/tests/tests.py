@@ -223,6 +223,10 @@ class StudyModelTests(CommonTestCase):
         self.assertTrue(x)
     
     # Study model tests:
+    def test_survey_create_with_object_id(self): pass
+
+    def test_get_all_studies_by_name(self): pass
+
     def test_add_researcher(self): pass
     
     def test_remove_researcher(self): pass
@@ -238,8 +242,6 @@ class StudyModelTests(CommonTestCase):
     def create_django_reference_participant(self): pass
     
     def compare_participant(self, researcher): pass
-
-    def test_survey_create_with_object_id(self): pass
 
 
 class SurveyModelTests(CommonTestCase):
@@ -287,6 +289,8 @@ class DeviceSettingsTests(CommonTestCase):
 class DataAccessModelTests(CommonTestCase):
     # ChunkRegistry model tests:
     def test_add_new_chunk(self): pass
+
+    def test_get_chunks_time_range(self): pass
     
     def test_update_chunk_hash(self): pass
     

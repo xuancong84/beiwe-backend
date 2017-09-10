@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 
 from django.db import models
+from django.db.models import F, Func
 
 from config.constants import IOS_API, ANDROID_API, NULL_OS, AUDIO_SURVEY, TRACKING_SURVEY
 from config.study_constants import (
@@ -42,10 +43,20 @@ class Study(AbstractModel):
         """
         Creates a new study with a populated object_id field
         """
-        # AJK TODO: please implement a check for
+        # AJK TODO: please implement a check for <-- @Eli what does this mean?
         study = cls(object_id=cls.generate_objectid_string("object_id"), **kwargs)
         study.save()
         return study
+
+    @classmethod
+    def get_all_studies_by_name(cls):
+        """
+        Sort the un-deleted Studies a-z by name, ignoring case.
+        """
+        return (cls.objects
+                .filter(deleted=False)
+                .annotate(name_lower=Func(F('name'), function='LOWER'))
+                .order_by('name_lower'))
 
     def add_researcher(self, researcher):
         # This takes either an actual Researcher object, or the primary key of such an object
