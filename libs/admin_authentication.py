@@ -1,11 +1,16 @@
 import functools
 from datetime import datetime, timedelta
 from flask import session, redirect
-from db.user_models import Admin
 from libs.security import generate_easy_alphanumeric_string
-from db.study_models import Studies, Study
 from bson.objectid import ObjectId
 from werkzeug.exceptions import abort
+
+# Mongolia models
+from db.user_models import Admin
+from db.study_models import Studies
+
+# Django models
+from study.models import Researcher, Study as DStudy
 
 ################################################################################
 ############################ Existence Modifiers ###############################
@@ -21,13 +26,17 @@ def remove_admin(username):
 ############################ Website Functions #################################
 ################################################################################
 
+
 def authenticate_admin_login(some_function):
     """Decorator for functions (pages) that require a login.
        Redirects to index if not authenticate_admin_login"""
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        if is_logged_in(): return some_function(*args, **kwargs)
-        return redirect("/")
+        if is_logged_in():
+            return some_function(*args, **kwargs)
+        else:
+            return redirect("/")
+
     return authenticate_and_call
 
 
@@ -38,8 +47,10 @@ def log_in_admin(username):
 
 
 def logout_loggedin_admin():
-    if "admin_uuid" in session: del session['admin_uuid']
-    if "expiry" in session: del session['expiry']
+    if "admin_uuid" in session:
+        del session['admin_uuid']
+    if "expiry" in session:
+        del session['expiry']
 
 
 def is_logged_in():
@@ -53,6 +64,7 @@ def is_logged_in():
 
 class ArgumentMissingException(Exception): pass
 
+
 #TODO: Low Priority. Josh/Alvin. permission denied page.
 #TODO: Low Priority. Josh/Alvin. we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
@@ -64,51 +76,59 @@ def authenticate_admin_study_access(some_function):
     A system admin is always able to access a study or survey. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        if not is_logged_in(): #check for regular login requirement
+
+        # Check for regular login requirement
+        if not is_logged_in():
             return redirect("/")
-        admin_name = session["admin_username"]
-        admin = Admin(admin_name)
-        #check proper syntax usage.
+
+        username = session["admin_username"]
+        researcher = Researcher.objects.get(username=username)
+
+        # Check proper syntax usage.
         if "survey_id" not in kwargs and "study_id" not in kwargs:
             raise ArgumentMissingException()
-        #We want the survey_id check to execute first if both args are supplied. 
+
+        # We want the survey_id check to execute first if both args are supplied.
         if "survey_id" in kwargs:
-            #turn the survey_id into a bson ObjectId.
-            survey_id = ObjectId(kwargs["survey_id"]) 
-            kwargs['survey_id'] = survey_id
-            #MongoDB checks both equality and contains when you pass it a value.
-            study = Study(surveys=survey_id)
-            if not study: #study does not exist.
+            study_set = DStudy.objects.filter(surveys=kwargs['survey_id'])
+            if not study_set.exists():
                 return abort(404)
-            #check admin is allowed, allow system admins.
-            if not admin.system_admin:
-                if admin['_id'] not in study.admins:
+
+            # Check that researcher is either a researcher on the study or an admin
+            study_pk = study_set.values_list('pk', flat=True)[0]
+            if not researcher.admin:
+                if not researcher.studies.filter(pk=study_pk).exists():
                     return abort(403)
+
         if "study_id" in kwargs:
-            study_id = ObjectId(kwargs['study_id'])
-            kwargs['study_id'] = study_id
-            study = Study(study_id)
-            if not study:
+            study_set = DStudy.objects.filter(pk=kwargs['study_id'])
+            if not study_set.exists():
                 return abort(404)
-            if not admin.system_admin:
-                if admin['_id'] not in study.admins:
+
+            study_pk = study_set.values_list('pk', flat=True)[0]
+            if not researcher.admin:
+                if not researcher.studies.filter(pk=study_pk).exists():
                     return abort(403)
+
         return some_function(*args, **kwargs)
+
     return authenticate_and_call
 
 
-#TODO: Low priority. Josh.  Find a way to do these solely in the nav bar template. 
+# TODO: Low priority. Josh.  Find a way to do these solely in the nav bar template.
 def admin_is_system_admin():
     # TODO: Low Priority. Josh. find a more efficient way of checking this and
     # "allowed_studies" than passing it to every render_template.
-    admin = Admin(session['admin_username'])
-    return admin.system_admin
+    researcher = Researcher(username=session['admin_username'])
+    return researcher.admin
+
 
 def get_admins_allowed_studies():
-    """ Return a list of studies which the currently logged-in admin is autho-
-    rized to view and edit """
-    admin = Admin(session['admin_username'])
-    return sorted(Studies(admins=admin._id), key=lambda x: x.name.lower())
+    """
+    Return a list of studies which the currently logged-in researcher is authorized to view and edit.
+    """
+    researcher = Researcher.objects.get(username=session['admin_username'])
+    return DStudy.get_all_studies_by_name().filter(researchers=researcher)
 
 
 ################################################################################

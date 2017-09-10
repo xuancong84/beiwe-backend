@@ -2,6 +2,10 @@ import os
 import jinja2
 from flask import Flask, render_template, redirect
 from werkzeug.contrib.fixers import ProxyFix
+
+# Load and set up Django
+from config import load_django
+
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
     data_access_web_form
 from api import admin_api, copy_study_api, data_access_api, mobile_api, survey_api

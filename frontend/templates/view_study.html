@@ -33,7 +33,7 @@
             {% for patient in patients %}
               <tr>
                 <td>
-                  <b>{{ patient['_id'] }}</b>
+                  <b>{{ patient['patient_id'] }}</b>
                 </td>
                 <td>
                   {% if patient['device_id'] %}
@@ -43,7 +43,7 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if 'os_type' in patient and patient['os_type'] != None %}
+                  {% if patient['os_type'] %}
                     {{ patient['os_type'] }}
                   {% else %}
                     <i>unknown</i>

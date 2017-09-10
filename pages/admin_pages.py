@@ -5,21 +5,25 @@ from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
     authenticate_admin_study_access, get_admins_allowed_studies,\
     admin_is_system_admin
-from db.user_models import Users, Admin
-from db.study_models import Study
 from libs.security import check_password_requirements
+
+from study.models import Researcher, Study
+
 
 admin_pages = Blueprint('admin_pages', __name__)
 
-#TODO: Document.
+# TODO: Document.
+
 
 @admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
     allowed_studies = get_admins_allowed_studies()
+
     # If the admin is authorized to view exactly 1 study, redirect to that study
-    if len(allowed_studies) == 1:
-        return redirect('/view_study/' + str(allowed_studies[0]._id))
+    if allowed_studies.count() == 1:
+        return redirect('/view_study/' + allowed_studies.values_list('object_id', flat=True)[0])
+
     # Otherwise, show the "Choose Study" page
     return render_template('choose_study.html',
                            allowed_studies=allowed_studies,
@@ -29,16 +33,20 @@ def choose_study():
 @admin_pages.route('/view_study/<string:study_id>', methods=['GET'])
 @authenticate_admin_study_access
 def view_study(study_id=None):
-    study = Study(study_id)
+    study = Study.objects.get(pk=study_id)
     tracking_survey_ids = study.get_survey_ids_for_study('tracking_survey')
     audio_survey_ids = study.get_survey_ids_for_study('audio_survey')
-    return render_template('view_study.html', study=study,
-                           patients=Users( study_id = study_id ),
-                           audio_survey_ids=audio_survey_ids,
-                           tracking_survey_ids=tracking_survey_ids,
-                           study_name=study.name,
-                           allowed_studies=get_admins_allowed_studies(),
-                           system_admin=admin_is_system_admin())
+    participants = [p.as_native_python() for p in study.participants.all()]
+
+    return render_template(
+        'view_study.html', study=study,
+        patients=participants,
+        audio_survey_ids=audio_survey_ids,
+        tracking_survey_ids=tracking_survey_ids,
+        study_name=study.name,
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
 
 
 """########################## Login/Logoff ##################################"""
@@ -63,10 +71,12 @@ def login():
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
-        if Admin.check_password(username, password):
+        if Researcher.check_password(username, password):
             admin_authentication.log_in_admin(username)
             return redirect("/choose_study")
-        flash("Incorrect username & password combination; try again.", 'danger')
+        else:
+            flash("Incorrect username & password combination; try again.", 'danger')
+
     return redirect("/")
 
 
@@ -85,7 +95,7 @@ def reset_admin_password():
     current_password = request.values['current_password']
     new_password = request.values['new_password']
     confirm_new_password = request.values['confirm_new_password']
-    if not Admin.check_password(username, current_password):
+    if not Researcher.check_password(username, current_password):
         flash("The Current Password you have entered is invalid", 'danger')
         return redirect('/manage_credentials')
     if not check_password_requirements(new_password, flash_message=True):
@@ -93,7 +103,7 @@ def reset_admin_password():
     if new_password != confirm_new_password:
         flash("New Password does not match Confirm New Password", 'danger')
         return redirect('/manage_credentials')
-    Admin(username).set_password(new_password)
+    Researcher.objects.get(username=username).set_password(new_password)
     flash("Your password has been reset!", 'success')
     return redirect('/manage_credentials')
 
@@ -101,8 +111,8 @@ def reset_admin_password():
 @admin_pages.route('/reset_download_api_credentials', methods=['POST'])
 @authenticate_admin_login
 def reset_download_api_credentials():
-    admin = Admin(session['admin_username'])
-    access_key, secret_key = admin.reset_access_credentials()
+    researcher = Researcher.objects.get(username=session['admin_username'])
+    access_key, secret_key = researcher.reset_access_credentials()
     msg = """<h3>Your Data-Download API access credentials have been reset!</h3>
         <p>Your new <b>Access Key</b> is: 
           <div class="container-fluid">

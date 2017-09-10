@@ -18,7 +18,7 @@
         <div id="filterableList" ng-controller="FilterableListController">
             <div ng-init="filterable_studies = [
                 {% for study in allowed_studies %}
-                    {name: '{{study['name']}}', study_id: '{{study['_id']}}'},
+                    {name: '{{study.name}}', study_id: '{{study.pk}}'},
                 {% endfor %}
             ]"></div>
 
