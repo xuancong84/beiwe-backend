@@ -26,7 +26,6 @@ admin_api = Blueprint('admin_api', __name__)
 
 @admin_api.route('/add_admin_to_study', methods=['POST'])
 @authenticate_system_admin
-# AJK TODO currently here dealing with this
 def add_admin_to_study():
     researcher_id = request.form.get('researcher_id')
     study_id = request.form.get('study_id')
@@ -52,7 +51,7 @@ def delete_researcher(admin_id):
     for study in Studies():
         study.remove_admin(admin_id)
     admin.remove()
-    return redirect('/manage_admins')
+    return redirect('/manage_researchers')
 
 
 @admin_api.route('/set_researcher_password', methods=['POST'])
@@ -61,9 +60,9 @@ def set_researcher_password():
     admin = Admin(request.form.get('admin_id'))
     new_password = request.form.get('password')
     if not check_password_requirements(new_password, flash_message=True):
-        return redirect('/edit_admin/' + admin._id)
+        return redirect('/edit_researcher/' + admin._id)
     admin.set_password(new_password)
-    return redirect('/edit_admin/' + admin._id)
+    return redirect('/edit_researcher/' + admin._id)
 
 
 @admin_api.route('/rename_study/<string:study_id>', methods=['POST'])
@@ -101,7 +100,7 @@ def reset_device(study_id=None):
     register a new device.
     """
 
-    # AJK TODO why is this request half in request.values and half in the url? @Eli
+    # AJK TODO look into making this an HTML hidden input and fiddling with authenticate_admin_study_access
     patient_id = request.values["patient_id"]
     participant_set = Participant.objects.filter(patient_id=patient_id)
     if participant_set.exists() and participant_set.values_list('study', flat=True).get() == int(study_id):

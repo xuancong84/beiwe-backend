@@ -19,7 +19,7 @@
 				{% for study in current_studies|sort(case_sensitive=False) %}
 					<div class="list-group-item">
 						<b>{{ study.name }}</b>
-                        <a href="#" onclick="remove_admin_from_study('{{ admin._id }}', '{{ study._id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>
+						<a href="#" onclick="remove_admin_from_study('{{ admin.id }}', '{{ study.id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>
 					</div>
 				{% endfor %}
 			</div>
@@ -30,11 +30,11 @@
 
             <div class="col-md-8">
                 <select class="form-control" id="study_id">
-					{% for study in all_studies %}
-                    <option value="{{ study._id }}">{{ study.name }}</option>
-                    {% endfor %}
+									{% for study in all_studies %}
+                    <option value="{{ study.id }}">{{ study.name }}</option>
+									{% endfor %}
                 </select>
-                <input type="hidden" id="admin_id" value="{{ admin._id }}">
+                <input type="hidden" id="researcher_id" value="{{ admin.id }}">
             </div>
 
             <div class="col-md-4">
@@ -68,7 +68,7 @@
 		{% endif %}
 
 		<div class="row">
-			<a href="/manage_admins" class="btn btn-success"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back to all researchers</a>
+			<a href="/manage_researchers" class="btn btn-success"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back to all researchers</a>
 
 			{% if not admin_is_current_user %}
 				<a href="/delete_researcher/{{ admin._id }}" class="btn btn-danger pull-right" onclick="return confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')"><span class="glyphicon glyphicon-trash"></span>&nbsp;Delete {{ admin._id }}</a>

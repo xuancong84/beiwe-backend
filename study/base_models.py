@@ -89,6 +89,11 @@ class AbstractModel(models.Model):
         self.full_clean()
         super(AbstractModel, self).save(*args, **kwargs)
 
+    def update(self, **kwargs):
+        for attr, value in kwargs.iteritems():
+            setattr(self, attr, value)
+        self.save()
+
     def __str__(self):
         if hasattr(self, 'study'):
             return '{} {} of Study {}'.format(self.__class__.__name__, self.pk, self.study.name)

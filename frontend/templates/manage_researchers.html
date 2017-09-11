@@ -17,8 +17,8 @@
 
     <div id="filterableList" ng-controller="FilterableListController" class="row">
         <div ng-init="filterable_admins = [
-            {% for admin in admins %}
-                {name: '{{admin[0]}}', studies: '{{admin[1]}}'},
+            {% for admin_data in admins %}
+                {id: '{{admin_data[0].id}}', name: '{{admin_data[0].username}}', studies: '{{admin_data[1]}}'},
             {% endfor %}
         ]"></div>
 
@@ -52,7 +52,7 @@
                         </span>
                     </td>
                     <td>
-                        <a href="/edit_admin/{% raw %}{{ admin.name }}{% endraw %}">edit researcher</a>
+                        <a href="/edit_researcher/{% raw %}{{ admin.id }}{% endraw %}">edit researcher</a>
                     </td>
                 </tr>
             </tbody>

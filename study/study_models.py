@@ -120,6 +120,12 @@ class Survey(AbstractModel):
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
 
     @classmethod
+    def create_with_object_id(cls, **kwargs):
+        object_id = cls.generate_objectid_string("object_id")
+        survey = cls.objects.create(object_id=object_id, **kwargs)
+        return survey
+
+    @classmethod
     def create_with_settings(cls, survey_type, **kwargs):
         """
         Create a new Survey with the provided survey type and attached to the given Study,
@@ -127,13 +133,10 @@ class Survey(AbstractModel):
         settings are given, give it the default audio survey settings.
         """
 
-        object_id = cls.generate_objectid_string("object_id")
-        survey = cls(object_id=object_id, survey_type=survey_type, **kwargs)
-
         if survey_type == AUDIO_SURVEY and 'settings' not in kwargs:
-            survey.settings = json.dumps(AUDIO_SURVEY_SETTINGS)
+            kwargs['settings'] = json.dumps(AUDIO_SURVEY_SETTINGS)
 
-        survey.save()
+        survey = cls.create_with_object_id(survey_type=survey_type, **kwargs)
         return survey
 
 

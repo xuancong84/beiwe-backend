@@ -21,49 +21,62 @@ system_admin_pages = Blueprint('system_admin_pages', __name__)
 
 # TODO: Document.
 
-@system_admin_pages.route('/manage_admins', methods=['GET'])
+
+@system_admin_pages.route('/manage_researchers', methods=['GET'])
 @authenticate_system_admin
-def manage_admins():
-    admins = []
-    for admin in Admins():
-        admin_name = admin._id
-        allowed_studies = ' | '.join(sorted(Studies(admins=admin._id, field='name'),
-                                            key=lambda x: x.lower()))
-        admins.append((admin_name, allowed_studies))
-    admins = sorted(admins, key=lambda s: s[0].lower())
-    return render_template('manage_admins.html', admins=admins,
-                           allowed_studies=get_admins_allowed_studies(),
-                           system_admin=admin_is_system_admin())
+def manage_researchers():
+    researcher_list = []
+    for researcher in Researcher.get_all_researchers_by_username():
+        allowed_studies = DStudy.get_all_studies_by_name().filter(researchers=researcher).values_list('name', flat=True)
+        allowed_study_string = ' | '.join(allowed_studies)
+        researcher_list.append((researcher, allowed_study_string))
+
+    return render_template(
+        'manage_researchers.html',
+        admins=researcher_list,
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
 
 
-@system_admin_pages.route('/edit_admin/<string:admin_id>', methods=['GET','POST'])
+@system_admin_pages.route('/edit_researcher/<string:researcher_pk>', methods=['GET', 'POST'])
 @authenticate_system_admin
-def edit_admin(admin_id):
-    admin = Admin(admin_id)
-    admin_is_current_user = (admin._id == session['admin_username'])
-    current_studies=sorted(Studies(admins=admin._id), key=lambda x: x.name.lower())
-    return render_template('edit_admin.html', admin=admin,
-                           current_studies=current_studies,
-                           all_studies=Studies.get_all_studies(),
-                           allowed_studies=get_admins_allowed_studies(),
-                           admin_is_current_user=admin_is_current_user,
-                           system_admin=admin_is_system_admin())
+def edit_researcher(researcher_pk):
+    researcher = Researcher.objects.get(pk=researcher_pk)
+    admin_is_current_user = (researcher.username == session['admin_username'])
+    # AJK TODO maybe make the default ordering the case-insensitive alphabetical one
+    current_studies = DStudy.get_all_studies_by_name().filter(researchers=researcher)
+    return render_template(
+        'edit_researcher.html',
+        admin=researcher,
+        current_studies=current_studies,
+        all_studies=DStudy.get_all_studies_by_name(),
+        allowed_studies=get_admins_allowed_studies(),
+        admin_is_current_user=admin_is_current_user,
+        system_admin=admin_is_system_admin()
+    )
+
 
 @system_admin_pages.route('/create_new_researcher', methods=['GET', 'POST'])
 @authenticate_system_admin
 def create_new_researcher():
     if request.method == 'GET':
-        return render_template('create_new_researcher.html',
-                               allowed_studies=get_admins_allowed_studies(),
-                               system_admin=admin_is_system_admin())
-    admin_id = ''.join(e for e in request.form.get('admin_id') if e.isalnum())
+        return render_template(
+            'create_new_researcher.html',
+            allowed_studies=get_admins_allowed_studies(),
+            system_admin=admin_is_system_admin()
+        )
+
+    # Drop any whitespace or special characters from the username
+    username = ''.join(e for e in request.form.get('admin_id') if e.isalnum())
     password = request.form.get('password')
-    if Admins(_id=admin_id):
-        flash("There is already a researcher with username " + admin_id, 'danger')
+
+    if Researcher.objects.filter(username=username).exists():
+        flash("There is already a researcher with username " + username, 'danger')
         return redirect('/create_new_researcher')
     else:
-        admin = Admin.create(admin_id, password)
-        return redirect('/edit_admin/' + admin._id)
+        researcher = Researcher.create_with_password(username, password)
+        return redirect('/edit_researcher/{:d}'.format(researcher.pk))
 
 
 """########################### Study Pages ##################################"""
@@ -72,10 +85,12 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
-    return render_template('manage_studies.html',
-                           studies=Studies.get_all_studies(),
-                           allowed_studies=get_admins_allowed_studies(),
-                           system_admin=admin_is_system_admin())
+    return render_template(
+        'manage_studies.html',
+        studies=DStudy.get_all_studies_by_name(),
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
 
 
 @system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
@@ -148,7 +163,5 @@ def device_settings(study_id=None):
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
     params = string_to_int(TIMER_VALUES, params)
-    for attr, value in params.iteritems():
-        setattr(settings, attr, value)
-    settings.save()
+    settings.update(**params)
     return redirect('/edit_study/{:d}'.format(study.id))

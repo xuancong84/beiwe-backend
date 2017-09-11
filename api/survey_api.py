@@ -17,14 +17,13 @@ survey_api = Blueprint('survey_api', __name__)
 
 @survey_api.route('/create_survey/<string:study_id>/<string:survey_type>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
-def create_new_survey(study_id=None, survey_type='tracking_survey'):
-    new_survey = DSurvey.create_with_settings(survey_type, study_id=study_id)
+def create_survey(study_id=None, survey_type='tracking_survey'):
+    new_survey = DSurvey.create_with_settings(study_id=study_id, survey_type=survey_type)
     return redirect('edit_survey/{:d}'.format(new_survey.id))
 
 
 @survey_api.route('/delete_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
-# AJK TODO shouldn't this be POST only?
 def delete_survey(survey_id=None):
     survey_set = DSurvey.objects.filter(pk=survey_id)
     if survey_set.exists():
