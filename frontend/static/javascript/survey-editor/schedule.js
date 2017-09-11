@@ -48,6 +48,7 @@ function renderSchedule() {
 }
 
 
+// AJK TODO I can input NaN into this; should I fix that?
 function add_time() {
     var time_string = $('#new_time_timepicker').val();
     var hours = parseInt(time_string.split(':')[0]);

@@ -1,15 +1,21 @@
 from flask import abort, Blueprint, flash, redirect, render_template, request,\
     session
-from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
-    StudyAlreadyExistsError
-from db.user_models import Admin, Admins
+
+from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
 from libs.copy_study import copy_existing_study_if_asked_to
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
     string_to_int
-from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
+
+# Mongolia models
+from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
+    StudyAlreadyExistsError
+from db.user_models import Admin, Admins
+
+# Django models
+from study.models import Researcher, Study as DStudy
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 
@@ -62,6 +68,7 @@ def create_new_researcher():
 
 """########################### Study Pages ##################################"""
 
+
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
@@ -74,10 +81,16 @@ def manage_studies():
 @system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
 @authenticate_system_admin
 def edit_study(study_id=None):
-    return render_template('edit_study.html', study=Study(study_id),
-                           all_admins=sorted(Admins(), key=lambda x: x._id.lower()),
-                           allowed_studies=get_admins_allowed_studies(),
-                           system_admin=admin_is_system_admin())
+    study = DStudy.objects.get(pk=study_id)
+    all_researchers = Researcher.get_all_researchers_by_username()
+    # MAYBE I NEED THIS participants = [p.as_native_python() for p in study.participants.all()]
+    return render_template(
+        'edit_study.html',
+        study=study,
+        all_researchers=all_researchers,
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
 
 
 @system_admin_pages.route('/create_study', methods=['GET', 'POST'])
@@ -115,18 +128,27 @@ def delete_study(study_id=None):
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def device_settings(study_id=None):
-    study = Study(study_id)
+    study = DStudy.objects.get(pk=study_id)
     readonly = not admin_is_system_admin()
+
     if request.method == 'GET':
         settings = study.get_study_device_settings()
-        return render_template("device_settings.html",
-                               study=study, settings=settings,
-                               readonly=not admin_is_system_admin(),
-                               system_admin=admin_is_system_admin())
-    if readonly: abort(403)
+        return render_template(
+            "device_settings.html",
+            study=study.as_native_python(),
+            settings=settings.as_native_python(),
+            readonly=not admin_is_system_admin(),
+            system_admin=admin_is_system_admin()
+        )
+
+    if readonly:
+        abort(403)
+
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
     params = string_to_int(TIMER_VALUES, params)
-    settings.update(**params)
-    return redirect('/edit_study/' + str(study._id))
+    for attr, value in params.iteritems():
+        setattr(settings, attr, value)
+    settings.save()
+    return redirect('/edit_study/{:d}'.format(study.id))

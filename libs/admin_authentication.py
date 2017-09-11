@@ -95,7 +95,7 @@ def authenticate_admin_study_access(some_function):
                 return abort(404)
 
             # Check that researcher is either a researcher on the study or an admin
-            study_pk = study_set.values_list('pk', flat=True)[0]
+            study_pk = study_set.values_list('pk', flat=True).get()
             if not researcher.admin:
                 if not researcher.studies.filter(pk=study_pk).exists():
                     return abort(403)
@@ -105,7 +105,7 @@ def authenticate_admin_study_access(some_function):
             if not study_set.exists():
                 return abort(404)
 
-            study_pk = study_set.values_list('pk', flat=True)[0]
+            study_pk = study_set.values_list('pk', flat=True).get()
             if not researcher.admin:
                 if not researcher.studies.filter(pk=study_pk).exists():
                     return abort(403)
@@ -119,7 +119,7 @@ def authenticate_admin_study_access(some_function):
 def admin_is_system_admin():
     # TODO: Low Priority. Josh. find a more efficient way of checking this and
     # "allowed_studies" than passing it to every render_template.
-    researcher = Researcher(username=session['admin_username'])
+    researcher = Researcher.objects.get(username=session['admin_username'])
     return researcher.admin
 
 
@@ -146,19 +146,20 @@ def authenticate_system_admin(some_function):
     500 error inside the authenticate_admin_study_access decorator. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        if not is_logged_in(): #check for regular login requirement
+        # Check for regular login requirement
+        if not is_logged_in():
             return redirect("/")
-        admin = Admin(session['admin_username'])
-        if not admin["system_admin"]:
+
+        researcher = Researcher.objects.get(username=session['admin_username'])
+        if not researcher.admin:
             # TODO: Low Priority. Josh. redirect to a URL, not a template file
             return abort(403)
+
         if 'study_id' in kwargs:
-            study_id = kwargs['study_id']
-            if not isinstance(study_id, ObjectId): # make an extra check in case
-                study_id = ObjectId(study_id)      # authenticate_admin_study_access
-                kwargs['study_id'] = study_id      # has already converted the id.
-            if not Studies(_id=study_id):
+            if not DStudy.objects.filter(pk=kwargs['study_id']).exists():
                 return redirect("/")
+
         return some_function(*args, **kwargs)
+
     return authenticate_and_call
 

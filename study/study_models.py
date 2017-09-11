@@ -69,13 +69,15 @@ class Study(AbstractModel):
         self.surveys.add(survey)
 
     def remove_survey(self, survey):
-        self.surveys.remove(survey)
+        # AJK TODO this is impossible because the FK isn't nullable -> the Survey can't exist without the Study
+        pass
+        # self.surveys.remove(survey)
 
     def get_surveys_for_study(self):
         return [json.loads(survey.as_native_json()) for survey in self.surveys.all()]
 
     def get_survey_ids_for_study(self, survey_type='tracking_survey'):
-        return self.surveys.filter(survey_type=survey_type).values_list('id', flat=True)
+        return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', flat=True)
 
     def get_study_device_settings(self):
         return self.device_settings
@@ -256,7 +258,7 @@ class Participant(AbstractPasswordUser):
         self.save()
 
     def clear_device(self):
-        self.device_id = None
+        self.device_id = ''
         self.save()
 
 
@@ -297,6 +299,16 @@ class Researcher(AbstractPasswordUser):
             return False
         researcher = Researcher.objects.get(username=username)
         return researcher.validate_password(compare_me)
+
+    @classmethod
+    def get_all_researchers_by_username(cls):
+        """
+        Sort the un-deleted Researchers a-z by username, ignoring case.
+        """
+        return (cls.objects
+                .filter(deleted=False)
+                .annotate(username_lower=Func(F('username'), function='LOWER'))
+                .order_by('username_lower'))
 
     def generate_hash_and_salt(self, password):
         return generate_hash_and_salt(password)

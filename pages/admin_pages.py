@@ -22,7 +22,7 @@ def choose_study():
 
     # If the admin is authorized to view exactly 1 study, redirect to that study
     if allowed_studies.count() == 1:
-        return redirect('/view_study/' + allowed_studies.values_list('object_id', flat=True)[0])
+        return redirect('/view_study/' + allowed_studies.values_list('object_id', flat=True).get())
 
     # Otherwise, show the "Choose Study" page
     return render_template('choose_study.html',
@@ -39,7 +39,8 @@ def view_study(study_id=None):
     participants = [p.as_native_python() for p in study.participants.all()]
 
     return render_template(
-        'view_study.html', study=study,
+        'view_study.html',
+        study=study,
         patients=participants,
         audio_survey_ids=audio_survey_ids,
         tracking_survey_ids=tracking_survey_ids,
@@ -50,6 +51,7 @@ def view_study(study_id=None):
 
 
 """########################## Login/Logoff ##################################"""
+
 
 @admin_pages.route('/')
 @admin_pages.route('/admin')

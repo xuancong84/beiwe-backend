@@ -24,7 +24,7 @@
   <script type="text/javascript">
     var raw_questions = '{{ survey.content|tojson }}';
     var questions = angular.fromJson(raw_questions.replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\\"/, "g"));
-    var survey_id = '{{ survey._id }}';
+    var survey_id = '{{ survey.id }}';
     var survey_times = {{ survey.timings }};
     var randomize = {{ "true" if survey.settings["randomize"] else "false" }};
     var randomizeWithMemory = {{ "true" if survey.settings["randomize_with_memory"] else "false" }};
@@ -49,10 +49,10 @@
 
   <ol class="breadcrumb">
     <li>
-      <a href="/view_study/{{ study['_id'] }}">{{ study['name'] }}</a>
+      <a href="/view_study/{{ study['id'] }}">{{ study['name'] }}</a>
     </li>
     <li class="active">
-      {{ "Audio" if survey['survey_type'] == 'audio_survey' }} Survey ID #{{ survey['_id'] }}
+      {{ "Audio" if survey['survey_type'] == 'audio_survey' }} Survey ID #{{ survey['id'] }}
     </li>
   </ol>
 
@@ -60,7 +60,7 @@
     <div class="span12">
       <div class="row">
         <h2>Edit Survey</h2>
-        <p>Survey ID #<b>{{ survey._id }}</b>. Your changes will not be saved until you click "Save and Deploy."</p>
+        <p>Survey ID #<b>{{ survey.id }}</b>. Your changes will not be saved until you click "Save and Deploy."</p>
         <button type="submit" class="btn btn-success btn-lg save_and_deploy_button" onclick="end(); return false;">
           <span class="glyphicon glyphicon-upload"></span>Save & Deploy
         </button>
@@ -154,7 +154,7 @@
         <button type="submit" class="btn btn-success btn-lg save_and_deploy_button" onclick="end(); return false;">
         <span class="glyphicon glyphicon-upload"></span>Save & Deploy
         </button>
-        <a class="btn btn-lg btn-danger pull-right" href="/delete_survey/{{ survey._id }}" onclick="return confirm('Are you sure you want to delete this survey? The survey questions will be lost forever, and if you want them back, you will have to re-create the survey from scratch. Also, people in the study will no longer get notifications for this survey or be able to answer it.')">
+        <a class="btn btn-lg btn-danger pull-right" href="/delete_survey/{{ survey.id }}" onclick="return confirm('Are you sure you want to delete this survey? The survey questions will be lost forever, and if you want them back, you will have to re-create the survey from scratch. Also, people in the study will no longer get notifications for this survey or be able to answer it.')">
         <span class="glyphicon glyphicon-trash"></span>Delete survey</a>
       </div>
       <br>

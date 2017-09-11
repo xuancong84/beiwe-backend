@@ -172,7 +172,7 @@ def migrate_surveys_admins_and_settings(study_referents):
             call_clinician_button_text=m_settings['call_clinician_button_text'],
             consent_form_text=m_settings['consent_form_text'],
             survey_submit_success_toast_text=m_settings['survey_submit_success_toast_text'],
-            consent_sections=m_settings['consent_sections'],
+            consent_sections=json.dumps(m_settings['consent_sections']),
             study_id=d_study.pk,
             deleted=d_study.deleted,
         )

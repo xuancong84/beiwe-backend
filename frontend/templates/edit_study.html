@@ -22,14 +22,14 @@
         <div class="row">
             <h2>Authorized researchers on this study</h2>
             <div class="list-group">
-                {% if not study.admins %}
+                {% if not study.researchers.exists() %}
                     <p><i>No researchers are authorized to view or edit this study.</i></p>
                 {% endif %}
 
-                {% for admin in study.admins|sort(case_sensitive=False) %}
+                {% for researcher in study.researchers.all()|sort(case_sensitive=False) %}
                     <div class="list-group-item">
-                        <b>{{ admin }}</b>
-                        <a href="#" onclick="remove_admin_from_study('{{ admin }}', '{{ study._id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>
+                        <b>{{ researcher.username }}</b>
+                        <a href="#" onclick="remove_admin_from_study('{{ researcher.id }}', '{{ study.id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>
                     </div>
                 {% endfor %}
             </div>
@@ -39,12 +39,12 @@
             <h5>Authorize an additional researcher on this study:</h5>
 
             <div class="col-md-8">
-                <select class="form-control" id="admin_id">
-                    {% for admin in all_admins %}
-                    <option value="{{ admin._id }}">{{ admin._id }}</option>
+                <select class="form-control" id="researcher_id">
+                    {% for researcher in all_researchers %}
+                    <option value="{{ researcher.id }}">{{ researcher.username }}</option>
                     {% endfor %}
                 </select>
-                <input type="hidden" id="study_id" value="{{ study._id }}">
+                <input type="hidden" id="study_id" value="{{ study.id }}">
             </div>
 
             <div class="col-md-4">
@@ -55,13 +55,13 @@
 
         <div class="row">
             <h2>App settings</h2>
-            <a href="/device_settings/{{ study._id }}">Edit the types of data this study collects and the wording that study participants see in the app</a>
+            <a href="/device_settings/{{ study.id }}">Edit the types of data this study collects and the wording that study participants see in the app</a>
         </div>
         <br><br><br>
 
         <div class="row">
             <h2>Rename study</h2>
-            <form action="/rename_study/{{ study._id }}" method="post">
+            <form action="/rename_study/{{ study.id }}" method="post">
                 <div class="col-md-10">
                     <input type="text" name="new_study_name" value="{{ study['name'] }}" class="form-control">
                 </div>
@@ -77,11 +77,11 @@
             <div class="col-md-6">
                 <h4>Export {{ study['name'] }}'s App Settings and Surveys</h4>
                 <p>Download a JSON file that contains {{ study['name'] }}'s App Settings (which data streams are turned on, what the timer durations and frequencies are, and what text appears in the app) and copies of all Surveys (including schedules, questions, and skip logic) and Audio Surveys (including schedules and voice recording prompts).</p>
-                <a class="btn btn-success" href="/export_study_settings_file/{{ study._id }}">Export study settings JSON file</a>
+                <a class="btn btn-success" href="/export_study_settings_file/{{ study.id }}">Export study settings JSON file</a>
             </div>
             <div class="col-md-6">
                 <h4>Import another study's App Settings and/or Surveys into {{ study['name'] }}</h4>
-                <form action="/import_study_settings_file/{{ study._id }}" method="post" enctype="multipart/form-data">
+                <form action="/import_study_settings_file/{{ study.id }}" method="post" enctype="multipart/form-data">
                     <input type="file" name="upload" id="file_upload_selector">
                     <div class="checkbox">
                         <label>
@@ -103,7 +103,7 @@
 
         <div class="row">
             <h2>Delete study</h2>
-            <a class="btn btn-danger" onclick="confirm_delete_study('{{ study.name|replace("'", "")|replace('"', "") }}', '{{ study._id }}')">
+            <a class="btn btn-danger" onclick="confirm_delete_study('{{ study.name|replace("'", "")|replace('"', "") }}', '{{ study.id }}')">
             <span class="glyphicon glyphicon-trash"></span>&nbsp;Delete study</a>
         </div>
 

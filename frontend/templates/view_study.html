@@ -37,7 +37,7 @@
                 </td>
                 <td>
                   {% if patient['device_id'] %}
-                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{study._id}}','{{ patient['_id'] }}')" >Un-Register Smartphone</button>
+                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{ study.id }}','{{ patient['patient_id'] }}')" >Un-Register Smartphone</button>
                   {% else %}
                     No smartphone registered
                   {% endif %}
@@ -50,7 +50,7 @@
                   {% endif %}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{study._id}}','{{ patient['_id'] }}')" >Reset password</button>
+                  <button type="button" class="btn btn-warning btn-sm reset_password_button" onclick="reset_patient_password('{{ study.id }}','{{ patient['patient_id'] }}')" >Reset password</button>
                 </td>
               </tr>
             {% endfor %}
@@ -58,7 +58,7 @@
           </tbody>
         </table>
 
-        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study._id }}')" title="Enable one new patient to enroll in {{ study_name }}: create a new Patient ID-registration password pair">Add new patient</button>
+        <button type="button" class="btn btn-primary add_new_patient_button" onclick="create_new_patient('{{ study.id }}')" title="Enable one new patient to enroll in {{ study_name }}: create a new Patient ID-registration password pair">Add new patient</button>
 
         <button type="button" class="btn btn-warning add_many_patients_button" data-toggle="modal" data-target="#addManyPatientsModal" title="Enable a number of new patients to enroll in {{ study_name }}: download a file of new Patient IDs and registration passwords">Add many new patients</button>
         {% include 'create_many_patients_modal.html' %}
@@ -81,7 +81,7 @@
           </div>
 
           {# TODO: Josh, make this pass in the study ID #}
-          <a href="/create_survey/{{ study._id }}/tracking_survey" class="btn btn-info">Create new survey</a>
+          <a href="/create_survey/{{ study.id }}/tracking_survey" class="btn btn-info">Create new survey</a>
         </div>
 
         <div class="row">
@@ -98,12 +98,12 @@
               <p><b>This study does not have any audio surveys.</b></p>
             {% endif %}
           </div>
-          <a href="/create_survey/{{ study._id }}/audio_survey" class="btn btn-info">Create new <b>audio survey</b></a>
+          <a href="/create_survey/{{ study.id }}/audio_survey" class="btn btn-info">Create new <b>audio survey</b></a>
         </div>
 
         <div class="row">
             <h3>App settings</h3>
-            <p><a href="/device_settings/{{ study['_id'] }}">View the types of data this study collects and the wording that study participants see in the app</a></p>
+            <p><a href="/device_settings/{{ study['id'] }}">View the types of data this study collects and the wording that study participants see in the app</a></p>
         </div>
 
       </div>

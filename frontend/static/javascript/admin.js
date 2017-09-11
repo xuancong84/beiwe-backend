@@ -105,7 +105,7 @@ function add_admin_to_study() {
         type: 'POST',
         url: '/add_admin_to_study',
         data: {
-            admin_id: $('#admin_id').val(),
+            researcher_id: $('#researcher_id').val(),
             study_id: $('#study_id').val()
         }
     }).done(function() {
