@@ -53,7 +53,8 @@ def edit_researcher(researcher_pk):
         all_studies=DStudy.get_all_studies_by_name(),
         allowed_studies=get_admins_allowed_studies(),
         admin_is_current_user=admin_is_current_user,
-        system_admin=admin_is_system_admin()
+        system_admin=admin_is_system_admin(),
+        redirect_url='/edit_researcher/{:s}'.format(researcher_pk),
     )
 
 
@@ -98,13 +99,13 @@ def manage_studies():
 def edit_study(study_id=None):
     study = DStudy.objects.get(pk=study_id)
     all_researchers = Researcher.get_all_researchers_by_username()
-    # MAYBE I NEED THIS participants = [p.as_native_python() for p in study.participants.all()]
     return render_template(
         'edit_study.html',
         study=study,
         all_researchers=all_researchers,
         allowed_studies=get_admins_allowed_studies(),
-        system_admin=admin_is_system_admin()
+        system_admin=admin_is_system_admin(),
+        redirect_url='/edit_study/{:s}'.format(study_id),
     )
 
 

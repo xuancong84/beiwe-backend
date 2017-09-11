@@ -57,13 +57,13 @@ def import_RSA_key( key ):
 ################################# AES ##########################################
 ################################################################################
 
-def encrypt_for_server(input_string, study_id):
+def encrypt_for_server(input_string, study_object_id):
     """
     Encrypts config using the ENCRYPTION_KEY, prepends the generated initialization vector.
     Use this function on an entire file (as a string).
     """
 
-    encryption_key = DStudy.objects.get(pk=study_id).encryption_key
+    encryption_key = DStudy.objects.get(object_id=study_object_id).encryption_key
     iv = urandom(16)
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 

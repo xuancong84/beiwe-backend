@@ -28,12 +28,15 @@ def _get_bucket(name):
 #     key.set_contents_from_string(some_string)
 
 
-def s3_upload(key_path, data_string, study_id, raw_path=False):
+def s3_upload(key_path, data_string, study_object_id, raw_path=False):
     """ Uploads data to s3, ensures data is encrypted with the key from the provided study.
     Takes an optional argument, raw_path, which defaults to false.  When false the study_id is
     prepended to the S3 file path (key_path), placing the file in the appropriate study folder. """
-    if not raw_path: key_path = str(study_id) + "/" + key_path
-    data = encryption.encrypt_for_server(data_string, study_id)
+
+    if not raw_path:
+        key_path = study_object_id + "/" + key_path
+
+    data = encryption.encrypt_for_server(data_string, study_object_id)
     key = _get_bucket(S3_BUCKET).new_key(key_path)
     key.set_contents_from_string(data)
 
@@ -128,8 +131,8 @@ def s3_delete(key_path):
 def create_client_key_pair(patient_id, study_id):
     """Generate key pairing, push to database, return sanitized key for client."""
     public, private = encryption.generate_key_pairing()
-    s3_upload( "keys/" + patient_id + "_private", private, study_id )
-    s3_upload( "keys/" + patient_id + "_public", public, study_id )
+    s3_upload("keys/" + patient_id + "_private", private, study_id )
+    s3_upload("keys/" + patient_id + "_public", public, study_id )
 
 
 def get_client_public_key_string(patient_id, study_id):

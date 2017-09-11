@@ -23,22 +23,26 @@ admin_api = Blueprint('admin_api', __name__)
 """######################### Study Administration ###########################"""
 
 
-@admin_api.route('/add_admin_to_study', methods=['POST'])
+@admin_api.route('/add_researcher_to_study', methods=['POST'])
 @authenticate_system_admin
-def add_admin_to_study():
-    researcher_id = request.form.get('researcher_id')
-    study_id = request.form.get('study_id')
+def add_researcher_to_study():
+    researcher_id = request.values['researcher_id']
+    study_id = request.values['study_id']
     Researcher.objects.get(pk=researcher_id).studies.add(study_id)
-    return '200'
+
+    # This gets called by both edit_researcher and edit_study, so the POST request
+    # must contain which URL it came from.
+    return redirect(request.values['redirect_url'])
 
 
-@admin_api.route('/remove_admin_from_study', methods=['POST'])
+@admin_api.route('/remove_researcher_from_study', methods=['POST'])
 @authenticate_system_admin
-def remove_admin_from_study():
-    researcher_id = request.form.get('admin_id')
-    study_id = request.form.get('study_id')
+def remove_researcher_from_study():
+    researcher_id = request.values['researcher_id']
+    study_id = request.values['study_id']
     Researcher.objects.get(pk=researcher_id).studies.remove(study_id)
-    return '200'
+
+    return redirect(request.values['redirect_url'])
 
 
 @admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
@@ -77,18 +81,21 @@ def rename_study(study_id=None):
 """########################## User Administration ###########################"""
 
 
-@admin_api.route('/reset_patient_password/<string:study_id>', methods=["POST"])
+@admin_api.route('/reset_participant_password', methods=["POST"])
 @authenticate_admin_study_access
-def reset_user_password(study_id=None):
+def reset_participant_password():
     """ Takes a patient ID and resets its password. Returns the new random password."""
-    patient_id = request.values["patient_id"]
+    patient_id = request.values['patient_id']
+    study_id = request.values['study_id']
     participant_set = Participant.objects.filter(patient_id=patient_id)
-    if participant_set.exists() and participant_set.values_list('study', flat=True).get() == int(study_id):
+    if participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id:
         participant = participant_set.get()
         new_password = participant.reset_password()
-        return make_response(new_password, 201)
+        flash('Patient {:s}\'s password has been reset to {:s}.'.format(patient_id, new_password), 'success')
     else:
-        return make_response("that patient id does not exist", 404)
+        flash('Sorry, something went wrong when trying to reset the patient\'s password.', 'danger')
+
+    return redirect('/view_study/{:s}'.format(study_id))
 
 
 @admin_api.route('/reset_device', methods=["POST"])
@@ -99,11 +106,10 @@ def reset_device():
     register a new device.
     """
 
-    # AJK TODO look into making this an HTML hidden input and fiddling with authenticate_admin_study_access
     patient_id = request.values['patient_id']
     study_id = request.values['study_id']
     participant_set = Participant.objects.filter(patient_id=patient_id)
-    if not participant_set.exists() and participant_set.values_list('study', flat=True).get() == int(study_id):
+    if participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id:
         participant = participant_set.get()
         participant.clear_device()
         flash('For patient {:s}, device was reset; password is untouched.'.format(patient_id), 'success')
@@ -113,22 +119,27 @@ def reset_device():
     return redirect('/view_study/{:s}'.format(study_id))
 
 
-@admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])
+@admin_api.route('/create_new_patient', methods=["POST"])
 @authenticate_admin_study_access
-def create_new_patient(study_id=None):
+def create_new_patient():
     """
     Creates a new user, generates a password and keys, pushes data to s3 and user database, adds
     user to the study they are supposed to be attached to and returns a string containing
     password and patient id.
     """
 
+    study_id = request.values['study_id']
     patient_id, password = Participant.create_with_password(study_id=study_id)
+
     # Create an empty file on S3 indicating that this user exists
     study_object_id = DStudy.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
     s3_upload(patient_id, "", study_object_id)
     create_client_key_pair(patient_id, study_object_id)
-    response_string = "patient_id: " + patient_id + "\npassword: " + password
-    return make_response(response_string, 201)
+
+    response_string = 'Created a new patient\npatient_id: {:s}\npassword: {:s}'.format(patient_id, password)
+    flash(response_string, 'success')
+
+    return redirect('/view_study/{:s}'.format(study_id))
 
 
 @admin_api.route('/create_many_patients/<string:study_id>', methods=["POST"])
