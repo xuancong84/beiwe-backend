@@ -33,18 +33,24 @@
             {% for patient in patients %}
               <tr>
                 <td>
-                  <b>{{ patient['patient_id'] }}</b>
+                  <b>{{ patient.patient_id }}</b>
                 </td>
                 <td>
-                  {% if patient['device_id'] %}
-                    <button type="button" class="btn btn-warning btn-sm reset_device_button" onclick="reset_device('{{ study.id }}','{{ patient['patient_id'] }}')" >Un-Register Smartphone</button>
+                  {% if patient.device_id %}
+                    <form action="/reset_device" method="post">
+                      <div class="form-inline">
+                        <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
+                        <input type="hidden" name="study_id" value="{{ study.id }}">
+                        <button type="submit" class="btn btn-warning btn-sm reset_device_button">Un-Register Smartphone</button>
+                      </div>
+                    </form>
                   {% else %}
                     No smartphone registered
                   {% endif %}
                 </td>
                 <td>
-                  {% if patient['os_type'] %}
-                    {{ patient['os_type'] }}
+                  {% if patient.os_type %}
+                    {{ patient.os_type }}
                   {% else %}
                     <i>unknown</i>
                   {% endif %}
@@ -63,7 +69,7 @@
         <button type="button" class="btn btn-warning add_many_patients_button" data-toggle="modal" data-target="#addManyPatientsModal" title="Enable a number of new patients to enroll in {{ study_name }}: download a file of new Patient IDs and registration passwords">Add many new patients</button>
         {% include 'create_many_patients_modal.html' %}
 
-        </br><hr></br>
+        <br/><hr><br/>
 
         <div class="row">
           <h3>Surveys</h3>

@@ -27,19 +27,18 @@
 
 		<div class="row">
 			<h5>Authorize this researcher on an additional study:</h5>
+        <div class="col-md-8">
+          <select class="form-control" id="study_id">
+            {% for study in all_studies %}
+              <option value="{{ study.id }}">{{ study.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" id="researcher_id" value="{{ admin.id }}">
+        </div>
 
-            <div class="col-md-8">
-                <select class="form-control" id="study_id">
-									{% for study in all_studies %}
-                    <option value="{{ study.id }}">{{ study.name }}</option>
-									{% endfor %}
-                </select>
-                <input type="hidden" id="researcher_id" value="{{ admin.id }}">
-            </div>
-
-            <div class="col-md-4">
-                <button onclick="add_admin_to_study()" class="btn btn-info add_admin_to_study_button">Add researcher to study</button>
-            </div>
+        <div class="col-md-4">
+          <button onclick="add_admin_to_study()" class="btn btn-info add_admin_to_study_button">Add researcher to study</button>
+        </div>
 		</div>
 
 		<br><br><br><br>
@@ -48,21 +47,21 @@
 		<div class="row">
 			<h4>Reset Password</h4>
 		    <div class="well">
-		        <b>Passwords require all of the following:</b>
-	            <ul class="list">
-	                <li class="list-item">at least one lower case letter</li>
-	                <li class="list-item">at least one upper case letter</li>
-	                <li class="list-item">at least one numeric character</li>
-	                <li class="list-item">at least one special character (! @ # $ % ^ [ ] etc.)</li>
-	            </ul>
-	        </div>
-			<form action="/set_researcher_password" method="post">
-	          	<div class="form-inline">
-	          		<input type="text" name="password" class="form-control">
-	          		<input type="hidden" name="admin_id" value="{{ admin._id }}">
-			        <input type="submit" class="btn btn-warning" value="Reset Password">
-	          	</div>
-        	</form>
+          <b>Passwords require all of the following:</b>
+            <ul class="list">
+              <li class="list-item">at least one lower case letter</li>
+              <li class="list-item">at least one upper case letter</li>
+              <li class="list-item">at least one numeric character</li>
+              <li class="list-item">at least one special character (! @ # $ % ^ [ ] etc.)</li>
+            </ul>
+        </div>
+			  <form action="/set_researcher_password" method="post">
+					<div class="form-inline">
+						<input type="text" name="password" class="form-control">
+						<input type="hidden" name="admin_id" value="{{ admin._id }}">
+					  <input type="submit" class="btn btn-warning" value="Reset Password">
+					</div>
+			  </form>
 		</div>
 		<br><br><br><br>
 		{% endif %}

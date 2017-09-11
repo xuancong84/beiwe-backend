@@ -1,13 +1,11 @@
 import functools
 from datetime import datetime, timedelta
-from flask import session, redirect
+from flask import redirect, request, session
 from libs.security import generate_easy_alphanumeric_string
-from bson.objectid import ObjectId
 from werkzeug.exceptions import abort
 
 # Mongolia models
 from db.user_models import Admin
-from db.study_models import Studies
 
 # Django models
 from study.models import Researcher, Study as DStudy
@@ -84,30 +82,33 @@ def authenticate_admin_study_access(some_function):
         username = session["admin_username"]
         researcher = Researcher.objects.get(username=username)
 
+        # Get values first from kwargs, then from the POST request
+        survey_id = kwargs.get('survey_id', request.values.get('survey_id'))
+        study_id = kwargs.get('study_id', request.values.get('study_id'))
+
         # Check proper syntax usage.
-        if "survey_id" not in kwargs and "study_id" not in kwargs:
+        if not survey_id and not study_id:
             raise ArgumentMissingException()
 
         # We want the survey_id check to execute first if both args are supplied.
-        if "survey_id" in kwargs:
-            study_set = DStudy.objects.filter(surveys=kwargs['survey_id'])
+        if survey_id:
+            study_set = DStudy.objects.filter(surveys=survey_id)
             if not study_set.exists():
                 return abort(404)
 
             # Check that researcher is either a researcher on the study or an admin
-            study_pk = study_set.values_list('pk', flat=True).get()
+            study_id = study_set.values_list('pk', flat=True).get()
             if not researcher.admin:
-                if not researcher.studies.filter(pk=study_pk).exists():
+                if not researcher.studies.filter(pk=study_id).exists():
                     return abort(403)
 
-        if "study_id" in kwargs:
-            study_set = DStudy.objects.filter(pk=kwargs['study_id'])
+        if study_id:
+            study_set = DStudy.objects.filter(pk=study_id)
             if not study_set.exists():
                 return abort(404)
 
-            study_pk = study_set.values_list('pk', flat=True).get()
             if not researcher.admin:
-                if not researcher.studies.filter(pk=study_pk).exists():
+                if not researcher.studies.filter(pk=study_id).exists():
                     return abort(403)
 
         return some_function(*args, **kwargs)

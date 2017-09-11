@@ -1,6 +1,5 @@
-from bson.objectid import ObjectId
 from csv import writer
-from flask import abort, Blueprint, make_response, redirect, request, Response
+from flask import abort, Blueprint, flash, make_response, redirect, request, Response
 from flask.templating import render_template
 from re import sub
 
@@ -14,7 +13,7 @@ from libs.security import check_password_requirements
 
 # Mongolia models
 from db.user_models import Admin
-from db.study_models import Study, Studies
+from db.study_models import Studies
 
 # Django models
 from study.models import Participant, Researcher, Study as DStudy
@@ -92,23 +91,26 @@ def reset_user_password(study_id=None):
         return make_response("that patient id does not exist", 404)
 
 
-@admin_api.route('/reset_device/<string:study_id>', methods=["POST"])
+@admin_api.route('/reset_device', methods=["POST"])
 @authenticate_admin_study_access
-def reset_device(study_id=None):
+def reset_device():
     """
-    Resets a patient's device.  The patient will not be able to connect until expect to
+    Resets a participant's device. The participant will not be able to connect until they
     register a new device.
     """
 
     # AJK TODO look into making this an HTML hidden input and fiddling with authenticate_admin_study_access
-    patient_id = request.values["patient_id"]
+    patient_id = request.values['patient_id']
+    study_id = request.values['study_id']
     participant_set = Participant.objects.filter(patient_id=patient_id)
-    if participant_set.exists() and participant_set.values_list('study', flat=True).get() == int(study_id):
+    if not participant_set.exists() and participant_set.values_list('study', flat=True).get() == int(study_id):
         participant = participant_set.get()
         participant.clear_device()
-        return make_response("device was reset; password is untouched.", 201)
+        flash('For patient {:s}, device was reset; password is untouched.'.format(patient_id), 'success')
     else:
-        return make_response("that patient id does not exist", 404)
+        flash('Sorry, something went wrong when trying to reset the patient\'s device.', 'danger')
+
+    return redirect('/view_study/{:s}'.format(study_id))
 
 
 @admin_api.route('/create_new_patient/<string:study_id>', methods=["POST"])

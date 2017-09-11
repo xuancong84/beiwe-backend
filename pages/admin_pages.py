@@ -36,7 +36,7 @@ def view_study(study_id=None):
     study = Study.objects.get(pk=study_id)
     tracking_survey_ids = study.get_survey_ids_for_study('tracking_survey')
     audio_survey_ids = study.get_survey_ids_for_study('audio_survey')
-    participants = [p.as_native_python() for p in study.participants.all()]
+    participants = study.participants.all()
 
     return render_template(
         'view_study.html',

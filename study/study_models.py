@@ -262,6 +262,7 @@ class Participant(AbstractPasswordUser):
 
     def clear_device(self):
         self.device_id = ''
+        self.os_type = NULL_OS
         self.save()
 
 
