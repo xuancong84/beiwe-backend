@@ -11,7 +11,7 @@
   <script type="text/javascript" src="../static/javascript/libraries/bootstrap-datetimepicker.js"></script>
   <script type="text/javascript" src="../static/javascript/data_download_page.js"></script>
   <script type="text/javascript">
-    var users_by_study = '{{ users_by_study|tojson }}';
+    var users_by_study = '{{ users_by_study|safe }}';
   </script>
   <script>
     allowedStudies = {{ allowed_studies|safe }};
@@ -57,7 +57,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="patient_selector">Patients</label>
-                <select id="patient_selector" ng-model="selectedPatient" ng-options="participant for participant in participantsByStudy[selectedStudy.id]" name="user_ids" class="form-control" size=12 multiple></select>
+                <select id="patient_selector" ng-model="selectedPatient" ng-options="participant for participant in participantsByStudy[selectedStudy.id] track by participant" name="user_ids" class="form-control" size=12 multiple></select>
               </div>
             </div>
 

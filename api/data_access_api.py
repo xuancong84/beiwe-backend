@@ -9,12 +9,16 @@ from flask import Blueprint, request, abort, json, Response
 
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               SURVEY_ANSWERS, SURVEY_TIMINGS)
-from db.data_access_models import ChunksRegistry
-from db.study_models import Study, Studies
-from db.user_models import Admin, User, Users
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
+
+# Mongolia models
+from db.study_models import Study, Studies
+from db.user_models import Admin, Users
+
+# Django models
+from study.models import ChunkRegistry, Participant, Researcher, Study as DStudy
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -30,50 +34,76 @@ upload_stream_map = {"survey_answers":("surveyAnswers", "csv"),
 #########################################################################################
 
 def get_and_validate_study_id():
-    """ Checks for a valid study id.
-        No study id causes a 400 (bad request) error.
-        Study id malformed (not 24 characters) causes 400 error.
-        Study id otherwise invalid causes 400 error.
-        Study id does not exist in our database causes _404_ error."""
+    """
+    Checks for a valid study object id or primary key.
+    If neither is given, a 400 (bad request) error is raised.
+    Study object id malformed (not 24 characters) causes 400 error.
+    Study object id otherwise invalid causes 400 error.
+    Study does not exist in our database causes 404 error.
+    """
     
-    if "study_id" not in request.values:
+    study_object_id_as_str = request.values.get('study_id')
+    study_pk = request.values.get('study_pk')
+    
+    if study_object_id_as_str:
+        # If the ID is incorrectly sized, we return a 400
+        if len(study_object_id_as_str) != 24:
+            print("Received invalid length objectid as study_id in the data access API.")
+            return abort(400)
+        
+        # If the ID is of some invalid form, we return a 400
+        try:
+            study_object_id = ObjectId(study_object_id_as_str)
+        except InvalidId:
+            return abort(400)
+        
+        # If no Study with the given ID exists, we return a 404
+        try:
+            study = DStudy.objects.get(object_id=study_object_id)
+        except DStudy.DoesNotExist:
+            return abort(404)
+        else:
+            return study
+    elif study_pk:
+        # If no Study with the given ID exists, we return a 404
+        try:
+            study = DStudy.objects.get(pk=study_pk)
+        except DStudy.DoesNotExist:
+            return abort(404)
+        else:
+            return study
+    else:
         return abort(400)
-    
-    if len(request.values["study_id"]) != 24:
-        # Don't proceed with large sized input.
-        print "Received invalid length objectid as study_id in the data access API."
-        return abort(400)
-    
-    try:  # If the ID is of some invalid form, we catch that and return a 400
-        study_id = ObjectId(request.values["study_id"])
-    except InvalidId:
-        return abort(400)
-    
-    study_obj = Study(study_id)
-    # Study object will be None if there is no matching study id.
-    if not study_obj:  # additional case: if study object exists but is empty
-        return abort(404)
-    
-    return study_obj
 
 
-def get_and_validate_admin(study_obj):
-    """ Finds admin based on the secret key provided, returns 403 if admin doesn't exist,
-        is not credentialled on the study, or if the secret key does not match. """
-    access_key = request.values["access_key"]
+def get_and_validate_admin(study):
+    """
+    Finds researcher based on the secret key provided.
+    Returns 403 if researcher doesn't exist, is not credentialed on the study, or if
+    the secret key does not match.
+    """
+    
+    access_key_id = request.values["access_key"]
     access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin:
+    
+    try:
+        researcher = Researcher.objects.get(access_key_id=access_key_id)
+    except Researcher.DoesNotExist:
         return abort(403)  # access key DNE
-    if admin._id not in study_obj['admins']:
-        return abort(403)  # admin is not credentialed for this study
-    if not admin.validate_access_credentials(access_secret):
+    
+    if not researcher.studies.filter(pk=study.pk).exists():
+        return abort(403)  # researcher is not credentialed for this study
+    
+    if not researcher.validate_access_credentials(access_secret):
         return abort(403)  # incorrect secret key
-    return admin
+    
+    return researcher
 
 
 #########################################################################################
 
+# AJK TODO All three of these functions (/get-X/v1) should take study_id as study.object_id and
+# study_pk as study.pk in their post requests
 @data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
 def get_studies():
     # Cases: invalid access creds
@@ -111,8 +141,9 @@ def grab_data():
     
     # uncomment the following line when doing a reindex
     # return abort(503)
-    study_obj = get_and_validate_study_id()
-    get_and_validate_admin(study_obj)
+    
+    study = get_and_validate_study_id()
+    get_and_validate_admin(study)
     
     query = {}
     determine_data_streams_for_db_query(query)  # select data streams
@@ -121,17 +152,18 @@ def grab_data():
     
     # Do query (this is actually a generator)
     if "registry" in request.values:
-        get_these_files = handle_database_query(study_obj._id, query,
-                                                registry=parse_registry(request.values["registry"]))
+        get_these_files = handle_database_query(study.pk, query, registry=parse_registry(request.values["registry"]))
     else:
-        get_these_files = handle_database_query(study_obj._id, query, registry=None)
+        get_these_files = handle_database_query(study.pk, query, registry=None)
     
     # If the request is from the web form we need to include mime information
     # and don't want to create a registry file.
     if 'web_form' in request.values:
-        return Response(zip_generator(get_these_files, construct_registry=False),
-                        mimetype="zip",
-                        headers={'Content-Disposition':'attachment; filename="data.zip"'})
+        return Response(
+            zip_generator(get_these_files, construct_registry=False),
+            mimetype="zip",
+            headers={'Content-Disposition': 'attachment; filename="data.zip"'}
+        )
     else:
         return Response(zip_generator(get_these_files, construct_registry=True))
 
@@ -290,9 +322,9 @@ def determine_users_for_db_query(query):
         except JSONDecodeError:
             query['user_ids'] = request.form.getlist('user_ids')
         
-        for user_id in query['user_ids']:  # Case: one of the user ids was invalid
-            if not User(user_id):
-                return abort(404)
+        # Ensure that all user IDs are patient_ids of actual Participants
+        if not Participant.objects.filter(patient_id__in=query['user_ids']).count() == len(query['user_ids']):
+            return abort(404)
 
 
 def determine_time_range_for_db_query(query):
@@ -307,23 +339,35 @@ def determine_time_range_for_db_query(query):
 
 
 def handle_database_query(study_id, query, registry=None):
-    """ Runs the database query as a generator/iterator. """
-    chunks = ChunksRegistry.get_chunks_time_range(study_id, **query)
-    # no registry, just return one by one.
+    """
+    Runs the database query and returns a QuerySet.
+    """
+    
+    chunks = ChunkRegistry.get_chunks_time_range(study_id, **query)
+    
+    # If there is no registry, just return all the chunks.
     if not registry:
         return chunks
     
-    # yes registry, we need to filter and then yield
+    # If there is a registry, we need to filter the chunks
     else:
-        def do_filtered_query():
-            for chunk in chunks:
-                if (chunk['chunk_path'] in registry
-                    and registry[chunk['chunk_path']] == chunk["chunk_hash"]):
-                    continue
-                else:
-                    yield chunk
+        # AJK TODO make sure this works well
+        # Get all chunks whose path and hash are both in the registry
+        possible_registered_chunks = (
+            chunks
+            .filter(chunk_path__in=registry, chunk_hash__in=registry.itervalues())
+            .values('pk', 'chunk_path', 'chunk_hash')
+        )
         
-        return do_filtered_query()
+        # Select only those chunks that actually are in the registry
+        registered_chunk_pks = [c['pk']
+                                for c in possible_registered_chunks
+                                if registry[c['chunk_path']] == c['chunk_hash']]
+        
+        # Return a QuerySet of the chunks that aren't in the registry
+        unregistered_chunks = chunks.exclude(pk__in=registered_chunk_pks)
+        
+        return unregistered_chunks
 
 #########################################################################################
 

@@ -50,7 +50,7 @@ class ChunkRegistry(AbstractModel):
 
         query = {'study_id': study_id}
         if user_ids:
-            query['user_id__in'] = user_ids
+            query['participant__patient_id__in'] = user_ids
         if data_types:
             query['data_type__in'] = data_types
         if start:

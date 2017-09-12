@@ -67,7 +67,7 @@
         <form action="/set_researcher_password" method="post">
           <div class="form-inline">
             <input type="text" name="password" class="form-control">
-            <input type="hidden" name="admin_id" value="{{ admin._id }}">
+            <input type="hidden" name="researcher_id" value="{{ admin.id }}">
             <input type="submit" class="btn btn-warning" value="Reset Password">
           </div>
         </form>
@@ -79,8 +79,7 @@
       <a href="/manage_researchers" class="btn btn-success"><span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back to all researchers</a>
 
       {% if not admin_is_current_user %}
-        {# AJK TODO make this a POST request #}
-        <a href="/delete_researcher/{{ admin._id }}" class="btn btn-danger pull-right" onclick="return confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')"><span class="glyphicon glyphicon-trash"></span>&nbsp;Delete {{ admin._id }}</a>
+        <a href="/delete_researcher/{{ admin.id }}" class="btn btn-danger pull-right" onclick="return confirm('Are you certain you want to delete {{ admin._id }}?  This cannot be undone.')"><span class="glyphicon glyphicon-trash"></span>&nbsp;Delete {{ admin._id }}</a>
       {% endif %}
     </div>
   </div>

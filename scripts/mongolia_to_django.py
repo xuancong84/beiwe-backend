@@ -120,7 +120,7 @@ def migrate_surveys_admins_and_settings(study_referents):
                 d_admin = DAdmin(
                     username=m_admin_id,
                     admin=m_admin['system_admin'],
-                    access_key_id=m_admin['access_key_id'] or '',
+                    access_key_id=m_admin['access_key_id'] or None,  # access_key_id is unique and therefore nullable
                     access_key_secret=m_admin['access_key_secret'] or '',
                     access_key_secret_salt=m_admin['access_key_secret_salt'] or '',
                     password=m_admin['password'],

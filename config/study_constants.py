@@ -53,3 +53,4 @@ AUDIO_SURVEY_SETTINGS = {
 }
 
 OBJECT_ID_ALLOWED_CHARS = string.ascii_uppercase + string.ascii_lowercase + string.digits
+EASY_ALPHANUMERIC_CHARS = string.ascii_lowercase + '123456789'

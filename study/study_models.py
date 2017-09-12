@@ -276,7 +276,7 @@ class Researcher(AbstractPasswordUser):
     username = models.CharField(max_length=32, unique=True, help_text='User-chosen username, stored in plain text')
     admin = models.BooleanField(default=False, help_text='Whether the researcher is also an admin')
 
-    access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator], blank=True)
+    access_key_id = models.CharField(max_length=64, validators=[standard_base_64_validator], unique=True, null=True, blank=True)
     access_key_secret = models.CharField(max_length=44, validators=[url_safe_base_64_validator], blank=True)
     access_key_secret_salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator], blank=True)
 

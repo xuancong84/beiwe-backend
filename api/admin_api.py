@@ -1,5 +1,5 @@
 from csv import writer
-from flask import abort, Blueprint, flash, make_response, redirect, request, Response
+from flask import abort, Blueprint, flash, redirect, request, Response
 from flask.templating import render_template
 from re import sub
 
@@ -10,12 +10,6 @@ from libs.admin_authentication import authenticate_admin_study_access,\
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from libs.security import check_password_requirements
-
-# Mongolia models
-from db.user_models import Admin
-from db.study_models import Studies
-
-# Django models
 from study.models import Participant, Researcher, Study as DStudy
 
 admin_api = Blueprint('admin_api', __name__)
@@ -28,7 +22,7 @@ admin_api = Blueprint('admin_api', __name__)
 def add_researcher_to_study():
     researcher_id = request.values['researcher_id']
     study_id = request.values['study_id']
-    Researcher.objects.get(pk=researcher_id).studies.add(study_id)
+    Researcher.studies.through.objects.get_or_create(researcher_id=researcher_id, study_id=study_id)
 
     # This gets called by both edit_researcher and edit_study, so the POST request
     # must contain which URL it came from.
@@ -45,27 +39,27 @@ def remove_researcher_from_study():
     return redirect(request.values['redirect_url'])
 
 
-@admin_api.route('/delete_researcher/<string:admin_id>', methods=['GET','POST'])
+@admin_api.route('/delete_researcher/<string:researcher_id>', methods=['GET', 'POST'])
 @authenticate_system_admin
-def delete_researcher(admin_id):
-    admin = Admin(admin_id)
-    if not admin:
+def delete_researcher(researcher_id):
+    try:
+        researcher = Researcher.objects.get(pk=researcher_id)
+    except Researcher.DoesNotExist:
         return abort(404)
-    for study in Studies():
-        study.remove_admin(admin_id)
-    admin.remove()
+    
+    researcher.studies.clear()
+    researcher.mark_deleted()
     return redirect('/manage_researchers')
 
 
 @admin_api.route('/set_researcher_password', methods=['POST'])
 @authenticate_system_admin
 def set_researcher_password():
-    admin = Admin(request.form.get('admin_id'))
+    researcher = Researcher.objects.get(pk=request.form.get('researcher_id'))
     new_password = request.form.get('password')
-    if not check_password_requirements(new_password, flash_message=True):
-        return redirect('/edit_researcher/' + admin._id)
-    admin.set_password(new_password)
-    return redirect('/edit_researcher/' + admin._id)
+    if check_password_requirements(new_password, flash_message=True):
+        researcher.set_password(new_password)
+    return redirect('/edit_researcher/{:d}'.format(researcher.pk))
 
 
 @admin_api.route('/rename_study/<string:study_id>', methods=['POST'])

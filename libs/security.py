@@ -1,10 +1,12 @@
 import base64, hashlib, re
+import random
 
 from flask import flash
 
 from config.secure_settings import (MONGO_PASSWORD, MONGO_USERNAME,
                                     FLASK_SECRET_KEY, ITERATIONS)
 from config.constants import PASSWORD_REQUIREMENT_REGEX_LIST
+from config.study_constants import EASY_ALPHANUMERIC_CHARS
 
 # pbkdf2 is a hashing protocol specifically for safe password hash generation.
 from hashlib import pbkdf2_hmac as pbkdf2
@@ -121,10 +123,13 @@ def generate_admin_password_and_salt():
 ################################################################################
 
 def generate_easy_alphanumeric_string():
-    """ Generates a pretty easy alphanumeric (lower case) string, this string
-        will not contain the number 0. """
-    random_string = hashlib.md5(urandom(24)).digest().encode('base64')
-    return re.sub(r'[^a-zA-Z1-9]', "", random_string)[:8].lower()
+    """
+    Generates an "easy" alphanumeric (lower case) string of length 8 without the 0 (zero)
+    character. This is a design decision, because users will have to type in the "easy"
+    string on mobile devices, so we have made this a string that is easy to type and
+    easy to distinguish the characters of (e.g. no I/l, 0/o/O confusion).
+    """
+    return ''.join(random.choice(EASY_ALPHANUMERIC_CHARS) for _ in xrange(8))
 
 
 def generate_random_string():
