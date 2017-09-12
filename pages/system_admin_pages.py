@@ -158,6 +158,7 @@ def device_settings(study_id=None):
         return render_template(
             "device_settings.html",
             study=study.as_native_python(),
+            allowed_studies=get_admins_allowed_studies(),
             settings=settings.as_native_python(),
             readonly=not admin_is_system_admin(),
             system_admin=admin_is_system_admin()

@@ -30,7 +30,7 @@
                             </div>
                         </li>
                         {# Filtered list of studies #}
-                        <li ng-repeat="study in navBarStudies">{# | filter:{name: searchText}">#}
+                        <li ng-repeat="study in navBarStudies | filter:{name: searchText}">
                             <a href="/view_study/{% raw %}{{ study.id }}{% endraw %}">{% raw %}{{ study.name }}{% endraw %}</a></li>
                         </li>
                     </ul>

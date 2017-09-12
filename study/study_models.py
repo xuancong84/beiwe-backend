@@ -43,7 +43,7 @@ class Study(AbstractModel):
         """
         Creates a new study with a populated object_id field
         """
-        # AJK TODO: please implement a check for <-- @Eli what does this mean?
+        
         study = cls(object_id=cls.generate_objectid_string("object_id"), **kwargs)
         study.save()
         return study
@@ -262,7 +262,6 @@ class Participant(AbstractPasswordUser):
 
     def clear_device(self):
         self.device_id = ''
-        self.os_type = NULL_OS
         self.save()
 
 

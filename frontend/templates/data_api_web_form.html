@@ -13,37 +13,17 @@
   <script type="text/javascript">
     var users_by_study = '{{ users_by_study|tojson }}';
   </script>
+  <script>
+    allowedStudies = {{ allowed_studies|safe }};
+    participantsByStudy = {{ users_by_study|safe }};
+  </script>
+  <script src="/static/javascript/app/survey-builder/controllers/data-access-web-form-controller.js"></script>
 {% endblock %}
 
 {% block content %}
 
     <div class="container">
       <br><br>
-<!--      <div class="span4">
-        <h3>Fill in Your Query</h3>
-        <p>Please select/fill in the fields below.</p>
-        Time: for date-time parameters copy this syntax: <b>1990-01-31T07:30:04 <br> NOTE:</b> all data streams, except for Survey Answers, are split into files by hour.  Time parameters are Inclusive.
-
-        <p> Depending on the amount of data retreived by your query this could take a minute to process.  Please consider using the Python command line interface if you have repeatable queries, or want to simply update your current data set.
-
-        <p>This pressing submit will submit your query and return a ZIP file containing this data.  Depending on the amount of data from this query it could take some time, please do not press submit multiple times, it will only make it slower. :D This is all placeholder text, insert some info on the way the API works and recommend that people use the python script. this will not work if you have not generated access credentials; time granularity for all data streams except survey responses is 1 hour; <p>
-
-        <form method="POST" action="/insert something here">
-          <input name="access_key" type="text" placeholder="Your Access Key" />
-          <input name="secret_key" type="text" placeholder="Your Secret Key" />
-          <input name="time_start" type="text" placeholder="" /> {# make this a date-time picker or tell user that format should be 1990-01-31T07:30:04... this is a bitch, it might be a better idea to actually NOT provide time granularity in an effort to get the user to make use of the python command line... nobody is going to like this. #}
-          <input name="time_end" type="text" placeholder="" />
-          <input name="data_streams" type="that multi-selection dropdown thing"  placeholder="" />  {# this needs to be a json list of strings, see the enormous comment below for details. #}
-          <input name="user_ids" type="multi-selection?" placeholder="select users" /> {# this could be a total pain... json list of strings #}
-          
-          <input name="study_id" type="text" placeholder="" /> {# a string, the study_id of a study.  This should be populated in a single selection dropdown menu, it would be nice if the dropdown listed studies by name, but provided the correct study_id string. Use the provided 'studies' list to generate that list (it is a list of all the studies this admin is allowed to view.) #}
-          <input type="submit" name="submit" value="Log in" class="btn btn-large btn-success">
-        </form>
-
-        Please consider using the Python command line interface if you wish to pull in a large data set.  The Python command line allows for an "updates-only" query, which will can improve the query time substantially.
-      </div>
-
-      <br><br><br><br><br> -->
 
       <div class="row well">
         <form action="/get-data/v1" method="POST" id="data_download_parameters_form">
@@ -63,17 +43,13 @@
           <br>
 
           {# Data Selectors #}
-          <div class="row">
+          <div ng-controller="DataAccessWebFormController" class="row">
 
             {# Study ID #}
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="study_selector">Study</label>
-                <select class="form-control" name="study_id" id="study_selector">
-                  {% for study in allowed_studies %}
-                    <option value="{{ study._id }}">{{ study.name }}</option>
-                  {% endfor %}
-                </select>
+                <select id="study_selector" ng-model="selectedStudy" ng-options="study.name for study in allowedStudies track by study.id" name="study_pk" class="form-control"></select>
               </div>
             </div>
 
@@ -81,15 +57,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="patient_selector">Patients</label>
-                <select class="form-control" name="user_ids" id="patient_selector" size=12 multiple>
-                </select>
-                <script id="patient_select_template" type="text/x-handlebars-template">
-                  {% raw %}
-                  {{#each patients}}
-                    <option>{{this}}</option>
-                  {{/each}}
-                  {% endraw %}
-                </script>
+                <select id="patient_selector" ng-model="selectedPatient" ng-options="participant for participant in participantsByStudy[selectedStudy.id]" name="user_ids" class="form-control" size=12 multiple></select>
               </div>
             </div>
 
