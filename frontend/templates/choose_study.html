@@ -2,25 +2,21 @@
 
 {% block head %}
     {{ super() }}
-    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+    <script>filterableObjects = {{ studies|safe }}</script>
+    <script src="/static/javascript/app/survey-builder/controllers/filterable-list-controller.js"></script>
 {% endblock %}
 
 {% block title %}Choose Study{% endblock %}
 
 {% block content %}
     {# If this admin is authorized to view studies, list the studies #}
-    {% if allowed_studies %}
+    {% if studies %}
         <div class="row">
             <h4>You are authorized to view and edit multiple studies.  Please choose one:</h4>
         </div>
         <br>
 
         <div id="filterableList" ng-controller="FilterableListController">
-            <div ng-init="filterable_studies = [
-                {% for study in allowed_studies %}
-                    {name: '{{study.name}}', study_id: '{{study.pk}}'},
-                {% endfor %}
-            ]"></div>
 
             {# Search/filter input field #}
             <div class="row">
@@ -30,8 +26,8 @@
             </div>
 
             <div class="list-group row">
-                <h4 ng-repeat="study in filterable_studies | filter:{name: studyFilterText}">
-                    <a href="/view_study/{% raw %}{{ study.study_id }}{% endraw %}" class="list-group-item">{% raw %}{{ study.name }}{% endraw %}</a>
+                <h4 ng-repeat="study in filterableObjects | filter:{name: studyFilterText}">
+                    <a href="/view_study/{% raw %}{{ study.id }}{% endraw %}" class="list-group-item">{% raw %}{{ study.name }}{% endraw %}</a>
                 </h4>
             </div>
 

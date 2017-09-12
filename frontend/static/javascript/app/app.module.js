@@ -1,4 +1,4 @@
-angular.module("surveyBuilder", ['ngRaven'])
+angular.module("surveyBuilder", [])
   .factory("_", function($window) {
     /**
      * Load lodash for use in angular

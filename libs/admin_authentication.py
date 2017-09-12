@@ -1,5 +1,6 @@
 import functools
 from datetime import datetime, timedelta
+import json
 from flask import redirect, request, session
 from libs.security import generate_easy_alphanumeric_string
 from werkzeug.exceptions import abort
@@ -124,12 +125,18 @@ def admin_is_system_admin():
     return researcher.admin
 
 
+def get_admins_allowed_studies_as_query_set():
+    researcher = Researcher.objects.get(username=session['admin_username'])
+    return DStudy.get_all_studies_by_name().filter(researchers=researcher)
+
+
 def get_admins_allowed_studies():
     """
     Return a list of studies which the currently logged-in researcher is authorized to view and edit.
     """
     researcher = Researcher.objects.get(username=session['admin_username'])
-    return DStudy.get_all_studies_by_name().filter(researchers=researcher)
+    study_set = DStudy.get_all_studies_by_name().filter(researchers=researcher)
+    return DStudy.query_set_as_native_json(study_set)
 
 
 ################################################################################

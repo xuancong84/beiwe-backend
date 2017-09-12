@@ -17,10 +17,9 @@
   </style>
 {% endblock %}
 
-{% block body_attributes %}ng-app="surveyBuilder" ng-controller="SurveyBuilderCtrl as surveyBuilder"{% endblock %}
+{% block body_attributes %}ng-controller="SurveyBuilderCtrl as surveyBuilder"{% endblock %}
 
 {% block javascript %}
-  <script src="/static/javascript/libraries/lodash.min.js"></script>
   <script type="text/javascript">
     var raw_questions = '{{ survey.content|tojson }}';
     var questions = angular.fromJson(raw_questions.replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\\"/, "g"));
@@ -33,7 +32,6 @@
   </script>
   <script src="/static/javascript/survey-editor/schedule.js"></script>
   <script src="/static/javascript/survey-editor/survey-editor.js"></script>
-  <script src="/static/javascript/app/app.module.js"></script>
   <script src="/static/javascript/app/survey-builder/constants.js"></script>
   <script src="/static/javascript/app/survey-builder/services.js"></script>
   <script src="/static/javascript/app/survey-builder/directives/tooltip/tooltip.js"></script>

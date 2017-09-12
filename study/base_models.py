@@ -50,6 +50,10 @@ class AbstractModel(models.Model):
             raise ObjectIdError("Could not generate unique id for %s." % cls.__name__)
 
         return object_id
+    
+    @classmethod
+    def query_set_as_native_json(cls, query_set):
+        return json.dumps([obj.as_native_python() for obj in query_set])
 
     def as_dict(self):
         """ Provides a dictionary representation of the object """

@@ -2,7 +2,8 @@
 
 {% block head %}
     {{ super() }}
-    <script src="/static/javascript/search_filter.js" type="text/javascript"></script>
+    <script>filterableObjects = {{ studies|safe }}</script>
+    <script src="/static/javascript/app/survey-builder/controllers/filterable-list-controller.js"></script>
 {% endblock %}
 
 {% block title %}Manage Studies{% endblock %}
@@ -19,17 +20,11 @@
     <br>
 
     <div id="filterableList" ng-controller="FilterableListController" class="row">
-        <div ng-init="filterable_studies = [
-            {% for study in studies %}
-                {name: '{{study.name}}', study_id: '{{study.id}}'},
-            {% endfor %}
-        ]"></div>
-
         {# Search/filter input field #}
         <div class="form-group col-sm-4">
             <input type="search" class="form-control" placeholder="Filter by study name" ng-model="studyFilterText" autofocus>
         </div>
-
+        
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -37,16 +32,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="study in filterable_studies | filter:{name: studyFilterText}">
+                <tr ng-repeat="study in filterableObjects | filter:{name: studyFilterText}">
                     <td><b>{% raw %}{{ study.name }}{% endraw %}</b></td>
-                    <td><a href="/edit_study/{% raw %}{{ study.study_id }}{% endraw %}">edit study</a></td>
+                    <td><a href="/edit_study/{% raw %}{{ study.id }}{% endraw %}">Edit study</a></td>
                 </tr>
             </tbody>
         </table>
     </div>
-
+    
     <br><br>
-
+    
     <div class="row">
         <a href="/create_study" class="btn btn-success">Create new study</a>
     </div>

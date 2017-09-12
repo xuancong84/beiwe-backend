@@ -1,3 +1,5 @@
+import json
+
 from flask import abort, Blueprint, flash, redirect, render_template, request,\
     session
 
@@ -10,9 +12,8 @@ from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
     string_to_int
 
 # Mongolia models
-from db.study_models import Study, Studies, InvalidEncryptionKeyError,\
+from db.study_models import Study, InvalidEncryptionKeyError,\
     StudyAlreadyExistsError
-from db.user_models import Admin, Admins
 
 # Django models
 from study.models import Researcher, Study as DStudy
@@ -28,12 +29,11 @@ def manage_researchers():
     researcher_list = []
     for researcher in Researcher.get_all_researchers_by_username():
         allowed_studies = DStudy.get_all_studies_by_name().filter(researchers=researcher).values_list('name', flat=True)
-        allowed_study_string = ' | '.join(allowed_studies)
-        researcher_list.append((researcher, allowed_study_string))
+        researcher_list.append((researcher.as_native_python(), list(allowed_studies)))
 
     return render_template(
         'manage_researchers.html',
-        admins=researcher_list,
+        admins=json.dumps(researcher_list),
         allowed_studies=get_admins_allowed_studies(),
         system_admin=admin_is_system_admin()
     )
@@ -86,9 +86,10 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
+    studies = [study.as_native_python() for study in DStudy.get_all_studies_by_name()]
     return render_template(
         'manage_studies.html',
-        studies=DStudy.get_all_studies_by_name(),
+        studies=json.dumps(studies),
         allowed_studies=get_admins_allowed_studies(),
         system_admin=admin_is_system_admin()
     )
@@ -113,17 +114,22 @@ def edit_study(study_id=None):
 @authenticate_system_admin
 def create_study():
     if request.method == 'GET':
-        return render_template('create_study.html',
-                               studies=Studies.get_all_studies(),
-                               allowed_studies=get_admins_allowed_studies(),
-                               system_admin=admin_is_system_admin())
+        studies = [study.as_native_python() for study in DStudy.get_all_studies_by_name()]
+        return render_template(
+            'create_study.html',
+            studies=json.dumps(studies),
+            allowed_studies=get_admins_allowed_studies(),
+            system_admin=admin_is_system_admin()
+        )
+
     name = request.form.get('name')
     encryption_key = request.form.get('encryption_key')
     try:
-        study = Study.create_default_study(name, encryption_key)
-        flash("Successfully created a new study.", 'success')
+        study = DStudy.create_with_object_id(name=name, encryption_key=encryption_key)
         copy_existing_study_if_asked_to(study)
-        return redirect('/device_settings/' + str(study._id))
+        flash('Successfully created study {}.'.format(name), 'success')
+        return redirect('/device_settings/{:d}'.format(study.pk))
+    # AJK TODO make sure you're catching the right errors
     except (InvalidEncryptionKeyError, StudyAlreadyExistsError) as e:
         flash(e.message, 'danger')
         return redirect('/create_study')
@@ -156,10 +162,10 @@ def device_settings(study_id=None):
             readonly=not admin_is_system_admin(),
             system_admin=admin_is_system_admin()
         )
-
+    
     if readonly:
         abort(403)
-
+        
     settings = study.get_study_device_settings()
     params = combined_multi_dict_to_dict( request.values )
     params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)

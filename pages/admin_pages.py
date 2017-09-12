@@ -1,9 +1,11 @@
+import json
+
 from flask import Blueprint, flash, Markup, redirect, render_template, request,\
     session
 
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
-    authenticate_admin_study_access, get_admins_allowed_studies,\
+    authenticate_admin_study_access, get_admins_allowed_studies, get_admins_allowed_studies_as_query_set,\
     admin_is_system_admin
 from libs.security import check_password_requirements
 
@@ -18,16 +20,20 @@ admin_pages = Blueprint('admin_pages', __name__)
 @admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
-    allowed_studies = get_admins_allowed_studies()
+    allowed_studies = get_admins_allowed_studies_as_query_set()
 
     # If the admin is authorized to view exactly 1 study, redirect to that study
     if allowed_studies.count() == 1:
-        return redirect('/view_study/' + allowed_studies.values_list('object_id', flat=True).get())
+        return redirect('/view_study/{:d}'.format(allowed_studies.values_list('pk', flat=True).get()))
 
     # Otherwise, show the "Choose Study" page
-    return render_template('choose_study.html',
-                           allowed_studies=allowed_studies,
-                           system_admin=admin_is_system_admin())
+    allowed_studies_json = Study.query_set_as_native_json(allowed_studies)
+    return render_template(
+        'choose_study.html',
+        studies=allowed_studies_json,
+        allowed_studies=allowed_studies_json,
+        system_admin=admin_is_system_admin()
+    )
 
 
 @admin_pages.route('/view_study/<string:study_id>', methods=['GET'])

@@ -4,7 +4,7 @@
 
 <ol class="breadcrumb">
     <li>
-        <a href="/view_study/{{ study['_id'] }}">{{ study['name'] }}</a>
+        <a href="/view_study/{{ study.id }}">{{ study.name }}</a>
     </li>
     <li class="active">
         App Settings
@@ -22,7 +22,7 @@
 {% if readonly %}
     <div>
 {% else %}
-    <form method="POST">
+    <form action="/device_settings/{{ study.id }}" method="POST">
 {% endif %}
     <div class="row form-horizontal">
         <div class="col-xs-6">
