@@ -17,7 +17,7 @@ from db.study_models import (
     StudyDeviceSettings as MSettings, Studies as MStudySet,
     Survey as MSurvey, Surveys as MSurveySet
 )
-from db.user_models import Admin as MAdmin, Users as MUserSet
+from db.user_models import Admins as MAdminSet, Users as MUserSet
 
 # Import Django models
 from study.models import (
@@ -45,7 +45,6 @@ def migrate_studies():
         )
 
         # Validate the new Study object and add it to the bulk create list
-        # AJK TODO should I catch this exception?
         d_study.full_clean()
         d_study_list.append(d_study)
 
@@ -72,11 +71,8 @@ def migrate_studies():
     return study_referents
 
 
-def migrate_surveys_admins_and_settings(study_referents):
+def migrate_study_relationships(study_referents):
 
-    m_admin_duplicate_set = set()
-    d_study_admin_list = []  # A list of studies and their researchers
-    d_admin_list = []
     d_survey_list = []
     d_settings_list = []
 
@@ -86,15 +82,11 @@ def migrate_surveys_admins_and_settings(study_referents):
         m_settings_id = object_ids['device_settings']
         d_study = DStudy.objects.get(name=study_name)
 
-        # Create a new element in the Study-Researcher list for d_study
-        d_study_admin_list.append([d_study, []])
-
         for m_survey_id in m_survey_id_list:
             # Build a Django Survey matching the Mongolia Survey
             m_survey = MSurvey(m_survey_id)
             if not m_survey:
-                # AJK TODO this is in case the survey does not exist
-                # This is probably not a long-term solution
+                # AJK TODO this is in case the survey does not exist: ask Eli if this is reasonable
                 continue
             d_survey = DSurvey(
                 content=json.dumps(m_survey['content']),
@@ -111,27 +103,8 @@ def migrate_surveys_admins_and_settings(study_referents):
             d_survey_list.append(d_survey)
 
         for m_admin_id in m_admin_id_list:
-            # Add the Researcher to d_study's list of researchers
-            d_study_admin_list[-1][1].append(m_admin_id)
-
-            # If the Researcher has not yet been built, build it
-            if m_admin_id not in m_admin_duplicate_set:
-                m_admin = MAdmin(m_admin_id)
-                d_admin = DAdmin(
-                    username=m_admin_id,
-                    admin=m_admin['system_admin'],
-                    access_key_id=m_admin['access_key_id'] or None,  # access_key_id is unique and therefore nullable
-                    access_key_secret=m_admin['access_key_secret'] or '',
-                    access_key_secret_salt=m_admin['access_key_secret_salt'] or '',
-                    password=m_admin['password'],
-                    salt=m_admin['salt'],
-                    deleted=d_study.deleted,
-                )
-                m_admin_duplicate_set.add(m_admin_id)
-
-                # Validate the Researcher and add it to the bulk_create list
-                d_admin.full_clean()
-                d_admin_list.append(d_admin)
+            # Add the Study-Researcher pair to the list of pairs
+            d_study_admin_list.append((d_study.pk, m_admin_id))
 
         # Build a new DeviceSettings object
         m_settings = MSettings(m_settings_id)
@@ -178,9 +151,8 @@ def migrate_surveys_admins_and_settings(study_referents):
         )
 
         d_settings_list.append(d_settings)
-
-    # Bulk_create the three sets of objects built above
-    DAdmin.objects.bulk_create(d_admin_list)
+    
+    # Bulk_create the two sets of objects built above
     DSurvey.objects.bulk_create(d_survey_list)
     DSettings.objects.bulk_create(d_settings_list)
 
@@ -189,10 +161,44 @@ def migrate_surveys_admins_and_settings(study_referents):
         d_survey_id = DSurvey.objects.filter(object_id=m_survey['_id']).values('pk').get()
         survey_id_dict[m_survey_id] = d_survey_id
 
+
+def migrate_admins():
+    
+    d_admin_list = []
+    
+    # Build all Researchers
+    for m_admin in MAdminSet.iterator():
+        d_admin = DAdmin(
+            username=m_admin['_id'],
+            admin=m_admin['system_admin'],
+            access_key_id=m_admin['access_key_id'] or None,  # access_key_id is unique and therefore nullable
+            access_key_secret=m_admin['access_key_secret'] or '',
+            access_key_secret_salt=m_admin['access_key_secret_salt'] or '',
+            password=m_admin['password'],
+            salt=m_admin['salt'],
+            deleted=False,
+        )
+        
+        # Validate the Researcher and add it to the bulk_create list
+        d_admin.full_clean()
+        d_admin_list.append(d_admin)
+    
+    # Bulk_create the list of Researchers
+    DAdmin.objects.bulk_create(d_admin_list)
+    
     # Now that the Researchers have primary keys, fill in the Study-Researcher ManyToMany relationship
-    for study, admin_username_list in d_study_admin_list:
-        admin_id_set = DAdmin.objects.filter(username__in=admin_username_list).values_list('pk', flat=True)
-        study.researchers.add(*admin_id_set)  # add takes *args, not an iterable
+    # Create a mapping from Researcher's username to primary key
+    admin_username_to_pk_dict = dict(DAdmin.objects.values_list('username', 'pk'))
+    
+    d_study_admin_relation_list = []
+    for study_id, admin_username in d_study_admin_list:
+        admin_id = admin_username_to_pk_dict[admin_username]
+        # Populate a list of database objects in the Study-Researcher relationship table
+        new_relation = DAdmin.studies.through(study_id=study_id, researcher_id=admin_id)
+        d_study_admin_relation_list.append(new_relation)
+        
+    # Bulk_create the Study-Researcher relationship objects
+    DAdmin.studies.through.objects.bulk_create(d_study_admin_relation_list)
 
 
 def migrate_users():
@@ -282,13 +288,9 @@ def migrate_chunk_registries():
 
 
 def run_all_migrations():
-    """
-    A function that runs all the other functions. This is to prevent any of the variables
-    being passed through here from being global and possibly causing issues in the other
-    functions.
-    """
     study_referents = migrate_studies()
-    migrate_surveys_admins_and_settings(study_referents)
+    migrate_study_relationships(study_referents)
+    migrate_admins()
     migrate_users()
     migrate_chunk_registries()
 
@@ -297,10 +299,10 @@ if __name__ == '__main__':
     study_id_dict = {}
     user_id_dict = {}
     survey_id_dict = {}
-
-    # AJK TODO temporary value: ask Eli for advice on the actual one
+    d_study_admin_list = []  # A list of study-researcher pairs
+    
     CHUNK_SIZE = 1000
-
+    
     print(DStudy.objects.count(), DUser.objects.count(), DChunks.objects.count())
     run_all_migrations()
     print(DStudy.objects.count(), DUser.objects.count(), DChunks.objects.count())

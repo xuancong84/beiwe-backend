@@ -276,8 +276,6 @@ class StudyModelTests(CommonTestCase):
     
     def test_add_survey(self): pass
     
-    def test_remove_survey(self): pass
-    
     def reference_participant(self): pass
     
     def translated_reference_participant(self): pass
@@ -388,14 +386,14 @@ def compare_dictionaries(reference, comparee, ignore=None):
     except Exception:
         pass
 
-    print "These dictionaries are not identical:"
+    print("These dictionaries are not identical:")
     if differences_a:
-        print "in reference, not in comparee:"
-        for x,y in differences_a:
-            print "\t", x, y
+        print("in reference, not in comparee:")
+        for x, y in differences_a:
+            print("\t", x, y)
     if differences_b:
-        print "in comparee, not in reference:"
+        print("in comparee, not in reference:")
         for x, y in differences_b:
-            print "\t", x, y
+            print("\t", x, y)
 
     return False

@@ -33,8 +33,8 @@ def make_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY, user_id
     If the data in the current working directory includes a "registry.dat" file, the server will use the contents of it to only download files that are new, potentially greatly speeding up your requests.
 
     Study ID
-    study_id is required for any query. Currently the only way to view the ID of a given study on studies.beiwe.org website is to look at the url while viewing a study's main page.
-    study_id is a string, it will look like this: 55f9d1a597013e3f50ffb4c7
+    study_id is required for any query. The ID of a given study is displayed immediately under the name of the study on the study's page
+    on studies.beiwe.org. study_id is a string; it will look like this: 55f9d1a597013e3f50ffb4c7
 
     Credentials
     If you are using the my_data_access_credentials.py file your credentials will automatically be pulled from it; you will not need to provide those as kwargs. Simply fill in the appropriate access and secret key values to the variables in that file.

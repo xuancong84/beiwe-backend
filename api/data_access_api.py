@@ -12,13 +12,7 @@ from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
-
-# Mongolia models
-from db.study_models import Study, Studies
-from db.user_models import Admin, Users
-
-# Django models
-from study.models import ChunkRegistry, Participant, Researcher, Study as DStudy
+from study.models import ChunkRegistry, Participant, Researcher, Study
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -59,16 +53,16 @@ def get_and_validate_study_id():
         
         # If no Study with the given ID exists, we return a 404
         try:
-            study = DStudy.objects.get(object_id=study_object_id)
-        except DStudy.DoesNotExist:
+            study = Study.objects.get(object_id=study_object_id)
+        except Study.DoesNotExist:
             return abort(404)
         else:
             return study
     elif study_pk:
         # If no Study with the given ID exists, we return a 404
         try:
-            study = DStudy.objects.get(pk=study_pk)
-        except DStudy.DoesNotExist:
+            study = Study.objects.get(pk=study_pk)
+        except Study.DoesNotExist:
             return abort(404)
         else:
             return study
@@ -102,32 +96,41 @@ def get_and_validate_admin(study):
 
 #########################################################################################
 
-# AJK TODO All three of these functions (/get-X/v1) should take study_id as study.object_id and
-# study_pk as study.pk in their post requests
 @data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
 def get_studies():
     # Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin: return abort(403)  # access key DNE
-    if not admin.validate_access_credentials(access_secret):
+    
+    try:
+        researcher = Researcher.objects.get(access_key_id=access_key)
+    except Researcher.DoesNotExist:
+        return abort(403)
+    
+    if not researcher.validate_access_credentials(access_secret):
         return abort(403)  # incorrect secret key
-    return json.dumps({str(study._id): study.name for study in Studies(admins=str(admin._id))})
+    
+    return json.dumps(dict(researcher.studies.values_list('object_id', 'name')))
 
 
 @data_access_api.route("/get-users/v1", methods=['POST', "GET"])
 def get_users_in_study():
-    try: study_id = ObjectId(request.values["study_id"])
-    except InvalidId: study_id = None
-    study_obj = Study(study_id)
-    if not study_obj: return abort(404)
-    _ = get_and_validate_admin(study_obj)
-    return json.dumps([str(user._id) for user in Users(study_id=study_id)])
+    try:
+        study_object_id = ObjectId(request.values["study_id"])
+    except InvalidId:
+        return abort(404)
+    
+    try:
+        study = Study.objects.get(object_id=study_object_id)
+    except Study.DoesNotExist:
+        return abort(404)
+    
+    get_and_validate_admin(study)
+    return json.dumps(list(study.participants.values_list('patient_id', flat=True)))
 
 
 @data_access_api.route("/get-data/v1", methods=['POST', "GET"])
-def grab_data():
+def get_data():
     """ Required: access key, access secret, study_id
     JSON blobs: data streams, users - default to all
     Strings: date-start, date-end - format as "YYYY-MM-DDThh:mm:ss"

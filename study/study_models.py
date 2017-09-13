@@ -68,11 +68,6 @@ class Study(AbstractModel):
     def add_survey(self, survey):
         self.surveys.add(survey)
 
-    def remove_survey(self, survey):
-        # AJK TODO this is impossible because the FK isn't nullable -> the Survey can't exist without the Study
-        pass
-        # self.surveys.remove(survey)
-
     def get_surveys_for_study(self):
         return [json.loads(survey.as_native_json()) for survey in self.surveys.all()]
 

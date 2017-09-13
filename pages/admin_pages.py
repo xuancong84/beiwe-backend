@@ -50,7 +50,6 @@ def view_study(study_id=None):
         patients=participants,
         audio_survey_ids=audio_survey_ids,
         tracking_survey_ids=tracking_survey_ids,
-        study_name=study.name,
         allowed_studies=get_admins_allowed_studies(),
         system_admin=admin_is_system_admin()
     )

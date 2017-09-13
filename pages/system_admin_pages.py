@@ -39,7 +39,6 @@ def manage_researchers():
 def edit_researcher(researcher_pk):
     researcher = Researcher.objects.get(pk=researcher_pk)
     admin_is_current_user = (researcher.username == session['admin_username'])
-    # AJK TODO maybe make the default ordering the case-insensitive alphabetical one
     current_studies = Study.get_all_studies_by_name().filter(researchers=researcher)
     return render_template(
         'edit_researcher.html',

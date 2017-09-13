@@ -22,16 +22,14 @@ def create_survey(study_id=None, survey_type='tracking_survey'):
 @survey_api.route('/delete_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def delete_survey(survey_id=None):
-    survey_set = Survey.objects.filter(pk=survey_id)
-    if survey_set.exists():
-        survey = survey_set.get()
-    else:
+    try:
+        survey = Survey.objects.get(pk=survey_id)
+    except Survey.DoesNotExist:
         return abort(404)
 
-    study = survey.study
-    study.remove_survey(survey)
+    study_id = survey.study_id
     survey.mark_deleted()
-    return redirect('/view_study/{:d}'.format(study.id))
+    return redirect('/view_study/{:d}'.format(study_id))
 
 ################################################################################
 ############################# Setters and Editors ##############################
