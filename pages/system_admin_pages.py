@@ -1,5 +1,6 @@
 import json
 
+from django.core.exceptions import ValidationError
 from flask import abort, Blueprint, flash, redirect, render_template, request,\
     session
 
@@ -10,13 +11,7 @@ from libs.admin_authentication import authenticate_system_admin,\
 from libs.copy_study import copy_existing_study_if_asked_to
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
     string_to_int
-
-# Mongolia models
-from db.study_models import Study, InvalidEncryptionKeyError,\
-    StudyAlreadyExistsError
-
-# Django models
-from study.models import Researcher, Study as DStudy
+from study.models import Researcher, Study
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 
@@ -28,7 +23,7 @@ system_admin_pages = Blueprint('system_admin_pages', __name__)
 def manage_researchers():
     researcher_list = []
     for researcher in Researcher.get_all_researchers_by_username():
-        allowed_studies = DStudy.get_all_studies_by_name().filter(researchers=researcher).values_list('name', flat=True)
+        allowed_studies = Study.get_all_studies_by_name().filter(researchers=researcher).values_list('name', flat=True)
         researcher_list.append((researcher.as_native_python(), list(allowed_studies)))
 
     return render_template(
@@ -45,12 +40,12 @@ def edit_researcher(researcher_pk):
     researcher = Researcher.objects.get(pk=researcher_pk)
     admin_is_current_user = (researcher.username == session['admin_username'])
     # AJK TODO maybe make the default ordering the case-insensitive alphabetical one
-    current_studies = DStudy.get_all_studies_by_name().filter(researchers=researcher)
+    current_studies = Study.get_all_studies_by_name().filter(researchers=researcher)
     return render_template(
         'edit_researcher.html',
         admin=researcher,
         current_studies=current_studies,
-        all_studies=DStudy.get_all_studies_by_name(),
+        all_studies=Study.get_all_studies_by_name(),
         allowed_studies=get_admins_allowed_studies(),
         admin_is_current_user=admin_is_current_user,
         system_admin=admin_is_system_admin(),
@@ -86,7 +81,7 @@ def create_new_researcher():
 @system_admin_pages.route('/manage_studies', methods=['GET'])
 @authenticate_system_admin
 def manage_studies():
-    studies = [study.as_native_python() for study in DStudy.get_all_studies_by_name()]
+    studies = [study.as_native_python() for study in Study.get_all_studies_by_name()]
     return render_template(
         'manage_studies.html',
         studies=json.dumps(studies),
@@ -98,7 +93,7 @@ def manage_studies():
 @system_admin_pages.route('/edit_study/<string:study_id>', methods=['GET'])
 @authenticate_system_admin
 def edit_study(study_id=None):
-    study = DStudy.objects.get(pk=study_id)
+    study = Study.objects.get(pk=study_id)
     all_researchers = Researcher.get_all_researchers_by_username()
     return render_template(
         'edit_study.html',
@@ -114,7 +109,7 @@ def edit_study(study_id=None):
 @authenticate_system_admin
 def create_study():
     if request.method == 'GET':
-        studies = [study.as_native_python() for study in DStudy.get_all_studies_by_name()]
+        studies = [study.as_native_python() for study in Study.get_all_studies_by_name()]
         return render_template(
             'create_study.html',
             studies=json.dumps(studies),
@@ -125,13 +120,13 @@ def create_study():
     name = request.form.get('name')
     encryption_key = request.form.get('encryption_key')
     try:
-        study = DStudy.create_with_object_id(name=name, encryption_key=encryption_key)
+        study = Study.create_with_object_id(name=name, encryption_key=encryption_key)
         copy_existing_study_if_asked_to(study)
         flash('Successfully created study {}.'.format(name), 'success')
         return redirect('/device_settings/{:d}'.format(study.pk))
-    # AJK TODO make sure you're catching the right errors
-    except (InvalidEncryptionKeyError, StudyAlreadyExistsError) as e:
-        flash(e.message, 'danger')
+    except ValidationError as ve:
+        for field, message in ve.message_dict.iteritems():
+            flash('{}: {}'.format(field, message[0]), 'danger')
         return redirect('/create_study')
 
 
@@ -140,17 +135,16 @@ def create_study():
 def delete_study(study_id=None):
     """ This functionality has been disabled pending testing and feature change."""
     if request.form.get('confirmation') == 'true':
-        study = Study(study_id)
-        study.update({'admins': [],
-                      'deleted': True})
-    flash ("Deleted study '%s'" % study['name'], 'success')
-    return "success"
+        study = Study.objects.get(pk=study_id)
+        study.mark_deleted()
+        flash("Deleted study '%s'" % study.name, 'success')
+        return "success"
 
 
 @system_admin_pages.route('/device_settings/<string:study_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def device_settings(study_id=None):
-    study = DStudy.objects.get(pk=study_id)
+    study = Study.objects.get(pk=study_id)
     readonly = not admin_is_system_admin()
 
     if request.method == 'GET':

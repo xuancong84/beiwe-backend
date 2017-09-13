@@ -1,25 +1,10 @@
 import functools
 from datetime import datetime, timedelta
-import json
 from flask import redirect, request, session
-from libs.security import generate_easy_alphanumeric_string
 from werkzeug.exceptions import abort
 
-# Mongolia models
-from db.user_models import Admin
-
-# Django models
-from study.models import Researcher, Study as DStudy
-
-################################################################################
-############################ Existence Modifiers ###############################
-################################################################################
-
-def create_admin(username, password):
-    Admin.create(username, password)
-
-def remove_admin(username):
-    Admin(username).remove()
+from libs.security import generate_easy_alphanumeric_string
+from study.models import Researcher, Study
 
 ################################################################################
 ############################ Website Functions #################################
@@ -93,7 +78,7 @@ def authenticate_admin_study_access(some_function):
 
         # We want the survey_id check to execute first if both args are supplied.
         if survey_id:
-            study_set = DStudy.objects.filter(surveys=survey_id)
+            study_set = Study.objects.filter(surveys=survey_id)
             if not study_set.exists():
                 return abort(404)
 
@@ -104,7 +89,7 @@ def authenticate_admin_study_access(some_function):
                     return abort(403)
 
         if study_id:
-            study_set = DStudy.objects.filter(pk=study_id)
+            study_set = Study.objects.filter(pk=study_id)
             if not study_set.exists():
                 return abort(404)
 
@@ -127,7 +112,7 @@ def admin_is_system_admin():
 
 def get_admins_allowed_studies_as_query_set():
     researcher = Researcher.objects.get(username=session['admin_username'])
-    return DStudy.get_all_studies_by_name().filter(researchers=researcher)
+    return Study.get_all_studies_by_name().filter(researchers=researcher)
 
 
 def get_admins_allowed_studies():
@@ -135,8 +120,8 @@ def get_admins_allowed_studies():
     Return a list of studies which the currently logged-in researcher is authorized to view and edit.
     """
     researcher = Researcher.objects.get(username=session['admin_username'])
-    study_set = DStudy.get_all_studies_by_name().filter(researchers=researcher)
-    return DStudy.query_set_as_native_json(study_set)
+    study_set = Study.get_all_studies_by_name().filter(researchers=researcher)
+    return Study.query_set_as_native_json(study_set)
 
 
 ################################################################################
@@ -164,7 +149,7 @@ def authenticate_system_admin(some_function):
             return abort(403)
 
         if 'study_id' in kwargs:
-            if not DStudy.objects.filter(pk=kwargs['study_id']).exists():
+            if not Study.objects.filter(pk=kwargs['study_id']).exists():
                 return redirect("/")
 
         return some_function(*args, **kwargs)

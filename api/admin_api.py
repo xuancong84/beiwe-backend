@@ -10,7 +10,7 @@ from libs.admin_authentication import authenticate_admin_study_access,\
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from libs.security import check_password_requirements
-from study.models import Participant, Researcher, Study as DStudy
+from study.models import Participant, Researcher, Study
 
 admin_api = Blueprint('admin_api', __name__)
 
@@ -65,7 +65,7 @@ def set_researcher_password():
 @admin_api.route('/rename_study/<string:study_id>', methods=['POST'])
 @authenticate_system_admin
 def rename_study(study_id=None):
-    study = DStudy.objects.get(pk=study_id)
+    study = Study.objects.get(pk=study_id)
     new_study_name = request.form.get('new_study_name')
     study.name = new_study_name
     study.save()
@@ -126,7 +126,7 @@ def create_new_patient():
     patient_id, password = Participant.create_with_password(study_id=study_id)
 
     # Create an empty file on S3 indicating that this user exists
-    study_object_id = DStudy.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
+    study_object_id = Study.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
     s3_upload(patient_id, "", study_object_id)
     create_client_key_pair(patient_id, study_object_id)
 
@@ -158,7 +158,7 @@ def csv_generator(study_id, number_of_new_patients):
     si = StreamingBytesIO()
     filewriter = writer(si)
     filewriter.writerow(['Patient ID', "Registration password"])
-    study_object_id = DStudy.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
+    study_object_id = Study.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
     for _ in xrange(number_of_new_patients):
         patient_id, password = Participant.create_with_password(study_id=study_id)
         # Creates an empty file on s3 indicating that this user exists

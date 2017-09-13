@@ -1,5 +1,6 @@
 from os import urandom
 from flask import request
+from security import decode_base64
 
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
@@ -7,16 +8,10 @@ from werkzeug.datastructures import FileStorage
 
 from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
-from security import decode_base64
 from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErrorMetadata,\
     PADDING_ERROR, EMPTY_KEY, MALFORMED_CONFIG, INVALID_LENGTH, LINE_EMPTY, IV_MISSING,\
     AES_KEY_BAD_LENGTH, IV_BAD_LENGTH, MP4_PADDING, LINE_IS_NONE
-
-# Mongolia models
-from db.study_models import Study
-
-# Django models
-from study.models import Study as DStudy
+from study.models import Study
 
 
 class DecryptionKeyInvalidError(Exception): pass
@@ -63,14 +58,14 @@ def encrypt_for_server(input_string, study_object_id):
     Use this function on an entire file (as a string).
     """
 
-    encryption_key = DStudy.objects.get(object_id=study_object_id).encryption_key
+    encryption_key = Study.objects.get(object_id=study_object_id).encryption_key
     iv = urandom(16)
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
 
 
-def decrypt_server(data, study_id):
+def decrypt_server(data, study_object_id):
     """ Decrypts config encrypted by the encrypt_for_server function."""
-    encryption_key = Study(study_id)['encryption_key']
+    encryption_key = Study.objects.filter(object_id=study_object_id).values_list('encryption_key', flat=True).get()
     iv = data[:16]
     data = data[16:]
     return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( data )
