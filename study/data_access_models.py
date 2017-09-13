@@ -100,14 +100,16 @@ class FileToProcess(AbstractModel):
 class FileProcessLock(AbstractModel):
     
     lock_time = models.DateTimeField(null=True)
-    # AJK TODO should we enforce on the database level that there can only be one FPL?
+    
+    # In case of weirdness, ensure that there is only one lock object
+    is_actual_lock = models.BooleanField(unique=True, help_text="This is True if the Lock is actually a lock")
     
     @classmethod
     def lock(cls):
-        if cls.objects.exists():
+        if cls.islocked():
             raise FileProcessingLockedError('File processing already locked')
         else:
-            cls.objects.create(mark=datetime.utcnow())
+            cls.objects.create(lock_time=datetime.utcnow(), is_actual_lock=True)
     
     @classmethod
     def unlock(cls):
@@ -115,8 +117,8 @@ class FileProcessLock(AbstractModel):
     
     @classmethod
     def islocked(cls):
-        return cls.objects.exists()
+        return cls.objects.filter(is_actual_lock=True).exists()
     
     @classmethod
     def get_time_since_locked(cls):
-        return datetime.utcnow() - FileProcessLock.objects.first().lock_time
+        return datetime.utcnow() - FileProcessLock.objects.get(is_actual_lock=True).lock_time
