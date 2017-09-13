@@ -8,6 +8,9 @@ from study.base_models import AbstractModel
 from study.study_models import Study
 
 
+class FileProcessingLockedError(Exception): pass
+
+
 class ChunkRegistry(AbstractModel):
 
     DATA_TYPE_CHOICES = tuple([(stream_name, stream_name) for stream_name in ALL_DATA_STREAMS])
@@ -92,3 +95,28 @@ class FileToProcess(AbstractModel):
             cls.objects.create(s3_file_path=file_path, study_id=study_pk, **kwargs)
         else:
             cls.objects.create(s3_file_path=study_object_id + '/' + file_path, study_id=study_pk, **kwargs)
+
+
+class FileProcessLock(AbstractModel):
+    
+    lock_time = models.DateTimeField(null=True)
+    # AJK TODO should we enforce on the database level that there can only be one FPL?
+    
+    @classmethod
+    def lock(cls):
+        if cls.objects.exists():
+            raise FileProcessingLockedError('File processing already locked')
+        else:
+            cls.objects.create(mark=datetime.utcnow())
+    
+    @classmethod
+    def unlock(cls):
+        cls.objects.all().delete()
+    
+    @classmethod
+    def islocked(cls):
+        return cls.objects.exists()
+    
+    @classmethod
+    def get_time_since_locked(cls):
+        return datetime.utcnow() - FileProcessLock.objects.first().lock_time
