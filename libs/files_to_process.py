@@ -17,10 +17,14 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
                               DATA_PROCESSING_NO_ERROR_STRING)
 
-from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry, FileProcessLock)
-from db.user_models import User
 from libs.s3 import s3_retrieve, s3_upload
 
+# Mongolia models
+from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry)
+from db.user_models import User
+
+# Django models
+from study.models import ChunkRegistry as DCR, FileToProcess as DTFP, FileProcessLock, Participant
 
 class EverythingWentFine(Exception): pass
 class ProcessingOverlapError(Exception): pass
@@ -39,13 +43,13 @@ def process_file_chunks():
     number_bad_files = 0
 
     user_ids = set(FilesToProcess(field="user_id"))
-    print "processing files for the following users: %s" % ",".join(user_ids)
+    print("processing files for the following users: %s" % ",".join(user_ids))
     for user_id in user_ids:
         while True:
             previous_number_bad_files = number_bad_files
             starting_length = FilesToProcess.count(user_id=user_id)
             
-            print str(datetime.now()), "processing %s, %s files remaining" % (user_id, starting_length)
+            print(str(datetime.now()), "processing %s, %s files remaining" % (user_id, starting_length))
             
             number_bad_files += do_process_user_file_chunks(
                     count=FILE_PROCESS_PAGE_SIZE,
@@ -93,8 +97,8 @@ def do_process_user_file_chunks(count, error_handler, skip_count, user_id):
         with error_handler:
             #raise errors that we encountered in the s3 access threaded operations to the error_handler
             if data['exception']:
-                print "\n" + data['ftp']['s3_file_path']
-                print data['traceback']
+                print("\n" + data['ftp']['s3_file_path'])
+                print(data['traceback'])
                 raise data['exception']
 
             if data['chunkable']:
@@ -236,7 +240,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
                     del new_contents
             except Exception as e:
                 failed_ftps.update(ftp_deque)
-                print e
+                print(e)
                 print ("failed to update: study_id:%s, user_id:%s, data_type:%s, time_bin:%s, header:%s "
                        % (study_id, user_id, data_type, time_bin, updated_header) )
                 raise
@@ -247,7 +251,7 @@ def upload_binified_data( binified_data, error_handler, survey_id_dict ):
     errors = pool.map(batch_upload, upload_these, chunksize=1)
     for err_ret in errors:
         if err_ret['exception']:
-            print err_ret['traceback']
+            print(err_ret['traceback'])
             raise err_ret['exception']
 
     pool.close()
@@ -557,7 +561,7 @@ def batch_upload(upload):
            'traceback': None}
     try:
         if len(upload) != 4:
-            print upload
+            print(upload)
         chunk, chunk_path, new_contents, study_id = upload
         del upload
         new_contents = new_contents.decode("zip")

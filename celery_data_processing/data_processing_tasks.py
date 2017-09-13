@@ -38,8 +38,13 @@ from raven.transport import HTTPTransport
 
 from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
-from db.data_access_models import FilesToProcess, FileProcessLock
 from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks
+
+# Mongolia models
+from db.data_access_models import FilesToProcess
+
+# Django models
+from study.models import FileProcessLock
 
 @celery_app.task
 def queue_user(name):
@@ -47,6 +52,7 @@ def queue_user(name):
 
 #Fixme: does this work?
 queue_user.max_retries = 0
+
 
 def safe_queue_user(*args, **kwargs):
     """ Enqueuing can fail deep inside amqp/transport.py with an OperationalError. We
@@ -67,7 +73,7 @@ def get_user_list_safely(retries=10):
     except CursorNotFound:
         if retries < 1:
             raise
-        print "encountered cursor error, retrying..."
+        print("encountered cursor error, retrying...")
         sleep(0.1)
         return get_user_list_safely(retries=retries - 1)
 
@@ -75,7 +81,7 @@ def create_file_processing_tasks():
     #literally wrapping the entire thing in an ErrorSentry...
     with ErrorSentry(SENTRY_DSN,
                      sentry_client_kwargs={'transport':HTTPTransport}) as error_sentry:
-        print error_sentry.sentry_client.is_enabled()
+        print(error_sentry.sentry_client.is_enabled())
         if FileProcessLock.islocked():
             # This is really a safety check to ensure that no code executes if this runs
             report_file_processing_locked_and_exit()
@@ -83,7 +89,7 @@ def create_file_processing_tasks():
         else:
             FileProcessLock.lock()
             
-        print "starting."
+        print("starting.")
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
         user_ids = get_user_list_safely()
@@ -98,7 +104,7 @@ def create_file_processing_tasks():
                                            task_publish_retry=False,
                                            retry=False) )
             
-        print "tasks:", running
+        print("tasks:", running)
         
         while running:
             new_running = []
@@ -118,18 +124,18 @@ def create_file_processing_tasks():
                     new_running.append(future)
                 
             running = new_running
-            print "tasks:", running
+            print("tasks:", running)
             if running:
                 sleep(5)
                 
-        print "Finished, unlocking."
+        print("Finished, unlocking.")
         FileProcessLock.unlock() #  This MUST be ___inside___ the with statement.
 
 
 def report_file_processing_locked_and_exit():
     """ Creates a useful error report with information about the run time. """
     timedelta_since_last_run = FileProcessLock.get_time_since_locked()
-    print "timedelta %s" % timedelta_since_last_run.total_seconds()
+    print("timedelta %s" % timedelta_since_last_run.total_seconds())
     if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS:
         error_msg =\
             "Data processing has overlapped with a prior data index run that started more than %s minutes ago.\n"\
@@ -148,7 +154,7 @@ def report_file_processing_locked_and_exit():
 class LogList(list):
     def append(self, p_object):
         super(LogList, self).append(p_object)
-        print p_object
+        print(p_object)
         
     def extend(self, iterable):
         print (str(i) for i in iterable)

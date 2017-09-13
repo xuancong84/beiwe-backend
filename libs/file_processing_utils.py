@@ -5,12 +5,16 @@ from config.constants import (CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_F
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 
-from db.data_access_models import (FileToProcess, FilesToProcess, ChunksRegistry,
-                                   ChunkRegistry, FileProcessLock)
-from db.study_models import Studies, Study, Survey, StudyDeviceSettings
-from db.user_models import Users, User
 from libs.files_to_process import process_file_chunks
 from libs.s3 import s3_list_files, s3_delete, s3_upload
+
+# Mongolia models
+from db.data_access_models import FileToProcess, FilesToProcess, ChunkRegistry, ChunksRegistry
+from db.study_models import Studies, Study, Survey, StudyDeviceSettings
+from db.user_models import Users, User
+
+# Django models
+from study.models import FileProcessLock
 
 
 def reindex_all_files_to_process():
@@ -18,62 +22,62 @@ def reindex_all_files_to_process():
     clears the chunksregistry, and then adds all relevent files on s3 to the
     files to process registry. """
     FileProcessLock.lock()
-    print str(datetime.now()), "purging FilesToProcess:", FilesToProcess.count()
+    print(str(datetime.now()), "purging FilesToProcess:", FilesToProcess.count())
     FileToProcess.db().drop()
-    print str(datetime.now()), "purging existing ChunksRegistry", ChunksRegistry.count()
+    print(str(datetime.now()), "purging existing ChunksRegistry", ChunksRegistry.count())
     ChunkRegistry.db().drop()
 
     pool = ThreadPool(CONCURRENT_NETWORK_OPS * 2 )
 
-    print str(datetime.now()), "deleting older chunked data:",
+    print(str(datetime.now()), "deleting older chunked data:")
     CHUNKED_DATA = s3_list_files(CHUNKS_FOLDER)
-    print len(CHUNKED_DATA)
+    print(len(CHUNKED_DATA))
     pool.map(s3_delete, CHUNKED_DATA)
     del CHUNKED_DATA
 
-    print str(datetime.now()), "pulling new files to process..."
+    print(str(datetime.now()), "pulling new files to process...")
     files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
-    print "putting new files to process..."
+    print("putting new files to process...")
     for i,l in enumerate(files_lists):
-        print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
+        print(str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files")
         for fp in l:
             if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
     pool.close()
     pool.terminate()
-    print str(datetime.now()), "processing data."
+    print(str(datetime.now()), "processing data.")
     FileProcessLock.unlock()
     process_file_chunks()
 
 
 def reindex_specific_data_type(data_type):
     FileProcessLock.lock()
-    print "starting..."
+    print("starting...")
     #this line will raise an error if something is wrong with the data type
     file_name_key = data_stream_to_s3_file_name_string(data_type)
     relevant_chunks = ChunksRegistry(data_type=data_type)
     relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
-    print "purging old data..."
+    print("purging old data...")
     for chunk in relevant_chunks: chunk.remove()
 
     pool = ThreadPool(20)
     pool.map(s3_delete, relevant_indexed_files)
 
-    print "pulling files to process..."
+    print("pulling files to process...")
     files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
     for i,l in enumerate(files_lists):
-        print str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files"
+        print(str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files")
         for fp in l:
             if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
                 FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
     del files_lists, l
     pool.close()
     pool.terminate()
-    print str(datetime.now()), "processing data..."
+    print(str(datetime.now()), "processing data...")
     FileProcessLock.unlock()
     process_file_chunks()
-    print "Done."
+    print("Done.")
 
 
 # def reindex_study(study_id):
@@ -117,7 +121,7 @@ def check_for_bad_chunks():
     for entry in ChunksRegistry():
         if entry.data_type in CHUNKABLE_FILES and entry.chunk_path not in chunked_data:
             bad_chunks.append(entry)
-    print "bad chunks:", len(bad_chunks)
+    print("bad chunks:", len(bad_chunks))
 
     # for chunk in bad_chunks:
     #     u = chunk.user_id
@@ -153,15 +157,15 @@ def completely_purge_study(study_id, actually_delete=False):
     chunks = ChunksRegistry(study_id=study_id)
     files_to_process = FilesToProcess(study_id=study_id)
     if not actually_delete:
-        print "if you actually delete this you will not be able to decrypt anything " \
-              "from this study.  Don't do it unless you know what you are doing."
-        print study.name
+        print("if you actually delete this you will not be able to decrypt anything " \
+              "from this study.  Don't do it unless you know what you are doing.")
+        print(study.name)
         # print len(study)
         # print len(device_settings)
-        print len(surveys)
-        print len(users)
-        print len(chunks)
-        print len(files_to_process)
+        print(len(surveys))
+        print(len(users))
+        print(len(chunks))
+        print(len(files_to_process))
     else:
         StudyDeviceSettings(device_settings).remove()
         [Survey(s).remove() for s in surveys]
