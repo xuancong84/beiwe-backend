@@ -34,7 +34,7 @@ function getDayOfWeek() {
 
 function get_survey_settings() {
     var trigger_on_first_download = document.getElementById('trigger_on_first_download').checked;
-    if (tracking_survey) {
+    if (trackingSurvey) {
         return {
             'trigger_on_first_download': trigger_on_first_download,
             'randomize': scope.surveyBuilder.randomize,
@@ -53,14 +53,14 @@ function get_survey_settings() {
 
 function end() {
     var content = "";
-    if (tracking_survey) {
+    if (trackingSurvey) {
         content = scope.surveyBuilder.questions;
         scope.surveyBuilder.errors = null;  // Reset errors
     } else {
         content_list = [];
         // Remove double-quotes, which break the JSON parser.
-        var sanitized_voice_recording_prompt_text_input = $('#voice_recording_prompt_text_input').val().replace(/"/g, "\u201C");
-        content_list.push( { prompt: sanitized_voice_recording_prompt_text_input } );
+        var voice_recording_prompt_text_input = $('#voice_recording_prompt_text_input').val();
+        content_list.push( { prompt: voice_recording_prompt_text_input } );
         content = content_list;
     }
     $('.save_and_deploy_button').prop('disabled', true);  // Disable the buttons

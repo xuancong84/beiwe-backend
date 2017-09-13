@@ -1,12 +1,9 @@
 from flask import abort, Blueprint, make_response, request, redirect, json
+
+from config.constants import TRACKING_SURVEY
 from libs.admin_authentication import authenticate_admin_study_access
 from libs.json_logic import do_validate_survey
-
-# Mongolia models
-from db.study_models import Survey, Study
-
-# Django models
-from study.models import Survey as DSurvey
+from study.models import Survey
 
 survey_api = Blueprint('survey_api', __name__)
 
@@ -18,14 +15,14 @@ survey_api = Blueprint('survey_api', __name__)
 @survey_api.route('/create_survey/<string:study_id>/<string:survey_type>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def create_survey(study_id=None, survey_type='tracking_survey'):
-    new_survey = DSurvey.create_with_settings(study_id=study_id, survey_type=survey_type)
+    new_survey = Survey.create_with_settings(study_id=study_id, survey_type=survey_type)
     return redirect('edit_survey/{:d}'.format(new_survey.id))
 
 
 @survey_api.route('/delete_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def delete_survey(survey_id=None):
-    survey_set = DSurvey.objects.filter(pk=survey_id)
+    survey_set = Survey.objects.filter(pk=survey_id)
     if survey_set.exists():
         survey = survey_set.get()
     else:
@@ -44,18 +41,25 @@ def delete_survey(survey_id=None):
 @survey_api.route('/update_survey/<string:survey_id>', methods=['GET', 'POST'])
 @authenticate_admin_study_access
 def update_survey(survey_id=None):
-    survey = Survey(survey_id)
-    if not survey:
+    try:
+        survey = Survey.objects.get(pk=survey_id)
+    except Survey.DoesNotExist:
         return abort(404)
+    
     content = json.loads(request.values['content'])
     content = make_slider_min_max_values_strings(content)
-    if survey.survey_type == "tracking_survey":  # TODO:turn tracking_survey into a constant
+    
+    if survey.survey_type == TRACKING_SURVEY:
         errors = do_validate_survey(content)
         if len(errors) > 1:
             return make_response(json.dumps(errors), 400)
-    timings = json.loads(request.values['timings'])
-    settings = json.loads(request.values['settings'])
-    survey.update({'content': content, 'timings': timings, 'settings': settings})
+    
+    # These three all stay JSON when added to survey
+    content = json.dumps(content)
+    timings = request.values['timings']
+    settings = request.values['settings']
+    survey.update(content=content, timings=timings, settings=settings)
+    
     return make_response("", 201)
 
 

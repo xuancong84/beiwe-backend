@@ -13,10 +13,9 @@ survey_designer = Blueprint('survey_designer', __name__)
 @survey_designer.route('/edit_survey/<string:survey_id>')
 @authenticate_admin_study_access
 def render_edit_survey(survey_id=None):
-    survey_set = Survey.objects.filter(pk=survey_id)
-    if survey_set.exists():
-        survey = survey_set.get()
-    else:
+    try:
+        survey = Survey.objects.get(pk=survey_id)
+    except Survey.DoesNotExist:
         return abort(404)
 
     study = survey.study
