@@ -1,23 +1,24 @@
 from os import path
 
-from bson.objectid import ObjectId
 from flask import flash, request
 
-# Mongolia models
-from db.study_models import Study, StudyDeviceSettings, Survey
-
-# Django models
-from study.models import Survey as DSurvey
+from study.models import Study, Survey
 
 
 def copy_existing_study_if_asked_to(new_study):
-    if ((request.form.get('copy_existing_study') == "true") and
-            (ObjectId.is_valid(request.form.get('existing_study_id')))):
-        old_study = Study(ObjectId(request.form.get('existing_study_id')))
-        msg = update_device_settings(StudyDeviceSettings(old_study['device_settings']),
-                               new_study, old_study['name'])
-        surveys_to_copy = [Survey(survey_id) for survey_id in old_study['surveys']]
-        msg += " \n" + add_new_surveys(surveys_to_copy, new_study, old_study['name'])
+    # AJK TODO this is not terribly pretty, see if it can be done better without affecting the API input format
+    if request.form.get('copy_existing_study') == 'true':
+        old_study = Study.objects.get(pk=request.form.get('existing_study_id'))
+        old_device_settings = old_study.device_settings.as_dict()
+        old_device_settings.pop('study')
+        msg = update_device_settings(old_device_settings, new_study, old_study.name)
+        
+        surveys_to_copy = []
+        for survey in old_study.surveys.all():
+            survey_as_dict = survey.as_dict()
+            survey_as_dict.pop('study')
+            surveys_to_copy.append(survey_as_dict)
+        msg += " \n" + add_new_surveys(surveys_to_copy, new_study, old_study.name)
         flash(msg, 'success')
 
 
@@ -45,7 +46,7 @@ def add_new_surveys(new_survey_settings, study, filename):
             # Don't copy unique fields to the new Survey object
             survey_settings.pop('id')
             survey_settings.pop('object_id')
-            DSurvey.create_with_object_id(study=study, **survey_settings)
+            Survey.create_with_object_id(study=study, **survey_settings)
             if survey_settings['survey_type'] == 'tracking_survey':
                 surveys_added += 1
             elif survey_settings['survey_type'] == 'audio_survey':

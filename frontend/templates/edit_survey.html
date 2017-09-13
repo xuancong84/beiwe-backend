@@ -21,14 +21,14 @@
 
 {% block javascript %}
   <script type="text/javascript">
-    var questions = {{ survey.content|safe }};
+    var questions = {{ survey.content|tojson }};
     var survey_id = '{{ survey.id }}';
-    var survey_times = {{ survey.timings|safe }};
-    var settings = {{ survey.settings|safe }};
+    var survey_times = {{ survey.timings|tojson }};
+    var settings = {{ survey.settings|tojson }};
     var randomize = settings.randomize || false;
     var randomizeWithMemory = settings.randomize_with_memory || false;
     var numberOfRandomQuestions = settings.number_of_random_questions || null;
-    var trackingSurvey = "{{ survey.survey_type }}" == "tracking_survey";
+    var trackingSurvey = settings.tracking_survey || false;
   </script>
   <script src="/static/javascript/survey-editor/schedule.js"></script>
   <script src="/static/javascript/survey-editor/survey-editor.js"></script>
@@ -72,7 +72,8 @@
     
       <hr>
 
-      <div ng-if="surveyBuilder.trackingSurvey" class="row">
+      {% if survey.survey_type == "tracking_survey" %}
+      <div class="row">
         <h3>Questions</h3>
         <question-summary></question-summary>
         <br>
@@ -104,7 +105,7 @@
         </div>
       </div>
 
-      <div ng-if="!surveyBuilder.trackingSurvey">
+      {% else %}
         <div class="row">
           <h3>Voice Recording Prompt</h3>
           <input id="voice_recording_prompt_text_input" type="text" class="form-control"
@@ -121,8 +122,6 @@
             <p><b>Uncompressed</b> audio recordings produce wav files. A wav file with a sample rate of 44,100 ("CD quality") has a bit rate equivalence of 706Kbps, or roughly <b>five megabytes</b> of data for each minute of audio.</p>
             </div>
   
-          <!--AJK TODO the 'checked' if and 'selected' if aren't working :(-->
-          <!--I might have to change the trackingSurvey stuff back as well-->
           <input type="radio" name="audio_survey_type" id="radio_compressed" value="compressed"
                  onclick="audioSurveyTypeChange('compressed')" {{ 'checked' if survey.settings.audio_survey_type == 'compressed' }}>
           <label for="radio_compressed"> Compressed audio&nbsp;&nbsp;&nbsp; </label>
@@ -144,10 +143,8 @@
             <option value="44100" {{ 'selected' if survey.settings['sample_rate'] == 44100 or not survey.settings['sample_rate'] }}>44,100Hz</option>
           </select>
         </div>
-      </div>
+      {% endif %}
       
-      
-
       <hr><br>
     
       <div class="row">

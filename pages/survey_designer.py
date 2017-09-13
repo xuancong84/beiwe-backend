@@ -21,7 +21,7 @@ def render_edit_survey(survey_id=None):
     study = survey.study
     return render_template(
         'edit_survey.html',
-        survey=survey,
+        survey=survey.as_native_python(),
         study=study,
         allowed_studies=get_admins_allowed_studies(),
         system_admin=admin_is_system_admin()

@@ -43,7 +43,6 @@
     vm.randomize = window.randomize;
     vm.randomizeWithMemory = window.randomizeWithMemory;
     vm.numberOfRandomQuestions = window.numberOfRandomQuestions;
-    vm.trackingSurvey = window.trackingSurvey;
     // vm.questionIds is set below in vm.refreshQuestionIds()
 
     /* Current question for displaying/modifying with modal */

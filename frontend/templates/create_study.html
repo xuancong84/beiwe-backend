@@ -47,20 +47,20 @@
                     </div>
                     {# Dropdown menu to select a study #}
                     <div class="form-group">
-                        <select class="form-control" ng-model="existing_study" name="existing_study_id" ng-options="study.name for study in filterableObjects | filter:{name: studyFilterText} track by study.study_id"></select>
+                        <select class="form-control" ng-model="existingStudy" name="existing_study_id" ng-options="study.name for study in filterableObjects | filter:{name: studyFilterText} track by study.id"></select>
                     </div>
                     {# Checkbox: copy app settings? #}
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" name="device_settings" value="true" checked>
-                            Copy {%raw%}{{ existing_study['name'] }}{%endraw%} App Settings into this new study that you're creating
+                            Copy {% raw %}{{ existingStudy.name }}{% endraw %} App Settings into this new study that you're creating
                         </label>
                     </div>
                     {# Checkbox: copy surveys? #}
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" name="surveys" value="true" checked>
-                            Copy {%raw%}{{ existing_study['name'] }}{%endraw%} Surveys and Audio Surveys into this new study that you're creating
+                            Copy {% raw %}{{ existingStudy.name }}{% endraw %} Surveys and Audio Surveys into this new study that you're creating
                         </label>
                     </div>
                 </div>
