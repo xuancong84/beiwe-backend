@@ -5,13 +5,12 @@ _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
 
 from kombu.exceptions import OperationalError
-from pymongo.errors import CursorNotFound
 
 from libs.logging import email_system_administrators
 from config.secure_settings import MONGO_IP
 
 from celery import Celery, states
-from celery.states import FAILURE, SUCCESS
+from celery.states import SUCCESS
 
 STARTED_OR_WAITING = [ states.PENDING,
                        states.RECEIVED,
@@ -27,6 +26,9 @@ celery_app = Celery("data_processing_tasks",
                     task_publish_retry=False,
                     task_track_started=True )
 
+# Load Django
+from config import load_django
+
 ################################################################################
 ############################# Data Processing ##################################
 ################################################################################
@@ -39,52 +41,52 @@ from raven.transport import HTTPTransport
 from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
 from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks
+from study.models import FileProcessLock, Participant
 
-# Mongolia models
-from db.data_access_models import FilesToProcess
-
-# Django models
-from study.models import FileProcessLock
 
 @celery_app.task
-def queue_user(name):
-    return celery_process_file_chunks(name)
+def queue_user(participant):
+    return celery_process_file_chunks(participant)
 
 #Fixme: does this work?
 queue_user.max_retries = 0
 
 
 def safe_queue_user(*args, **kwargs):
-    """ Enqueuing can fail deep inside amqp/transport.py with an OperationalError. We
-    wrap it in some retry logic when this occurs. """
+    """
+    Queue the given user's file processing with the given keyword arguments. This should
+    return immediately and leave the processing to be done in the background via celery.
+    In case there is an error with enqueuing the process, retry it several times until
+    it works.
+    """
     for i in xrange(10):
         try:
             return queue_user.apply_async(*args, **kwargs)
         except OperationalError:
+            # Enqueuing can fail deep inside amqp/transport.py with an OperationalError. We
+            # wrap it in some retry logic when this occurs.
             if i < 3:
                 pass
             else:
                 raise
 
-def get_user_list_safely(retries=10):
-    """ This error started occurring on occasionally on Mar 22, 2017, we don't know why. """
-    try:
-        return set(FilesToProcess(field="user_id"))
-    except CursorNotFound:
-        if retries < 1:
-            raise
-        print("encountered cursor error, retrying...")
-        sleep(0.1)
-        return get_user_list_safely(retries=retries - 1)
+
+def get_user_list_safely():
+    """
+    Get the list of participants with open files to process.
+    """
+    participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct()
+    return participant_set
+
 
 def create_file_processing_tasks():
-    #literally wrapping the entire thing in an ErrorSentry...
-    with ErrorSentry(SENTRY_DSN,
-                     sentry_client_kwargs={'transport':HTTPTransport}) as error_sentry:
+    # The entire code is wrapped in an ErrorSentry, which catches any errors and sends them to Sentry
+    with ErrorSentry(SENTRY_DSN, sentry_client_kwargs={'transport': HTTPTransport}) as error_sentry:
         print(error_sentry.sentry_client.is_enabled())
         if FileProcessLock.islocked():
-            # This is really a safety check to ensure that no code executes if this runs
+            # This is really a safety check to ensure that no code executes if file processing is locked
             report_file_processing_locked_and_exit()
+            # report_file_processing_locked should raise an error; this should be unreachable
             exit(0)
         else:
             FileProcessLock.lock()
@@ -92,20 +94,25 @@ def create_file_processing_tasks():
         print("starting.")
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        user_ids = get_user_list_safely()
+        participant_set = get_user_list_safely()
         running = []
         
-        for user_id in user_ids:
-            # queue all users, get list of futures to check
-            running.append(safe_queue_user(args=[user_id],
-                                           max_retries=0,
-                                           expires=expiry,
-                                           task_track_started=True,
-                                           task_publish_retry=False,
-                                           retry=False) )
+        for participant in participant_set:
+            # Queue all users' file processing, and generate a list of currently running jobs
+            # to use to detect when all jobs are finished running.
+            running.append(safe_queue_user(
+                args=[participant],
+                max_retries=0,
+                expires=expiry,
+                task_track_started=True,
+                task_publish_retry=False,
+                retry=False
+            ))
             
         print("tasks:", running)
         
+        # If there are any Celery tasks still running, check their state and update the running
+        # list accordingly. Do this every 5 seconds.
         while running:
             new_running = []
             failed = []
@@ -129,7 +136,8 @@ def create_file_processing_tasks():
                 sleep(5)
                 
         print("Finished, unlocking.")
-        FileProcessLock.unlock() #  This MUST be ___inside___ the with statement.
+        # The unlocking MUST be **inside** the with statement.
+        FileProcessLock.unlock()
 
 
 def report_file_processing_locked_and_exit():
@@ -161,30 +169,35 @@ class LogList(list):
         super(LogList, self).extend(iterable)
         
         
-def celery_process_file_chunks(user_id):
-    """ This is the function that is called from cron.  It runs through all new files that have
+def celery_process_file_chunks(participant):
+    """
+    This is the function that is called from celery.  It runs through all new files that have
     been uploaded and 'chunks' them. Handles logic for skipping bad files, raising errors
-    appropriately. """
+    appropriately.
+    This runs automatically and periodically as a Celery task.
+    """
     log = LogList()
     number_bad_files = 0
-    error_sentry = ErrorSentry(SENTRY_DSN,
-                               sentry_client_kwargs = {"tags":{ "user_id": user_id },
-                                                       'transport':HTTPTransport }
-    )
-    log.append("processing files for %s" % user_id)
+    error_sentry = ErrorSentry(SENTRY_DSN, sentry_client_kwargs={
+        "tags": {"user_id": participant.patient_id},
+        'transport': HTTPTransport
+    })
+    log.append("processing files for %s" % participant.patient_id)
     
     while True:
         previous_number_bad_files = number_bad_files
-        starting_length = FilesToProcess.count(user_id=user_id)
+        starting_length = participant.files_to_process.count()
         
-        log.append(str(datetime.now()) + " processing %s, %s files remaining" % (user_id, starting_length))
+        log.append("%s processing %s, %s files remaining" % (datetime.now(), participant.patient_id, starting_length))
         number_bad_files += do_process_user_file_chunks(
                 count=FILE_PROCESS_PAGE_SIZE,
                 error_handler=error_sentry,
                 skip_count=number_bad_files,
-                user_id=user_id)
-
-        if starting_length == FilesToProcess.count(user_id=user_id):  # zero files processed
+                participant=participant,
+        )
+        
+        # If no files were processed, quit processing
+        if participant.files_to_process.count() == starting_length:
             if previous_number_bad_files == number_bad_files:
                 # Cases:
                 #   every file broke, blow up. (would cause infinite loop otherwise)

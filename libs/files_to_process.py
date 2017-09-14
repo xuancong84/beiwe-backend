@@ -1,7 +1,6 @@
 import gc
 
 from boto.exception import S3ResponseError
-from bson.objectid import ObjectId
 from collections import defaultdict, deque
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
@@ -17,7 +16,7 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
                               DATA_PROCESSING_NO_ERROR_STRING)
 from libs.s3 import s3_retrieve, s3_upload
-from study.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study
+from study.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study, Survey
 
 
 class EverythingWentFine(Exception): pass
@@ -94,9 +93,11 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
     skip_count. The first skip_count files are expected to be files that have previously errored
     in file processing.
     """
-    # Declare a defaultdict containing a tuple of two deques
-    all_binified_data = defaultdict( lambda : ( deque(), deque() ) )
+    # Declare a defaultdict containing a tuple of two double ended queues (deque, pronounced "deck")
+    all_binified_data = defaultdict(lambda: (deque(), deque()))
     ftps_to_remove = set()
+    # The ThreadPool enables downloading multiple files simultaneously from the network, and continuing
+    # to download files as other files are being processed, making the code as a whole run faster.
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
     survey_id_dict = {}
 
@@ -134,11 +135,15 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
                 # print "2a"
                 timestamp = clean_java_timecode(data['ftp']["s3_file_path"].rsplit("/", 1)[-1][:-4])
                 # print "2a"
-                ChunkRegistry.add_new_chunk(data['ftp']["study_id"],
-                                            data['ftp']["user_id"],
-                                            data['data_type'],
-                                            data['ftp']["s3_file_path"],
-                                            timestamp)
+                # Since we aren't binning the data by hour, just create a ChunkRegistry that
+                # points to the already existing S3 file.
+                ChunkRegistry.add_new_chunk(
+                    data['data_type'],
+                    timestamp,
+                    study_id=data['ftp']['study'].pk,
+                    participant_id=data['ftp']['participant'].pk,
+                    chunk_path=data['ftp']['s3_file_path'],
+                )
                 # print "2b"
                 ftps_to_remove.add(data['ftp']['id'])
 
@@ -148,9 +153,10 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
     more_ftps_to_remove, number_bad_files = upload_binified_data(all_binified_data, error_handler, survey_id_dict)
     # print "X"
     ftps_to_remove.update(more_ftps_to_remove)
-    # Actually delete the processed FTPs
+    # Actually delete the processed FTPs from the database
     FileToProcess.objects.filter(pk__in=ftps_to_remove).delete()
     # print "Y"
+    # Garbage collect to free up memory
     gc.collect()
     # print "Z"
     return number_bad_files
@@ -244,20 +250,21 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                     if data_type in SURVEY_DATA_FILES:
                         # We need to keep a mapping of files to survey ids, that is handled here.
                         # print "7da"
-                        survey_id_hash = ObjectId(study_id), user_id, data_type, original_header
+                        survey_id_hash = study_id, user_id, data_type, original_header
                         survey_id = survey_id_dict[survey_id_hash]
                         # print survey_id_hash
                     else:
                         # print "7db"
                         survey_id = None
                     # print "7e"
-                    chunk_params = {"study_id": study_id,
-                                    "user_id": user_id,
-                                    "data_type": data_type,
-                                    "chunk_path": chunk_path,
-                                    "time_bin": time_bin,
-                                    "survey_id": survey_id}
-                    print('cp', chunk_params)
+                    chunk_params = {
+                        "study_id": study_id,
+                        "user_id": user_id,
+                        "data_type": data_type,
+                        "chunk_path": chunk_path,
+                        "time_bin": time_bin,
+                        "survey_id": survey_id
+                    }
                     upload_these.append((chunk_params, chunk_path, new_contents.encode("zip"), study_id))
             except Exception as e:
                 # Here we catch any exceptions that may have arisen, as well as the ones that we raised
@@ -274,7 +281,6 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                 ftps_to_retire.update(ftp_deque)
 
     pool = ThreadPool(CONCURRENT_NETWORK_OPS)
-    # pool = dummy_threadpool()
     errors = pool.map(batch_upload, upload_these, chunksize=1)
     for err_ret in errors:
         if err_ret['exception']:
@@ -636,8 +642,14 @@ def batch_upload(upload):
             chunk.low_memory_update_chunk_hash(new_contents)
         else:
             # If a new ChunkRegistry object is being created
+            # AJK TODO talk with Eli: is this too slow?
+            # Convert the ID's used in the S3 file names into primary keys for making ChunkRegistry FKs
             study_pk = Study.objects.filter(object_id=chunk['study_id']).values_list('pk', flat=True).get()
             participant_pk = Participant.objects.filter(patient_id=chunk['user_id']).values_list('pk', flat=True).get()
+            if chunk['survey_id']:
+                survey_pk = Survey.objects.filter(object_id=chunk['survey_id']).values_list('pk', flat=True).get()
+            else:
+                survey_pk = None
             ChunkRegistry.add_new_chunk(
                 chunk['data_type'],
                 chunk['time_bin'],
@@ -645,7 +657,7 @@ def batch_upload(upload):
                 study_id=study_pk,
                 participant_id=participant_pk,
                 chunk_path=chunk['chunk_path'],
-                survey_id=chunk['survey_id'],
+                survey_id=survey_pk,
             )
     except Exception as e:
         ret['traceback'] = format_exc(e)
