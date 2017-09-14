@@ -83,6 +83,8 @@ class FileToProcess(AbstractModel):
     def append_file_for_processing(cls, file_path, study_value, **kwargs):
         # Get the study's ID
         # AJK TODO depending how this is used in the codebase, stick with passing a single type of study_value
+        # It seems to be mostly using the object ID because that's actually easier, since it's present
+        # in the filename.
         if Study.objects.filter(object_id=study_value).exists():
             # A Study object_id was passed (as a string)
             study_pk = Study.objects.filter(object_id=study_value).values_list('pk', flat=True).get()
@@ -91,7 +93,7 @@ class FileToProcess(AbstractModel):
             # A Study primary key was passed
             study_pk = study_value
             study_object_id = Study.objects.filter(pk=study_value).values_list('object_id', flat=True).get()
-
+        
         if file_path[:24] == study_object_id:
             cls.objects.create(s3_file_path=file_path, study_id=study_pk, **kwargs)
         else:

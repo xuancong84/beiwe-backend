@@ -10,72 +10,94 @@ from libs.s3 import s3_list_files, s3_delete, s3_upload
 
 # Mongolia models
 from db.data_access_models import FileToProcess, FilesToProcess, ChunkRegistry, ChunksRegistry
-from db.study_models import Studies, Study, Survey, StudyDeviceSettings
+from db.study_models import Study, Survey, StudyDeviceSettings
 from db.user_models import Users, User
 
 # Django models
-from study.models import FileProcessLock
+from study.models import ChunkRegistry as DCR, DeviceSettings as DDS, FileProcessLock, FileToProcess as DFTP, Participant, Study as DStudy, Survey as DSurvey
 
 
 def reindex_all_files_to_process():
-    """ Totally removes the FilesToProcess DB, deletes all chunked files on s3,
-    clears the chunksregistry, and then adds all relevent files on s3 to the
-    files to process registry. """
+    """
+    Totally clears the FilesToProcess DB, deletes all chunked files on S3,
+    clears the ChunksRegistry DB, readds all relevant files on S3 to the
+    FilesToProcess registry and then rechunks them.
+    """
+    
+    # Delete all preexisting FTP and ChunkRegistry objects
     FileProcessLock.lock()
-    print(str(datetime.now()), "purging FilesToProcess:", FilesToProcess.count())
-    FileToProcess.db().drop()
-    print(str(datetime.now()), "purging existing ChunksRegistry", ChunksRegistry.count())
-    ChunkRegistry.db().drop()
-
-    pool = ThreadPool(CONCURRENT_NETWORK_OPS * 2 )
-
-    print(str(datetime.now()), "deleting older chunked data:")
+    print('{!s} purging FileToProcess: {:d}'.format(datetime.now(), DFTP.objects.count()))
+    DFTP.objects.all().delete()
+    print('{!s} purging ChunkRegistry: {:d}'.format(datetime.now(), DCR.objects.count()))
+    DCR.objects.all().delete()
+    
+    pool = ThreadPool(CONCURRENT_NETWORK_OPS * 2)
+    
+    # Delete all preexisting chunked data files
     CHUNKED_DATA = s3_list_files(CHUNKS_FOLDER)
-    print(len(CHUNKED_DATA))
+    print('{!s} deleting older chunked data: {:d}'.format(datetime.now(), len(CHUNKED_DATA)))
     pool.map(s3_delete, CHUNKED_DATA)
     del CHUNKED_DATA
-
-    print(str(datetime.now()), "pulling new files to process...")
-    files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
+    
+    # Get a list of all S3 files to replace in the database
+    print('{!s} pulling new files to process...'.format(datetime.now()))
+    files_lists = pool.map(s3_list_files, DStudy.objects.values_list('object_id', flat=True))
+    
+    # For each such file, create an FTP object
     print("putting new files to process...")
-    for i,l in enumerate(files_lists):
-        print(str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files")
+    for i, l in enumerate(files_lists):
+        print('{!s} {:d} of {:d}, {:d} files'.format(datetime.now(), i+1, Study.objects.count(), len(l)))
         for fp in l:
             if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
-                FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
+                patient_id = fp.split('/', 2)[1]
+                participant_pk = Participant.objects.filter(patient_id=patient_id).values_list('pk', flat=True).get()
+                DFTP.append_file_for_processing(fp, fp.split("/", 1)[0], participant_id=participant_pk)
+    
+    # Clean up by deleting large variables, closing the thread pool and unlocking the file process lock
     del files_lists, l
     pool.close()
     pool.terminate()
-    print(str(datetime.now()), "processing data.")
     FileProcessLock.unlock()
+    
+    # Rechunk the newly created FTPs
+    print("{!s} processing data.".format(datetime.now()))
     process_file_chunks()
 
 
 def reindex_specific_data_type(data_type):
     FileProcessLock.lock()
     print("starting...")
-    #this line will raise an error if something is wrong with the data type
+    # Convert the data type; raise an error if something is wrong with it
     file_name_key = data_stream_to_s3_file_name_string(data_type)
-    relevant_chunks = ChunksRegistry(data_type=data_type)
-    relevant_indexed_files = [ chunk["chunk_path"] for chunk in relevant_chunks ]
+    
+    # Get all chunk paths of the given data type
+    relevant_chunks = DCR.objects.filter(data_type=data_type)
+    # list() ensures that the QuerySet is evaluated before all of its elements are deleted (otherwise it would be empty)
+    relevant_indexed_files = list(relevant_chunks.values_list('chunk_path', flat=True))
+    
+    # Delete the old ChunkRegistry objects
     print("purging old data...")
-    for chunk in relevant_chunks: chunk.remove()
+    relevant_chunks.delete()
 
     pool = ThreadPool(20)
     pool.map(s3_delete, relevant_indexed_files)
 
     print("pulling files to process...")
-    files_lists = pool.map(s3_list_files, [str(s._id) for s in Studies()] )
-    for i,l in enumerate(files_lists):
-        print(str(datetime.now()), i+1, "of", str(Studies.count()) + ",", len(l), "files")
+    files_lists = pool.map(s3_list_files, DStudy.objects.values_list('object_id', flat=True))
+    for i, l in enumerate(files_lists):
+        print('{!s} {:d} of {:d}, {:d} files'.format(datetime.now(), i + 1, Study.objects.count(), len(l)))
         for fp in l:
             if fp[-4:] in PROCESSABLE_FILE_EXTENSIONS:
-                FileToProcess.append_file_for_processing(fp, ObjectId(fp.split("/", 1)[0]), fp.split("/", 2)[1])
+                patient_id = fp.split('/', 2)[1]
+                participant_pk = Participant.objects.filter(patient_id=patient_id).values_list('pk', flat=True).get()
+                DFTP.append_file_for_processing(fp, fp.split("/", 1)[0], participant_id=participant_pk)
+    
     del files_lists, l
     pool.close()
     pool.terminate()
-    print(str(datetime.now()), "processing data...")
     FileProcessLock.unlock()
+
+    print("{!s} processing data.".format(datetime.now()))
     process_file_chunks()
     print("Done.")
 
