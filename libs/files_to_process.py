@@ -7,14 +7,12 @@ from multiprocessing.pool import ThreadPool
 from traceback import format_exc
 from cronutils.error_handler import ErrorHandler
 
-from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
-                              CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
-                              VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
-                              POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
-                              PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API,
-                              DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
-                              CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
-                              DATA_PROCESSING_NO_ERROR_STRING)
+from config.constants import (
+    API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM,
+    FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER, ANDROID_API, SURVEY_DATA_FILES,
+    CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES, DATA_PROCESSING_NO_ERROR_STRING,
+    UPLOAD_FILE_TYPE_MAPPING
+)
 from libs.s3 import s3_retrieve, s3_upload
 from study.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study, Survey
 
@@ -179,7 +177,6 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                 study_id, user_id, data_type, time_bin, original_header = data_bin
                 # print 5
                 # data_rows_deque may be a generator; here it is evaluated
-                # AJK TODO check that ^ is true
                 rows = list(data_rows_deque)
                 updated_header = convert_unix_to_human_readable_timestamps(original_header, rows)
                 # print 6
@@ -187,6 +184,9 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                 # print 7
                 old_chunk_exists = ChunkRegistry.objects.filter(chunk_path=chunk_path).exists()
                 if old_chunk_exists:
+                    # AJK TODO chunk_path needs to be unique=True, ask Eli if that's reasonable
+                    # I checked on prod and the first 100.000 CRs have unique chunk_paths
+                    # The only plausible issue is for non-chunkable files that get processed twice (?)
                     chunk = ChunkRegistry.objects.get(chunk_path=chunk_path)
                     try:
                         # print 8
@@ -307,23 +307,14 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
 
 
 def file_path_to_data_type(file_path):
-    if "/accel/" in file_path: return ACCELEROMETER
-    if "/bluetoothLog/" in file_path: return BLUETOOTH
-    if "/callLog/" in file_path: return CALL_LOG
-    if "/gps/" in file_path: return GPS
-    if "/identifiers" in file_path: return IDENTIFIERS
-    if "/logFile/" in file_path: return LOG_FILE
-    if "/powerState/" in file_path: return POWER_STATE
-    if "/surveyAnswers/" in file_path: return SURVEY_ANSWERS
-    if "/surveyTimings/" in file_path: return SURVEY_TIMINGS
-    if "/textsLog/" in file_path: return TEXTS_LOG
-    if "/voiceRecording" in file_path: return VOICE_RECORDING
-    if "/wifiLog/" in file_path: return WIFI
-    if "/proximity/" in file_path: return PROXIMITY
-    if "/gyro/" in file_path: return GYRO
-    if "/magnetometer/" in file_path: return MAGNETOMETER
-    if "/devicemotion/" in file_path: return DEVICEMOTION
-    if "/reachability/" in file_path: return REACHABILITY
+    # Look through each folder name in file_path to see if it corresponds to a data type
+    for file_piece in file_path.split('/'):
+        data_type = UPLOAD_FILE_TYPE_MAPPING.get(file_piece)
+        if data_type:
+            return data_type
+    
+    # If no data type has been selected; i.e. if none of the data types are present in file_path,
+    # raise an error
     raise Exception("data type unknown: %s" % file_path)
 
 
