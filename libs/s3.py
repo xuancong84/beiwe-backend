@@ -51,7 +51,8 @@ def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAUL
     """ Takes an S3 file path (key_path), and a study ID.  Takes an optional argument, raw_path,
     which defaults to false.  When set to false the path is prepended to place the file in the
     appropriate study_id folder. """
-    if not raw_path: key_path = str(study_object_id) + "/" + key_path
+    if not raw_path:
+        key_path = study_object_id + "/" + key_path
     encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)
     return encryption.decrypt_server(encrypted_data, study_object_id)
 
@@ -67,7 +68,7 @@ def _do_retrieve(bucket_name, key_path, number_retries=DEFAULT_S3_RETRIES):
         return key.read()
     except IncompleteRead:
         if number_retries > 0:
-            print "s3_retreive failed with incomplete read, retrying on %s" % key_path
+            print("s3_retrieve failed with incomplete read, retrying on %s" % key_path)
             return _do_retrieve(bucket_name, key_path, number_retries=number_retries - 1)
         raise
     except SSLError as e:

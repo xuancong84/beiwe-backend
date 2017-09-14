@@ -8,9 +8,13 @@ from werkzeug.datastructures import FileStorage
 
 from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
+
+# Mongolia models
 from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErrorMetadata,\
     PADDING_ERROR, EMPTY_KEY, MALFORMED_CONFIG, INVALID_LENGTH, LINE_EMPTY, IV_MISSING,\
     AES_KEY_BAD_LENGTH, IV_BAD_LENGTH, MP4_PADDING, LINE_IS_NONE
+
+# Django models
 from study.models import Study
 
 
