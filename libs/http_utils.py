@@ -1,8 +1,7 @@
 import functools
 
 from flask import request
-
-from config.constants import IOS_API, ANDROID_API
+from study.models import Participant
 
 
 def checkbox_to_boolean(list_checkbox_params, dict_all_params):
@@ -26,7 +25,7 @@ def string_to_int(list_int_params, dict_all_params):
 
 def combined_multi_dict_to_dict(cmd):
     """ converts an ImmutableMultiDict to a mutable python Dict. """
-    return { key: value for key, value in cmd.items() }
+    return {key: value for key, value in cmd.items()}
 
 
 def determine_os_api(some_function):
@@ -38,14 +37,13 @@ def determine_os_api(some_function):
     To handle any issues that arise from an undeclared keyword argument, throw
     'OS_API=""' into your url function declaration. """
     @functools.wraps(some_function)
-    def provide_os_determination_and_call( *args, **kwargs ):
-        #naive, could be improved, but sufficient
+    def provide_os_determination_and_call(*args, **kwargs):
+        # naive, could be improved, but sufficient
         url_end = request.path[-4:].lower()
         if "ios" in url_end:
-            kwargs["OS_API"] = IOS_API
+            kwargs["OS_API"] = Participant.IOS_API
         else:
-            kwargs["OS_API"] = ANDROID_API
-        return some_function( *args, **kwargs )
+            kwargs["OS_API"] = Participant.ANDROID_API
+        return some_function(*args, **kwargs)
 
     return provide_os_determination_and_call
-

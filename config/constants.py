@@ -22,17 +22,11 @@ FILE_PROCESS_PAGE_SIZE = getenv("FILE_PROCESS_PAGE_SIZE") or 250
 #This string will be printed into non-error hourly reports to improve error filtering.
 DATA_PROCESSING_NO_ERROR_STRING = getenv("DATA_PROCESSING_NO_ERROR_STRING") or "2HEnBwlawY"
 
-#The number of minutes after which a queued celery task will be invalidated.
+# The number of minutes after which a queued celery task will be invalidated.
 # (this is not a timeout, it only invalidates tasks that have not yet run.)
 CELERY_EXPIRY_MINUTES = getenv("CELERY_EXPIRY_MINUTES") or 4
 CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECONDS") or 60*15
 
-
-# API differences
-# use_these aliases to determine if the incoming url was for an api version
-IOS_API = "IOS"
-ANDROID_API = "ANDROID"
-NULL_OS = ''
 
 ## Data streams and survey types ##
 ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
@@ -40,11 +34,6 @@ PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 MEDIA_EXTENSIONS = [".mp4", ".wav"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings']
-
-AUDIO_SURVEY = 'audio_survey'
-TRACKING_SURVEY = 'tracking_survey'
-SURVEY_TYPES = [AUDIO_SURVEY, TRACKING_SURVEY]
-
 
 
 ## HTML lists ##

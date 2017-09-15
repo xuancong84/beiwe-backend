@@ -2,7 +2,6 @@ import functools
 from flask import request, abort
 from werkzeug.datastructures import MultiDict
 
-from config.constants import IOS_API
 from study.models import Participant
 
 
@@ -20,15 +19,15 @@ def authenticate_user(some_function):
         is_this_user_valid = validate_post(*args, **kwargs)
         if is_this_user_valid:
             return some_function(*args, **kwargs)
-        return abort(401 if (kwargs["OS_API"] == IOS_API) else 403)
+        return abort(401 if (kwargs["OS_API"] == Participant.IOS_API) else 403)
     return authenticate_and_call
 
 
 def validate_post(*args, **kwargs):
     """Check if user exists, check if the provided passwords match, and if the
     device id matches."""
-    #print "user info:  ", request.values.items()
-    #print "file info:  ", request.files.items()
+    # print "user info:  ", request.values.items()
+    # print "file info:  ", request.files.items()
     if ("patient_id" not in request.values
             or "password" not in request.values
             or "device_id" not in request.values):
@@ -58,7 +57,7 @@ def authenticate_user_registration(some_function):
         is_this_user_valid = validate_registration(*args, **kwargs)
         if is_this_user_valid:
             return some_function(*args, **kwargs)
-        return abort(401 if (kwargs["OS_API"] == IOS_API) else 403)
+        return abort(401 if (kwargs["OS_API"] == Participant.IOS_API) else 403)
     return authenticate_and_call
 
 

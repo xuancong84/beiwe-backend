@@ -6,7 +6,6 @@ import json
 from django.db import models
 from django.db.models import F, Func
 
-from config.constants import IOS_API, ANDROID_API, NULL_OS, AUDIO_SURVEY, TRACKING_SURVEY
 from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
     SURVEY_SUBMIT_SUCCESS_TOAST_TEXT, AUDIO_SURVEY_SETTINGS
@@ -101,6 +100,8 @@ class Survey(AbstractModel):
     indicating the number of seconds past midnight.
     """
 
+    AUDIO_SURVEY = 'audio_survey'
+    TRACKING_SURVEY = 'tracking_survey'
     SURVEY_TYPE_CHOICES = (
         (AUDIO_SURVEY, AUDIO_SURVEY),
         (TRACKING_SURVEY, TRACKING_SURVEY),
@@ -132,7 +133,7 @@ class Survey(AbstractModel):
         settings are given, give it the default audio survey settings.
         """
 
-        if survey_type == AUDIO_SURVEY and 'settings' not in kwargs:
+        if survey_type == cls.AUDIO_SURVEY and 'settings' not in kwargs:
             kwargs['settings'] = json.dumps(AUDIO_SURVEY_SETTINGS)
 
         survey = cls.create_with_object_id(survey_type=survey_type, **kwargs)
@@ -196,9 +197,11 @@ class Participant(AbstractPasswordUser):
     participants in the study, as well as information about the device the participant is using.
     A Participant uses mobile, so their passwords are hashed accordingly.
     """
-
-    # AJK TODO possibly move their definitions *back* from constants.py to here
-    # Same for survey types
+    
+    IOS_API = "IOS"
+    ANDROID_API = "ANDROID"
+    NULL_OS = ''
+    
     OS_TYPE_CHOICES = (
         (IOS_API, IOS_API),
         (ANDROID_API, ANDROID_API),

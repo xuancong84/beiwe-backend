@@ -9,7 +9,7 @@ from cronutils.error_handler import ErrorHandler
 
 from config.constants import (
     API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM,
-    FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER, ANDROID_API, SURVEY_DATA_FILES,
+    FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER, SURVEY_DATA_FILES,
     CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES, DATA_PROCESSING_NO_ERROR_STRING,
     UPLOAD_FILE_TYPE_MAPPING
 )
@@ -382,7 +382,7 @@ def process_csv_data(data):
         Returns None If the csv has no data in it. """
     participant = data['ftp']['participant']
     
-    if participant.os_type == ANDROID_API:
+    if participant.os_type == Participant.ANDROID_API:
         # Do fixes for Android
         if data["data_type"] == LOG_FILE:
             data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])

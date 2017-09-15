@@ -1,6 +1,5 @@
 from flask import abort, Blueprint, make_response, request, redirect, json
 
-from config.constants import TRACKING_SURVEY
 from libs.admin_authentication import authenticate_admin_study_access
 from libs.json_logic import do_validate_survey
 from study.models import Survey
@@ -47,7 +46,7 @@ def update_survey(survey_id=None):
     content = json.loads(request.values['content'])
     content = make_slider_min_max_values_strings(content)
     
-    if survey.survey_type == TRACKING_SURVEY:
+    if survey.survey_type == Survey.TRACKING_SURVEY:
         errors = do_validate_survey(content)
         if len(errors) > 1:
             return make_response(json.dumps(errors), 400)
