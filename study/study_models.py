@@ -66,7 +66,15 @@ class Study(AbstractModel):
         self.surveys.add(survey)
 
     def get_surveys_for_study(self):
-        return [json.loads(survey.as_native_json()) for survey in self.surveys.all()]
+        survey_json_list = []
+        for survey in self.surveys.all():
+            survey_dict = survey.as_native_python()
+            # Make the dict look like the old Mongolia-style dict that the frontend is expecting
+            survey_dict.pop('id')
+            survey_dict.pop('deleted')
+            survey_dict['_id'] = survey_dict.pop('object_id')
+            survey_json_list.append(survey_dict)
+        return survey_json_list
 
     def get_survey_ids_for_study(self, survey_type='tracking_survey'):
         return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', flat=True)

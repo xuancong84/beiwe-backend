@@ -76,7 +76,7 @@ def decrypt_server(data, study_object_id):
 
 ########################### User/Device Decryption #############################
 
-def decrypt_device_file(patient_id, original_data, private_key, user):
+def decrypt_device_file(patient_id, original_data, private_key):
     """ Runs the line-by-line decryption of a file encrypted by a device.
     This function is a special handler for iOS file uploads. """
     
@@ -113,7 +113,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
         DecryptionKeyError.create( {
             "file_path": request.values['file_name'],
             "contents": "\n".join(file_data),
-            "user_id": user._id },
+            "user_id": patient_id },
             random_id=True
         )
         raise DecryptionKeyInvalidError("invalid decryption key. %s" % e.message)
@@ -133,7 +133,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
             create_line_error_db_entry(LINE_IS_NONE)
             error_types.append(LINE_IS_NONE)
             bad_lines.append(line)
-            print "encountered empty line of data, ignoring."
+            print("encountered empty line of data, ignoring.")
             continue
             
         try:
