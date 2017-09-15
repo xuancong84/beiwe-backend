@@ -74,11 +74,11 @@ def upload(OS_API=""):
     patient_id = request.values['patient_id']
     user = Participant.objects.get(patient_id=patient_id)
 
-    #Slightly different values for iOS vs Android behavior.
-    #Android sends the file data as standard form post parameter (request.values)
-    #iOS sends the file as a multipart upload (so ends up in request.files)
-    #if neither is found, consider the "body" of the post the file
-    #("body" post is not currently used by any client, only here for completeness)
+    # Slightly different values for iOS vs Android behavior.
+    # Android sends the file data as standard form post parameter (request.values)
+    # iOS sends the file as a multipart upload (so ends up in request.files)
+    # if neither is found, consider the "body" of the post the file
+    # ("body" post is not currently used by any client, only here for completeness)
     if "file" in request.files:
         uploaded_file = request.files['file']
     elif "file" in request.values:
@@ -108,8 +108,8 @@ def upload(OS_API=""):
     except DecryptionKeyInvalidError:
         return render_template('blank.html'), 200
 
-    #print "decryption success:", file_name
-    #if uploaded data a) actually exists, B) is validly named and typed...
+    # print "decryption success:", file_name
+    # if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension(file_name):
         s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
         FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
