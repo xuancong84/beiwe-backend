@@ -1,5 +1,6 @@
-import calendar, time
+import calendar
 from datetime import datetime
+import time
 
 from flask import Blueprint, request, abort, render_template, json
 from raven import Client as SentryClient
@@ -14,10 +15,7 @@ from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from libs.http_utils import determine_os_api
-from study.models import FileToProcess, Participant
-
-# Mongolia models
-from db.profiling import UploadTracking
+from study.models import FileToProcess, Participant, UploadTracking
 
 
 ################################################################################
@@ -99,7 +97,7 @@ def upload(OS_API=""):
     
     client_private_key = get_client_private_key(patient_id, user.study.object_id)
     try:
-        uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key)
+        uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
     except HandledError as e:
         # when decrypting fails, regardless of why, we rely on the decryption code
         # to log it correctly and return 200 OK to get the device to delete the file.
@@ -113,16 +111,13 @@ def upload(OS_API=""):
     #print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension(file_name):
-        s3_upload(file_name.replace("_", "/"), uploaded_file, user["study_id"])
+        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
         FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
-        UploadTracking.create(
-            {
-                "file_path": file_name.replace("_", "/"),
-                "timestamp": datetime.utcnow(),
-                "user_id": patient_id,
-                "file_size": len(uploaded_file)
-            },
-            random_id=True
+        UploadTracking.objects.create(
+            file_path=file_name.replace("_", "/"),
+            file_size=len(uploaded_file),
+            timestamp=datetime.utcnow(),
+            participant=user,
         )
         return render_template('blank.html'), 200
     

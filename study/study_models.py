@@ -22,7 +22,6 @@ from study.validators import (
 from study.base_models import AbstractModel, JSONTextField
 
 
-# AJK TODO create profiling models (see db/profiling.py)
 # AJK TODO when all that is done, collapse migrations
 # We're keeping Flask for the frontend stuff; Django is only for the database interactions (ORM).
 
