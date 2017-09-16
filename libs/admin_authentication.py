@@ -131,7 +131,7 @@ def get_admins_allowed_studies():
 def authenticate_system_admin(some_function):
     """ Authenticate system admin checks whether a user is a system admin before allowing access
     to pages marked with this decorator.  If a study_id variable is supplied as a keyword
-    argument, the decoator will automatically grab the ObjectId in place of the string provided
+    argument, the decorator will automatically grab the ObjectId in place of the string provided
     in a route.
     
     NOTE: if you are using this function along with the authenticate_admin_study_access decorator
