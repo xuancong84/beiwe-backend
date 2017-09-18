@@ -71,14 +71,6 @@ def safe_queue_user(*args, **kwargs):
                 raise
 
 
-def get_user_list_safely():
-    """
-    Get the list of participants with open files to process.
-    """
-    participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct()
-    return participant_set
-
-
 def create_file_processing_tasks():
     # The entire code is wrapped in an ErrorSentry, which catches any errors and sends them to Sentry
     with ErrorSentry(SENTRY_DSN, sentry_client_kwargs={'transport': HTTPTransport}) as error_sentry:
@@ -94,7 +86,7 @@ def create_file_processing_tasks():
         print("starting.")
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        participant_set = get_user_list_safely()
+        participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct()
         running = []
         
         for participant in participant_set:

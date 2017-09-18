@@ -9,6 +9,8 @@ from study.study_models import Study
 
 
 class FileProcessingLockedError(Exception): pass
+class UnchunkableDataTypeError(Exception): pass
+class ChunkableDataTypeError(Exception): pass
 
 
 class ChunkRegistry(AbstractModel):
@@ -26,22 +28,42 @@ class ChunkRegistry(AbstractModel):
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='chunk_registries')  # , db_index=True)
     participant = models.ForeignKey('Participant', on_delete=models.PROTECT, related_name='chunk_registries')  # , db_index=True)
     survey = models.ForeignKey('Survey', blank=True, null=True, on_delete=models.PROTECT, related_name='chunk_registries')  # , db_index=True)
-
+    
     @classmethod
-    def add_new_chunk(cls, data_type, time_bin, file_contents=None, **kwargs):
-        is_chunkable = data_type in CHUNKABLE_FILES
-        if is_chunkable:
-            time_bin = int(time_bin) * CHUNK_TIMESLICE_QUANTUM
-            chunk_hash_str = chunk_hash(file_contents)
-        else:
-            chunk_hash_str = ''
-
+    def register_chunked_data(cls, data_type, time_bin, chunk_path, file_contents, study_id, participant_id, survey_id=None):
+        
+        if data_type not in CHUNKABLE_FILES:
+            raise UnchunkableDataTypeError
+        
+        time_bin = int(time_bin) * CHUNK_TIMESLICE_QUANTUM
+        chunk_hash_str = chunk_hash(file_contents)
+        
         cls.objects.create(
-            is_chunkable=is_chunkable,
+            is_chunkable=True,
+            chunk_path=chunk_path,
             chunk_hash=chunk_hash_str,
             data_type=data_type,
             time_bin=datetime.fromtimestamp(time_bin),
-            **kwargs
+            study_id=study_id,
+            participant_id=participant_id,
+            survey_id=survey_id,
+        )
+    
+    @classmethod
+    def register_unchunked_data(cls, data_type, time_bin, chunk_path, study_id, participant_id, survey_id=None):
+        
+        if data_type in CHUNKABLE_FILES:
+            raise ChunkableDataTypeError
+        
+        cls.objects.create(
+            is_chunkable=False,
+            chunk_path=chunk_path,
+            chunk_hash='',
+            data_type=data_type,
+            time_bin=datetime.fromtimestamp(time_bin),
+            study_id=study_id,
+            participant_id=participant_id,
+            survey_id=survey_id,
         )
 
     @classmethod

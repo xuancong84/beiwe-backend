@@ -135,12 +135,12 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
                 # print "2a"
                 # Since we aren't binning the data by hour, just create a ChunkRegistry that
                 # points to the already existing S3 file.
-                ChunkRegistry.add_new_chunk(
+                ChunkRegistry.register_unchunked_data(
                     data['data_type'],
                     timestamp,
-                    study_id=data['ftp']['study'].pk,
-                    participant_id=data['ftp']['participant'].pk,
-                    chunk_path=data['ftp']['s3_file_path'],
+                    data['ftp']['s3_file_path'],
+                    data['ftp']['study'].pk,
+                    data['ftp']['participant'].pk,
                 )
                 # print "2b"
                 ftps_to_remove.add(data['ftp']['id'])
@@ -633,22 +633,20 @@ def batch_upload(upload):
             chunk.low_memory_update_chunk_hash(new_contents)
         else:
             # If a new ChunkRegistry object is being created
-            # AJK TODO talk with Eli: is this too slow?
             # Convert the ID's used in the S3 file names into primary keys for making ChunkRegistry FKs
-            study_pk = Study.objects.filter(object_id=chunk['study_id']).values_list('pk', flat=True).get()
-            participant_pk = Participant.objects.filter(patient_id=chunk['user_id']).values_list('pk', flat=True).get()
+            participant_pk, study_pk = Participant.objects.filter(patient_id=chunk['user_id']).values_list('pk', 'study_id').get()
             if chunk['survey_id']:
                 survey_pk = Survey.objects.filter(object_id=chunk['survey_id']).values_list('pk', flat=True).get()
             else:
                 survey_pk = None
-            ChunkRegistry.add_new_chunk(
+            ChunkRegistry.register_chunked_data(
                 chunk['data_type'],
                 chunk['time_bin'],
+                chunk['chunk_path'],
                 new_contents,  # unlikely to be huge
-                study_id=study_pk,
-                participant_id=participant_pk,
-                chunk_path=chunk['chunk_path'],
-                survey_id=survey_pk,
+                study_pk,
+                participant_pk,
+                survey_pk,
             )
     except Exception as e:
         ret['traceback'] = format_exc(e)

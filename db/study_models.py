@@ -1,5 +1,4 @@
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
-from config.constants import SURVEY_TYPES
 
 
 class Study( DatabaseObject ):
