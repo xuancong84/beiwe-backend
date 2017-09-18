@@ -22,7 +22,7 @@ TIME_ZONE = 'UTC'
 USE_TZ = True
 
 INSTALLED_APPS = [
-    'database.apps.StudyConfig',
+    'database.apps.DatabaseConfig',
     'django_extensions',
 ]
 

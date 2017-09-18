@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 
-class StudyConfig(AppConfig):
-    name = 'study'
+class DatabaseConfig(AppConfig):
+    name = 'database'
 
     def ready(self):
         from database import signals
