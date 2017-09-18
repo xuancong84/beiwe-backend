@@ -57,15 +57,12 @@ def process_file_chunks():
             )
             
             # If no files were processed, quit processing
-            # AJK TODO can't this just be if X and Y: break?
-            if participant.files_to_process.count() == starting_length:
-                if previous_number_bad_files == number_bad_files:
-                    # Cases:
-                    #   every file broke, might as well fail here, and would cause infinite loop otherwise.
-                    #   no new files.
-                    break
-                else:
-                    continue
+            if (participant.files_to_process.count() == starting_length
+                    and previous_number_bad_files == number_bad_files):
+                # Cases:
+                #   every file broke, might as well fail here, and would cause infinite loop otherwise.
+                #   no new files.
+                break
     FileProcessLock.unlock()
     error_handler.raise_errors()
     raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
@@ -184,9 +181,6 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                 # print 7
                 old_chunk_exists = ChunkRegistry.objects.filter(chunk_path=chunk_path).exists()
                 if old_chunk_exists:
-                    # AJK TODO chunk_path needs to be unique=True, ask Eli if that's reasonable
-                    # I checked on prod and the first 100.000 CRs have unique chunk_paths
-                    # The only plausible issue is for non-chunkable files that get processed twice (?)
                     chunk = ChunkRegistry.objects.get(chunk_path=chunk_path)
                     try:
                         # print 8
@@ -234,7 +228,7 @@ def upload_binified_data(binified_data, error_handler, survey_id_dict):
                         new_contents = construct_csv_string(updated_header, old_rows)
                     del old_rows
                     # print 14
-                    upload_these.append((chunk, chunk_path, new_contents.encode("zip"), study_id ))
+                    upload_these.append((chunk, chunk_path, new_contents.encode("zip"), study_id))
                     del new_contents
                 else:
                     # print "7a"

@@ -53,16 +53,6 @@ class Study(AbstractModel):
                 .annotate(name_lower=Func(F('name'), function='LOWER'))
                 .order_by('name_lower'))
 
-    def add_researcher(self, researcher):
-        # This takes either an actual Researcher object, or the primary key of such an object
-        self.researchers.add(researcher)
-
-    def remove_researcher(self, researcher):
-        self.researchers.remove(researcher)
-
-    def add_survey(self, survey):
-        self.surveys.add(survey)
-
     def get_surveys_for_study(self):
         survey_json_list = []
         for survey in self.surveys.all():
@@ -254,7 +244,6 @@ class Participant(AbstractPasswordUser):
         return compare_password(compare_me, self.salt, self.password)
 
     def set_device(self, device_id):
-        # AJK TODO once this works, get rid of it (and brethren)
         self.device_id = device_id
         self.save()
 
