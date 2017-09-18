@@ -6,7 +6,7 @@ from flask import Blueprint, flash, redirect, request, Response
 from libs.admin_authentication import authenticate_admin_study_access
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
-from study.models import Participant, Study
+from database.models import Participant, Study
 
 
 participant_administration = Blueprint('participant_administration', __name__)

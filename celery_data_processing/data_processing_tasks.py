@@ -41,7 +41,7 @@ from raven.transport import HTTPTransport
 from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
 from config.secure_settings import SENTRY_DSN
 from libs.files_to_process import ProcessingOverlapError, do_process_user_file_chunks
-from study.models import FileProcessLock, Participant
+from database.models import FileProcessLock, Participant
 
 
 @celery_app.task

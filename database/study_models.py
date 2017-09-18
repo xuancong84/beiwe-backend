@@ -15,11 +15,11 @@ from libs.security import (
     compare_password, device_hash, generate_easy_alphanumeric_string, generate_hash_and_salt,
     generate_random_string, generate_user_hash_and_salt
 )
-from study.validators import (
+from database.validators import (
     id_validator, standard_base_64_validator, url_safe_base_64_validator, LengthValidator
 )
 
-from study.base_models import AbstractModel, JSONTextField
+from database.base_models import AbstractModel, JSONTextField
 
 
 # AJK TODO when all that is done, collapse migrations

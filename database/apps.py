@@ -8,4 +8,4 @@ class StudyConfig(AppConfig):
     name = 'study'
 
     def ready(self):
-        from study import signals
+        from database import signals

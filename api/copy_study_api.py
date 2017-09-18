@@ -3,7 +3,7 @@ from flask import Blueprint, flash, redirect, request, Response
 
 from libs.admin_authentication import authenticate_system_admin
 from libs.copy_study import add_new_surveys, allowed_filename, update_device_settings
-from study.models import Study
+from database.models import Study
 
 copy_study_api = Blueprint('copy_study_api', __name__)
 

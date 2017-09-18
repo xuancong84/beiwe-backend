@@ -9,7 +9,7 @@ from libs.admin_authentication import authenticate_admin_login,\
     admin_is_system_admin
 from libs.security import check_password_requirements
 
-from study.models import Researcher, Study
+from database.models import Researcher, Study
 
 
 admin_pages = Blueprint('admin_pages', __name__)

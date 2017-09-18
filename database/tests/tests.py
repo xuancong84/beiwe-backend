@@ -4,7 +4,7 @@ import json
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from study.models import Researcher, Study, Survey, DeviceSettings, Participant
+from database.models import Researcher, Study, Survey, DeviceSettings, Participant
 
 # Fields that we don't fill in in translation to django types.
 class ReferenceReversed(Exception): pass
@@ -166,19 +166,19 @@ class ResearcherModelTests(CommonTestCase):
                                  ignore=["deleted", "id"])
         self.assertTrue(x)
     
-    def test_researcher_create_with_password(self): pass
+    def test_researcher_create_with_password(self): raise NotImplementedError
 
-    def test_researcher_check_password(self): pass
+    def test_researcher_check_password(self): raise NotImplementedError
         
-    def test_researcher_validate_password(self):pass
+    def test_researcher_validate_password(self): raise NotImplementedError
         
-    def test_researcher_set_password(self): pass
+    def test_researcher_set_password(self): raise NotImplementedError
         
-    def test_researcher_elevate_to_admin(self): pass
+    def test_researcher_elevate_to_admin(self): raise NotImplementedError
         
-    def test_researcher_validate_access_credentials(self): pass
+    def test_researcher_validate_access_credentials(self): raise NotImplementedError
         
-    def test_researcher_reset_access_credentials(self): pass
+    def test_researcher_reset_access_credentials(self): raise NotImplementedError
 
 
 class ParticipantModelTests(CommonTestCase):
@@ -197,21 +197,21 @@ class ParticipantModelTests(CommonTestCase):
         self.assertTrue(x)
     
     # Participant tests
-    def test_participant_create(self): pass
+    def test_participant_create(self): raise NotImplementedError
     
-    def test_participant_debug_validate_password(self): pass
+    def test_participant_debug_validate_password(self): raise NotImplementedError
 
-    def test_participant_validate_password(self): pass
+    def test_participant_validate_password(self): raise NotImplementedError
     
-    def test_participant_reset_password(self): pass
+    def test_participant_reset_password(self): raise NotImplementedError
     
-    def test_participant_set_device(self): pass
+    def test_participant_set_device(self): raise NotImplementedError
     
-    def test_participant_set_os_type(self): pass
+    def test_participant_set_os_type(self): raise NotImplementedError
     
-    def test_participant_clear_device(self): pass
+    def test_participant_clear_device(self): raise NotImplementedError
     
-    def test_participant_set_password(self): pass
+    def test_participant_set_password(self): raise NotImplementedError
 
 
 class StudyModelTests(CommonTestCase):
@@ -270,11 +270,11 @@ class StudyModelTests(CommonTestCase):
         bad_study = Study.create_with_object_id(name='name', encryption_key=encryption_key, deleted=True)
         self.assertNotIn(bad_study, Study.get_all_studies_by_name())
 
-    def test_add_researcher(self): pass
+    def test_add_researcher(self): raise NotImplementedError
     
-    def test_remove_researcher(self): pass
+    def test_remove_researcher(self): raise NotImplementedError
     
-    def test_add_survey(self): pass
+    def test_add_survey(self): raise NotImplementedError
     
     def reference_participant(self): pass
     
@@ -303,13 +303,13 @@ class SurveyModelTests(CommonTestCase):
         self.assertTrue(x)
 
     # Survey model tests:
-    def test_survey_create_with_settings(self): pass
+    def test_survey_create_with_settings(self): raise NotImplementedError
 
-    def test_get_surveys_for_study(self): pass
+    def test_get_surveys_for_study(self): raise NotImplementedError
+
+    def test_get_survey_ids_for_study(self): raise NotImplementedError
     
-    def test_get_survey_ids_for_study(self): pass
-    
-    def test_get_study_device_settings(self): pass
+    def test_get_study_device_settings(self): raise NotImplementedError
 
 
 class DeviceSettingsTests(CommonTestCase):
@@ -327,42 +327,39 @@ class DeviceSettingsTests(CommonTestCase):
 
 
 class DataAccessModelTests(CommonTestCase):
-    # ChunkRegistry model tests:
-    def test_add_new_chunk(self): pass
 
-    def test_get_chunks_time_range(self): pass
+    # ChunkRegistry model tests:
+    def test_add_new_chunk(self): raise NotImplementedError
+
+    def test_get_chunks_time_range(self): raise NotImplementedError
     
-    def test_update_chunk_hash(self): pass
+    def test_update_chunk_hash(self): raise NotImplementedError
     
-    def test_low_memory_update_chunk_hash(self): pass
-    
-    def test_get_chunks_time_range(self): pass
+    def test_low_memory_update_chunk_hash(self): raise NotImplementedError
     
     # FileProcessLock tests:
-    def test_lock(self): pass
+    def test_lock(self): raise NotImplementedError
     
-    def test_unlock(self): pass
+    def test_unlock(self): raise NotImplementedError
     
-    def test_islocked(self): pass
+    def test_islocked(self): raise NotImplementedError
     
-    def test_get_time_since_locked(self): pass
+    def test_get_time_since_locked(self): raise NotImplementedError
 
 
 class ProfilingModelTests(CommonTestCase):
     
     # Upload model tests
-    def test_get_trailing(self): pass
+    def test_get_trailing(self): raise NotImplementedError
     
-    def test_get_trailing_count(self): pass
+    def test_get_trailing_count(self): raise NotImplementedError
     
-    def test_weekly_stats(self): pass
-    
-    
+    def test_weekly_stats(self): raise NotImplementedError
+
     # DecryptionKeyError tests
     def decode(self): pass
-    
-    
-    
+
+
 def compare_dictionaries(reference, comparee, ignore=None):
     if not isinstance(reference, dict):
         raise Exception("reference was %s, not dictionary" % type(reference))
@@ -372,8 +369,8 @@ def compare_dictionaries(reference, comparee, ignore=None):
     if ignore is None:
         ignore = []
     
-    b = set((x, y) for x,y in comparee.iteritems() if x not in ignore)
-    a = set((x, y) for x,y in reference.iteritems() if x not in ignore)
+    b = set((x, y) for x, y in comparee.iteritems() if x not in ignore)
+    a = set((x, y) for x, y in reference.iteritems() if x not in ignore)
     differences_a = a - b
     differences_b = b - a
     

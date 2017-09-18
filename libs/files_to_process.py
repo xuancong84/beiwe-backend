@@ -14,7 +14,7 @@ from config.constants import (
     UPLOAD_FILE_TYPE_MAPPING
 )
 from libs.s3 import s3_retrieve, s3_upload
-from study.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study, Survey
+from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study, Survey
 
 
 class EverythingWentFine(Exception): pass

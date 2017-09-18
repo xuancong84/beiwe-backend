@@ -12,7 +12,7 @@ from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
-from study.models import ChunkRegistry, Participant, Researcher, Study
+from database.models import ChunkRegistry, Participant, Researcher, Study
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.

@@ -4,7 +4,7 @@ from flask import redirect, request, session
 from werkzeug.exceptions import abort
 
 from libs.security import generate_easy_alphanumeric_string
-from study.models import Researcher, Study
+from database.models import Researcher, Study
 
 ################################################################################
 ############################ Website Functions #################################

@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from study.models import DeviceSettings, Study, Survey, SurveyArchive
+from database.models import DeviceSettings, Study, Survey, SurveyArchive
 
 
 @receiver(post_save, sender=Study)

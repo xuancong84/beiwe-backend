@@ -2,7 +2,7 @@ from flask import abort, Blueprint, make_response, request, redirect, json
 
 from libs.admin_authentication import authenticate_admin_study_access
 from libs.json_logic import do_validate_survey
-from study.models import Survey
+from database.models import Survey
 
 survey_api = Blueprint('survey_api', __name__)
 

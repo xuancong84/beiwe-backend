@@ -7,7 +7,7 @@ from libs.admin_authentication import (
     get_admins_allowed_studies
 )
 from libs.security import check_password_requirements
-from study.models import Researcher, Study
+from database.models import Researcher, Study
 
 admin_api = Blueprint('admin_api', __name__)
 

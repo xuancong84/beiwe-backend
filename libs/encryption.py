@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
-from study.models import Study, DecryptionKeyError, EncryptionErrorMetadata, LineEncryptionError
+from database.models import Study, DecryptionKeyError, EncryptionErrorMetadata, LineEncryptionError
 
 
 class DecryptionKeyInvalidError(Exception): pass

@@ -1,7 +1,7 @@
 from flask import abort, Blueprint, render_template
 from libs.admin_authentication import authenticate_admin_study_access,\
     get_admins_allowed_studies, admin_is_system_admin
-from study.models import Survey
+from database.models import Survey
 
 
 survey_designer = Blueprint('survey_designer', __name__)

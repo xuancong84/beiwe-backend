@@ -18,13 +18,12 @@ DATABASES = {
     },
 }
 
-
 TIME_ZONE = 'UTC'
 USE_TZ = True
 
 INSTALLED_APPS = [
-    'study.apps.StudyConfig',
-    'django_extensions'
+    'database.apps.StudyConfig',
+    'django_extensions',
 ]
 
 SHELL_PLUS = "ipython"

@@ -7,7 +7,7 @@ from libs.admin_authentication import (
     admin_is_system_admin, authenticate_admin_login,
     get_admins_allowed_studies, get_admins_allowed_studies_as_query_set
 )
-from study.models import Researcher
+from database.models import Researcher
 
 
 data_access_web_form = Blueprint('data_access_web_form', __name__)

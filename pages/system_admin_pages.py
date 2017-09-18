@@ -11,7 +11,7 @@ from libs.admin_authentication import authenticate_system_admin,\
 from libs.copy_study import copy_existing_study_if_asked_to
 from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
     string_to_int
-from study.models import Researcher, Study
+from database.models import Researcher, Study
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 

@@ -4,8 +4,8 @@ from django.db import models
 
 from config.constants import ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
 from libs.security import chunk_hash, low_memory_chunk_hash
-from study.base_models import AbstractModel
-from study.study_models import Study
+from database.base_models import AbstractModel
+from database.study_models import Study
 
 
 class FileProcessingLockedError(Exception): pass

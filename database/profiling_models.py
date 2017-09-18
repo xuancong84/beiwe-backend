@@ -4,7 +4,7 @@ from django.db import models
 
 from config.constants import UPLOAD_FILE_TYPE_MAPPING
 from libs.security import decode_base64
-from study.base_models import AbstractModel, JSONTextField
+from database.base_models import AbstractModel, JSONTextField
 
 
 class EncryptionErrorMetadata(AbstractModel):

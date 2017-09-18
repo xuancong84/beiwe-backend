@@ -2,7 +2,7 @@ import functools
 from flask import request, abort
 from werkzeug.datastructures import MultiDict
 
-from study.models import Participant
+from database.models import Participant
 
 
 def authenticate_user(some_function):

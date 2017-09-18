@@ -3,7 +3,7 @@ from flask.blueprints import Blueprint
 from flask.templating import render_template
 from libs.user_authentication import authenticate_user
 from libs.graph_data import get_survey_results
-from study.models import Participant
+from database.models import Participant
 
 mobile_pages = Blueprint('mobile_pages', __name__)
 

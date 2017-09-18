@@ -20,7 +20,7 @@ from db.study_models import (
 from db.user_models import Admins as MAdminSet, Users as MUserSet
 
 # Import Django models
-from study.models import (
+from database.models import (
     Researcher as DAdmin, DeviceSettings as DSettings, Participant as DUser,
     Study as DStudy, Survey as DSurvey, ChunkRegistry as DChunks
 )
