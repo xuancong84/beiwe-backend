@@ -19,7 +19,8 @@ DATABASES = {
 }
 
 
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = 'UTC'
+USE_TZ = True
 
 INSTALLED_APPS = [
     'study.apps.StudyConfig',

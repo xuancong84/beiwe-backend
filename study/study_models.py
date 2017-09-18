@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
 import json
 
 from django.db import models
@@ -71,8 +72,28 @@ class Study(AbstractModel):
         return self.device_settings
 
 
-# AJK TODO idea: add SurveyArchive model that gets created on Survey.save() (or with a signal)
-class Survey(AbstractModel):
+class AbstractSurvey(AbstractModel):
+    
+    AUDIO_SURVEY = 'audio_survey'
+    TRACKING_SURVEY = 'tracking_survey'
+    SURVEY_TYPE_CHOICES = (
+        (AUDIO_SURVEY, AUDIO_SURVEY),
+        (TRACKING_SURVEY, TRACKING_SURVEY),
+    )
+    
+    content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
+    survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES,
+                                   help_text='What type of survey this is.')
+    settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
+    timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
+                            help_text='JSON blob containing the times at which the survey is sent.')
+    
+    class Meta:
+        abstract = True
+
+
+# AJK TODO annotate that there is a pre-save signal
+class Survey(AbstractSurvey):
     """
     Surveys contain all information the app needs to display the survey correctly to a participant,
     and when it should push the notifications to take the survey.
@@ -89,24 +110,12 @@ class Survey(AbstractModel):
     inner list containing any number of times of the day. Times of day are integer values
     indicating the number of seconds past midnight.
     """
-
-    AUDIO_SURVEY = 'audio_survey'
-    TRACKING_SURVEY = 'tracking_survey'
-    SURVEY_TYPE_CHOICES = (
-        (AUDIO_SURVEY, AUDIO_SURVEY),
-        (TRACKING_SURVEY, TRACKING_SURVEY),
-    )
-
-    content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
-    survey_type = models.CharField(max_length=16, choices=SURVEY_TYPE_CHOICES,
-                                   help_text='What type of survey this is.')
-    settings = JSONTextField(default='{}', help_text='JSON blob containing settings for the survey.')
-    timings = JSONTextField(default=json.dumps([[], [], [], [], [], [], []]),
-                            help_text='JSON blob containing the times at which the survey is sent.')
-
-    # Do not delete after migration, this is required for file name and path generation
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    
+    # This is required for file name and path generation
     object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)])
-
+    
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys')
 
     @classmethod
@@ -128,6 +137,15 @@ class Survey(AbstractModel):
 
         survey = cls.create_with_object_id(survey_type=survey_type, **kwargs)
         return survey
+
+
+class SurveyArchive(AbstractSurvey):
+    
+    archive_start = models.DateTimeField()
+    archive_end = models.DateTimeField(default=datetime.utcnow)
+    
+    survey = models.ForeignKey('Survey', on_delete=models.PROTECT, related_name='archives')
+    study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys_archive')
 
 
 class AbstractPasswordUser(AbstractModel):
