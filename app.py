@@ -3,8 +3,32 @@ import jinja2
 from flask import Flask, render_template, redirect
 from werkzeug.contrib.fixers import ProxyFix
 
+# if running locally we want to use a sqlite database
+if __name__ == '__main__':
+    os.environ['DJANGO_DB_ENV'] = "local"
+
+# if running through WSGI we want
+if not __name__ == '__main__':
+    error = []
+    if 'RDS_DB_NAME' not in os.environ():
+        error.append('RDS_DB_NAME')
+    if 'RDS_USERNAME' not in os.environ():
+        error.append('RDS_USERNAME')
+    if 'RDS_PASSWORD' not in os.environ():
+        error.append('RDS_PASSWORD')
+    if 'RDS_HOSTNAME' not in os.environ():
+        error.append('RDS_HOSTNAME')
+    
+    if error:
+        class ServerImproperlyConfiguredError(Exception):
+            pass
+        raise ServerImproperlyConfiguredError(",".join(e for e in error) + "environment variables missing.")
+    
+    os.environ['DJANGO_DB_ENV'] = "remote"
+
 # Load and set up Django
 from config import load_django
+
 
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
     data_access_web_form
@@ -54,14 +78,14 @@ def inject_dict_for_all_templates():
     return {"SENTRY_JAVASCRIPT_DSN":SENTRY_JAVASCRIPT_DSN}
 
 
-#Extra Production settings
+# Extra Production settings
 if not __name__ == '__main__':
     # Points our custom 404 page (in /frontend/templates) to display on a 404 error
     @app.errorhandler(404)
     def e404(e):
         return render_template("404.html",is_logged_in=is_logged_in()), 404
 
-#Extra Debugging settings
+# Extra Debugging settings
 if __name__ == '__main__':
     # might be necessary if running on windows/linux subsystem on windows.
     # from gevent.wsgi import WSGIServer

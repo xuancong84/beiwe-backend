@@ -1,3 +1,5 @@
+import os
+
 from os.path import dirname, join
 
 from config.settings import FLASK_SECRET_KEY
@@ -5,18 +7,34 @@ from config.settings import FLASK_SECRET_KEY
 DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
 TEST_DATABASE_PATH = join(dirname(__file__), 'private/tests_db.sqlite')
 
-# THIS BIT IS REQUIRED BY THE DJANGO MANAGEMENT COMMANDS
-
+# SECRET KEY is required by the django management commands, using the flask key is fine because
+# we are not actually using in in any server runtime capacity.
 SECRET_KEY = FLASK_SECRET_KEY
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_PATH,
-        # TODO: The test database directive currently fails to create a database...
-        # 'TEST': {'NAME': TEST_DATABASE_PATH}
-    },
-}
+
+if os.environ['DJANGO_DB_ENV'] == "local":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': DB_PATH,
+            # TODO: The test database directive currently fails to create a database...
+            # 'TEST': {'NAME': TEST_DATABASE_PATH}
+        },
+    }
+elif os.environ['DJANGO_DB_ENV'] == "remote":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+        },
+    }
+else:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured("server not running as expected, could not find environment variable DJANGO_DB_ENV")
+
 
 TIME_ZONE = 'UTC'
 USE_TZ = True
