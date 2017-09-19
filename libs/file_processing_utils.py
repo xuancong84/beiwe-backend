@@ -5,7 +5,7 @@ from config.constants import (
     CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
     PROCESSABLE_FILE_EXTENSIONS, data_stream_to_s3_file_name_string,
 )
-from libs.files_to_process import process_file_chunks
+from libs.file_processing import process_file_chunks
 from libs.s3 import s3_list_files, s3_delete, s3_upload
 from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study
 

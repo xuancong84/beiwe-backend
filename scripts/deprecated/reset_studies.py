@@ -3,7 +3,7 @@ from bson import ObjectId
 from db.data_access_models import FilesToProcess
 from db.study_models import Study
 from libs.file_processing_utils import reindex_study
-from libs.files_to_process import process_file_chunks
+from libs.file_processing import process_file_chunks
 from libs.logging import email_system_administrators
 
 studies = []
