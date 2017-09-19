@@ -8,7 +8,7 @@ from flask import request
 from raven import Client as SentryClient
 from raven.transport import HTTPTransport
 
-from config.secure_settings import SENTRY_DSN
+from config.settings import SENTRY_DSN
 
 #old email error code:
 # email_system_administrators(error_report,

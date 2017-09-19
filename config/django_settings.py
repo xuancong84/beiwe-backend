@@ -1,6 +1,6 @@
 from os.path import dirname, join
 
-from config.secure_settings import FLASK_SECRET_KEY
+from config.settings import FLASK_SECRET_KEY
 
 DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
 TEST_DATABASE_PATH = join(dirname(__file__), 'private/tests_db.sqlite')

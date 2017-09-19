@@ -154,7 +154,7 @@ class AbstractPasswordUser(AbstractModel):
     users of the database, whatever variety of user they may be.
 
     APU descendants have passwords hashed once with sha256 and many times (as defined in
-    secure_settings.py) with PBKDF2, and salted using a cryptographically secure random number
+    settings.py) with PBKDF2, and salted using a cryptographically secure random number
     generator. The sha256 check duplicates the storage of the password on the mobile device, so
     that the APU's password is never stored in a reversible manner.
     """

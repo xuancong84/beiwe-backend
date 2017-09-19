@@ -11,7 +11,7 @@ from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages
 from api import admin_api, copy_study_api, data_access_api, mobile_api, participant_administration, survey_api
 from libs.admin_authentication import is_logged_in
 from libs.security import set_secret_key
-from config.secure_settings import SENTRY_DSN, SENTRY_JAVASCRIPT_DSN
+from config.settings import SENTRY_DSN, SENTRY_JAVASCRIPT_DSN
 
 
 def subdomain(directory):

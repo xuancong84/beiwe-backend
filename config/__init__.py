@@ -1,5 +1,5 @@
-from config import secure_settings, constants
-provided_settings = vars(secure_settings)
+from config import settings, constants
+provided_settings = vars(settings)
 
 #check that all values provided actually contain something
 for attr_name, attr_value in provided_settings.items():
@@ -33,9 +33,9 @@ for mandatory_var in MANDATORY_VARS:
         raise ImportError(mandatory_var + " was not provided in your settings.")
 
 # Environment variables might be unpredictable, so we sanitize the numerical ones as ints.
-secure_settings.MONGO_PORT = int(secure_settings.MONGO_PORT)
-secure_settings.ASYMMETRIC_KEY_LENGTH = int(secure_settings.ASYMMETRIC_KEY_LENGTH)
-secure_settings.ITERATIONS = int(secure_settings.ITERATIONS)
+settings.MONGO_PORT = int(settings.MONGO_PORT)
+settings.ASYMMETRIC_KEY_LENGTH = int(settings.ASYMMETRIC_KEY_LENGTH)
+settings.ITERATIONS = int(settings.ITERATIONS)
 
 constants.DEFAULT_S3_RETRIES = int(constants.DEFAULT_S3_RETRIES)
 constants.CONCURRENT_NETWORK_OPS = int(constants.CONCURRENT_NETWORK_OPS)
@@ -44,10 +44,10 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 
 # email addresses are parsed from a comma separated list
 # whitespace before and after addresses are stripped
-secure_settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in secure_settings.SYSADMIN_EMAILS.split(",")]
+settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in settings.SYSADMIN_EMAILS.split(",")]
 
 # IS_STAGING needs to resolve to False except under specific settings; the default needs to be production.
-if (secure_settings.IS_STAGING is True or secure_settings.IS_STAGING.upper() == "TRUE"):
-    secure_settings.IS_STAGING = True
+if (settings.IS_STAGING is True or settings.IS_STAGING.upper() == "TRUE"):
+    settings.IS_STAGING = True
 else:
-    secure_settings.IS_STAGING = False
+    settings.IS_STAGING = False

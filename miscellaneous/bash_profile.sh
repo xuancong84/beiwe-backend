@@ -84,7 +84,7 @@ alias relog='restart; logt'
 alias uplog='up;logt'
 
 #Configuration files
-alias conf='sudo nano /var/www/beiwe-backend/config/secure_settings.py'
+alias conf='sudo nano /var/www/beiwe-backend/config/settings.py'
 alias monconf='sudo nano /etc/mongodb.conf'
 
 #Services configuration files

@@ -1,7 +1,7 @@
 from flask import abort, Blueprint, redirect, request
 from flask.templating import render_template
 
-from config.secure_settings import IS_STAGING
+from config.settings import IS_STAGING
 from libs.admin_authentication import (
     authenticate_system_admin, authenticate_admin_login, admin_is_system_admin,
     get_admins_allowed_studies

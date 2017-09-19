@@ -1,10 +1,10 @@
 All the settings listed here can be found either in the constants file or in the
-secure_settings file, or can have an environment variable set for them.
+config/settings.py file, or can have an environment variable set for them.
 
 
 Optional Settings
 if an environment variable is provided for any of these they will override the default
-value.  More information is available in the constants and secure_settings files in the
+value.  More information is available in the constants and config/settings.py files in the
 config directory.
 
     DEFAULT_S3_RETRIES - the number of retries on attempts to connect to AWS S3
@@ -28,7 +28,7 @@ config directory.
 
 Mandatory Settings
 If any of these are not provided, Beiwe will not run, empty and None values are
-considered invalid  Additional documentation can be found in secure_settings.
+considered invalid  Additional documentation can be found in config/setting.pys.
 
     MONGO_USERNAME - the mongodb user name
     MONGO_PASSWORD - the mongodb user password

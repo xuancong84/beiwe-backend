@@ -3,8 +3,8 @@ import random
 
 from flask import flash
 
-from config.secure_settings import (MONGO_PASSWORD, MONGO_USERNAME,
-                                    FLASK_SECRET_KEY, ITERATIONS)
+from config.settings import (MONGO_PASSWORD, MONGO_USERNAME,
+                             FLASK_SECRET_KEY, ITERATIONS)
 from config.constants import PASSWORD_REQUIREMENT_REGEX_LIST
 from config.study_constants import EASY_ALPHANUMERIC_CHARS
 

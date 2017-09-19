@@ -2,7 +2,7 @@ import traceback, smtplib
 from datetime import datetime
 
 from cronutils.error_handler import BundledError
-from config.secure_settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+from config.settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
 
 
 def log_and_email_500_error(e, log_message=None, emails=SYSADMIN_EMAILS):

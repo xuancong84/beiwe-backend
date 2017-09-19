@@ -2,9 +2,9 @@ import mongolia
 from datetime import datetime
 from mongobackup import backup
 
-from config.secure_settings import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
-         S3_BACKUPS_AWS_SECRET_ACCESS_KEY as BACKUP_KEY,S3_BACKUPS_BUCKET,
-         MONGO_USERNAME, MONGO_PASSWORD, LOCAL_BACKUPS_DIRECTORY)
+from config.settings import (S3_BACKUPS_AWS_KEY_ID as BACKUP_ID,
+                             S3_BACKUPS_AWS_SECRET_ACCESS_KEY as BACKUP_KEY, S3_BACKUPS_BUCKET,
+                             MONGO_USERNAME, MONGO_PASSWORD, LOCAL_BACKUPS_DIRECTORY)
 
 from db.mongolia_setup import db_connection
 
