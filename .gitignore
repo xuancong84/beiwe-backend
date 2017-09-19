@@ -5,9 +5,6 @@
 .idea/
 .python-version
 
-# Beiwe Excluded Files
-config/security.py
-
 # A place to stick your files
 private/*
 
@@ -16,4 +13,3 @@ private/*
 *.pyc
 *~
 *.pem
-
