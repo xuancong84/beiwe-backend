@@ -5,7 +5,7 @@
 # tails the celery log, ctrl-c to exit the tail
 
 #sudo apt-get install -y rabbitmq-server
-sudo pip install supervisor celery
+sudo pip install supervisor==3.3.3 celery==4.1.0
 
 #this is almost definitely overkill/unnecessary
 sudo mkdir -p /etc/supervisor/conf.d/
