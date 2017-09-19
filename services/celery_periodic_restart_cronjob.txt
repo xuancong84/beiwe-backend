@@ -1,0 +1,6 @@
+# Celery generally has some issues keeping memory usage down, so we periodically restart it.
+# When supervisord receives the HUP signal it will stop all processes, reload the configuration from the first config
+# file it finds, and start all processes.
+
+# at 4:29am restart celery by restarting supervisord
+29 4 * * *: pkill -HUP supervisord
