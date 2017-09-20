@@ -76,9 +76,11 @@ class AbstractSurvey(AbstractModel):
     
     AUDIO_SURVEY = 'audio_survey'
     TRACKING_SURVEY = 'tracking_survey'
+    DUMMY_SURVEY = 'dummy'
     SURVEY_TYPE_CHOICES = (
         (AUDIO_SURVEY, AUDIO_SURVEY),
         (TRACKING_SURVEY, TRACKING_SURVEY),
+        (DUMMY_SURVEY, DUMMY_SURVEY)
     )
     
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
