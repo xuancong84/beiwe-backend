@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -30,9 +31,13 @@ def create_survey_archive(sender, **kwargs):
     
     # The Survey instance being passed has the updated contents of the Survey. To get
     # the preexisting contents of the Survey, make a database call using the passed
-    # instance's primary key.
+    # instance's primary key. If we get an ObjectDoesNotExist error short-circuit because
+    # that means it is the initial save operation.
     my_survey_plus_updates = kwargs['instance']
-    my_survey = Survey.objects.get(pk=my_survey_plus_updates.pk)
+    try:
+        my_survey = Survey.objects.get(pk=my_survey_plus_updates.pk)
+    except ObjectDoesNotExist:
+        return
     
     # All fields present in AbstractSurvey, plus the study foreign key which is
     # separately present in Survey and SurveyArchive.
