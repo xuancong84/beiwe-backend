@@ -1,10 +1,33 @@
+import os
+from os.path import abspath, dirname, join, exists
+
+EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env")
+ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
+print EXPLICIT_REMOTE_ENV
+print ELASTIC_BEANSTALK_ENV
+errors = []
+
+if exists(EXPLICIT_REMOTE_ENV) or exists(ELASTIC_BEANSTALK_ENV):
+    os.environ['DJANGO_DB_ENV'] = "remote"
+    # If you are running with a remote database (e.g. on a server in a beiwe cluster) you need
+    # some extra environment variables to be set.
+    for env_var in ["RDS_DB_NAME", "RDS_USERNAME", "RDS_PASSWORD", "RDS_HOSTNAME"]:
+        if env_var not in os.environ:
+            errors.append("environment variable %s was not found" % env_var)
+    
+else:
+    # if you are not running as part of a beiwe cluster (e.g. for local development)
+    # we configure django to use a locale sqlite database.
+    os.environ['DJANGO_DB_ENV'] = "local"
+
+
 from config import settings, constants
 provided_settings = vars(settings)
 
 #check that all values provided actually contain something
 for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
-        raise ImportError(attr_name + " was not provided with a value.")
+        errors.append(attr_name + " was not provided with a value.")
 
 MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'AWS_ACCESS_KEY_ID',
@@ -30,7 +53,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
 #Check that all the mandatory variables exist...
 for mandatory_var in MANDATORY_VARS:
     if mandatory_var not in provided_settings:
-        raise ImportError(mandatory_var + " was not provided in your settings.")
+        errors.append(mandatory_var + " was not provided in your settings.")
 
 # Environment variables might be unpredictable, so we sanitize the numerical ones as ints.
 settings.MONGO_PORT = int(settings.MONGO_PORT)
@@ -52,4 +75,6 @@ if (settings.IS_STAGING is True or settings.IS_STAGING.upper() == "TRUE"):
 else:
     settings.IS_STAGING = False
     
-    
+if errors:
+    class BadServerConfigurationError(Exception): pass
+    raise BadServerConfigurationError("\n" + "\n".join(errors))

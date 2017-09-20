@@ -3,28 +3,13 @@ import jinja2
 from flask import Flask, render_template, redirect
 from werkzeug.contrib.fixers import ProxyFix
 
-# if running locally we want to use a sqlite database
-if __name__ == '__main__':
-    os.environ['DJANGO_DB_ENV'] = "local"
-
-# if running through WSGI we want
-if not __name__ == '__main__':
-    error = []
-    if 'RDS_DB_NAME' not in os.environ():
-        error.append('RDS_DB_NAME')
-    if 'RDS_USERNAME' not in os.environ():
-        error.append('RDS_USERNAME')
-    if 'RDS_PASSWORD' not in os.environ():
-        error.append('RDS_PASSWORD')
-    if 'RDS_HOSTNAME' not in os.environ():
-        error.append('RDS_HOSTNAME')
-    
-    if error:
-        class ServerImproperlyConfiguredError(Exception):
-            pass
-        raise ServerImproperlyConfiguredError(",".join(e for e in error) + "environment variables missing.")
-    
-    os.environ['DJANGO_DB_ENV'] = "remote"
+# # if running locally we want to use a sqlite database
+# if __name__ == '__main__':
+#     os.environ['DJANGO_DB_ENV'] = "local"
+#
+# # if running through WSGI we want
+# if not __name__ == '__main__':
+#     os.environ['DJANGO_DB_ENV'] = "remote"
 
 # Load and set up Django
 from config import load_django
