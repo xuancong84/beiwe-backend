@@ -67,7 +67,8 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 
 # email addresses are parsed from a comma separated list
 # whitespace before and after addresses are stripped
-settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in settings.SYSADMIN_EMAILS.split(",")]
+if settings.SYSADMIN_EMAILS:
+    settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in settings.SYSADMIN_EMAILS.split(",")]
 
 # IS_STAGING needs to resolve to False except under specific settings; the default needs to be production.
 if (settings.IS_STAGING is True or settings.IS_STAGING.upper() == "TRUE"):
