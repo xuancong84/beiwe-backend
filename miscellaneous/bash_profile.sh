@@ -95,6 +95,8 @@ alias db='cd /var/www/beiwe-backend/; ipython -i /var/www/beiwe-backend/db_shell
 alias sdb="cd /var/www/beiwe-backend/; sudo ipython -i /var/www/beiwe-backend/db_shell.py"
 alias py="python"
 alias ipy="ipython"
+alias manage="python manage.py"
+alias shell="python manage.py shell_plus"
 
 function run {
     nohup python -u $1 > ~/$1_log.out &

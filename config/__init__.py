@@ -1,16 +1,20 @@
 import os
 from os.path import abspath, dirname, join, exists
 
-EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env")
+EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env") + ".py"
 ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
 print EXPLICIT_REMOTE_ENV
 print ELASTIC_BEANSTALK_ENV
 errors = []
 
+if exists(EXPLICIT_REMOTE_ENV) and not exists(ELASTIC_BEANSTALK_ENV):
+    import config.remote_db_env
+
 if exists(EXPLICIT_REMOTE_ENV) or exists(ELASTIC_BEANSTALK_ENV):
     os.environ['DJANGO_DB_ENV'] = "remote"
     # If you are running with a remote database (e.g. on a server in a beiwe cluster) you need
     # some extra environment variables to be set.
+    
     for env_var in ["RDS_DB_NAME", "RDS_USERNAME", "RDS_PASSWORD", "RDS_HOSTNAME"]:
         if env_var not in os.environ:
             errors.append("environment variable %s was not found" % env_var)
