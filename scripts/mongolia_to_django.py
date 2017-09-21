@@ -409,7 +409,7 @@ def migrate_chunk_registries():
             if i % CHUNK_SIZE == 0:
                 # print a thing every 10,000
                 j += 1
-                if j % 100 == 0:
+                if j % 10 == 0:
                     print j * CHUNK_SIZE
                     
                 # there are a lot of unique chunk path issues
@@ -472,10 +472,7 @@ if __name__ == '__main__':
     d_study_survey_dict = {}  # A mapping of surveys to their associated studies
     d_study_settings_dict = {}  # A mapping of device settings to their associated studies
 
-    # do not increase, our fallback creation method when we encounter duplicate chunk paths
-    # is super slow and we want to minimize number of objects it has to handle while still
-    # benefitting from the bulk_create.
-    CHUNK_SIZE = 300
+    CHUNK_SIZE = 10000
     
     error_handler = ErrorHandler()
     # error_handler = null_error_handler()
@@ -489,3 +486,4 @@ if __name__ == '__main__':
     print "end:", datetime.now()
     
     error_handler.raise_errors()
+
