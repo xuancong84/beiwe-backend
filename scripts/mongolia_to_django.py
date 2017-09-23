@@ -189,9 +189,6 @@ def migrate_surveys():
                 d_survey_id = DSurvey.objects.filter(object_id=m_survey['_id']).values('pk').get()
             except DSurvey.DoesNotExist:
                 print 'Survey {} was not created.'.format(m_survey_id)
-                # raise ObjectCreationException('Survey {} was not created.'.format(m_survey_id))
-                if m_survey._id not in orphaned_surveys:
-                    raise Exception("buh?")
                 continue
             survey_id_dict[m_survey_id] = d_survey_id
 
@@ -474,8 +471,8 @@ if __name__ == '__main__':
 
     CHUNK_SIZE = 10000
     
-    error_handler = ErrorHandler()
-    # error_handler = null_error_handler()
+    # error_handler = ErrorHandler()
+    error_handler = null_error_handler()
     
     print(DStudy.objects.count(), DSurvey.objects.count(), DSettings.objects.count(),
           DAdmin.objects.count(), DUser.objects.count(), DChunks.objects.count())
