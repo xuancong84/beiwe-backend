@@ -18,7 +18,7 @@ class ChunkRegistry(AbstractModel):
     DATA_TYPE_CHOICES = tuple([(stream_name, stream_name) for stream_name in ALL_DATA_STREAMS])
 
     is_chunkable = models.BooleanField()
-    chunk_path = models.CharField(max_length=256, unique=True)
+    chunk_path = models.CharField(max_length=256)#, unique=True)
     chunk_hash = models.CharField(max_length=25, blank=True)
 
     data_type = models.CharField(max_length=32, choices=DATA_TYPE_CHOICES)  # , db_index=True)

@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('deleted', models.BooleanField(default=False)),
                 ('is_chunkable', models.BooleanField()),
-                ('chunk_path', models.CharField(max_length=256, unique=True)),
+                ('chunk_path', models.CharField(max_length=256)),
                 ('chunk_hash', models.CharField(blank=True, max_length=25)),
                 ('data_type', models.CharField(choices=[(b'accelerometer', b'accelerometer'), (b'bluetooth', b'bluetooth'), (b'calls', b'calls'), (b'gps', b'gps'), (b'identifiers', b'identifiers'), (b'app_log', b'app_log'), (b'power_state', b'power_state'), (b'survey_answers', b'survey_answers'), (b'survey_timings', b'survey_timings'), (b'texts', b'texts'), (b'audio_recordings', b'audio_recordings'), (b'wifi', b'wifi'), (b'proximity', b'proximity'), (b'gyro', b'gyro'), (b'magnetometer', b'magnetometer'), (b'devicemotion', b'devicemotion'), (b'reachability', b'reachability')], max_length=32)),
                 ('time_bin', models.DateTimeField()),
