@@ -69,8 +69,8 @@ def authenticate_admin_study_access(some_function):
         researcher = Researcher.objects.get(username=username)
 
         # Get values first from kwargs, then from the POST request
-        survey_id = kwargs.get('survey_id', request.values.get('survey_id'))
-        study_id = kwargs.get('study_id', request.values.get('study_id'))
+        survey_id = kwargs.get('survey_id', request.values.get('survey_id', None))
+        study_id = kwargs.get('study_id', request.values.get('study_id', None))
 
         # Check proper syntax usage.
         if not survey_id and not study_id:

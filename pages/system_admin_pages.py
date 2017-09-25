@@ -63,8 +63,8 @@ def create_new_researcher():
         )
 
     # Drop any whitespace or special characters from the username
-    username = ''.join(e for e in request.form.get('admin_id') if e.isalnum())
-    password = request.form.get('password')
+    username = ''.join(e for e in request.form.get('admin_id', '') if e.isalnum())
+    password = request.form.get('password', '')
 
     if Researcher.objects.filter(username=username).exists():
         flash("There is already a researcher with username " + username, 'danger')
@@ -116,8 +116,8 @@ def create_study():
             system_admin=admin_is_system_admin()
         )
 
-    name = request.form.get('name')
-    encryption_key = request.form.get('encryption_key')
+    name = request.form.get('name', '')
+    encryption_key = request.form.get('encryption_key', '')
     try:
         study = Study.create_with_object_id(name=name, encryption_key=encryption_key)
         copy_existing_study_if_asked_to(study)
@@ -133,7 +133,7 @@ def create_study():
 @authenticate_system_admin
 def delete_study(study_id=None):
     """ This functionality has been disabled pending testing and feature change."""
-    if request.form.get('confirmation') == 'true':
+    if request.form.get('confirmation', 'false') == 'true':
         study = Study.objects.get(pk=study_id)
         study.mark_deleted()
         flash("Deleted study '%s'" % study.name, 'success')

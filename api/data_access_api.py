@@ -36,8 +36,8 @@ def get_and_validate_study_id():
     Study does not exist in our database causes 404 error.
     """
     
-    study_object_id_as_str = request.values.get('study_id')
-    study_pk = request.values.get('study_pk')
+    study_object_id_as_str = request.values.get('study_id', None)
+    study_pk = request.values.get('study_pk', None)
     
     if study_object_id_as_str:
         # If the ID is incorrectly sized, we return a 400

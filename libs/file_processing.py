@@ -14,7 +14,7 @@ from config.constants import (
     UPLOAD_FILE_TYPE_MAPPING
 )
 from libs.s3 import s3_retrieve, s3_upload
-from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Study, Survey
+from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Survey
 
 
 class EverythingWentFine(Exception): pass
@@ -303,7 +303,7 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
 def file_path_to_data_type(file_path):
     # Look through each folder name in file_path to see if it corresponds to a data type
     for file_piece in file_path.split('/'):
-        data_type = UPLOAD_FILE_TYPE_MAPPING.get(file_piece)
+        data_type = UPLOAD_FILE_TYPE_MAPPING.get(file_piece, None)
         if data_type:
             return data_type
     
