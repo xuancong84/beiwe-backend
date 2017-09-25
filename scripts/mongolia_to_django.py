@@ -19,8 +19,8 @@ import json
 from config import load_django
 
 # Import Mongolia models
-from db.data_access_models import ChunksRegistry as MChunks, ChunkRegistry as MChunkInstanceClass
-
+from db.data_access_models import ChunksRegistry as MChunkSet, ChunkRegistry as MChunk
+from db.profiling import Uploads as MUploadSet
 from db.study_models import (
     StudyDeviceSettings as MSettings, StudyDeviceSettingsCollection as MSettingsSet,
     Studies as MStudySet, Survey as MSurvey, Surveys as MSurveySet
@@ -30,7 +30,7 @@ from db.user_models import Admins as MAdminSet, Users as MUserSet
 # Import Django models
 from database.models import (
     Researcher as DAdmin, DeviceSettings as DSettings, Participant as DUser,
-    Study as DStudy, Survey as DSurvey, ChunkRegistry as DChunks
+    Study as DStudy, Survey as DSurvey, ChunkRegistry as DChunk, UploadTracking as DUpload
 )
 
 
@@ -39,6 +39,7 @@ class MissingRequiredForeignKey(Exception): pass
 class ObjectCreationException(Exception): pass
 
 
+# Utils
 def create_dummy_survey(object_id, study_object_id):
     # print orphaned_surveys
     # print object_id
@@ -80,7 +81,20 @@ def create_dummy_study(object_id):
     return s
 
 
-# Actual code begins here
+def duplicate_chunk_path_severity(chunk_path):
+    """ Compare contents of all chunks matching this path, blow up if any values are different.
+        (They should all be identical.) """
+    collisions = {key: set() for key in MChunk.DEFAULTS.keys()}
+    for key in MChunk.DEFAULTS.iterkeys():
+        for chunk in MChunkSet(chunk_path=chunk_path):
+            collisions[key].add(chunk[key])
+
+    for key, collision in collisions.iteritems():
+        if len(collision) > 1:
+            raise Exception('actually a collision:\n%s' % collisions)
+
+
+# Migration functions
 def migrate_studies():
     d_study_list = []
     for m_study in MStudySet.iterator():
@@ -287,7 +301,7 @@ def migrate_admins():
                 admin_id = admin_username_to_pk_dict[admin_username]
             except KeyError:
                 # study_name = DStudy.objects.get(pk=study_id).name
-                print('Admin {} is referenced by a Study but does not exist.')
+                print('Admin {} is referenced by a Study but does not exist.'.format(admin_username))
                 continue
             # Populate a list of database objects in the Study-Researcher relationship table
             new_relation = DAdmin.studies.through(study_id=study_id, researcher_id=admin_id)
@@ -349,26 +363,27 @@ def migrate_users():
 
 
 def migrate_chunk_registries():
-    # Calculate the number of chunks that will be used to go through all of MChunks()
+    # Calculate the number of chunks that will be used to go through all of MChunkSet()
     
     d_chunk_list = []
-    i = 0
-    j = 0
-    for m_chunk in MChunks.iterator():
+    num_registries_handled = 0
+    num_bulk_creates = 0
+    for m_chunk in MChunkSet.iterator():
         
         with error_handler:
             try:
                 d_study_info = study_id_dict[m_chunk.study_id]
             except KeyError:
-                msg = 'Study {} referenced in chunk but does not exist.'.format(m_chunk['study_id'])
+                msg = 'Study {} referenced in chunk but does not exist, creating it.'.format(m_chunk['study_id'])
                 print(msg)
-                new_study = create_dummy_study(m_chunk.study_id)
+                create_dummy_study(m_chunk.study_id)
                 # raise NoSuchDatabaseObject(msg)
             try:
                 d_user_info = user_id_dict[m_chunk.user_id]
             except KeyError:
                 msg = 'User {} referenced in chunk but does not exist.'.format(m_chunk['user_id'])
                 print(msg)
+                continue
                 # raise NoSuchDatabaseObject(msg)
             
             # some chunks have survey_ids that are string representations of objectids, fix.
@@ -382,11 +397,11 @@ def migrate_chunk_registries():
                 d_survey_pk = survey_id_dict[m_chunk.survey_id]['pk']
             else:
                 # for some reason  # TODO @Eli what is the reason?
-                new_survey = create_dummy_survey(m_chunk.survey_id, m_chunk.study_id)
                 print('Survey {} referenced in chunk but does not exist, creating it.'.format(m_chunk.survey_id))
+                new_survey = create_dummy_survey(m_chunk.survey_id, m_chunk.study_id)
                 d_survey_pk = new_survey.pk
 
-            d_chunk = DChunks(
+            d_chunk = DChunk(
                 is_chunkable=m_chunk.is_chunkable,
                 chunk_path=m_chunk.chunk_path,
                 chunk_hash=m_chunk.chunk_hash or '',
@@ -401,20 +416,21 @@ def migrate_chunk_registries():
             # d_chunk.full_clean()  # Don't bother full cleaning, it is slow and unnecessary here.
             d_chunk_list.append(d_chunk)
             
-            i += 1
-            if i % CHUNK_SIZE == 0:
-                # print a thing every 10,000
-                j += 1
-                if j % 10 == 0:
-                    print(j * CHUNK_SIZE)
+            num_registries_handled += 1
+            if num_registries_handled % CHUNK_SIZE == 0:
+                # Every 10.000 database objects, bulk create and print to stdout
+                num_bulk_creates += 1
+                if num_bulk_creates % 10 == 0:
+                    print(num_bulk_creates * CHUNK_SIZE)
                     
                 # there are a lot of unique chunk path issues
                 try:
-                    DChunks.objects.bulk_create(d_chunk_list)
+                    DChunk.objects.bulk_create(d_chunk_list)
                 except IntegrityError as e:
+                    # TODO @Eli this shouldn't be relevant anymore, because CR.unique=False. Correct?
                     if "UNIQUE" in e.message:
                         for d_chunk in d_chunk_list:
-                            if DChunks.objects.filter(chunk_path=d_chunk.chunk_path).exists():
+                            if DChunk.objects.filter(chunk_path=d_chunk.chunk_path).exists():
                                 try:
                                     print("duplicate path:",)
                                     duplicate_chunk_path_severity(d_chunk.chunk_path)
@@ -430,20 +446,45 @@ def migrate_chunk_registries():
                 finally:
                     d_chunk_list = []
     
-    DChunks.objects.bulk_create(d_chunk_list)
+    DChunk.objects.bulk_create(d_chunk_list)
 
 
-def duplicate_chunk_path_severity(chunk_path):
-    """ Compare contents of all chunks matching this path, blow up if any values are different.
-        (They should all be identical.) """
-    collisions = {key: set() for key in MChunkInstanceClass.DEFAULTS.keys()}
-    for key in MChunkInstanceClass.DEFAULTS.iterkeys():
-        for chunk in MChunks(chunk_path=chunk_path):
-            collisions[key].add(chunk[key])
-
-    for key, collision in collisions.iteritems():
-        if len(collision) > 1:
-            raise Exception('actually a collision:\n%s' % collisions)
+def migrate_upload_trackers():
+    d_upload_list = []
+    num_uploads_handled = 0
+    num_bulk_creates = 0
+    for m_upload in MUploadSet.iterator():
+        
+        with error_handler:
+            try:
+                d_user_info = user_id_dict[m_upload.user_id]
+            except KeyError:
+                msg = 'User {} referenced in upload tracker but does not exist.'.format(m_upload['user_id'])
+                print(msg)
+                continue
+            
+            d_upload = DUpload(
+                file_path=m_upload.file_path,
+                file_size=m_upload.file_size or 0,
+                timestamp=m_upload.timestamp,
+                participant_id=d_user_info['pk'],
+                deleted=False,
+            )
+            
+            d_upload_list.append(d_upload)
+            
+            num_uploads_handled += 1
+            if num_uploads_handled % CHUNK_SIZE == 0:
+                # Every 10.000 database objects, bulk create and print to stdout
+                num_bulk_creates += 1
+                if num_bulk_creates % 10 == 0:
+                    print(num_bulk_creates * CHUNK_SIZE)
+                
+                DUpload.objects.bulk_create(d_upload_list)
+                d_upload_list = []
+    
+    # Bulk create any remaining database objects
+    DUpload.objects.bulk_create(d_upload_list)
 
 
 def run_all_migrations():
@@ -454,6 +495,7 @@ def run_all_migrations():
     migrate_admins()
     migrate_users()
     migrate_chunk_registries()
+    migrate_upload_trackers()
 
 
 if __name__ == '__main__':
@@ -473,12 +515,12 @@ if __name__ == '__main__':
     # error_handler = ErrorHandler()
     error_handler = null_error_handler()
     
-    print(DStudy.objects.count(), DSurvey.objects.count(), DSettings.objects.count(),
-          DAdmin.objects.count(), DUser.objects.count(), DChunks.objects.count())
+    print(MStudySet.count(), MSurveySet.count(), MSettingsSet.count(),
+          MAdminSet.count(), MUserSet.count(), MChunkSet.count(), MUploadSet.count())
     with error_handler:
         run_all_migrations()
     print(DStudy.objects.count(), DSurvey.objects.count(), DSettings.objects.count(),
-          DAdmin.objects.count(), DUser.objects.count(), DChunks.objects.count())
+          DAdmin.objects.count(), DUser.objects.count(), DChunk.objects.count(), DUpload.objects.count())
     print("end:", datetime.now())
     
     error_handler.raise_errors()
