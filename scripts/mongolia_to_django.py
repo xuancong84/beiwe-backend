@@ -4,6 +4,8 @@ from bson import ObjectId
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
+# AJK TODO before this is run, collapse migrations
+
 print("start:", datetime.now())
 # Add the parent directory to the path in order to enable imports from sister directories
 from os.path import abspath as _abspath
@@ -396,7 +398,6 @@ def migrate_chunk_registries():
             elif m_chunk.survey_id in survey_id_dict:
                 d_survey_pk = survey_id_dict[m_chunk.survey_id]['pk']
             else:
-                # for some reason  # TODO @Eli what is the reason?
                 print('Survey {} referenced in chunk but does not exist, creating it.'.format(m_chunk.survey_id))
                 new_survey = create_dummy_survey(m_chunk.survey_id, m_chunk.study_id)
                 d_survey_pk = new_survey.pk
@@ -427,7 +428,8 @@ def migrate_chunk_registries():
                 try:
                     DChunk.objects.bulk_create(d_chunk_list)
                 except IntegrityError as e:
-                    # TODO @Eli this shouldn't be relevant anymore, because CR.unique=False. Correct?
+                    # This can't happen, because chunk_path does has unique=False at the time of the
+                    # migration, and only has unique=True set later in a separate Django migration.
                     if "UNIQUE" in e.message:
                         for d_chunk in d_chunk_list:
                             if DChunk.objects.filter(chunk_path=d_chunk.chunk_path).exists():

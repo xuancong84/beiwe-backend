@@ -18,12 +18,11 @@ class ChunkRegistry(AbstractModel):
     DATA_TYPE_CHOICES = tuple([(stream_name, stream_name) for stream_name in ALL_DATA_STREAMS])
 
     is_chunkable = models.BooleanField()
-    chunk_path = models.CharField(max_length=256)#, unique=True)
+    chunk_path = models.CharField(max_length=256)  # , unique=True)
     chunk_hash = models.CharField(max_length=25, blank=True)
 
     data_type = models.CharField(max_length=32, choices=DATA_TYPE_CHOICES)  # , db_index=True)
     time_bin = models.DateTimeField()  # db_index=True)
-    # AJK TODO check that time_bin is preserved in migration to POSTGRES
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='chunk_registries')  # , db_index=True)
     participant = models.ForeignKey('Participant', on_delete=models.PROTECT, related_name='chunk_registries')  # , db_index=True)

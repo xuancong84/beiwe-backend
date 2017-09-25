@@ -22,12 +22,12 @@ from database.validators import (
 from database.base_models import AbstractModel, JSONTextField
 
 
-# AJK TODO when all that is done, collapse migrations
-# We're keeping Flask for the frontend stuff; Django is only for the database interactions (ORM).
-
-
-# AJK TODO annotate, point out that a DeviceSettings is automatically created
 class Study(AbstractModel):
+    
+    # When a Study object is created, a default DeviceSettings object is automatically
+    # created alongside it. If the Study is created via the researcher interface (as it
+    # usually is) the researcher is immediately shown the DeviceSettings to edit. The code
+    # to create the DeviceSettings object is in database.signals.populate_study_device_settings.
     name = models.TextField(unique=True, help_text='Name of the study; can be of any length')
     encryption_key = models.CharField(max_length=32, validators=[LengthValidator(32)],
                                       help_text='Key used for encrypting the study data')
@@ -94,7 +94,6 @@ class AbstractSurvey(AbstractModel):
         abstract = True
 
 
-# AJK TODO annotate that there is a pre-save signal
 class Survey(AbstractSurvey):
     """
     Surveys contain all information the app needs to display the survey correctly to a participant,
@@ -113,6 +112,11 @@ class Survey(AbstractSurvey):
     indicating the number of seconds past midnight.
     """
     
+    # Every time that a Survey object is saved (except upon creation), a SurveyArchive object
+    # is created. The SurveyArchive object contains all of the AbstractSurvey fields that the
+    # Survey object did *before* it was saved, as well as a pair of timestamps marking during
+    # what time period the SurveyArchive applies. The code that creates SurveyArchive objects
+    # is found in database.signals.create_survey_archive.
     last_modified = models.DateTimeField(auto_now=True)
     
     # This is required for file name and path generation
@@ -161,8 +165,6 @@ class AbstractPasswordUser(AbstractModel):
     that the APU's password is never stored in a reversible manner.
     """
 
-    # AJK TODO look into doing password stuff automatically through Django:
-    # https://docs.djangoproject.com/en/1.11/topics/auth/passwords/
     password = models.CharField(max_length=44, validators=[url_safe_base_64_validator],
                                 help_text='A hash of the user\'s password')
     salt = models.CharField(max_length=24, validators=[url_safe_base_64_validator])

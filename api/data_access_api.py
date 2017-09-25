@@ -21,8 +21,8 @@ from database.models import ChunkRegistry, Participant, Researcher, Study
 
 data_access_api = Blueprint('data_access_api', __name__)
 
-upload_stream_map = {"survey_answers":("surveyAnswers", "csv"),
-                     "audio":("voiceRecording", "mp4")}
+upload_stream_map = {"survey_answers": ("surveyAnswers", "csv"),
+                     "audio": ("voiceRecording", "mp4")}
 
 
 #########################################################################################
@@ -284,7 +284,8 @@ def str_to_datetime(time_string):
     try:
         return datetime.strptime(time_string, API_TIME_FORMAT)
     except ValueError as e:
-        if "does not match format" in e.message: return abort(400)
+        if "does not match format" in e.message:
+            return abort(400)
 
 
 def batch_retrieve_s3(chunk):

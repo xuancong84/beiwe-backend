@@ -6,7 +6,6 @@ from database.models import Study, Survey
 
 
 def copy_existing_study_if_asked_to(new_study):
-    # AJK TODO this is not terribly pretty, see if it can be done better without affecting the API input format
     if request.form.get('copy_existing_study', 'false') == 'true':
         old_study = Study.objects.get(pk=request.form.get('existing_study_id', None))
         old_device_settings = old_study.device_settings.as_dict()
