@@ -299,7 +299,7 @@ class SurveyModelTests(CommonTestCase):
         # This comparison requires the as_dict comparison because it has jsonfields
         x = compare_dictionaries(mongo_reference_survey,
                                  django_reference_survey.as_dict(),
-                                 ignore=['deleted', 'id'])
+                                 ignore=['deleted', 'id', 'last_modified'])
         self.assertTrue(x)
 
     # Survey model tests:

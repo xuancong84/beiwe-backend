@@ -4,7 +4,7 @@ from bson import ObjectId
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
-print "start:", datetime.now()
+print("start:", datetime.now())
 # Add the parent directory to the path in order to enable imports from sister directories
 from os.path import abspath as _abspath
 from sys import path as _path
@@ -37,7 +37,6 @@ from database.models import (
 class NoSuchDatabaseObject(Exception): pass
 class MissingRequiredForeignKey(Exception): pass
 class ObjectCreationException(Exception): pass
-
 
 
 def create_dummy_survey(object_id, study_object_id):
@@ -136,8 +135,8 @@ def remap_study_relationships():
                     m_survey = MSurvey(m_survey_id)
                     if not m_survey:
                         msg = 'Survey {} referenced by Study but does not exist.'.format(m_survey_id)
-                        print msg
-                        raise NoSuchDatabaseObject(msg)
+                        print(msg)
+                        # raise NoSuchDatabaseObject(msg)
                     d_study_survey_dict[m_survey_id] = d_study
     
             for m_admin_id in m_admin_id_list:
@@ -147,8 +146,8 @@ def remap_study_relationships():
             m_settings = MSettings(m_settings_id)
             if not m_settings:
                 msg = 'DeviceSettings {} referenced by Study but does not exist.'.format(m_settings_id)
-                print msg
-                raise NoSuchDatabaseObject(msg)
+                print(msg)
+                # raise NoSuchDatabaseObject(msg)
             d_study_settings_dict[m_settings_id] = d_study
 
 
@@ -161,8 +160,8 @@ def migrate_surveys():
             try:
                 d_study = d_study_survey_dict[m_survey['_id']]
             except KeyError:  # This MSurvey has no corresponding Study
-                print 'Survey {} does not connect to any Study.'.format(m_survey['_id'])
-                orphaned_surveys[m_survey._id] = m_survey
+                print('Survey {} does not connect to any Study.'.format(m_survey['_id']))
+                orphaned_surveys[m_survey['_id']] = m_survey
                 continue
             d_survey = DSurvey(
                 content=json.dumps(m_survey['content']),
@@ -188,7 +187,7 @@ def migrate_surveys():
             try:
                 d_survey_id = DSurvey.objects.filter(object_id=m_survey['_id']).values('pk').get()
             except DSurvey.DoesNotExist:
-                print 'Survey {} was not created.'.format(m_survey_id)
+                print('Survey {} was not created.'.format(m_survey_id))
                 continue
             survey_id_dict[m_survey_id] = d_survey_id
 
@@ -202,7 +201,7 @@ def migrate_settings():
             try:
                 d_study = d_study_settings_dict[m_settings['_id']]
             except KeyError:  # This MSettings has no corresponding Study
-                print 'DeviceSettings {} is not connected to any Study.'.format(m_settings['_id'])
+                print('DeviceSettings {} is not connected to any Study.'.format(m_settings['_id']))
                 continue
             d_settings = DSettings(
                 accelerometer=m_settings['accelerometer'],
@@ -288,7 +287,7 @@ def migrate_admins():
                 admin_id = admin_username_to_pk_dict[admin_username]
             except KeyError:
                 # study_name = DStudy.objects.get(pk=study_id).name
-                print 'Admin {} is referenced by a Study but does not exist.'
+                print('Admin {} is referenced by a Study but does not exist.')
                 continue
             # Populate a list of database objects in the Study-Researcher relationship table
             new_relation = DAdmin.studies.through(study_id=study_id, researcher_id=admin_id)
@@ -312,7 +311,7 @@ def migrate_users():
             try:
                 d_study_info = study_id_dict[m_study_id]
             except KeyError:
-                print 'Study {} is referenced by a User but does not exist.'.format(m_study_id)
+                print('Study {} is referenced by a User but does not exist.'.format(m_study_id))
                 continue
     
             # Django convention is to use the empty string rather than None in CharFields
@@ -344,8 +343,8 @@ def migrate_users():
                 d_user_id = DUser.objects.filter(patient_id=m_user['_id']).values('pk').get()
             except DUser.DoesNotExist:
                 msg = 'User {} was not created.'.format(m_user_id)
-                print msg
-                raise ObjectCreationException(msg)
+                print(msg)
+                # raise ObjectCreationException(msg)
             user_id_dict[m_user_id] = d_user_id
 
 
@@ -362,15 +361,15 @@ def migrate_chunk_registries():
                 d_study_info = study_id_dict[m_chunk.study_id]
             except KeyError:
                 msg = 'Study {} referenced in chunk but does not exist.'.format(m_chunk['study_id'])
-                print msg
+                print(msg)
                 new_study = create_dummy_study(m_chunk.study_id)
                 # raise NoSuchDatabaseObject(msg)
             try:
                 d_user_info = user_id_dict[m_chunk.user_id]
             except KeyError:
                 msg = 'User {} referenced in chunk but does not exist.'.format(m_chunk['user_id'])
-                print msg
-                raise NoSuchDatabaseObject(msg)
+                print(msg)
+                # raise NoSuchDatabaseObject(msg)
             
             # some chunks have survey_ids that are string representations of objectids, fix.
             # (and sometimes this can be an empty string, handle that too.)
@@ -382,9 +381,9 @@ def migrate_chunk_registries():
             elif m_chunk.survey_id in survey_id_dict:
                 d_survey_pk = survey_id_dict[m_chunk.survey_id]['pk']
             else:
-                # for some reason
+                # for some reason  # TODO @Eli what is the reason?
                 new_survey = create_dummy_survey(m_chunk.survey_id, m_chunk.study_id)
-                print 'Survey {} referenced in chunk but does not exist, creating it.'.format(m_chunk.survey_id)
+                print('Survey {} referenced in chunk but does not exist, creating it.'.format(m_chunk.survey_id))
                 d_survey_pk = new_survey.pk
 
             d_chunk = DChunks(
@@ -407,7 +406,7 @@ def migrate_chunk_registries():
                 # print a thing every 10,000
                 j += 1
                 if j % 10 == 0:
-                    print j * CHUNK_SIZE
+                    print(j * CHUNK_SIZE)
                     
                 # there are a lot of unique chunk path issues
                 try:
@@ -417,13 +416,13 @@ def migrate_chunk_registries():
                         for d_chunk in d_chunk_list:
                             if DChunks.objects.filter(chunk_path=d_chunk.chunk_path).exists():
                                 try:
-                                    print "duplicate path:",
+                                    print("duplicate path:",)
                                     duplicate_chunk_path_severity(d_chunk.chunk_path)
-                                    print "...nevermind."
+                                    print("...nevermind.")
                                 except Exception as e2:
-                                    print d_chunk.chunk_path
-                                    print e2.message
-                                    raise e2
+                                    print(d_chunk.chunk_path)
+                                    print(e2.message)
+                                    # raise e2
                             else:
                                 d_chunk.save()
                     else:
@@ -480,7 +479,6 @@ if __name__ == '__main__':
         run_all_migrations()
     print(DStudy.objects.count(), DSurvey.objects.count(), DSettings.objects.count(),
           DAdmin.objects.count(), DUser.objects.count(), DChunks.objects.count())
-    print "end:", datetime.now()
+    print("end:", datetime.now())
     
     error_handler.raise_errors()
-
