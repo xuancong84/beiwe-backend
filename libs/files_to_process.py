@@ -15,7 +15,7 @@ from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, ANDR
                               PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
-                              DATA_PROCESSING_NO_ERROR_STRING)
+                              DATA_PROCESSING_NO_ERROR_STRING, IOS_LOG_FILE)
 
 from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry, FileProcessLock)
 from db.user_models import User
@@ -283,6 +283,7 @@ def file_path_to_data_type(file_path):
     if "/magnetometer/" in file_path: return MAGNETOMETER
     if "/devicemotion/" in file_path: return DEVICEMOTION
     if "/reachability/" in file_path: return REACHABILITY
+    if "/ios_log/" in file_path: return IOS_LOG_FILE
     raise Exception("data type unknown: %s" % file_path)
 
 def ensure_sorted_by_timestamp(l):
@@ -530,7 +531,7 @@ def unix_time_to_string(unix_time):
 """ Batch Operations """
 def batch_retrieve_for_processing(ftp):
     """ Used for mapping an s3_retrieve function. """
-    data_type = file_path_to_data_type(ftp['s3_file_path'])
+    data_type = file_(path_to_data_type(ftp['s3_file_path'])
     ret = {'ftp':ftp,
            "data_type":data_type,
            'exception':None,
