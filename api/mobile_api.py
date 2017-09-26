@@ -2,7 +2,7 @@ import calendar, time
 
 from datetime import datetime
 from flask import Blueprint, request, abort, render_template, json
-from config.constants import ALLOWED_EXTENSIONS
+from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER
 from db.profiling import UploadTracking
 from db.user_models import User
 from db.study_models import Study
@@ -157,7 +157,7 @@ def upload(OS_API=""):
 @mobile_api.route( '/register_user/ios/', methods=['GET', 'POST'] )
 @determine_os_api
 @authenticate_user_registration
-def register_user(OS_API="", DEVICE_IDENTIFIERS_HEADER=None):
+def register_user(OS_API=""):
     """ Checks that the patient id has been granted, and that there is no device registered with
     that id.  If the patient id has no device registered it registers this device and logs the
     bluetooth mac address.
