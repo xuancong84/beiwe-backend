@@ -8,7 +8,7 @@ from multiprocessing.pool import ThreadPool
 from traceback import format_exc
 from cronutils.error_handler import ErrorHandler
 
-from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
+from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, ANDROID_LOG_FILE,
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
@@ -271,7 +271,7 @@ def file_path_to_data_type(file_path):
     if "/callLog/" in file_path: return CALL_LOG
     if "/gps/" in file_path: return GPS
     if "/identifiers" in file_path: return IDENTIFIERS
-    if "/logFile/" in file_path: return LOG_FILE
+    if "/logFile/" in file_path: return ANDROID_LOG_FILE
     if "/powerState/" in file_path: return POWER_STATE
     if "/surveyAnswers/" in file_path: return SURVEY_ANSWERS
     if "/surveyTimings/" in file_path: return SURVEY_TIMINGS
@@ -343,7 +343,7 @@ def process_csv_data(data):
     user = User(data['ftp']['user_id'])
 
     if user['os_type'] == ANDROID_API: #Do fixes for android
-        if data["data_type"] == LOG_FILE:
+        if data["data_type"] == ANDROID_LOG_FILE:
             data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])
 
         header, csv_rows_list = csv_to_list(data['file_contents'])
