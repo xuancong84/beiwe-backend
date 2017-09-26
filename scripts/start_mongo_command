@@ -1,2 +1,0 @@
-# on the current beiwe server the mongod install is broken, you will need to manually run the following command
-sudo nohup mongod --dbpath=/var/lib/mongodb
