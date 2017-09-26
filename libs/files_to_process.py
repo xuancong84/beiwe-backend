@@ -283,8 +283,8 @@ def file_path_to_data_type(file_path):
     if "/magnetometer/" in file_path: return MAGNETOMETER
     if "/devicemotion/" in file_path: return DEVICEMOTION
     if "/reachability/" in file_path: return REACHABILITY
-    if "/ios_log/" in file_path: return IOS_LOG_FILE
-    raise Exception("data type unknown: %s" % file_path)
+    if "/ios/log/" in file_path: return IOS_LOG_FILE
+    raise Exception("beiwe data stream unknown: %s" % file_path)
 
 def ensure_sorted_by_timestamp(l):
     """ According to the docs the sort method on a list is in place and should
@@ -531,7 +531,7 @@ def unix_time_to_string(unix_time):
 """ Batch Operations """
 def batch_retrieve_for_processing(ftp):
     """ Used for mapping an s3_retrieve function. """
-    data_type = file_(path_to_data_type(ftp['s3_file_path'])
+    data_type = file_path_to_data_type(ftp['s3_file_path'])
     ret = {'ftp':ftp,
            "data_type":data_type,
            'exception':None,
