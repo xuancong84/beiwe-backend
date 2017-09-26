@@ -20,7 +20,7 @@ SURVEY_TIMINGS = "survey_timings"
 TEXTS_LOG = "texts"
 VOICE_RECORDING = "audio_recordings"
 WIFI = "wifi"
-IOS_LOG = "appEvent"
+IOS_LOG = "ios_log"
 
 # API_URL_BASE = 'https://staging.beiwe.org/'
 

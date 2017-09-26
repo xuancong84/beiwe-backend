@@ -147,7 +147,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "voiceRecording": VOICE_RECORDING,
     "wifiLog": WIFI,
     "proximity": PROXIMITY,
-    "appEvent": IOS_LOG_FILE,
+    "ios_log": IOS_LOG_FILE,
 }
 
 
@@ -171,7 +171,7 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == MAGNETOMETER: return "magnetometer"
     if data_type == DEVICEMOTION: return "devicemotion"
     if data_type == REACHABILITY: return "reachability"
-    if data_type == IOS_LOG_FILE: return "appEvent"
+    if data_type == IOS_LOG_FILE: return "ios_log"
     raise Exception("unknown data type: %s" % data_type)
 
 CHUNKABLE_FILES = {ACCELEROMETER,
