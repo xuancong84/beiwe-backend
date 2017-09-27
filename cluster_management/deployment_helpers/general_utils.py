@@ -10,6 +10,7 @@ from fabric.exceptions import NetworkError
 
 # Folder and file names
 CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
+PUSHED_FILES_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
 USER_SPECIFIC_CONFIG_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'my_cluster_configuration')
 AWS_PEM_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_deployment_key.pem')
 AWS_CREDENTIALS_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_credentials.json')

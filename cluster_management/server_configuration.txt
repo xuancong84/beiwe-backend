@@ -1,12 +1,12 @@
 server configuration
 
 ssh keys:
-    need to push the deployment key private into .ssh with name id_rsa
+    need to push the deployment key private into .ssh with name id_rsa	DONE
 
 push:
-    bash_profile to .profile
+    bash_profile to .profile	DONE
         it seems like .bashrc is overwriting some of the .profile aliases (e.g. ll)
-    .inputrc to .inputrc
+    .inputrc to .inputrc	DONE
     unattended upgrades?
     our cron operations...
 
