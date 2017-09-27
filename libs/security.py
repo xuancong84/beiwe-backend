@@ -67,6 +67,8 @@ def decode_base64(data):
     except TypeError as e:
         if "Incorrect padding" == e.message:
             raise PaddingException
+        else:
+            raise
 
 def generate_user_hash_and_salt( password ):
     """ Generates a hash and salt that will match a given input string, and also
