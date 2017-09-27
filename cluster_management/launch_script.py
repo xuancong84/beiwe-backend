@@ -20,15 +20,35 @@
 import argparse
 import logging
 
-from deployment_helpers.general_utils import log
+from fabric.api import env, run
 
+from deployment_helpers.configuration_utils import validate_config, write_config_to_file
+from deployment_helpers.general_utils import log, AWS_PEM_FILE
+
+
+# Set logging levels
 logging.basicConfig(level=logging.DEBUG)
-
-
-# make logging for boto less terrible
 logging.getLogger('boto3').setLevel(logging.WARNING)
 logging.getLogger('botocore').setLevel(logging.WARNING)
 
 
+# Fabric configuration
+class FabricExecutionError(Exception): pass
+env.abort_exception = FabricExecutionError
+env.abort_on_prompts = True
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="interactive script for managing a Beiwe Cluster")
+    
+    # Get the configuration values and make them environment variables
+    combined_config = validate_config()
+    write_config_to_file(combined_config)
+    
+    # More fabric configuration
+    env.host_string = combined_config['host_string']
+    env.key_filename = AWS_PEM_FILE
+    
+    # Run actual code
+    # AJK TODO make this a function in this same file
+    run('echo')

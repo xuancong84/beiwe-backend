@@ -13,6 +13,7 @@ push:
 cron:
 
 sudo apt-get install:
+    cron requires sudo apt-get more-utils
     sendmail
     python? currently on 2.7.12, installing yields 2.7.11
     silversearcher-ag 0.31.0.2 because AJK is used to it. I'm picky, gosh
@@ -40,4 +41,7 @@ construct and push:
     config/env?
     TODO: we need to cram all env settings into remote_db_env.py, and push them all
 
-cron requires sudo apt-get more-utils
+
+local requirements:
+    researcher should run everything from .../cluster_management$
+    pip install -r launch_requirements.txt

@@ -1,0 +1,5 @@
+# Botocore is used for AWS command line utilities
+botocore==1.7.18
+
+# Fabric is used for running bash commands on a remote server
+fabric==1.14.0
