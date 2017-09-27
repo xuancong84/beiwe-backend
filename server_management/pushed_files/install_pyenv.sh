@@ -42,29 +42,3 @@ checkout "${GITHUB}/yyuu/pyenv-installer.git"  "${PYENV_ROOT}/plugins/pyenv-inst
 checkout "${GITHUB}/yyuu/pyenv-update.git"     "${PYENV_ROOT}/plugins/pyenv-update"
 checkout "${GITHUB}/yyuu/pyenv-virtualenv.git" "${PYENV_ROOT}/plugins/pyenv-virtualenv"
 checkout "${GITHUB}/yyuu/pyenv-which-ext.git"  "${PYENV_ROOT}/plugins/pyenv-which-ext"
-
-if ! command -v pyenv 1>/dev/null; then
-  { echo
-    colorize 1 "WARNING"
-    echo ": seems you still have not added 'pyenv' to the load path."
-    echo
-  } >&2
-
-  case "$shell" in
-  bash )
-    profile="~/.bash_profile"
-    ;;
-  zsh )
-    profile="~/.zshrc"
-    ;;
-  ksh )
-    profile="~/.profile"
-    ;;
-  fish )
-    profile="~/.config/fish/config.fish"
-    ;;
-  * )
-    profile="your profile"
-    ;;
-  esac
-fi
