@@ -1,10 +1,10 @@
 import os
 from os.path import abspath, dirname, join, exists
 
-EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env") + ".py"
+EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env.py")
 ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
-print EXPLICIT_REMOTE_ENV
-print ELASTIC_BEANSTALK_ENV
+print(EXPLICIT_REMOTE_ENV)
+print(ELASTIC_BEANSTALK_ENV)
 errors = []
 
 if exists(EXPLICIT_REMOTE_ENV) and not exists(ELASTIC_BEANSTALK_ENV):
@@ -28,7 +28,7 @@ else:
 from config import settings, constants
 provided_settings = vars(settings)
 
-#check that all values provided actually contain something
+# Check that all values provided actually contain something
 for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
         errors.append(attr_name + " was not provided with a value.")
@@ -54,7 +54,7 @@ MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
                   'SENTRY_JAVASCRIPT_DSN',
                   'SYSADMIN_EMAILS'}
 
-#Check that all the mandatory variables exist...
+# Check that all the mandatory variables exist...
 for mandatory_var in MANDATORY_VARS:
     if mandatory_var not in provided_settings:
         errors.append(mandatory_var + " was not provided in your settings.")
@@ -74,8 +74,9 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 if settings.SYSADMIN_EMAILS:
     settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in settings.SYSADMIN_EMAILS.split(",")]
 
-# IS_STAGING needs to resolve to False except under specific settings; the default needs to be production.
-if (settings.IS_STAGING is True or settings.IS_STAGING.upper() == "TRUE"):
+# IS_STAGING needs to resolve to False except under specific settings.
+# The default needs to be production.
+if settings.IS_STAGING is True or settings.IS_STAGING.upper() == "TRUE":
     settings.IS_STAGING = True
 else:
     settings.IS_STAGING = False

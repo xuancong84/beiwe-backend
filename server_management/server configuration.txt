@@ -5,23 +5,39 @@ ssh keys:
 
 push:
     bash_profile to .profile
+        it seems like .bashrc is overwriting some of the .profile aliases (e.g. ll)
     .inputrc to .inputrc
     unattended upgrades?
     our cron operations...
 
 cron:
 
-install:
+sudo apt-get install:
     sendmail
-    python?
+    python? currently on 2.7.12, installing yields 2.7.11
+    silversearcher-ag 0.31.0.2 because AJK is used to it. I'm picky, gosh
+    libssl-dev 1.0.2
+    libreadline-gplv2-dev 5.2
+    libbz2-dev 1.0.6-8
+    libsqlite3-dev 3.11.0
     python-pip, apparently?
-        then pip install --upgrade pip because derp
+        then pip install --upgrade pip because derp, then pip install -r Requirements.txt
+        pip install ipython (stick this into Requirements.txt)
 
+pyenv:
+    #https://github.com/pyenv/pyenv/wiki/Common-build-problems if any issues
+    echo 'export PATH="/home/ubuntu/.pyenv/bin:$PATH"' >> ~/.profile  #add pyenv to PATH
+    echo 'eval "$(pyenv init -)"' >> ~/.profile  #add pyenv python versions to PATH
+    source ~/.profile  #this might not work with fabric: test and find out
+    ../pushed_files/install_pyenv.sh  #install pyenv
+    pyenv install 2.7.14  #install latest python 2 version
+    pyenv global 2.7.14  #set all python to default to that version
+    python --version  #to check that it worked; should read "2.7.14"
+
+AJK: not relevant yet
 construct and push:
-    config/remote_db_settings.py
+    config/remote_db_env.py
     config/env?
-    TODO: we need to cram all env settings into remote_db_settings.py, and push them all
+    TODO: we need to cram all env settings into remote_db_env.py, and push them all
 
 cron requires sudo apt-get more-utils
-database partition
-security parameters

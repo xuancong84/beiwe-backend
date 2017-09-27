@@ -33,6 +33,7 @@ alias no="nano -Iwn"
 alias sn='sudo nano -c'
 alias sno="sudo nano -Iwn"
 alias ls='ls --color=auto'
+alias la='ls -A'
 alias ll='ls -lh'
 alias lh='ls -lhX --color=auto'
 alias lll="du -ah --max-depth=0 --block-size=MB --time * | sort -nr"
@@ -42,6 +43,7 @@ alias grep='grep --color=auto'
 alias u="cd .."
 alias uu="cd ../.."
 alias uuu="cd ../../.."
+alias ri="rm -i"
 
 #Tools with CL config
 alias htop="htop -d 5"
@@ -97,6 +99,7 @@ alias py="python"
 alias ipy="ipython"
 alias manage="python manage.py"
 alias shell="python manage.py shell_plus"
+alias ag+="clear; printf '_%.0s' {1..100}; echo ''; echo 'Silver results begin here:'; ag --column"
 
 function run {
     nohup python -u $1 > ~/$1_log.out &
