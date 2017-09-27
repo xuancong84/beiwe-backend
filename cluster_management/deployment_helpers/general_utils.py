@@ -8,12 +8,12 @@ from time import sleep
 import botocore.exceptions as botoexceptions
 from fabric.exceptions import NetworkError
 
-SERVER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
-log = logging.getLogger(SERVER_MANAGEMENT_FOLDER)
+CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
+log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
 
 def retry(function, *args, **kwargs):
     while True:
-        print "."
+        print(".")
         sys.stdout.flush()
         try:
             return function(*args, **kwargs)

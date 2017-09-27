@@ -26,11 +26,11 @@ sudo apt-get install:
 
 pyenv:
     #https://github.com/pyenv/pyenv/wiki/Common-build-problems if any issues
+    ../pushed_files/install_pyenv.sh  #install pyenv
     echo 'export PATH="/home/ubuntu/.pyenv/bin:$PATH"' >> ~/.profile  #add pyenv to PATH
     echo 'eval "$(pyenv init -)"' >> ~/.profile  #add pyenv python versions to PATH
     source ~/.profile  #this might not work with fabric: test and find out
-    ../pushed_files/install_pyenv.sh  #install pyenv
-    pyenv install 2.7.14  #install latest python 2 version
+    pyenv install 2.7.14  #install latest python 2 version  #this is slow (~75 seconds)
     pyenv global 2.7.14  #set all python to default to that version
     python --version  #to check that it worked; should read "2.7.14"
 
