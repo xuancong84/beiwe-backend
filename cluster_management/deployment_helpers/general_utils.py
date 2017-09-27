@@ -16,6 +16,21 @@ AWS_PEM_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_deployment_key.pem
 AWS_CREDENTIALS_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_credentials.json')
 OS_ENVIRON_SETTING_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'env_values.py')
 
+# Utilities to install
+# AJK TODO document what each of these is for
+APT_GET_INSTALLS = [
+    'ack-grep',  # Search within files
+    'htop',
+    'libbz2-dev',
+    'libreadline-gplv2-dev',
+    'libsqlite3-dev',
+    'libssl-dev',
+    'moreutils',
+    'nload',
+    'sendmail',
+    'silversearcher-ag',  # Search within files
+]
+
 
 log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
 

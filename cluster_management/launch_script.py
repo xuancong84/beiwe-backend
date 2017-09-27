@@ -21,10 +21,10 @@ import argparse
 import logging
 import os
 
-from fabric.api import env, put, run
+from fabric.api import env, put, run, sudo
 
 from deployment_helpers.configuration_utils import validate_config, write_config_to_file
-from deployment_helpers.general_utils import log, AWS_PEM_FILE, PUSHED_FILES_FOLDER
+from deployment_helpers.general_utils import log, APT_GET_INSTALLS, AWS_PEM_FILE, PUSHED_FILES_FOLDER
 
 
 # Set logging levels
@@ -41,8 +41,10 @@ env.abort_on_prompts = True
 
 
 def run_remote_code():
-    # Install things that need to be installed
-    run('sudo apt-get install git')
+    # Install things that need to be installed. Notes: apt-get install accepts
+    # an arbitrary number of space-separated arguments. The -y flag answers
+    # "yes" to all prompts, preventing the need for user interaction.
+    sudo('apt-get -qy install ' + ' '.join(APT_GET_INSTALLS))
     
     # Push the files in the pushed files folder
     put(

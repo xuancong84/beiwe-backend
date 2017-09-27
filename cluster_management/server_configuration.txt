@@ -12,18 +12,14 @@ push:
 
 cron:
 
-sudo apt-get install:
-    cron requires sudo apt-get more-utils
+sudo apt-get install:	ALL DONE
+    moreutils (for cron)
     sendmail
-    python? currently on 2.7.12, installing yields 2.7.11
     silversearcher-ag 0.31.0.2 because AJK is used to it. I'm picky, gosh
     libssl-dev 1.0.2
     libreadline-gplv2-dev 5.2
     libbz2-dev 1.0.6-8
     libsqlite3-dev 3.11.0
-    python-pip, apparently?
-        then pip install --upgrade pip because derp, then pip install -r Requirements.txt
-        pip install ipython (stick this into Requirements.txt)
 
 pyenv:
     #https://github.com/pyenv/pyenv/wiki/Common-build-problems if any issues
@@ -34,6 +30,8 @@ pyenv:
     pyenv install 2.7.14  #install latest python 2 version  #this is slow (~75 seconds)
     pyenv global 2.7.14  #set all python to default to that version
     python --version  #to check that it worked; should read "2.7.14"
+    pip install --upgrade pip
+    pip install -r Requirements.txt
 
 AJK: not relevant yet
 construct and push:
