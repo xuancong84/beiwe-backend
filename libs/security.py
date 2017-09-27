@@ -65,10 +65,27 @@ def decode_base64(data):
     try:
         return base64.urlsafe_b64decode(data)
     except TypeError as e:
+        # print "this is the error:"
+        # print e
+        # print "this is the data:";
+        # try:
+        #     print data.encode("string_escape")
+        # except Exception as e2:
+        #     print "could not print data because of this error:", e2
+        
         if "Incorrect padding" == e.message:
             raise PaddingException
         else:
-            raise
+            try:
+                return base64.standard_b64decode(data)
+            except TypeError as e2:
+                if "Incorrect padding" == e2.message:
+                    raise PaddingException
+                else:
+                    raise OurBase64Error(e.message)
+        raise OurBase64Error(e.message)  # should be unreachable
+
+class OurBase64Error(Exception): pass
 
 def generate_user_hash_and_salt( password ):
     """ Generates a hash and salt that will match a given input string, and also

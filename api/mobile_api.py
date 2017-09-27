@@ -9,9 +9,11 @@ from db.study_models import Study
 from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
+from libs.security import OurBase64Error
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from libs.http_utils import determine_os_api
+from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
 from db.data_access_models import FileToProcess
 
@@ -82,9 +84,16 @@ def upload(OS_API=""):
     #iOS sends the file as a multipart upload (so ends up in request.files)
     #if neither is found, consider the "body" of the post the file
     #("body" post is not currently used by any client, only here for completeness)
-    if "file" in request.files: uploaded_file = request.files['file']
-    elif "file" in request.values: uploaded_file = request.values['file']
-    else: uploaded_file = request.data
+    if "file" in request.files:
+        uploaded_file = request.files['file']
+    elif "file" in request.values:
+        uploaded_file = request.values['file']
+    else:
+        uploaded_file = request.data
+
+    if isinstance(uploaded_file, FileStorage):
+        uploaded_file = uploaded_file.read()
+    
 
     file_name = request.values['file_name']
 #     print "uploaded file name:", file_name, len(uploaded_file)
@@ -105,10 +114,19 @@ def upload(OS_API=""):
         print "the following error was handled:"
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message) )
         return render_template('blank.html'), 200
-    except DecryptionKeyInvalidError:
-        return render_template('blank.html'), 200
-
-    #print "decryption success:", file_name
+    # except DecryptionKeyInvalidError:
+    #     return render_template('blank.html'), 200
+    except OurBase64Error:
+        print "decryption problems" + "#"*200
+        print
+        print patient_id
+        print
+        print file_name
+        print uploaded_file
+        print
+        raise
+        
+    print "decryption success:", file_name
     #if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension( file_name ):
         s3_upload( file_name.replace("_", "/") , uploaded_file, user["study_id"] )
