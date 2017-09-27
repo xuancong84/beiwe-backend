@@ -1,0 +1,27 @@
+server configuration
+
+ssh keys:
+    need to push the deployment key private into .ssh with name id_rsa
+
+push:
+    bash_profile to .profile
+    .inputrc to .inputrc
+    unattended upgrades?
+    our cron operations...
+
+cron:
+
+install:
+    sendmail
+    python?
+    python-pip, apparently?
+        then pip install --upgrade pip because derp
+
+construct and push:
+    config/remote_db_settings.py
+    config/env?
+    TODO: we need to cram all env settings into remote_db_settings.py, and push them all
+
+cron requires sudo apt-get more-utils
+database partition
+security parameters
