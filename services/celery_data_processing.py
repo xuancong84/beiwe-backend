@@ -1,23 +1,16 @@
 # We need to execute this file directly, so we always run the import hack
 from os.path import abspath as _abspath
 import imp as _imp
-_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+_current_folder_init = _abspath(__file__).rsplit('/', 1)[0] + "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
 
 from kombu.exceptions import OperationalError
-
-from libs.logging import email_system_administrators
-
 from celery import Celery, states
 from celery.states import SUCCESS
 
-STARTED_OR_WAITING = [ states.PENDING,
-                       states.RECEIVED,
-                       states.STARTED ]
+STARTED_OR_WAITING = [states.PENDING, states.RECEIVED, states.STARTED]
 
-FAILED = [ states.REVOKED,
-           states.RETRY,
-           states.FAILURE ]
+FAILED = [states.REVOKED, states.RETRY, states.FAILURE]
 
 # AJK TODO this was previously config.settings.MONGO_IP, but that no longer exists.
 # What should it be changed to?
@@ -36,13 +29,11 @@ from config import load_django
 from time import sleep
 from datetime import datetime, timedelta
 
-from cronutils import ErrorSentry
-from raven.transport import HTTPTransport
-
 from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
-from config.settings import SENTRY_DATA_PROCESSING_DSN
-from libs.file_processing import ProcessingOverlapError, do_process_user_file_chunks
 from database.models import FileProcessLock, Participant
+from libs.file_processing import ProcessingOverlapError, do_process_user_file_chunks
+from libs.logging import email_system_administrators
+from libs.sentry import make_error_sentry
 
 
 @celery_app.task
@@ -73,11 +64,13 @@ def safe_queue_user(*args, **kwargs):
 
 
 def create_file_processing_tasks():
-    # The entire code is wrapped in an ErrorSentry, which catches any errors and sends them to Sentry
-    with ErrorSentry(SENTRY_DATA_PROCESSING_DSN, sentry_client_kwargs={'transport': HTTPTransport}) as error_sentry:
+    # The entire code is wrapped in an ErrorSentry, which catches any errors
+    # and sends them to Sentry.
+    with make_error_sentry('data') as error_sentry:
         print(error_sentry.sentry_client.is_enabled())
         if FileProcessLock.islocked():
-            # This is really a safety check to ensure that no code executes if file processing is locked
+            # This is really a safety check to ensure that no code executes
+            # if file processing is locked.
             report_file_processing_locked_and_exit()
             # report_file_processing_locked should raise an error; this should be unreachable
             exit(0)
@@ -172,10 +165,8 @@ def celery_process_file_chunks(participant):
     """
     log = LogList()
     number_bad_files = 0
-    error_sentry = ErrorSentry(SENTRY_DATA_PROCESSING_DSN, sentry_client_kwargs={
-        "tags": {"user_id": participant.patient_id},
-        'transport': HTTPTransport
-    })
+    tags = {'user_id': participant.patient_id}
+    error_sentry = make_error_sentry('data', tags=tags)
     log.append("processing files for %s" % participant.patient_id)
     
     while True:

@@ -3,19 +3,18 @@ from datetime import datetime
 import time
 
 from flask import Blueprint, request, abort, render_template, json
-from raven import Client as SentryClient
-from raven.transport import HTTPTransport
+
 from werkzeug.exceptions import BadRequestKeyError
 
 from config.constants import ALLOWED_EXTENSIONS
-from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN
+from database.models import FileToProcess, Participant, UploadTracking
 from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
+from libs.sentry import make_sentry_client
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.user_authentication import authenticate_user, authenticate_user_registration
 from libs.logging import log_error
 from libs.http_utils import determine_os_api
-from database.models import FileToProcess, Participant, UploadTracking
 
 
 ################################################################################
@@ -124,10 +123,10 @@ def upload(OS_API=""):
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
-            #it appears that occasionally the app creates some spurious files
-            #with a name like "rList-org.beiwe.app.LoadingActivity"
+            # it appears that occasionally the app creates some spurious files
+            # with a name like "rList-org.beiwe.app.LoadingActivity"
             error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
-            log_error( Exception("upload error"), error_message )
+            log_error(Exception("upload error"), error_message)
             return render_template('blank.html'), 200
         
         elif not file_name:
@@ -138,10 +137,8 @@ def upload(OS_API=""):
         else:
             error_message += "AN UNKNOWN ERROR OCCURRED."
 
-        # AJK TODO make this and other calls to SentryClient in libs/sentry.py as callable functions
-        sentry_client = SentryClient(dsn=SENTRY_ELASTIC_BEANSTALK_DSN,
-                                     tags={"upload_error": "upload error", "user_id": user.patient_id},
-                                     transport=HTTPTransport)
+        tags = {"upload_error": "upload error", "user_id": patient_id}
+        sentry_client = make_sentry_client('eb', tags)
         sentry_client.captureMessage(error_message)
         
         # log_and_email_500_error(Exception("upload error"), error_message)

@@ -1,22 +1,16 @@
 from datetime import datetime
-
-from cronutils import ErrorSentry
 from dateutil import tz
-
 from flask import request
 
-from raven import Client as SentryClient
-from raven.transport import HTTPTransport
-
-from config.settings import SENTRY_ANDROID_DSN
+from libs.sentry import make_error_sentry, make_sentry_client
 
 
 def send_android_error_report(user_id, error_report):
     # Encountered a corrupted (write error) error report upload on Apr 30 2017, adding error sentry
     # so that we get *some* report of the error occuring but also delete that file from the device.
-    with ErrorSentry(SENTRY_ANDROID_DSN, sentry_client_kwargs={'transport': HTTPTransport}):
+    with make_error_sentry('android'):
         # get all non-empty lines in the error report
-        contents = [line for line in error_report.splitlines() if line.strip() ]
+        contents = [line for line in error_report.splitlines() if line.strip()]
         
         # the first line contains a unix millisecond timestamp, construct a datetime
         # The printed value in the crash report is in UTC
@@ -39,12 +33,12 @@ def send_android_error_report(user_id, error_report):
         device_identifiers = {ID.strip().split(":",1)[0] : ID.strip().split(":",1)[1]
                                               for ID in device_identifiers}
     
-        #get a useful timestamp...
+        # get a useful timestamp...
         eastern_time = timestamp.replace(tzinfo=tz.gettz('UTC')).astimezone(tz.gettz('America/New_York'))
         
-        #construct some useful tags for this error report, add all identifiers as tags.
+        # construct some useful tags for this error report, add all identifiers as tags.
         tags = {"Android_Error": "android error",
-                "user_id":user_id,
+                "user_id": user_id,
                 "date": str(timestamp.date()),
                 "time": str(timestamp).split(" ")[1].split(".")[0],
                 "eastern_date": str(eastern_time.date()),
@@ -52,10 +46,6 @@ def send_android_error_report(user_id, error_report):
                 }
         tags.update(device_identifiers)
         
-        sentry_client = SentryClient(dsn=SENTRY_ANDROID_DSN,
-                                     tags=tags,
-                                     transport=HTTPTransport)
+        sentry_client = make_sentry_client('android', tags)
     
         sentry_client.captureMessage("\n".join(contents))
-    
-    
