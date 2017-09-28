@@ -111,6 +111,8 @@ def install_pyenv():
 def augment_config(config):
     config['flask_secret_key'] = ''.join([random.choice('0123456789abcdef') for _ in xrange(80)])
     
+    config['s3_backups_bucket'] = '{}-backup'.format(config['s3_bucket'])
+    
     config['e500_email_address'] = 'e500_error@{}'.format(config['domain_name'])
     config['other_email_address'] = 'telegram_service@{}'.format(config['domain_name'])
     return config

@@ -71,7 +71,7 @@ TIMER_VALUES = ["accelerometer_off_duration_seconds",
                 "devicemotion_off_duration_seconds",
                 "devicemotion_on_duration_seconds" ]
 
-#The format that dates should be in throughout the
+# The format that dates should be in throughout the codebase
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 """1990-01-31T07:30:04 gets you jan 31 1990 at 7:30:04am
    human string is YYYY-MM-DDThh:mm:ss """
@@ -117,7 +117,7 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     GYRO,
                     MAGNETOMETER,
                     DEVICEMOTION,
-                    REACHABILITY ]
+                    REACHABILITY]
 
 SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
@@ -226,3 +226,7 @@ NUMBER_REGEX = "[0-9]"
 PASSWORD_REQUIREMENT_REGEX_LIST = [SYMBOL_REGEX, LOWERCASE_REGEX, UPPERCASE_REGEX, NUMBER_REGEX]
 
 DEVICE_IDENTIFIERS_HEADER = "patient_id,MAC,phone_number,device_id,device_os,os_version,product,brand,hardware_id,manufacturer,model,beiwe_version\n"
+
+# Encryption constants
+ASYMMETRIC_KEY_LENGTH = 2048  # length of private/public keys
+ITERATIONS = 1000  # number of SHA iterations in password hashing

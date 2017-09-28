@@ -7,7 +7,8 @@ from Crypto.PublicKey import RSA
 from flask import request
 from werkzeug.datastructures import FileStorage
 
-from config.settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
+from config.constants import ASYMMETRIC_KEY_LENGTH
+from config.settings import IS_STAGING
 from libs.logging import log_error
 from database.models import Study, DecryptionKeyError, EncryptionErrorMetadata, LineEncryptionError
 

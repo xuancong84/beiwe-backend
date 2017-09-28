@@ -1,6 +1,8 @@
 import os
 from os.path import abspath, dirname, join, exists
 
+# AJK TODO make sure all the settings are checked here
+
 # The explicit remote env file should be beiwe-backend/config/remote_db_env.py
 EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env.py")
 ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
@@ -34,24 +36,20 @@ for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
         errors.append(attr_name + " was not provided with a value.")
 
-MANDATORY_VARS = {'ASYMMETRIC_KEY_LENGTH',
-                  'AWS_ACCESS_KEY_ID',
+MANDATORY_VARS = {'AWS_ACCESS_KEY_ID',
                   'AWS_SECRET_ACCESS_KEY',
+                  'DOMAIN_NAME',
                   'E500_EMAIL_ADDRESS',
                   'FLASK_SECRET_KEY',
-                  'ITERATIONS',
                   'IS_STAGING',
-                  'LOCAL_BACKUPS_DIRECTORY',
                   'MONGO_PASSWORD',
                   'MONGO_USERNAME',
-                  'MONGO_PORT',
-                  'MONGO_IP',
                   'OTHER_EMAIL_ADDRESS',
-                  'S3_BACKUPS_AWS_KEY_ID',
-                  'S3_BACKUPS_AWS_SECRET_ACCESS_KEY',
                   'S3_BACKUPS_BUCKET',
                   'S3_BUCKET',
-                  'SENTRY_DSN',
+                  'SENTRY_ANDROID_DSN',
+                  'SENTRY_DATA_PROCESSING_DSN',
+                  'SENTRY_ELASTIC_BEANSTALK_DSN',
                   'SENTRY_JAVASCRIPT_DSN',
                   'SYSADMIN_EMAILS'}
 
@@ -61,10 +59,6 @@ for mandatory_var in MANDATORY_VARS:
         errors.append(mandatory_var + " was not provided in your settings.")
 
 # Environment variables might be unpredictable, so we sanitize the numerical ones as ints.
-settings.MONGO_PORT = int(settings.MONGO_PORT)
-settings.ASYMMETRIC_KEY_LENGTH = int(settings.ASYMMETRIC_KEY_LENGTH)
-settings.ITERATIONS = int(settings.ITERATIONS)
-
 constants.DEFAULT_S3_RETRIES = int(constants.DEFAULT_S3_RETRIES)
 constants.CONCURRENT_NETWORK_OPS = int(constants.CONCURRENT_NETWORK_OPS)
 constants.FILE_PROCESS_PAGE_SIZE = int(constants.FILE_PROCESS_PAGE_SIZE)

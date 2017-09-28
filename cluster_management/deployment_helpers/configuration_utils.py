@@ -12,10 +12,10 @@ def validate_config():
     
     # Validate the data
     errors = []
-    s3_bucket_name = aws_credentials_config.get('s3_bucket_name', '')
-    if not isinstance(s3_bucket_name, (str, unicode)):
+    s3_bucket = aws_credentials_config.get('s3_bucket_name', '')
+    if not isinstance(s3_bucket, (str, unicode)):
         errors.append('S3 bucket name must be a string')
-    elif not s3_bucket_name:
+    elif not s3_bucket:
         errors.append('S3 bucket name cannot be empty')
     
     sysadmin_emails = aws_credentials_config.get('system_administrator_email_list', [])
@@ -55,7 +55,7 @@ def validate_config():
     
     # Put the data into one dict to be returned
     combined_config = {
-        's3_bucket_name': s3_bucket_name,
+        's3_bucket': s3_bucket,
         'domain_name': domain_name,
         'sysadmin_emails': ','.join(sysadmin_emails),
         'sentry_elastic_beanstalk_dsn': sentry_elastic_beanstalk_dsn,
