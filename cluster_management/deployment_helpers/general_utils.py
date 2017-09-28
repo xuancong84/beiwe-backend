@@ -9,6 +9,7 @@ import botocore.exceptions as botoexceptions
 from fabric.exceptions import NetworkError
 
 # Folder and file names
+REMOTE_HOME_DIR = '/home/ubuntu'
 CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
 PUSHED_FILES_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
 USER_SPECIFIC_CONFIG_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'my_cluster_configuration')
@@ -29,6 +30,17 @@ APT_GET_INSTALLS = [
     'nload',
     'sendmail',
     'silversearcher-ag',  # Search within files
+]
+
+# Files to push from the local server, besides the git pem and the pyenv installation script
+# This is a list of 2-tuples of (local_path, remote_path) where local_path is located
+# in PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
+FILES_TO_PUSH = [
+    ('bash_profile.sh', '.profile'),
+    ('celery_configuration.sh', 'celery_configuration.sh'),
+    ('celery_periodic_restart_cronjob.txt', 'celery_periodic_restart_cronjob.txt'),
+    ('install_celery_worker.sh', 'install_celery_worker.sh'),
+    ('.inputrc', '.inputrc'),
 ]
 
 
