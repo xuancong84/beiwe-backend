@@ -40,18 +40,63 @@ env.abort_exception = FabricExecutionError
 env.abort_on_prompts = True
 
 
-def run_remote_code():
-    # Install things that need to be installed. Notes: apt-get install accepts
-    # an arbitrary number of space-separated arguments. The -y flag answers
-    # "yes" to all prompts, preventing the need for user interaction.
-    sudo('apt-get -qy install ' + ' '.join(APT_GET_INSTALLS))
+def get_git_repo():
+    """
+    Get a local copy of the git repository
+    """
     
-    # Push the files in the pushed files folder
+    # Grab the read-only key from the local repository
     put(
         os.path.join(PUSHED_FILES_FOLDER, 'git_read_only_key'),
         remote_path='/home/ubuntu/.ssh/id_rsa'
     )
     run('chmod 600 /home/ubuntu/.ssh/id_rsa')
+    
+    # Git clone the repository into the remote beiwe-backend folder
+    run('git clone git@github.com:onnela-lab/beiwe-backend.git')
+    
+    # Make sure the code is on the right branch
+    # AJK TODO right now this is django, obviously this will change on prod
+    run('cd /home/ubuntu/beiwe-backend; git checkout django')
+
+
+def install_pyenv():
+    """
+    Install pyenv as well as the latest version of Python 2, accessible
+    via /home/ubuntu/.pyenv/shims/python.
+    """
+    
+    # Copy the installation script from the local repository onto the
+    # remote server, make it executable and execute it.
+    put(
+        os.path.join(PUSHED_FILES_FOLDER, 'install_pyenv.sh'),
+        remote_path='/home/ubuntu/install_pyenv.sh'
+    )
+    run('chmod +x /home/ubuntu/install_pyenv.sh')
+    run('/home/ubuntu/install_pyenv.sh')
+
+    # Install the latest python 2 version and set pyenv to default to that version.
+    # Note that this installation is slow, taking approximately a minute.
+    # -f: Install even if the version appears to be installed already
+    run('/home/ubuntu/.pyenv/bin/pyenv install -f 2.7.14')
+    run('/home/ubuntu/.pyenv/bin/pyenv global 2.7.14')
+    
+    # Display the version of python used by pyenv; this should print "Python 2.7.14".
+    run('/home/ubuntu/.pyenv/shims/python --version')
+
+
+def run_remote_code():
+    
+    # Install things that need to be installed. Notes: apt-get install accepts
+    # an arbitrary number of space-separated arguments. The -y flag answers
+    # "yes" to all prompts, preventing the need for user interaction.
+    sudo('apt-get -qy install ' + ' '.join(APT_GET_INSTALLS))
+    
+    # Download the git repository onto the remote server
+    get_git_repo()
+
+    # Push the other files in the pushed files folder
+    # AJK TODO understand this better and block and document more fully
     put(
         os.path.join(PUSHED_FILES_FOLDER, 'bash_profile.sh'),
         remote_path='/home/ubuntu/.profile'
@@ -60,13 +105,15 @@ def run_remote_code():
         os.path.join(PUSHED_FILES_FOLDER, '.inputrc'),
         remote_path='/home/ubuntu/.inputrc'
     )
-    put(
-        os.path.join(PUSHED_FILES_FOLDER, 'install_pyenv.sh'),
-        remote_path='/home/ubuntu/install_pyenv.sh'
-    )
     
-    # Get a local copy of the git repository, now that we have the read-only key
-    run('git clone git@github.com:onnela-lab/beiwe-backend.git')
+    # Install pyenv and the latest Python 2 version
+    install_pyenv()
+    
+    # Upgrade pip, because we don't know what version the server came with.
+    # Install the python requirements for running the server code.
+    # AJK TODO point out that we are using the pyenv pip. make sure this works properly
+    run('/home/ubuntu/.pyenv/shims/pip install --upgrade pip')
+    run('/home/ubuntu/.pyenv/shims/pip install -r /home/ubuntu/beiwe-backend/Requirements.txt')
 
 
 if __name__ == "__main__":
