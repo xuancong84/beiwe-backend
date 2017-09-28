@@ -44,3 +44,4 @@ construct and push:
 local requirements:
     researcher should run everything from .../cluster_management$
     pip install -r launch_requirements.txt
+    python launch_script.py

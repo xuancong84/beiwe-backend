@@ -9,7 +9,11 @@ import botocore.exceptions as botoexceptions
 from fabric.exceptions import NetworkError
 
 # Folder and file names
+# Remote
 REMOTE_HOME_DIR = '/home/ubuntu'
+LOG_FILE = os.path.join(REMOTE_HOME_DIR, 'server_setup.log')
+
+# Local
 CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
 PUSHED_FILES_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
 USER_SPECIFIC_CONFIG_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'my_cluster_configuration')

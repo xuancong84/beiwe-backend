@@ -25,7 +25,7 @@ from fabric.api import env, put, run, sudo
 
 from deployment_helpers.configuration_utils import validate_config, write_config_to_file
 from deployment_helpers.general_utils import (
-    log, APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH,
+    log, APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE,
     PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
 )
 
@@ -57,12 +57,16 @@ def get_git_repo():
     run('chmod 600 {key_path}'.format(key_path=key_path))
     
     # Git clone the repository into the remote beiwe-backend folder
-    run('cd {home}; git clone git@github.com:onnela-lab/beiwe-backend.git'
-        .format(home=REMOTE_HOME_DIR))
+    # Note that here stderr is redirected to the log file, because git clone prints
+    # to stderr rather than stdout.
+    run('cd {home}; git clone git@github.com:onnela-lab/beiwe-backend.git 2>> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
     
     # Make sure the code is on the right branch
+    # git checkout prints to both stderr *and* stdout, so redirect them both to the log file
     # AJK TODO for local testing this uses the django branch
-    run('cd {home}/beiwe-backend; git checkout django'.format(home=REMOTE_HOME_DIR))
+    run('cd {home}/beiwe-backend; git checkout django 1>> {log} 2>> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
 def push_files():
@@ -104,10 +108,17 @@ def install_pyenv():
 
 def run_remote_code():
     
+    # AJK TODO this presumably isn't necessary in reality?
+    # Clear the log file if it already exists. This file will be used to redirect
+    # output to, so that the local user isn't forced to see a mass of confusing
+    # text.
+    run('echo "" > {log}'.format(log=LOG_FILE))
+    
     # Install things that need to be installed. Notes: apt-get install accepts
     # an arbitrary number of space-separated arguments. The -y flag answers
     # "yes" to all prompts, preventing the need for user interaction.
-    sudo('apt-get -qy install ' + ' '.join(APT_GET_INSTALLS))
+    installs_string = ' '.join(APT_GET_INSTALLS)
+    sudo('apt-get -y install {installs} >> {log}'.format(log=LOG_FILE, installs=installs_string))
     
     # Download the git repository onto the remote server
     # AJK TODO temporary for repeated testing (+1)
@@ -123,11 +134,12 @@ def run_remote_code():
     
     # Upgrade pip, because we don't know what version the server came with.
     # Install the python requirements for running the server code.
-    # AJK TODO point out that we are using the pyenv pip. make sure this works properly
-    # IDEA: use the path context manager
-    run('{home}/.pyenv/shims/pip install --upgrade pip'.format(home=REMOTE_HOME_DIR))
-    run('{home}/.pyenv/shims/pip install -r {home}/beiwe-backend/Requirements.txt'
-        .format(home=REMOTE_HOME_DIR))
+    # Note that we are using the pyenv pip to ensure that the python requirements
+    # are installed into pyenv, rather than into the system python.
+    run('{home}/.pyenv/shims/pip install --upgrade pip >> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+    run('{home}/.pyenv/shims/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
 if __name__ == "__main__":
