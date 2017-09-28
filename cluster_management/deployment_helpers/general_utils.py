@@ -12,6 +12,8 @@ from fabric.exceptions import NetworkError
 # Remote
 REMOTE_HOME_DIR = '/home/ubuntu'
 LOG_FILE = os.path.join(REMOTE_HOME_DIR, 'server_setup.log')
+OS_ENVIRON_SETTING_REMOTE_FILE = os.path.join(REMOTE_HOME_DIR,
+                                              'beiwe-backend/config/remote_db_env.py')
 
 # Local
 CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
@@ -19,7 +21,8 @@ PUSHED_FILES_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
 USER_SPECIFIC_CONFIG_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'my_cluster_configuration')
 AWS_PEM_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_deployment_key.pem')
 AWS_CREDENTIALS_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_credentials.json')
-OS_ENVIRON_SETTING_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'env_values.py')
+OS_ENVIRON_SETTING_LOCAL_FILE = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'remote_db_env.py')
+
 
 # Utilities to install
 # AJK TODO document what each of these is for

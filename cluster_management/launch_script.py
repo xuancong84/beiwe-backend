@@ -24,10 +24,10 @@ import random
 
 from fabric.api import env, put, run, sudo
 
-from deployment_helpers.configuration_utils import validate_config, write_config_to_file
+from deployment_helpers.configuration_utils import validate_config, write_config_to_local_file
 from deployment_helpers.general_utils import (
-    APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE,
-    PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
+    APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
+    OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
 )
 
 
@@ -109,7 +109,7 @@ def install_pyenv():
 
 
 def augment_config(config):
-    config['flask_secure_key'] = ''.join([random.choice('0123456789abcdef') for _ in xrange(80)])
+    config['flask_secret_key'] = ''.join([random.choice('0123456789abcdef') for _ in xrange(80)])
     
     config['e500_email_address'] = 'e500_error@{}'.format(config['domain_name'])
     config['other_email_address'] = 'telegram_service@{}'.format(config['domain_name'])
@@ -151,6 +151,12 @@ def run_remote_code():
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
     run('{home}/.pyenv/shims/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+    
+    # Put the environment-setting file to the remote server
+    put(
+        OS_ENVIRON_SETTING_LOCAL_FILE,
+        remote_path=OS_ENVIRON_SETTING_REMOTE_FILE,
+    )
 
 
 if __name__ == "__main__":
@@ -159,10 +165,11 @@ if __name__ == "__main__":
     # Get the configuration values and make them environment variables
     combined_config = validate_config()
     augmented_config = augment_config(combined_config)
-    write_config_to_file(augmented_config)
+    write_config_to_local_file(augmented_config)
     
     # More fabric configuration
-    env.host_string = combined_config['host_string']
+    # AJK TODO temporary hardcode, this is going to be derived from boto
+    env.host_string = '54.88.7.29'
     env.user = 'ubuntu'
     env.key_filename = AWS_PEM_FILE
     

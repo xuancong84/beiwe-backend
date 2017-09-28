@@ -46,9 +46,9 @@ ASYMMETRIC_KEY_LENGTH = getenv("ASYMMETRIC_KEY_LENGTH") or 2048
 # have created passwords, because then the hashes won't match!
 ITERATIONS = getenv("ITERATIONS") or 1000
 
-#Sentry DSN
+# Sentry DSN
 SENTRY_DSN = getenv("SENTRY_DSN") or "USE_EMAIL_FALLBACK"
 SENTRY_JAVASCRIPT_DSN = getenv("SENTRY_JAVASCRIPT_DSN") or None
 
-#Production/Staging - set to "TRUE"
+# Production/Staging: set to "TRUE" if staging
 IS_STAGING = getenv("IS_STAGING") or "PRODUCTION"

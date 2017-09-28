@@ -1,6 +1,7 @@
 import os
 from os.path import abspath, dirname, join, exists
 
+# The explicit remote env file should be beiwe-backend/config/remote_db_env.py
 EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env.py")
 ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
 print(EXPLICIT_REMOTE_ENV)

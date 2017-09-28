@@ -1,7 +1,7 @@
 import json
 import re
 
-from deployment_helpers.general_utils import AWS_CREDENTIALS_FILE
+from deployment_helpers.general_utils import AWS_CREDENTIALS_FILE, OS_ENVIRON_SETTING_LOCAL_FILE
 
 
 # AJK TODO annotate
@@ -12,11 +12,6 @@ def validate_config():
     
     # Validate the data
     errors = []
-    host_string = aws_credentials_config.get('ip_address', '')
-    if not re.match('^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){4}$',
-                    host_string + '.'):
-        errors.append('Invalid IP address')
-    
     s3_bucket_name = aws_credentials_config.get('s3_bucket_name', '')
     if not isinstance(s3_bucket_name, (str, unicode)):
         errors.append('S3 bucket name must be a string')
@@ -47,7 +42,7 @@ def validate_config():
         elif not re.match('^https://[\S]+:[\S]+@sentry\.io/[\S]+$', dsn):
             errors.append('Invalid DSN: {}'.format(dsn))
     
-    domain_name = aws_credentials_config.get('domain_name')
+    domain_name = aws_credentials_config.get('website_name')
     if not isinstance(domain_name, (str, unicode)):
         errors.append('Domain name must be a string')
     elif not domain_name:
@@ -60,7 +55,6 @@ def validate_config():
     
     # Put the data into one dict to be returned
     combined_config = {
-        'host_string': host_string,
         's3_bucket_name': s3_bucket_name,
         'domain_name': domain_name,
         'sysadmin_emails': ','.join(sysadmin_emails),
@@ -72,8 +66,13 @@ def validate_config():
     return combined_config
 
 
-def write_config_to_file(config):
-    # AJK TODO write locally using open as fn, fn.write
-    # then use fabric.api.put to upload it to the remote
-    from pprint import pprint
-    pprint(config)
+# AJK TODO annotate
+def write_config_to_local_file(config):
+    list_to_write = ['import os']
+    for key, value in config.iteritems():
+        next_line = "os.environ['{key}'] = '{value}'".format(key=key.upper(), value=value)
+        list_to_write.append(next_line)
+    
+    string_to_write = '\n'.join(list_to_write) + '\n'
+    with open(OS_ENVIRON_SETTING_LOCAL_FILE, 'w') as fn:
+        fn.write(string_to_write)

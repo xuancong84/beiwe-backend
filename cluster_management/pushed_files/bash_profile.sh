@@ -16,7 +16,7 @@ alias mount-db-drive="mount /dev/xvdb /mnt"
 #Alias aliases
 alias a="alias"
 alias p="nano ~/.profile; source ~/.profile"
-alias pup="cp /var/www/beiwe-backend/miscellaneous/bash_profile.sh ~/.profile; source ~/.profile"
+alias pup="cp $HOME/beiwe-backend/miscellaneous/bash_profile.sh ~/.profile; source ~/.profile"
 
 #File Sizes
 alias mongosize="ll -h /mnt/" #prints out the contents with file sizes of the mongodb folder
@@ -59,7 +59,7 @@ alias master="git checkout master"
 alias prod="git checkout production"
 
 #File locations
-alias www='cd /var/www/beiwe-backend'
+alias www='cd $HOME/beiwe-backend'
 alias apache="cd /etc/apache2"
 
 #Apache restart functionality
@@ -68,7 +68,7 @@ alias are='apacherestart'
 alias restart='sudo service apache2 restart'
 alias pyc='find . -type f -name "*.pyc" -delete -print'
 alias up='update'
-alias update='cd /var/www/beiwe-backend; pyc; git pull; touch /var/www/beiwe-backend/wsgi.py'
+alias update='cd $HOME/beiwe-backend; pyc; git pull; touch $HOME/beiwe-backend/wsgi.py'
 
 #supervisord (data processing)
 alias processing-start="sudo service rabbitmq-server restart; supervisord"
@@ -86,15 +86,15 @@ alias relog='restart; logt'
 alias uplog='up;logt'
 
 #Configuration files
-alias conf='sudo nano /var/www/beiwe-backend/config/settings.py'
+alias conf='sudo nano $HOME/beiwe-backend/config/settings.py'
 alias monconf='sudo nano /etc/mongodb.conf'
 
 #Services configuration files
 alias boot="sudo sysv-rc-conf"
 
 #Developer tools
-alias db='cd /var/www/beiwe-backend/; ipython -i /var/www/beiwe-backend/db_shell.py'
-alias sdb="cd /var/www/beiwe-backend/; sudo ipython -i /var/www/beiwe-backend/db_shell.py"
+alias db="cd $HOME/beiwe-backend/; ipython -i db_shell.py"
+alias sdb="cd $HOME/beiwe-backend/; sudo ipython -i db_shell.py"
 alias py="python"
 alias ipy="ipython"
 alias manage="python manage.py"
@@ -147,3 +147,8 @@ YELLOW="\[\033[0;33m\]"
 GREEN="\[\033[0;32m\]"
 NO_COLOUR="\[\033[0m\]"
 PS1="$GREEN\u$NO_COLOUR:\w$YELLOW\$(parse_git_branch)$NO_COLOUR\$ "
+
+
+#add pyenv folders to PATH to enable using pyenv
+export PATH="/home/ubuntu/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
