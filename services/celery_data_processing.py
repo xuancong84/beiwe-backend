@@ -40,7 +40,7 @@ from cronutils import ErrorSentry
 from raven.transport import HTTPTransport
 
 from config.constants import FILE_PROCESS_PAGE_SIZE, CELERY_EXPIRY_MINUTES, CELERY_ERROR_REPORT_TIMEOUT_SECONDS
-from config.settings import SENTRY_DSN
+from config.settings import SENTRY_DATA_PROCESSING_DSN
 from libs.file_processing import ProcessingOverlapError, do_process_user_file_chunks
 from database.models import FileProcessLock, Participant
 
@@ -74,7 +74,7 @@ def safe_queue_user(*args, **kwargs):
 
 def create_file_processing_tasks():
     # The entire code is wrapped in an ErrorSentry, which catches any errors and sends them to Sentry
-    with ErrorSentry(SENTRY_DSN, sentry_client_kwargs={'transport': HTTPTransport}) as error_sentry:
+    with ErrorSentry(SENTRY_DATA_PROCESSING_DSN, sentry_client_kwargs={'transport': HTTPTransport}) as error_sentry:
         print(error_sentry.sentry_client.is_enabled())
         if FileProcessLock.islocked():
             # This is really a safety check to ensure that no code executes if file processing is locked
@@ -138,9 +138,10 @@ def report_file_processing_locked_and_exit():
     timedelta_since_last_run = FileProcessLock.get_time_since_locked()
     print("timedelta %s" % timedelta_since_last_run.total_seconds())
     if timedelta_since_last_run.total_seconds() > CELERY_ERROR_REPORT_TIMEOUT_SECONDS:
-        error_msg =\
-            "Data processing has overlapped with a prior data index run that started more than %s minutes ago.\n"\
-            "That prior run has been going for %s hour(s), %s minute(s)"
+        error_msg = (
+            "Data processing has overlapped with a prior data index run that started more than "
+            "%s minutes ago.\nThat prior run has been going for %s hour(s), %s minute(s)"
+        )
         error_msg = error_msg % (CELERY_ERROR_REPORT_TIMEOUT_SECONDS / 60,
                                  str(int(timedelta_since_last_run.total_seconds() / 60 / 60)),
                                  str(int(timedelta_since_last_run.total_seconds() / 60 % 60)))
@@ -171,7 +172,7 @@ def celery_process_file_chunks(participant):
     """
     log = LogList()
     number_bad_files = 0
-    error_sentry = ErrorSentry(SENTRY_DSN, sentry_client_kwargs={
+    error_sentry = ErrorSentry(SENTRY_DATA_PROCESSING_DSN, sentry_client_kwargs={
         "tags": {"user_id": participant.patient_id},
         'transport': HTTPTransport
     })

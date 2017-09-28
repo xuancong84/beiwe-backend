@@ -8,17 +8,18 @@ from flask import request
 from raven import Client as SentryClient
 from raven.transport import HTTPTransport
 
-from config.settings import SENTRY_DSN
+from config.settings import SENTRY_ANDROID_DSN
 
 #old email error code:
 # email_system_administrators(error_report,
 #                             "Beiwe Android Crash Log: %s" % user_id,
 #                             source_email="android_errors@studies.beiwe.org")
 
+
 def send_android_error_report(user_id, error_report):
     # Encountered a corrupted (write error) error report upload on Apr 30 2017, adding error sentry
     # so that we get *some* report of the error occuring but also delete that file from the device.
-    with ErrorSentry(SENTRY_DSN, sentry_client_kwargs={'transport': HTTPTransport}):
+    with ErrorSentry(SENTRY_ANDROID_DSN, sentry_client_kwargs={'transport': HTTPTransport}):
         #get all non-empty lines in the error report
         contents = [line for line in error_report.splitlines() if line.strip() ]
         
@@ -56,9 +57,9 @@ def send_android_error_report(user_id, error_report):
                 }
         tags.update(device_identifiers)
         
-        sentry_client = SentryClient(dsn=SENTRY_DSN,
+        sentry_client = SentryClient(dsn=SENTRY_ANDROID_DSN,
                                      tags=tags,
-                                     transport=HTTPTransport )
+                                     transport=HTTPTransport)
     
         sentry_client.captureMessage("\n".join(contents))
     

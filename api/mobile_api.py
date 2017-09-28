@@ -8,7 +8,7 @@ from raven.transport import HTTPTransport
 from werkzeug.exceptions import BadRequestKeyError
 
 from config.constants import ALLOWED_EXTENSIONS
-from config.settings import SENTRY_DSN
+from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN
 from libs.android_error_reporting import send_android_error_report
 from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
@@ -138,8 +138,9 @@ def upload(OS_API=""):
         else:
             error_message += "AN UNKNOWN ERROR OCCURRED."
 
-        sentry_client = SentryClient(dsn=SENTRY_DSN,
-                                     tags={"upload_error": "upload error", "user_id": user.patient_id },
+        # AJK TODO make this and other calls to SentryClient in libs/sentry.py as callable functions
+        sentry_client = SentryClient(dsn=SENTRY_ELASTIC_BEANSTALK_DSN,
+                                     tags={"upload_error": "upload error", "user_id": user.patient_id},
                                      transport=HTTPTransport)
         sentry_client.captureMessage(error_message)
         

@@ -28,12 +28,14 @@ S3_BACKUPS_BUCKET = getenv("S3_BACKUPS_BUCKET")
 E500_EMAIL_ADDRESS = getenv("E500_EMAIL_ADDRESS")
 OTHER_EMAIL_ADDRESS = getenv("OTHER_EMAIL_ADDRESS")
 
-# A list of email addresses that will receive error emails.
-# this value must be a comma separated list, whitespace before and after addresses will be stripped.
+# A list of email addresses that will receive error emails. This value must be a
+# comma separated list; whitespace before and after addresses will be stripped.
 SYSADMIN_EMAILS = getenv("SYSADMIN_EMAILS")
 
-# Sentry DSN
-SENTRY_DSN = getenv("SENTRY_DSN") or "USE_EMAIL_FALLBACK"
+# Sentry DSNs
+SENTRY_ANDROID_DSN = getenv("SENTRY_ANDROID_DSN")
+SENTRY_DATA_PROCESSING_DSN = getenv("SENTRY_DATA_PROCESSING_DSN")
+SENTRY_ELASTIC_BEANSTALK_DSN = getenv("SENTRY_ELASTIC_BEANSTALK_DSN")
 SENTRY_JAVASCRIPT_DSN = getenv("SENTRY_JAVASCRIPT_DSN")
 
 # Production/Staging: set to "TRUE" if staging
