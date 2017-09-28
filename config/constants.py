@@ -1,5 +1,7 @@
 from os import getenv
 
+from config.settings import DOMAIN_NAME
+
 ### Environment settings ###
 # All settings here can be configured by setting an environment variable, or by editing the default value
 
@@ -230,3 +232,7 @@ DEVICE_IDENTIFIERS_HEADER = "patient_id,MAC,phone_number,device_id,device_os,os_
 # Encryption constants
 ASYMMETRIC_KEY_LENGTH = 2048  # length of private/public keys
 ITERATIONS = 1000  # number of SHA iterations in password hashing
+
+# Error reporting send-from emails
+E500_EMAIL_ADDRESS = 'e500_error@{}'.format(DOMAIN_NAME)
+OTHER_EMAIL_ADDRESS = 'telegram_service@{}'.format(DOMAIN_NAME)

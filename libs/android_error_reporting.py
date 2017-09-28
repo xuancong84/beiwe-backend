@@ -10,25 +10,20 @@ from raven.transport import HTTPTransport
 
 from config.settings import SENTRY_ANDROID_DSN
 
-#old email error code:
-# email_system_administrators(error_report,
-#                             "Beiwe Android Crash Log: %s" % user_id,
-#                             source_email="android_errors@studies.beiwe.org")
-
 
 def send_android_error_report(user_id, error_report):
     # Encountered a corrupted (write error) error report upload on Apr 30 2017, adding error sentry
     # so that we get *some* report of the error occuring but also delete that file from the device.
     with ErrorSentry(SENTRY_ANDROID_DSN, sentry_client_kwargs={'transport': HTTPTransport}):
-        #get all non-empty lines in the error report
+        # get all non-empty lines in the error report
         contents = [line for line in error_report.splitlines() if line.strip() ]
         
         # the first line contains a unix millisecond timestamp, construct a datetime
         # The printed value in the crash report is in UTC
-        try: #Beiwe version greater than 4
+        try:  # Beiwe version greater than 4
             timestamp = datetime.fromtimestamp(float(contents[0]) / 1000)
-            contents.pop(0) #remove timestamp from message text
-        except ValueError: #Beiwe version 4
+            contents.pop(0)  # remove timestamp from message text
+        except ValueError:  # Beiwe version 4
             timestamp = datetime.fromtimestamp(float(request.values['file_name'].split("_")[1]) / 1000)
     
         device_identifiers = contents[0].split(',')

@@ -24,9 +24,8 @@ AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY")
 S3_BUCKET = getenv("S3_BUCKET")
 S3_BACKUPS_BUCKET = getenv("S3_BACKUPS_BUCKET")
 
-# Email addresses used on the server.
-E500_EMAIL_ADDRESS = getenv("E500_EMAIL_ADDRESS")
-OTHER_EMAIL_ADDRESS = getenv("OTHER_EMAIL_ADDRESS")
+# Domain name for the server
+DOMAIN_NAME = getenv("DOMAIN_NAME")
 
 # A list of email addresses that will receive error emails. This value must be a
 # comma separated list; whitespace before and after addresses will be stripped.

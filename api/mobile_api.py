@@ -66,7 +66,7 @@ def upload(OS_API=""):
     upload it again at some point.
 
     Request format:
-    send an http post request to studies.beiwe.org/upload, remember to include security
+    send an http post request to [domain name]/upload, remember to include security
     parameters (see user_authentication for documentation). Provide the contents of the file,
     encrypted (see encryption specification) and properly converted to Base64 encoded text,
     as a request parameter entitled "file".

@@ -1,8 +1,11 @@
-import traceback, smtplib
 from datetime import datetime
+import smtplib
+import traceback
 
 from cronutils.error_handler import BundledError
-from config.settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EMAIL_ADDRESS
+
+from config.constants import E500_EMAIL_ADDRESS, OTHER_EMAIL_ADDRESS
+from config.settings import SYSADMIN_EMAILS
 
 
 def log_and_email_500_error(e, log_message=None, emails=SYSADMIN_EMAILS):
@@ -13,18 +16,18 @@ def log_and_email_500_error(e, log_message=None, emails=SYSADMIN_EMAILS):
     try:
         subject = "Beiwe Error: %s" % e.message
         message = log_error(e, log_message, reraise=True)
-        _send_email(E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, message, subject)
+        _send_email(E500_EMAIL_ADDRESS, emails, message, subject)
         
     except Exception:
         print("\n!!!! ERROR IN log_and_email_error !!!!")
 
 
 def email_bundled_error(bundled_error, subject, emails=SYSADMIN_EMAILS):
-    #use the __repr__() function to extract an emailable version of the bundled error.
+    # use the __repr__() function to extract an emailable version of the bundled error.
     if not isinstance(bundled_error, BundledError):
-        print "ERROR: received a non-BundledError in email_bundled_error."
+        print("ERROR: received a non-BundledError in email_bundled_error.")
         raise bundled_error
-    _send_email(OTHER_EMAIL_ADDRESS, SYSADMIN_EMAILS, bundled_error.__repr__(), subject)
+    _send_email(OTHER_EMAIL_ADDRESS, emails, bundled_error.__repr__(), subject)
 
 
 def log_error(e, message=None, reraise=False):
@@ -65,7 +68,7 @@ def _send_email(source_email_address, destination_email_addresses, message, subj
     try:
         email_server.sendmail(source_email_address,
                               destination_email_addresses,
-                              'Subject: %s\n\n%s' % (subject, message) )
+                              'Subject: %s\n\n%s' % (subject, message))
     except Exception:
         raise
     finally:

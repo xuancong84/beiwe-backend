@@ -76,6 +76,7 @@ function end() {
         statusCode: {
             200: function(response) {
                 // A redirect to the Login page will show up as a 200 redirect
+                // AJK TODO change this to use config.settings.DOMAIN_NAME
                 alert("Your session may have expired. Open a new browser tab, log in to beiwe.org, and then click the 'Save and Deploy' button again on this tab.");
             },
             201: function(response) {
