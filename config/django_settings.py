@@ -8,7 +8,7 @@ DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
 TEST_DATABASE_PATH = join(dirname(__file__), 'private/tests_db.sqlite')
 
 # SECRET KEY is required by the django management commands, using the flask key is fine because
-# we are not actually using in in any server runtime capacity.
+# we are not actually using it in any server runtime capacity.
 SECRET_KEY = FLASK_SECRET_KEY
 
 

@@ -20,12 +20,13 @@
 import argparse
 import logging
 import os
+import random
 
 from fabric.api import env, put, run, sudo
 
 from deployment_helpers.configuration_utils import validate_config, write_config_to_file
 from deployment_helpers.general_utils import (
-    log, APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE,
+    APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE,
     PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
 )
 
@@ -71,6 +72,7 @@ def get_git_repo():
 
 def push_files():
     # Push the other files in the pushed files folder
+    # AJK TODO these should all be individually used at some point, rendering this function moot
     for local_path, remote_path in FILES_TO_PUSH:
         put(
             os.path.join(PUSHED_FILES_FOLDER, local_path),
@@ -106,6 +108,14 @@ def install_pyenv():
     run('{home}/.pyenv/shims/python --version'.format(home=REMOTE_HOME_DIR))
 
 
+def augment_config(config):
+    config['flask_secure_key'] = ''.join([random.choice('0123456789abcdef') for _ in xrange(80)])
+    
+    config['e500_email_address'] = 'e500_error@{}'.format(config['domain_name'])
+    config['other_email_address'] = 'telegram_service@{}'.format(config['domain_name'])
+    return config
+
+
 def run_remote_code():
     
     # AJK TODO this presumably isn't necessary in reality?
@@ -118,7 +128,8 @@ def run_remote_code():
     # an arbitrary number of space-separated arguments. The -y flag answers
     # "yes" to all prompts, preventing the need for user interaction.
     installs_string = ' '.join(APT_GET_INSTALLS)
-    sudo('apt-get -y install {installs} >> {log}'.format(log=LOG_FILE, installs=installs_string))
+    sudo('apt-get -y install {installs} >> {log}'
+         .format(log=LOG_FILE, installs=installs_string))
     
     # Download the git repository onto the remote server
     # AJK TODO temporary for repeated testing (+1)
@@ -147,7 +158,8 @@ if __name__ == "__main__":
     
     # Get the configuration values and make them environment variables
     combined_config = validate_config()
-    write_config_to_file(combined_config)
+    augmented_config = augment_config(combined_config)
+    write_config_to_file(augmented_config)
     
     # More fabric configuration
     env.host_string = combined_config['host_string']

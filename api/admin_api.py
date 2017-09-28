@@ -109,6 +109,7 @@ def download_privacy_policy():
 
 """########################## Debugging Code ###########################"""
 
+# This is here to check whether staging is correctly configured
 if IS_STAGING:
     @admin_api.route("/is_staging")
     def is_staging():
