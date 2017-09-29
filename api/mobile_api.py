@@ -20,8 +20,7 @@ from db.data_access_models import FileToProcess
 from raven import Client as SentryClient
 from raven.transport import HTTPTransport
 
-from config.secure_settings import SENTRY_DSN
-
+from config.secure_settings import SENTRY_DSN, IS_STAGING
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -117,13 +116,14 @@ def upload(OS_API=""):
     # except DecryptionKeyInvalidError:
     #     return render_template('blank.html'), 200
     except OurBase64Error:
-        print "decryption problems" + "#"*200
-        print
-        print patient_id
-        print
-        print file_name
-        print uploaded_file
-        print
+        if IS_STAGING:
+            print "decryption problems" + "#"*200
+            print
+            print patient_id
+            print
+            print file_name
+            print uploaded_file
+            print
         raise
         
     print "decryption success:", file_name
