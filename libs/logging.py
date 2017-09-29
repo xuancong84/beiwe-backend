@@ -6,11 +6,10 @@ from config.secure_settings import E500_EMAIL_ADDRESS, SYSADMIN_EMAILS, OTHER_EM
 
 
 def log_and_email_500_error(e, log_message=None, emails=SYSADMIN_EMAILS):
-    """ Prints in the server logs (defaults to Apache if not specified),
-    does NOT stop execution.
-    Note the error.message value is actually the subject line of the email,
-    the "log_message" variable is a passed in as the "message" variable
-    into the log_error function and appears as part of the email and log statement. """
+    """ Prints in the server logs (defaults to Apache if not specified), does NOT stop execution.
+    Note the error.message value is actually the subject line of the email, the "log_message"
+    variable is a passed in as the "message" variable into the log_error function and appears as
+    part of the email and log statement. """
     try:
         subject = "Beiwe Error: %s" % e.message
         message = log_error(e, log_message, reraise=True)
@@ -29,8 +28,8 @@ def email_bundled_error(bundled_error, subject, emails=SYSADMIN_EMAILS):
 
 
 def log_error(e, message=None, reraise=False):
-    """ Prints an error to the apache log.
-    "message" is a customizable that will be printed in the log.
+    """ Prints an error to the apache log. "message" is a customizable that will be printed in
+    the log.
     Reraise is dangerous, only set to true if you understand what it is.
     natively handles BundledError error formatting. """
     try:
@@ -64,9 +63,9 @@ def _send_email(source_email_address, destination_email_addresses, message, subj
     """ Inner function for doing an email send. """
     email_server = smtplib.SMTP("localhost")
     try:
-        email_server.sendmail( source_email_address,
-                               destination_email_addresses,
-                               'Subject: %s\n\n%s' % (subject, message) )
+        email_server.sendmail(source_email_address,
+                              destination_email_addresses,
+                              'Subject: %s\n\n%s' % (subject, message) )
     except Exception:
         raise
     finally:

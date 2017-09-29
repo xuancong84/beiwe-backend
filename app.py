@@ -1,12 +1,11 @@
 import os
-import jinja2, traceback
-from flask import Flask, render_template, redirect, abort
+import jinja2
+from flask import Flask, render_template, redirect
 from werkzeug.contrib.fixers import ProxyFix
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
     data_access_web_form
 from api import admin_api, copy_study_api, data_access_api, mobile_api, survey_api
 from libs.admin_authentication import is_logged_in
-# from libs.logging import log_error, log_and_email_500_error
 from libs.security import set_secret_key
 from config.secure_settings import SENTRY_DSN, SENTRY_JAVASCRIPT_DSN
 
@@ -45,12 +44,6 @@ def strip_dot_html(page):
     return redirect("/%s" % page)
 
 
-# # Defines additional behavior for HTML 500 errors, in this case logs a stacktrace.
-# @app.errorhandler(500)
-# def e500_handler(e):
-#     log_and_email_500_error(e)
-#     return abort(500)
-
 @app.context_processor
 def inject_dict_for_all_templates():
     return {"SENTRY_JAVASCRIPT_DSN":SENTRY_JAVASCRIPT_DSN}
@@ -58,13 +51,14 @@ def inject_dict_for_all_templates():
 
 #Extra Production settings
 if not __name__ == '__main__':
-# Points our custom 404 page (in /frontend/templates) to display on a 404 error.
+    # Points our custom 404 page (in /frontend/templates) to display on a 404 error
     @app.errorhandler(404)
     def e404(e):
         return render_template("404.html",is_logged_in=is_logged_in()), 404
 
 #Extra Debugging settings
 if __name__ == '__main__':
+    # might be necessary if running on windows/linux subsystem on windows.
     # from gevent.wsgi import WSGIServer
     # http_server = WSGIServer(('', 8080), app)
     # http_server.serve_forever()

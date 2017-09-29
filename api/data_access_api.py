@@ -1,19 +1,20 @@
-from bson import ObjectId
 from datetime import datetime
-from flask import Blueprint, request, abort, json, Response
 from multiprocessing.pool import ThreadPool
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZIP_STORED
 
+from boto.utils import JSONDecodeError
+from bson import ObjectId
 from bson.errors import InvalidId
-from db.data_access_models import ChunksRegistry, FileToProcess
+from flask import Blueprint, request, abort, json, Response
+
+from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
+                              SURVEY_ANSWERS, SURVEY_TIMINGS)
+from db.data_access_models import ChunksRegistry
 from db.study_models import Study, Studies
 from db.user_models import Admin, User, Users
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
-from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              CONCURRENT_NETWORK_OPS, SURVEY_ANSWERS, SURVEY_TIMINGS)
-from boto.utils import JSONDecodeError
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -111,7 +112,7 @@ def grab_data():
     # uncomment the following line when doing a reindex
     # return abort(503)
     study_obj = get_and_validate_study_id()
-    _ = get_and_validate_admin(study_obj)
+    get_and_validate_admin(study_obj)
     
     query = {}
     determine_data_streams_for_db_query(query)  # select data streams
@@ -135,24 +136,26 @@ def grab_data():
         return Response(zip_generator(get_these_files, construct_registry=True))
 
 
-from libs.security import generate_random_string
-
+# from libs.security import generate_random_string
 
 # Note: you cannot access the request context inside a generator function
 def zip_generator(files_list, construct_registry=False):
-    """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that data.
-    This is a generator, advantage is it starts returning data (file by file, but wrapped in zip compression)
-    almost immediately."""
+    """ Pulls in data from S3 in a multithreaded network operation, constructs a zip file of that
+    data. This is a generator, advantage is it starts returning data (file by file, but wrapped
+    in zip compression) almost immediately. """
     
     processed_files = set()
     duplicate_files = set()
-    pool = ThreadPool(CONCURRENT_NETWORK_OPS)
+    pool = ThreadPool(3)
+    # 3 Threads has been heuristically determined to be a good value, it does not cause the server
+    # to be overloaded, and provides more-or-less the maximum data download speed.  This was tested
+    # on an m4.large instance (dual core, 8GB of ram).
     file_registry = {}
     
     zip_output = StreamingBytesIO()
-    zip_input = ZipFile(zip_output, mode="w", compression=ZIP_DEFLATED, allowZip64=True)
-    random_id = generate_random_string()[:32]
-    print "returning data for query %s" % random_id
+    zip_input = ZipFile(zip_output, mode="w", compression=ZIP_STORED, allowZip64=True)
+    # random_id = generate_random_string()[:32]
+    # print "returning data for query %s" % random_id
     try:
         # chunks_and_content is a list of tuples, of the chunk and the content of the file.
         # chunksize (which is a keyword argument of imap, not to be confused with Beiwe Chunks)

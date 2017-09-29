@@ -134,7 +134,7 @@ def check_password_requirements(password, flash_message=False):
     for regex in PASSWORD_REQUIREMENT_REGEX_LIST:
         if not re.search(regex, password):
             if flash_message:
-                flash("Your New Password must contain at least one symbol, one number, one lowercase, and "
-                      "one uppercase character.", "danger")
+                flash("Your New Password must contain at least one symbol, one number, "
+                      "one lowercase, and one uppercase character.", "danger")
             return False
     return True

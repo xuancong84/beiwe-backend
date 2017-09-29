@@ -19,8 +19,8 @@ class InvalidIV(Exception): pass
 class InvalidData(Exception): pass
 class DefinitelyInvalidFile(Exception):pass
 
-""" The private keys are stored server-side (S3), and the public key is sent to
-    the android device. """
+# The private keys are stored server-side (S3), and the public key is sent to the android device.
+
 ################################################################################
 ################################# RSA ##########################################
 ################################################################################
@@ -33,9 +33,9 @@ def generate_key_pairing():
 
 def prepare_X509_key_for_java( exported_key ):
     # This may actually be a PKCS8 Key specification.
-    """ Removes all extraneous config (new lines and labels from a formatted key
-        string, because this is how Java likes its key files to be formatted.
-        Y'know, not according to the specification.  Because Java. """
+    """ Removes all extraneous config (new lines and labels from a formatted key string,
+    because this is how Java likes its key files to be formatted.
+    (Y'know, not in accordance with the specification.  Because Java. """
     return "".join( exported_key.split('\n')[1:-1] )
 
 def import_RSA_key( key ):
@@ -52,9 +52,8 @@ def import_RSA_key( key ):
 ################################################################################
 
 def encrypt_for_server(input_string, study_id):
-    """ encrypts config using the ENCRYPTION_KEY, prepends the generated
-        initialization vector.
-        Use this function on an entire file (as a string)."""
+    """ encrypts config using the ENCRYPTION_KEY, prepends the generated initialization vector.
+    Use this function on an entire file (as a string). """
     encryption_key = Study(study_id)['encryption_key']
     iv = urandom(16)
     return iv + AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).encrypt( input_string )
@@ -68,11 +67,9 @@ def decrypt_server(data, study_id):
 
 ########################### User/Device Decryption #############################
 
-
-
 def decrypt_device_file(patient_id, original_data, private_key, user):
-    """ Runs the line-by-line decryption of a file encrypted by a device. """
-    #This is a special handler for iOS file uploads.
+    """ Runs the line-by-line decryption of a file encrypted by a device.
+    This function is a special handler for iOS file uploads. """
     
     def create_line_error_db_entry(error_type):
         # declaring this inside decrypt device file to access its function-global variables
@@ -112,10 +109,9 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
         )
         raise DecryptionKeyInvalidError("invalid decryption key. %s" % e.message)
     
-    #(we have an inefficiency in this encryption process, this might not need
-    # to be doubly encoded in base64.  It works, not fixing it.)
-    #The following is all error catching code for bugs we encountered (and solved)
-    # in development.
+    # (we have an inefficiency in this encryption process, this might not need to be doubly
+    # encoded in base64.  This is probably never going to be changed.)
+    # The following is all error catching code for bugs we encountered (and solved) in development.
     # print "length decrypted key", len(decrypted_key)
     
     for i, line in enumerate(file_data):

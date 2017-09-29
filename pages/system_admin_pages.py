@@ -13,6 +13,7 @@ from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
 
+# TODO: Document.
 
 @system_admin_pages.route('/manage_admins', methods=['GET'])
 @authenticate_system_admin

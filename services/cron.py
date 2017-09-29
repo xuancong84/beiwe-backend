@@ -7,7 +7,6 @@ _imp.load_source("__init__", _current_folder_init)
 from sys import argv
 from cronutils import run_tasks
 from services.db_maintenance import run_database_tasks
-# from libs.files_to_process import process_file_chunks
 from celery_data_processing.data_processing_tasks import create_file_processing_tasks
 
 FIVE_MINUTES = "five_minutes"
@@ -25,9 +24,9 @@ TASKS = {
     WEEKLY: []
 }
 
-# We run the hourly task... hourly.  When multiples of this job overlap
-# we disallow it and get the error report notification. So, we set the
-# time limit very high to avoid the extra notification.
+# We run the hourly task... hourly.  When multiples of this job overlap we disallow it and get
+# the error report notification. So, we set the time limit very high to avoid the extra
+# notification.
 TIME_LIMITS = {
     FIVE_MINUTES: 60*60*24*365,    # 1 year (never kill)
     HOURLY: 60*60*24*365,          # 1 year (never kill)

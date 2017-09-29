@@ -129,22 +129,20 @@ class StudyDeviceSettings( DatabaseObject ):
     
     
 class Survey( DatabaseObject ):
-    """ Surveys contain all information the app needs to display the survey
-        correctly to a user, and when it should push the notifications to take
-        the survey.
+    """ Surveys contain all information the app needs to display the survey correctly to a user,
+    and when it should push the notifications to take the survey.
         
-        Surveys must have a 'survey_type', which is a string declaring the type of
-        survey it contains, which the app uses to display the correct interface. 
-        
-        Surveys contain 'content', which is a json string that is unpacked on the
-        app and displayed to the user in the form indicated by the survey_type.
-        
-        Timings schema: a survey must indicate the day of week and time of day
-        on which to trigger, by default it contains no values.
-        The timings schema mimics the Java.util.Calendar.DayOfWeek specification,
-        i.e. it is zero-indexed with day 0 of Sunday.  'timings' is a list of 7
-        inner-lists, each inner list contains any number of times of the day,
-        times of day are integer values indicating the "seconds past 12am". """
+    Surveys must have a 'survey_type', which is a string declaring the type of survey it
+    contains, which the app uses to display the correct interface.
+    
+    Surveys contain 'content', which is a json string that is unpacked on the app and displayed
+    to the user in the form indicated by the survey_type.
+    
+    Timings schema: a survey must indicate the day of week and time of day on which to trigger,
+    by default it contains no values. The timings schema mimics the Java.util.Calendar.DayOfWeek
+    specification, i.e. it is zero-indexed with day 0 of Sunday.  'timings' is a list of 7
+    inner-lists, each inner list contains any number of times of the day, times of day are
+    integer values indicating the "seconds past 12am". """
     
     # it doesn't need to be in this document, but this should say where to find it.
     PATH = "beiwe.surveys"
@@ -182,32 +180,18 @@ class Survey( DatabaseObject ):
         else: survey = { "survey_type": survey_type }
         return Survey.create(survey, random_id=True)
 
-    #enhanced audio survey.   The following settings will be added to the settings dict
-    # "audio_survey_type" maps to either "compressed" or "raw"
-    # The app should default to a "compressed" survey if audio_survey_type is not present.
-    # "raw" should always be paired with the keyword "sample_rate", which should map to
-    #       an integer value.  Valid values are... 16000, 22050, and 44100.
-    #     (Those values may change, almost definitely this is an android limitation.)
-    #     (The app should default to 44100 if there is no sample_rate key, but this
-    #       case probably will not occur outside of testing.)
-    # "compressed" should always be paired with the keyword "bit_rate", which should
-    #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
-    #     (The app should default to 64 if no value is provided.  This will occur when
-    #       audio_survey_type is not provided.)
-
-
     #debugging function
 #     def set_alarms_thirty_seconds(self):
 #         now = datetime.now() - timedelta(seconds = 3600*4) #EDT, server is UTC.
 #         start_of_day = datetime(now.year, now.month, now.day)
 #         time_diff = int((now - start_of_day).total_seconds() + 30)
-#         self['timings'] =[ [time_diff],
-#                              [time_diff],
-#                              [time_diff],
-#                              [time_diff],
-#                              [time_diff],
-#                              [time_diff],
-#                              [time_diff] ]
+#         self['timings'] =[ [time_diff],   # 1
+#                            [time_diff],   # 2
+#                            [time_diff],   # 3
+#                            [time_diff],   # 4
+#                            [time_diff],   # 5
+#                            [time_diff],   # 6
+#                            [time_diff] ]  # 7
 #         self.save()
 
 """############################ Collections #################################"""
@@ -218,7 +202,6 @@ class Studies( DatabaseCollection ):
     @classmethod
     def get_all_studies(cls):
         return sorted(cls(deleted=False), key=lambda x: x.name.lower())
-
 
 class StudyDeviceSettingsCollection( DatabaseCollection ):
     """ The per-study device settings. """

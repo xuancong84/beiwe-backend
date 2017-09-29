@@ -2,7 +2,10 @@ import urllib, urllib2, StringIO, zipfile, json
 from datetime import datetime
 from os import path
 # Comment out the following import to disable the credentials file.
-from my_data_access_api_credentials import ACCESS_KEY, SECRET_KEY
+try:
+    from my_data_access_api_credentials import ACCESS_KEY, SECRET_KEY
+except ImportError:
+    ACCESS_KEY, SECRET_KEY = None, None
 
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 ACCELEROMETER = "accelerometer"
@@ -18,11 +21,13 @@ TEXTS_LOG = "texts"
 VOICE_RECORDING = "audio_recordings"
 WIFI = "wifi"
 
+# API_URL_BASE = 'https://staging.beiwe.org/'
+
+DEBUG = False
 
 def make_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY, user_ids=None, data_streams=None,
                  time_start=None, time_end=None):
     """
-
     Behavior
     This function will download the data from the server, decompress it, and WRITE IT TO FILES IN YOUR CURRENT WORKING DIRECTORY.
     If the data in the current working directory includes a "registry.dat" file, the server will use the contents of it to only download files that are new, potentially greatly speeding up your requests.
@@ -53,7 +58,10 @@ def make_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY, user_id
     NOTE: Use the string from this module's API_TIME_FORMAT variable if you are using the Python DateTime library to generate date strings, or investigate the commented out lines of code in this function.
     """
     
-    url = 'https://studies.beiwe.org/get-data/v1'
+    if access_key is None or secret_key is None:
+        raise Exception("You must provide credentials to run this API call.")
+    
+    url = API_URL_BASE + 'get-data/v1'
     values = {'access_key':access_key,
               'secret_key':secret_key,
               'study_id':study_id}
@@ -76,14 +84,41 @@ def make_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY, user_id
             old_registry = json.load(f)
             f.close()
             values["registry"] = json.dumps(old_registry)
-    else: old_registry = {}
+    else:
+        old_registry = {}
     
     print "sending request, this could take some time."
     # print values
     
     req = urllib2.Request(url, urllib.urlencode(values))
     response = urllib2.urlopen(req)
-    return_data = response.read()
+    
+    if DEBUG == False:
+        return_data = response.read()
+    else:
+        import gc
+        from datetime import datetime
+        z = datetime.now()
+        data_list = []
+        profile_list = []
+        chunk_size = 2**16
+        while 1:
+            a = datetime.now()
+            data = response.read(chunk_size)
+            if not data:
+                print "done, average of %s MB/s" % (sum(profile_list) / len(profile_list))
+                print "download took %s seconds." % (datetime.now() - z).total_seconds()
+                break
+            data_list.append(data)
+            b = datetime.now()
+            total = (len(data_list) * chunk_size / 1024. / 1024.)
+            speed = (chunk_size / 1024. / 1024.) / (b - a).total_seconds()
+            profile_list.append(speed)
+            print "%s MB downloaded @ %s MB/s" % (total, speed)
+        
+        return_data = "".join(data_list)
+        del data_list
+        gc.collect()
     
     print "Data received.  Unpacking and overwriting any updated files into", path.abspath('.')
     
@@ -105,7 +140,7 @@ def make_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY, user_id
 
 def get_users_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY):
     """ Provides a list of user ids enrolled in the given study. """
-    url = 'https://studies.beiwe.org/get-users/v1'
+    url = API_URL_BASE + 'get-users/v1'
     values = {'access_key':access_key,
               'secret_key':secret_key,
               'study_id':study_id}
@@ -117,7 +152,7 @@ def get_users_request(study_id, access_key=ACCESS_KEY, secret_key=SECRET_KEY):
 
 def get_studies_request(access_key=ACCESS_KEY, secret_key=SECRET_KEY):
     """ Provides a dictionary of the form {study_key:study_name} for studies accessible to the provided user credentials"""
-    url = 'https://studies.beiwe.org/get-studies/v1'
+    url = API_URL_BASE + 'get-studies/v1'
     values = {'access_key':access_key,
               'secret_key':secret_key}
     
