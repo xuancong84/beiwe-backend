@@ -10,7 +10,8 @@ from fabric.exceptions import NetworkError
 
 # Folder and file names
 # Remote
-REMOTE_HOME_DIR = '/home/ubuntu'
+REMOTE_USER = 'ubuntu'
+REMOTE_HOME_DIR = os.path.join('/home', REMOTE_USER)
 LOG_FILE = os.path.join(REMOTE_HOME_DIR, 'server_setup.log')
 OS_ENVIRON_SETTING_REMOTE_FILE = os.path.join(REMOTE_HOME_DIR,
                                               'beiwe-backend/config/remote_db_env.py')
@@ -33,10 +34,12 @@ APT_GET_INSTALLS = [
     'libreadline-gplv2-dev',
     'libsqlite3-dev',
     'libssl-dev',
-    'moreutils',
+    # AJK TODO do I need this? github says I do
+    # 'mailutils',  # Necessary for cronutils
+    'moreutils',  # Necessary for cronutils
     'nload',
     'rabbitmq-server',  # Queue tasks to run using celery
-    'sendmail',
+    'sendmail',  # Necessary for cronutils
     'silversearcher-ag',  # Search within files
 ]
 
@@ -45,10 +48,8 @@ APT_GET_INSTALLS = [
 # in PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
 FILES_TO_PUSH = [
     ('bash_profile.sh', '.profile'),
-    ('celery_periodic_restart_cronjob.txt', 'celery_periodic_restart_cronjob.txt'),
     ('.inputrc', '.inputrc'),
 ]
-
 
 log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
 

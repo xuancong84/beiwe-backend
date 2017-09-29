@@ -28,7 +28,7 @@ from deployment_helpers.configuration_utils import (
 )
 from deployment_helpers.general_utils import (
     APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
-    OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
+    OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USER
 )
 
 
@@ -120,17 +120,23 @@ def setup_python():
 
 
 def setup_celery():
-    celery_file = 'install_celery_worker.sh'
+    celery_local_file = os.path.join(PUSHED_FILES_FOLDER, 'install_celery_worker.sh')
+    celery_remote_file = os.path.join(REMOTE_HOME_DIR, 'install_celery_worker.sh')
     
     # Copy the script from the local repository onto the remote server,
     # make it executable and execute it.
-    script_path = os.path.join(REMOTE_HOME_DIR, celery_file)
-    put(
-        os.path.join(PUSHED_FILES_FOLDER, celery_file),
-        remote_path=script_path,
-    )
-    run('chmod +x {script_path}'.format(script_path=script_path))
-    run('{script_path} >> {log}'.format(script_path=script_path, log=LOG_FILE))
+    put(celery_local_file, remote_path=celery_remote_file)
+    run('chmod +x {file}'.format(file=celery_remote_file))
+    run('{file} >> {log}'.format(file=celery_remote_file, log=LOG_FILE))
+
+
+def setup_cron():
+    cronjob_local_file = os.path.join(PUSHED_FILES_FOLDER, 'celery_periodic_restart_cronjob.txt')
+    cronjob_remote_file = os.path.join(REMOTE_HOME_DIR, 'cronjob.txt')
+    
+    # Copy the cronjob file onto the remote server and add it to the remote crontab
+    put(cronjob_local_file, remote_path=cronjob_remote_file)
+    run('crontab -u {user} {file}'.format(file=cronjob_remote_file, user=REMOTE_USER))
 
 
 def run_remote_code():
@@ -157,11 +163,10 @@ def run_remote_code():
     # their corresponding remote locations.
     push_files()
     
-    # Install pyenv and the latest Python 2 version and project requirements
+    # Install and set up python, celery and cron
     setup_python()
-    
-    # Install and set up celery
     setup_celery()
+    setup_cron()
     
     # Put the environment-setting file to the remote server, in order to set
     # all the user-defined values from validate_config.
@@ -182,7 +187,7 @@ if __name__ == "__main__":
     # More fabric configuration
     # AJK TODO temporary hardcode, this is going to be derived from boto
     env.host_string = '54.88.7.29'
-    env.user = 'ubuntu'
+    env.user = REMOTE_USER
     env.key_filename = AWS_PEM_FILE
     
     # Run actual code
