@@ -58,6 +58,7 @@ def encode_base64(data):
         new lines."""
     return base64.urlsafe_b64encode(data).replace("\n","")
 
+
 def decode_base64(data):
     """ unpacks url safe base64 encoded string. """
     #there seemed to be some problems with inserting a config.encode('utf-8') here,
@@ -86,6 +87,7 @@ def decode_base64(data):
         raise OurBase64Error(e.message)  # should be unreachable
 
 class OurBase64Error(Exception): pass
+
 
 def generate_user_hash_and_salt( password ):
     """ Generates a hash and salt that will match a given input string, and also
