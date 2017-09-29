@@ -21,6 +21,8 @@
 #
 # m h  dom mon dow   command
 
+PATH=/home/ubuntu/.pyenv/shims:/usr/bin:/bin
+
 # Celery generally has some issues keeping memory usage down, so we periodically restart it.
 # When supervisord receives the HUP signal it will stop all processes, reload the configuration from the first config
 # file it finds, and start all processes.

@@ -43,14 +43,6 @@ APT_GET_INSTALLS = [
     'silversearcher-ag',  # Search within files
 ]
 
-# Files to push from the local server, besides the git pem and the pyenv installation script
-# This is a list of 2-tuples of (local_path, remote_path) where local_path is located
-# in PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
-FILES_TO_PUSH = [
-    ('bash_profile.sh', '.profile'),
-    ('.inputrc', '.inputrc'),
-]
-
 log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
 
 
