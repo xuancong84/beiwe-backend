@@ -80,7 +80,7 @@ def push_files():
         )
 
 
-def install_pyenv():
+def setup_python():
     """
     Install pyenv as well as the latest version of Python 2, accessible
     via REMOTE_HOME_DIR/.pyenv/shims/python.
@@ -106,6 +106,30 @@ def install_pyenv():
     
     # Display the version of python used by pyenv; this should print "Python 2.7.14".
     run('{home}/.pyenv/shims/python --version'.format(home=REMOTE_HOME_DIR))
+
+    # Upgrade pip, because we don't know what version the server came with.
+    run('{home}/.pyenv/shims/pip install --upgrade pip >> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+    
+    # Install the python requirements for running the server code.
+    # Note that we are using the pyenv pip to ensure that the python requirements
+    # are installed into pyenv, rather than into the system python.
+    run('{home}/.pyenv/shims/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
+        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+
+
+def setup_celery():
+    celery_file = 'install_celery_worker.sh'
+    
+    # Copy the script from the local repository onto the remote server,
+    # make it executable and execute it.
+    script_path = os.path.join(REMOTE_HOME_DIR, celery_file)
+    put(
+        os.path.join(PUSHED_FILES_FOLDER, celery_file),
+        remote_path=script_path,
+    )
+    run('chmod +x {script_path}'.format(script_path=script_path))
+    run('{script_path} >> {log}'.format(script_path=script_path, log=LOG_FILE))
 
 
 def augment_config(config):
@@ -142,19 +166,14 @@ def run_remote_code():
     # their corresponding remote locations.
     push_files()
     
-    # Install pyenv and the latest Python 2 version
-    install_pyenv()
+    # Install pyenv and the latest Python 2 version and project requirements
+    setup_python()
     
-    # Upgrade pip, because we don't know what version the server came with.
-    # Install the python requirements for running the server code.
-    # Note that we are using the pyenv pip to ensure that the python requirements
-    # are installed into pyenv, rather than into the system python.
-    run('{home}/.pyenv/shims/pip install --upgrade pip >> {log}'
-        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
-    run('{home}/.pyenv/shims/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
-        .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+    # Install and set up celery
+    setup_celery()
     
-    # Put the environment-setting file to the remote server
+    # Put the environment-setting file to the remote server, in order to set
+    # all the user-defined values from validate_config.
     put(
         OS_ENVIRON_SETTING_LOCAL_FILE,
         remote_path=OS_ENVIRON_SETTING_REMOTE_FILE,

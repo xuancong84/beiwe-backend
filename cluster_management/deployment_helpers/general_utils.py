@@ -35,6 +35,7 @@ APT_GET_INSTALLS = [
     'libssl-dev',
     'moreutils',
     'nload',
+    'rabbitmq-server',  # Queue tasks to run using celery
     'sendmail',
     'silversearcher-ag',  # Search within files
 ]
@@ -44,9 +45,7 @@ APT_GET_INSTALLS = [
 # in PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
 FILES_TO_PUSH = [
     ('bash_profile.sh', '.profile'),
-    ('celery_configuration.sh', 'celery_configuration.sh'),
     ('celery_periodic_restart_cronjob.txt', 'celery_periodic_restart_cronjob.txt'),
-    ('install_celery_worker.sh', 'install_celery_worker.sh'),
     ('.inputrc', '.inputrc'),
 ]
 
