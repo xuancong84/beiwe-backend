@@ -20,11 +20,12 @@
 import argparse
 import logging
 import os
-import random
 
 from fabric.api import env, put, run, sudo
 
-from deployment_helpers.configuration_utils import validate_config, write_config_to_local_file
+from deployment_helpers.configuration_utils import (
+    augment_config, validate_config, write_config_to_local_file
+)
 from deployment_helpers.general_utils import (
     APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
     OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR,
@@ -130,16 +131,6 @@ def setup_celery():
     )
     run('chmod +x {script_path}'.format(script_path=script_path))
     run('{script_path} >> {log}'.format(script_path=script_path, log=LOG_FILE))
-
-
-def augment_config(config):
-    config['flask_secret_key'] = ''.join([random.choice('0123456789abcdef') for _ in xrange(80)])
-    
-    config['s3_backups_bucket'] = '{}-backup'.format(config['s3_bucket'])
-    
-    config['e500_email_address'] = 'e500_error@{}'.format(config['domain_name'])
-    config['other_email_address'] = 'telegram_service@{}'.format(config['domain_name'])
-    return config
 
 
 def run_remote_code():

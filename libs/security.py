@@ -21,17 +21,6 @@ def set_secret_key(app):
     app.secret_key = FLASK_SECRET_KEY
 
 
-def pymongo():
-    import pymongo
-    try:
-        #ignore this error if you can see it, it is not correct.
-        conn = pymongo.Connection()
-    except (pymongo.errors.AutoReconnect, pymongo.errors.ConnectionFailure):
-        raise DatabaseIsDownError("No mongod process is running.")
-    conn.admin.authenticate(MONGO_USERNAME, MONGO_PASSWORD)
-    return conn
-
-
 ################################################################################
 ################################## HASHING #####################################
 ################################################################################

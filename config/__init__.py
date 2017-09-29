@@ -34,20 +34,20 @@ for attr_name, attr_value in provided_settings.items():
     if not attr_value and attr_name[0] != '_':
         errors.append(attr_name + " was not provided with a value.")
 
-MANDATORY_VARS = {'AWS_ACCESS_KEY_ID',
-                  'AWS_SECRET_ACCESS_KEY',
-                  'DOMAIN_NAME',
-                  'FLASK_SECRET_KEY',
-                  'IS_STAGING',
-                  'MONGO_PASSWORD',
-                  'MONGO_USERNAME',
-                  'S3_BACKUPS_BUCKET',
-                  'S3_BUCKET',
-                  'SENTRY_ANDROID_DSN',
-                  'SENTRY_DATA_PROCESSING_DSN',
-                  'SENTRY_ELASTIC_BEANSTALK_DSN',
-                  'SENTRY_JAVASCRIPT_DSN',
-                  'SYSADMIN_EMAILS'}
+MANDATORY_VARS = {
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'DOMAIN_NAME',
+    'FLASK_SECRET_KEY',
+    'IS_STAGING',
+    'S3_BACKUPS_BUCKET',
+    'S3_BUCKET',
+    'SENTRY_ANDROID_DSN',
+    'SENTRY_DATA_PROCESSING_DSN',
+    'SENTRY_ELASTIC_BEANSTALK_DSN',
+    'SENTRY_JAVASCRIPT_DSN',
+    'SYSADMIN_EMAILS'
+}
 
 # Check that all the mandatory variables exist...
 for mandatory_var in MANDATORY_VARS:

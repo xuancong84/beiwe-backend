@@ -1,14 +1,9 @@
 from os import getenv
 
 """
-To customize any of these values, use the following pattern.
-MONGO_USERNAME = getenv("MONGO_USERNAME") or "username"
+To customize any of these values, append a line to config/remote_db_env.py such as:
+os.environ['S3_BUCKET'] = 'bucket_name'
 """
-
-# These are the credentials used to access the MongoDB that contains website usernames and
-# passwords.  If you are configuring your server see the comment at the end of this document.
-MONGO_USERNAME = getenv("MONGO_USERNAME")
-MONGO_PASSWORD = getenv("MONGO_PASSWORD")
 
 # This is the secret key for the website. Mostly it is used to sign cookies. You should provide a
 #  cryptographically secure string to this value.
