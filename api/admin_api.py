@@ -1,13 +1,13 @@
 from flask import abort, Blueprint, redirect, request
 from flask.templating import render_template
 
-from config.settings import IS_STAGING
+from config.settings import DOMAIN_NAME, IS_STAGING
+from database.models import Researcher, Study
 from libs.admin_authentication import (
     authenticate_system_admin, authenticate_admin_login, admin_is_system_admin,
     get_admins_allowed_studies
 )
 from libs.security import check_password_requirements
-from database.models import Researcher, Study
 
 admin_api = Blueprint('admin_api', __name__)
 
@@ -75,9 +75,12 @@ def rename_study(study_id=None):
 @admin_api.route("/downloads")
 @authenticate_admin_login
 def download_page():
-    return render_template("download_landing_page.html",
-                           system_admin=admin_is_system_admin(),
-                           allowed_studies=get_admins_allowed_studies())
+    return render_template(
+        "download_landing_page.html",
+        system_admin=admin_is_system_admin(),
+        allowed_studies=get_admins_allowed_studies(),
+        domain_name=DOMAIN_NAME,
+    )
 
 
 @admin_api.route("/download")

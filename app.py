@@ -48,7 +48,9 @@ app.register_blueprint(data_access_api.data_access_api)
 app.register_blueprint(data_access_web_form.data_access_web_form)
 app.register_blueprint(copy_study_api.copy_study_api)
 
-sentry = Sentry(app, dsn=SENTRY_ELASTIC_BEANSTALK_DSN)
+# Don't set up Sentry for local development
+if os.environ['DJANGO_DB_ENV'] != 'local':
+    sentry = Sentry(app, dsn=SENTRY_ELASTIC_BEANSTALK_DSN)
 
 
 @app.route("/<page>.html")

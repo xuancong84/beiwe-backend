@@ -1,8 +1,6 @@
 import os
 from os.path import abspath, dirname, join, exists
 
-# AJK TODO make sure all the settings are checked here
-
 # The explicit remote env file should be beiwe-backend/config/remote_db_env.py
 EXPLICIT_REMOTE_ENV = join(abspath(dirname(__file__)), "remote_db_env.py")
 ELASTIC_BEANSTALK_ENV = join(abspath(dirname(dirname(dirname(__file__)))), "env")
@@ -65,7 +63,8 @@ constants.CELERY_EXPIRY_MINUTES = int(constants.CELERY_EXPIRY_MINUTES)
 # email addresses are parsed from a comma separated list
 # whitespace before and after addresses are stripped
 if settings.SYSADMIN_EMAILS:
-    settings.SYSADMIN_EMAILS = [_email_address.strip() for _email_address in settings.SYSADMIN_EMAILS.split(",")]
+    settings.SYSADMIN_EMAILS = [_email_address.strip()
+                                for _email_address in settings.SYSADMIN_EMAILS.split(",")]
 
 # IS_STAGING needs to resolve to False except under specific settings.
 # The default needs to be production.
