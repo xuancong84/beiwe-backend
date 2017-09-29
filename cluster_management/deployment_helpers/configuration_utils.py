@@ -103,9 +103,6 @@ def augment_config(config):
     config['aws_secret_access_key'] = 'default'
     
     config['s3_backups_bucket'] = '{}-backup'.format(config['s3_bucket'])
-    
-    config['e500_email_address'] = 'e500_error@{}'.format(config['domain_name'])
-    config['other_email_address'] = 'telegram_service@{}'.format(config['domain_name'])
     return config
 
 
