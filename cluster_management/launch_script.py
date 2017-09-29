@@ -27,7 +27,7 @@ from deployment_helpers.configuration_utils import (
     augment_config, validate_config, write_config_to_local_file
 )
 from deployment_helpers.general_utils import (
-    APT_GET_INSTALLS, AWS_PEM_FILE, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
+    APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
     OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USER
 )
 
@@ -43,6 +43,13 @@ logging.getLogger('paramiko.transport').setLevel(logging.WARNING)
 class FabricExecutionError(Exception): pass
 env.abort_exception = FabricExecutionError
 env.abort_on_prompts = True
+
+
+def setup_profile():
+    for local_relative_file, remote_relative_file in FILES_TO_PUSH:
+        local_file = os.path.join(PUSHED_FILES_FOLDER, local_relative_file)
+        remote_file = os.path.join(REMOTE_HOME_DIR, remote_relative_file)
+        put(local_file, remote_file)
 
 
 def get_git_repo():
@@ -67,16 +74,6 @@ def get_git_repo():
     # AJK TODO for local testing this uses the django branch
     run('cd {home}/beiwe-backend; git checkout django 1>> {log} 2>> {log}'
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
-
-
-def setup_profile():
-    profile_local_file = os.path.join(PUSHED_FILES_FOLDER, 'bash_profile.sh')
-    profile_remote_file = os.path.join(REMOTE_HOME_DIR, '.profile')
-    put(profile_local_file, profile_remote_file)
-
-    inputrc_local_file = os.path.join(PUSHED_FILES_FOLDER, '.inputrc')
-    inputrc_remote_file = os.path.join(REMOTE_HOME_DIR, '.inputrc')
-    put(inputrc_local_file, inputrc_remote_file)
 
 
 def setup_python():
@@ -138,25 +135,26 @@ def setup_cron():
 
 def run_remote_code():
     
-    # AJK TODO this presumably isn't necessary in reality?
+    # AJK TODO not everything is getting logged, even when I redirect---figure out why
     # Clear the log file if it already exists. This file will be used to redirect
     # output to, so that the local user isn't forced to see a mass of confusing
     # text.
     run('echo "" > {log}'.format(log=LOG_FILE))
     
+    # Set up the bash profile and terminal interactions
+    setup_profile()
+    
     # Install things that need to be installed. Notes: apt-get install accepts
     # an arbitrary number of space-separated arguments. The -y flag answers
     # "yes" to all prompts, preventing the need for user interaction.
     installs_string = ' '.join(APT_GET_INSTALLS)
+    sudo('apt-get -y update >> {log}'.format(log=LOG_FILE))
     sudo('apt-get -y install {installs} >> {log}'.format(installs=installs_string, log=LOG_FILE))
     
     # Download the git repository onto the remote server
     # AJK TODO temporary for repeated testing (+1)
     run('rm -fr {home}/beiwe-backend'.format(home=REMOTE_HOME_DIR))
     get_git_repo()
-    
-    # Set up the bash profile and terminal interactions
-    setup_profile()
     
     # Install and set up python, celery and cron
     setup_python()

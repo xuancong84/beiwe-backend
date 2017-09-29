@@ -29,6 +29,7 @@ OS_ENVIRON_SETTING_LOCAL_FILE = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'remote_
 # AJK TODO document what each of these is for
 APT_GET_INSTALLS = [
     'ack-grep',  # Search within files
+    'build-essential',  # Includes a C compiler for compiling python
     'htop',
     'libbz2-dev',
     'libreadline-gplv2-dev',
@@ -41,6 +42,15 @@ APT_GET_INSTALLS = [
     'rabbitmq-server',  # Queue tasks to run using celery
     'sendmail',  # Necessary for cronutils
     'silversearcher-ag',  # Search within files
+]
+
+# Files to push from the local server before the rest of launch
+# This is a list of 2-tuples of (local_path, remote_path) where local_path is located
+# in PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
+FILES_TO_PUSH = [
+    ('bash_profile.sh', '.profile'),  # standard bash profile
+    ('.inputrc', '.inputrc'),  # modifies what up-arrow, tab etc. do
+    ('known_hosts', '.ssh/known_hosts'),  # allows git clone without further prompting
 ]
 
 log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
