@@ -8,14 +8,14 @@ from multiprocessing.pool import ThreadPool
 from traceback import format_exc
 from cronutils.error_handler import ErrorHandler
 
-from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE,
+from config.constants import (API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, ANDROID_LOG_FILE,
                               CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE,
                               VOICE_RECORDING, TEXTS_LOG, SURVEY_TIMINGS, SURVEY_ANSWERS,
                               POWER_STATE, BLUETOOTH, ACCELEROMETER, GPS,
                               PROXIMITY, GYRO, MAGNETOMETER, ANDROID_API,
                               DEVICEMOTION, REACHABILITY, SURVEY_DATA_FILES,
                               CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
-                              DATA_PROCESSING_NO_ERROR_STRING)
+                              DATA_PROCESSING_NO_ERROR_STRING, IOS_LOG_FILE)
 
 from db.data_access_models import (FileToProcess, FilesToProcess, ChunkRegistry, FileProcessLock)
 from db.user_models import User
@@ -271,7 +271,7 @@ def file_path_to_data_type(file_path):
     if "/callLog/" in file_path: return CALL_LOG
     if "/gps/" in file_path: return GPS
     if "/identifiers" in file_path: return IDENTIFIERS
-    if "/logFile/" in file_path: return LOG_FILE
+    if "/logFile/" in file_path: return ANDROID_LOG_FILE
     if "/powerState/" in file_path: return POWER_STATE
     if "/surveyAnswers/" in file_path: return SURVEY_ANSWERS
     if "/surveyTimings/" in file_path: return SURVEY_TIMINGS
@@ -283,7 +283,8 @@ def file_path_to_data_type(file_path):
     if "/magnetometer/" in file_path: return MAGNETOMETER
     if "/devicemotion/" in file_path: return DEVICEMOTION
     if "/reachability/" in file_path: return REACHABILITY
-    raise Exception("data type unknown: %s" % file_path)
+    if "/ios/log/" in file_path: return IOS_LOG_FILE
+    raise Exception("beiwe data stream unknown: %s" % file_path)
 
 def ensure_sorted_by_timestamp(l):
     """ According to the docs the sort method on a list is in place and should
@@ -343,7 +344,7 @@ def process_csv_data(data):
     user = User(data['ftp']['user_id'])
 
     if user['os_type'] == ANDROID_API: #Do fixes for android
-        if data["data_type"] == LOG_FILE:
+        if data["data_type"] == ANDROID_LOG_FILE:
             data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])
 
         header, csv_rows_list = csv_to_list(data['file_contents'])

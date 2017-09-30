@@ -1,4 +1,5 @@
 from os import urandom
+
 from flask import request
 
 from Crypto.Cipher import AES
@@ -7,7 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.secure_settings import ASYMMETRIC_KEY_LENGTH, IS_STAGING
 from libs.logging import log_error
-from security import decode_base64
+from security import decode_base64, encode_base64
 from db.study_models import Study
 from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErrorMetadata,\
     PADDING_ERROR, EMPTY_KEY, MALFORMED_CONFIG, INVALID_LENGTH, LINE_EMPTY, IV_MISSING,\
@@ -76,26 +77,20 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
         if IS_STAGING:
             LineEncryptionError.create( {
                 "type": error_type,
-                "line": line,
-                "base64_decryption_key": private_key.decrypt(decoded_key),
-                "prev_line": file_data[i - 1] if i > 0 else None,
-                "next_line": file_data[i + 1] if i < len(file_data) - 1 else None },
+                "line": encode_base64(line),
+                "base64_decryption_key": encode_base64(private_key.decrypt(decoded_key)),
+                "prev_line": encode_base64(file_data[i - 1]) if i > 0 else None,
+                "next_line": encode_base64(file_data[i + 1]) if i < len(file_data) - 1 else None },
                 random_id=True
             )
-    
-    if isinstance(original_data, FileStorage):
-        file_data = original_data.read()
-    elif isinstance(original_data, (unicode, str)):
-        #namespace is immediately overwritten, this is fine.
-        file_data = original_data
-    else:
-        raise TypeError("expected string or werkzeug.datastructures.FileStorage")
-    
+            
     bad_lines = []
     error_types = []
     error_count = 0
     return_data = ""
-    file_data = [line for line in file_data.split('\n') if line != ""]
+    file_data = [line for line in original_data.split('\n') if line != ""]
+    
+    del original_data  # memory optimization
     
     try: #get the decryption key from the file.
         decoded_key = decode_base64(file_data[0].encode("utf-8"))

@@ -34,7 +34,7 @@ class LineEncryptionError(DatabaseObject):
     DEFAULTS = {
         "type": REQUIRED_STRING,
         "line":REQUIRED_STRING,
-        "base64_decryption_key": REQUIRED_STRING,
+        "base64_decryption_key": "",
         "prev_line": "",
         "next_line": ""
     }

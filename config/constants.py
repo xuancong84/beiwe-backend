@@ -95,7 +95,8 @@ BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
 IDENTIFIERS = "identifiers"
-LOG_FILE = "app_log"
+ANDROID_LOG_FILE = "app_log"
+IOS_LOG_FILE = "ios_log"
 POWER_STATE = "power_state"
 SURVEY_ANSWERS = "survey_answers"
 SURVEY_TIMINGS = "survey_timings"
@@ -113,7 +114,7 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     CALL_LOG,
                     GPS,
                     IDENTIFIERS,
-                    LOG_FILE,
+                    ANDROID_LOG_FILE,
                     POWER_STATE,
                     SURVEY_ANSWERS,
                     SURVEY_TIMINGS,
@@ -124,7 +125,8 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     GYRO,
                     MAGNETOMETER,
                     DEVICEMOTION,
-                    REACHABILITY ]
+                    REACHABILITY,
+                    IOS_LOG_FILE]
 
 SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
@@ -135,7 +137,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "devicemotion": DEVICEMOTION,
     "gps": GPS,
     "gyro": GYRO,
-    "logFile": LOG_FILE,
+    "logFile": ANDROID_LOG_FILE,
     "magnetometer": MAGNETOMETER,
     "powerState": POWER_STATE,
     "reachability": REACHABILITY,
@@ -145,6 +147,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "voiceRecording": VOICE_RECORDING,
     "wifiLog": WIFI,
     "proximity": PROXIMITY,
+    "ios_log": IOS_LOG_FILE,
 }
 
 
@@ -156,7 +159,7 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == CALL_LOG: return "callLog"
     if data_type == GPS: return "gps"
     if data_type == IDENTIFIERS: return "identifiers"
-    if data_type == LOG_FILE: return "logFile"
+    if data_type == ANDROID_LOG_FILE: return "logFile"
     if data_type == POWER_STATE: return "powerState"
     if data_type == SURVEY_ANSWERS: return "surveyAnswers"
     if data_type == SURVEY_TIMINGS: return "surveyTimings"
@@ -168,6 +171,7 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == MAGNETOMETER: return "magnetometer"
     if data_type == DEVICEMOTION: return "devicemotion"
     if data_type == REACHABILITY: return "reachability"
+    if data_type == IOS_LOG_FILE: return "ios_log"
     raise Exception("unknown data type: %s" % data_type)
 
 CHUNKABLE_FILES = {ACCELEROMETER,
@@ -175,7 +179,7 @@ CHUNKABLE_FILES = {ACCELEROMETER,
                    CALL_LOG,
                    GPS,
                    IDENTIFIERS,
-                   LOG_FILE,
+                   ANDROID_LOG_FILE,
                    POWER_STATE,
                    SURVEY_TIMINGS,
                    TEXTS_LOG,
@@ -184,7 +188,8 @@ CHUNKABLE_FILES = {ACCELEROMETER,
                    GYRO,
                    MAGNETOMETER,
                    DEVICEMOTION,
-                   REACHABILITY }
+                   REACHABILITY,
+                   IOS_LOG_FILE}
 
 ## Survey Question Types
 FREE_RESPONSE = "free_response"
