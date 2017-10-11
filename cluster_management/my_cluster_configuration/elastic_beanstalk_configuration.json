@@ -1,0 +1,9 @@
+{
+  "DEPLOYMENT_KEY_NAME": "ohio-test-key",
+  "SecurityGroups": ""
+}
+
+
+
+//2017-10-05 20:10:33 UTC-0400	ERROR	LaunchWaitCondition failed. The expected number of EC2 instances were not initialized within the given time. Rebuild the environment. If this persists, contact support.
+//2017-10-05 20:10:33 UTC-0400	ERROR	Stack named 'awseb-e-ufpqpgvemd-stack' aborted operation. Current state: 'CREATE_FAILED' Reason: The following resource(s) failed to create: [AWSEBInstanceLaunchWaitCondition].

@@ -18,7 +18,6 @@
 
 
 import argparse
-import logging
 import os
 
 from fabric.api import env, put, run, sudo
@@ -30,14 +29,6 @@ from deployment_helpers.general_utils import (
     APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
     OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USER
 )
-
-
-# Set logging levels
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('boto3').setLevel(logging.WARNING)
-logging.getLogger('botocore').setLevel(logging.WARNING)
-logging.getLogger('paramiko.transport').setLevel(logging.WARNING)
-
 
 # Fabric configuration
 class FabricExecutionError(Exception): pass

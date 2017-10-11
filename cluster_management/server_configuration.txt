@@ -45,3 +45,58 @@ local requirements:
     researcher should run everything from .../cluster_management$
     pip install -r launch_requirements.txt
     python launch_script.py
+
+
+aws credential requirements:
+    administrator
+    AdministratorAccess
+    IAM PassRole Action
+
+
+AWS user permissions required to run this script????
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "ec2:*",
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": "elasticbeanstalk:*",
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+    ]
+}
+
+server instance profile (iam permissions beiwe requires in order to run)
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BucketAccess",
+      "Action": [
+        "s3:Get*",
+        "s3:List*",
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-*",
+        "arn:aws:s3:::elasticbeanstalk-*/*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogsAccess",
+      "Action": [
+        "logs:PutLogEvents",
+        "logs:CreateLogStream"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/elasticbeanstalk*"
+      ]
+    }
+  ]
+}

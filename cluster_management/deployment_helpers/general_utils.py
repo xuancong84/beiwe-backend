@@ -1,32 +1,18 @@
 # Do not import from other utils files here
+import logging, coloredlogs, string, random
 
-import logging
-import os
-import sys
-from time import sleep
+coloredlogs.install(fmt="%(levelname)s %(name)s: %(message)s")
 
-import botocore.exceptions as botoexceptions
-from fabric.exceptions import NetworkError
+# Set logging levels
+logging.getLogger('boto3').setLevel(logging.WARNING)
+logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('paramiko.transport').setLevel(logging.WARNING)
 
-# Folder and file names
-# Remote
-REMOTE_USER = 'ubuntu'
-REMOTE_HOME_DIR = os.path.join('/home', REMOTE_USER)
-LOG_FILE = os.path.join(REMOTE_HOME_DIR, 'server_setup.log')
-OS_ENVIRON_SETTING_REMOTE_FILE = os.path.join(REMOTE_HOME_DIR,
-                                              'beiwe-backend/config/remote_db_env.py')
+log = logging.getLogger("cluster-management")
+log.setLevel(logging.DEBUG)
 
-# Local
-CLUSTER_MANAGEMENT_FOLDER = os.path.abspath(__file__).rsplit('/', 2)[0]
-PUSHED_FILES_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
-USER_SPECIFIC_CONFIG_FOLDER = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'my_cluster_configuration')
-AWS_PEM_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_deployment_key.pem')
-AWS_CREDENTIALS_FILE = os.path.join(USER_SPECIFIC_CONFIG_FOLDER, 'aws_credentials.json')
-OS_ENVIRON_SETTING_LOCAL_FILE = os.path.join(CLUSTER_MANAGEMENT_FOLDER, 'remote_db_env.py')
+#TODO: the remaining variables should be moved to some kind of configuration file rather than utils.
 
-
-# Utilities to install
-# AJK TODO document what each of these is for
 APT_GET_INSTALLS = [
     'ack-grep',  # Search within files
     'build-essential',  # Includes a C compiler for compiling python
@@ -53,15 +39,30 @@ FILES_TO_PUSH = [
     ('known_hosts', '.ssh/known_hosts'),  # allows git clone without further prompting
 ]
 
-log = logging.getLogger(CLUSTER_MANAGEMENT_FOLDER)
+##
+## Code
+##
+
+import botocore.exceptions as botoexceptions
+from time import sleep
+from fabric.exceptions import NetworkError
 
 
 def retry(func, *args, **kwargs):
-    while True:
-        print(".")
-        sys.stdout.flush()
+    for i in range(10):
         try:
             return func(*args, **kwargs)
         except (NetworkError, botoexceptions.ClientError, botoexceptions.WaiterError) as e:
-            log.debug("retrying due to %s" % e)
+            log.error('Encountered error of type %s with error message "%s"\nRetrying with attempt %s.'
+                      % (e.__name__, e, i+1) )
             sleep(3)
+
+
+TYPEABLE_CHARACTERS = string.ascii_letters + '0123456789!@#$%^&*()<>?[]{}_+='
+
+def random_typeable_string(length):
+    return ''.join(random.choice(TYPEABLE_CHARACTERS) for _ in xrange(length))
+
+def random_alphanumeric_string(length):
+    return ''.join(random.choice(TYPEABLE_CHARACTERS) for _ in xrange(length))
+
