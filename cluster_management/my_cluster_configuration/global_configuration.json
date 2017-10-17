@@ -1,4 +1,4 @@
 {
   "DEPLOYMENT_KEY_NAME": "ohio-test-key",
-  "SecurityGroups": ""
+  "VPC_ID": "vpc-ccff08a5"
 }
