@@ -43,6 +43,11 @@ FILES_TO_PUSH = [
 ## Code
 ##
 
+from datetime import datetime
+
+def current_time_string():
+    return ("%s" % datetime.now())[:-7]
+
 import botocore.exceptions as botoexceptions
 from time import sleep
 from fabric.exceptions import NetworkError
@@ -58,11 +63,32 @@ def retry(func, *args, **kwargs):
             sleep(3)
 
 
-TYPEABLE_CHARACTERS = string.ascii_letters + '0123456789!@#$%^&*()<>?[]{}_+='
+ALPHANUMERICS = string.ascii_letters + string.digits
 
-def random_typeable_string(length):
-    return ''.join(random.choice(TYPEABLE_CHARACTERS) for _ in xrange(length))
+#postgress passwords are alphanumerics plus "typable special characters" that are not not /, ", or @
+POSTGRESS_PASSWORD_CHARACTERS = ALPHANUMERICS + '!#$%^&*()<>?[]{}_+='
+
+def random_password_string(length):
+    return ''.join(random.choice(POSTGRESS_PASSWORD_CHARACTERS) for _ in xrange(length))
 
 def random_alphanumeric_string(length):
-    return ''.join(random.choice(TYPEABLE_CHARACTERS) for _ in xrange(length))
+    return ''.join(random.choice(ALPHANUMERICS) for _ in xrange(length))
 
+def random_alphanumeric_starting_with_letter(length):
+    return random.choice(string.ascii_letters) + random_alphanumeric_string(length - 1)
+
+
+def increment_identifier(base_string, increment_string):
+    """ Finds the next number to use for an incrementing numerical suffix"""
+    splits = increment_string.split(base_string)
+    
+    if len(splits) != 2:
+        raise Exception("%s not found or found more than once in %s" % (base_string, increment_string))
+
+    prefix, suffix = splits
+    if suffix is "":
+        suffix_increment = 1
+    else:
+        suffix_increment = int(suffix) + 1
+    return prefix + str(suffix_increment)
+    
