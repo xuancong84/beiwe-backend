@@ -1,6 +1,11 @@
 from pprint import pprint
 
 ## The various errors we use.
+from deployment_helpers.aws.boto_helpers import create_iam_client
+from deployment_helpers.constants import (EB_INSTANCE_PROFILE_ROLE,
+    EB_INSTANCE_PROFILE_NAME)
+
+
 class PythonPlatformDiscoveryError(Exception): pass
 class EnvironmentDeploymentFailure(Exception): pass
 class IamEntityMissingError(Exception): pass
@@ -41,3 +46,15 @@ def iam_find_instance_profile(iam_client, instance_profile_name):
         if instance_profile['InstanceProfileName'] == instance_profile_name:
             return instance_profile
     raise IamEntityMissingError("IAM could not find Instance Profile %s" % instance_profile_name)
+
+
+def iam_purge_instance_profiles():
+    iam_client = create_iam_client()
+    try:
+        iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_ROLE)
+    except Exception as e:
+        print e
+    try:
+        iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_NAME)
+    except Exception as e:
+        print e
