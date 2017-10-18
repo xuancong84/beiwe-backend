@@ -1,5 +1,8 @@
 # Do not import from other utils files here
-import logging, coloredlogs, string, random
+import coloredlogs
+import logging
+import random
+import string
 
 coloredlogs.install(fmt="%(levelname)s %(name)s: %(message)s")
 

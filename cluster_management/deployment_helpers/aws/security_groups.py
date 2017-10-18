@@ -7,18 +7,12 @@ from botocore.exceptions import ClientError
 
 from deployment_helpers.aws.boto_helpers import create_ec2_resource, create_ec2_client
 from deployment_helpers.aws.elastic_beanstalk_configuration import get_global_config
+from deployment_helpers.general_utils import log
 
 GLOBAL_CONFIGURATION = get_global_config()
 
-def find_sec_group(sec_group_name, tag_dict=None):
-    ec2_client = create_ec2_client()
-    sec_grps = ec2_client.describe_security_groups()['SecurityGroups']
-    if tag_dict is None:
-        return sec_grps
-    for sec_grp in sec_grps:
-        pass
-
 class InvalidSecurityGroupIdException(Exception): pass
+class InvalidSecurityGroupNameException(Exception): pass
 
 def get_security_group_by_id(sec_grp_id):
     try:
@@ -26,12 +20,21 @@ def get_security_group_by_id(sec_grp_id):
     except ClientError as e:
         # Boto3 throws unimportable errors.
         if "Invalid id:" in e.message:
+            log.debug(e.message)
             raise InvalidSecurityGroupIdException(sec_grp_id)
         raise
 
 
 def get_security_group_by_name(sec_grp_name):
-    return create_ec2_client().describe_security_groups(GroupNames=[sec_grp_name])['SecurityGroups'][0]
+    try:
+        return create_ec2_client().describe_security_groups(GroupNames=[sec_grp_name])['SecurityGroups'][0]
+    except ClientError as e:
+        # Boto3 throws unimportable errors.
+        if "InvalidGroup.NotFound" in e.message:
+            log.debug(e.message)
+            raise InvalidSecurityGroupNameException(sec_grp_name)
+        raise
+    
 
 
 def create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group(

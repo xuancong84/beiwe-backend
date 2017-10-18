@@ -31,7 +31,7 @@ def construct_eb_environment_variables(eb_environment_name, without_db=False):
     deployment_key_name = get_global_config()["DEPLOYMENT_KEY_NAME"]
     environment_variables = get_eb_environment_file_contents()
     
-    if without_db:
+    if not without_db:
         environment_variables.update(get_full_db_credentials_by_eb_name(eb_environment_name))
     # This needs to be a comma separated list of environment variables declared as "var=value"
     env_var_string = ",".join(["%s=%s" % (k, v) for k, v in environment_variables.iteritems()])
@@ -230,7 +230,7 @@ def allow_eb_environment_database_access(eb_environment_name):
 def create_eb_environment(eb_environment_name, without_db=False):
     app = get_or_create_eb_application()
     
-    if without_db:
+    if not without_db:
         database_name = construct_db_name(eb_environment_name)
         try:
             log.info("checking if there is a database named '%s'" % database_name)
