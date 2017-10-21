@@ -2,8 +2,7 @@ from pprint import pprint
 
 ## The various errors we use.
 from deployment_helpers.aws.boto_helpers import create_iam_client
-from deployment_helpers.constants import (EB_INSTANCE_PROFILE_ROLE,
-    EB_INSTANCE_PROFILE_NAME)
+from deployment_helpers.constants import EB_INSTANCE_PROFILE_ROLE, EB_INSTANCE_PROFILE_NAME
 
 
 class PythonPlatformDiscoveryError(Exception): pass
@@ -63,3 +62,4 @@ def iam_purge_instance_profiles():
         iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_NAME)
     except Exception as e:
         print e
+        

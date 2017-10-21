@@ -6,7 +6,7 @@ rabbitmq needs to allow workers
 from botocore.exceptions import ClientError
 
 from deployment_helpers.aws.boto_helpers import create_ec2_resource, create_ec2_client
-from deployment_helpers.aws.elastic_beanstalk_configuration import get_global_config
+from deployment_helpers.constants import get_global_config
 from deployment_helpers.general_utils import log
 
 GLOBAL_CONFIGURATION = get_global_config()
@@ -34,7 +34,6 @@ def get_security_group_by_name(sec_grp_name):
             log.debug(e.message)
             raise InvalidSecurityGroupNameException(sec_grp_name)
         raise
-    
 
 
 def create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group(
@@ -54,6 +53,12 @@ def create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group(
     ingress_rule["IpPermissions"][0]['UserIdGroupPairs'] = [{}]
     ingress_rule["IpPermissions"][0]['UserIdGroupPairs'][0]['GroupId'] = sec_grp_id
     return ingress_rule
+
+
+def open_tcp_port(sec_grp_id, port, ip_address="0.0.0.0/0"):
+    port = int(port)
+    create_ec2_client().authorize_security_group_ingress(
+            GroupId=sec_grp_id, IpProtocol="tcp", CidrIp=ip_address, FromPort=port, ToPort=port)
 
 
 def create_security_group(group_name, description,

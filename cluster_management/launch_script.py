@@ -16,19 +16,21 @@
 # modify EB scaling settings?
 # update rabbitmq/celery server
 
-
 import argparse
 import os
+import sys
+from time import sleep
 
 from fabric.api import env, put, run, sudo
 
 from deployment_helpers.configuration_utils import (
-    augment_config, validate_config, write_config_to_local_file
-)
-from deployment_helpers.general_utils import (
-    APT_GET_INSTALLS, AWS_PEM_FILE, FILES_TO_PUSH, LOG_FILE, OS_ENVIRON_SETTING_LOCAL_FILE,
-    OS_ENVIRON_SETTING_REMOTE_FILE, PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USER
-)
+    are_aws_credentials_present, is_global_configuration_valid)
+from deployment_helpers.constants import (
+    APT_GET_INSTALLS, FILES_TO_PUSH, LOG_FILE,
+    PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USERNAME,
+    DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH, get_beiwe_environment_file_path)
+from deployment_helpers.general_utils import log, EXIT
+
 
 # Fabric configuration
 class FabricExecutionError(Exception): pass
@@ -62,7 +64,7 @@ def get_git_repo():
     
     # Make sure the code is on the right branch
     # git checkout prints to both stderr *and* stdout, so redirect them both to the log file
-    # AJK TODO for local testing this uses the django branch
+    # FIXME: for local testing this uses the django branch
     run('cd {home}/beiwe-backend; git checkout django 1>> {log} 2>> {log}'
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
@@ -85,9 +87,7 @@ def setup_python():
     # Note that this installation is slow, taking approximately a minute.
     # -f: Install even if the version appears to be installed already
     pyenv_exec = os.path.join(REMOTE_HOME_DIR, '.pyenv/bin/pyenv')
-    # AJK TODO temporary for repeated testing (+1-1)
-    run('{pyenv} install -s 2.7.14'.format(pyenv=pyenv_exec))
-    # run('{home}/.pyenv/bin/pyenv install -f 2.7.14'.format(home=REMOTE_HOME_DIR))
+    run('{pyenv} install -f 2.7.14'.format(pyenv=pyenv_exec))
     run('{pyenv} global 2.7.14'.format(pyenv=pyenv_exec))
     
     # Display the version of python used by pyenv; this should print "Python 2.7.14".
@@ -121,11 +121,10 @@ def setup_cron():
     
     # Copy the cronjob file onto the remote server and add it to the remote crontab
     put(cronjob_local_file, cronjob_remote_file)
-    run('crontab -u {user} {file}'.format(file=cronjob_remote_file, user=REMOTE_USER))
+    run('crontab -u {user} {file}'.format(file=cronjob_remote_file, user=REMOTE_USERNAME))
 
 
-def run_remote_code():
-    
+def run_remote_code(eb_environment_name):
     # AJK TODO not everything is getting logged, even when I redirect---figure out why
     # Clear the log file if it already exists. This file will be used to redirect
     # output to, so that the local user isn't forced to see a mass of confusing
@@ -143,8 +142,6 @@ def run_remote_code():
     sudo('apt-get -y install {installs} >> {log}'.format(installs=installs_string, log=LOG_FILE))
     
     # Download the git repository onto the remote server
-    # AJK TODO temporary for repeated testing (+1)
-    run('rm -fr {home}/beiwe-backend'.format(home=REMOTE_HOME_DIR))
     get_git_repo()
     
     # Install and set up python, celery and cron
@@ -154,22 +151,77 @@ def run_remote_code():
     
     # Put the environment-setting file to the remote server, in order to set
     # all the user-defined values from validate_config.
-    put(OS_ENVIRON_SETTING_LOCAL_FILE, OS_ENVIRON_SETTING_REMOTE_FILE)
+    put(get_beiwe_environment_file_path(eb_environment_name), DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH)
 
-
+def test_args_for_environment():
+    """ argparse is not well suited to printing a nice message when a particular parameter is missing. """
+    # check if parameter present
+    arguments_sans_values = [arg.split("=")[0] for arg in sys.argv]
+    # get value
+    parameter_value = [arg.split("=")[1] for arg in sys.argv if "--environment=" in arg]
+    # test with useful short-circuiting if --environment exists and has a real value
+    if "--environment" not in arguments_sans_values or not parameter_value or not parameter_value[0]:
+        log.error("You must provide a value to --environments, '--environment=abc123'")
+        sleep(0.1)
+        EXIT(1)
+        
+    
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="interactive script for managing a Beiwe Cluster")
+    if not all((are_aws_credentials_present(), is_global_configuration_valid())):
+        EXIT(1)
+    test_args_for_environment()
     
-    # Get the configuration values and make them environment variables
-    combined_config = validate_config()
-    augmented_config = augment_config(combined_config)
-    write_config_to_local_file(augmented_config)
+    parser = argparse.ArgumentParser(description="interactive set of commands for managing a Beiwe Cluster")
     
-    # More fabric configuration
-    # AJK TODO temporary hardcode, this is going to be derived from boto
-    env.host_string = '54.88.7.29'
-    env.user = REMOTE_USER
-    env.key_filename = AWS_PEM_FILE
+    # helper for creating the configuratiion for a deployment
+    # list ip addresses for workers and managers
+    # open-close ssh for worker and manager instances
+    # create a manager
+    # terminate manager
+    # create N workers
+    # terminate workers
+    # update workers?
+    # create elastic beanstalk and RDS
+    # setup SSL and URL???
+    parser.add_argument('--environment',
+                        help="(Required) The name of the Beiwe environment to run an operation on")
     
-    # Run actual code
-    run_remote_code()
+    requires_environment = {
+        'create_environment': "creates new environment with the provided environment name",
+        'create_manager': "creates a data processing manager for the provided environment",
+        'create_workers': "creates a data processing worker for the provided environment",
+        "terminate_manager": "terminates the data processing manager for the provided environment",
+        "terminate_worksers": "teminates the data processing workers for the provided environment",
+        "update_workers": "updates the beiwe code for all workers in the provided environment",
+        "update_manager": "updates the beiwe code for the manager in the provided environment",
+        "update_elastic_beanstalk": "updates the beiwe code for the provided Elastic Beanstalk environment",
+    }
+    
+    for arg, help in requires_environment.iteritems():
+        parser.add_argument(arg, help=help, action="count")
+
+    arguments = parser.parse_args()
+    # so far all arguments require the environment be provided.
+        
+    print arguments
+
+    EXIT(1)
+    raise Exception("aoeuaoeuaoeu")
+    # TODO: basic functiionality
+    # prompt for environment name
+    # validate some subset of credentials
+    
+    
+    # # Get the configuration values and make them environment variables
+    # combined_config = validate_config()
+    # augmented_config = augment_config(combined_config)
+    # write_config_to_local_file(augmented_config)
+    #
+    # # More fabric configuration
+    # # AJK TODO temporary hardcode, this is going to be derived from boto
+    # env.host_string = '54.88.7.29'
+    # env.user = REMOTE_USERNAME
+    # env.key_filename = AWS_PEM_FILE
+    #
+    # # Run actual code
+    # run_remote_code()

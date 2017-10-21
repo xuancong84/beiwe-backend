@@ -1,16 +1,17 @@
 from time import sleep
 
 from deployment_helpers.aws.boto_helpers import create_ec2_client, create_ec2_resource
-from deployment_helpers.aws.elastic_beanstalk_configuration import get_global_config
+
 from deployment_helpers.aws.rds import (get_rds_security_groups_by_eb_name)
 from deployment_helpers.aws.security_groups import (
     create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group,
-    create_security_group, get_security_group_by_name, InvalidSecurityGroupNameException)
+    create_security_group, get_security_group_by_name, InvalidSecurityGroupNameException,
+    open_tcp_port)
+from deployment_helpers.constants import get_global_config, RABBIT_MQ_PORT
 from deployment_helpers.general_utils import log
 
 GLOBAL_CONFIGURATION = get_global_config()
 
-RABBIT_MQ_PORT = 50000
 RABBIT_MQ_SEC_GRP_DESCRIPTION = "allows connections to rabbitmq from servers with security group %s"
 PROCESSING_MANAGER_NAME = "%s data processing manager"
 
@@ -33,20 +34,26 @@ def get_manager_instance_by_eb_environment_name(eb_environment_name):
 def get_instances_by_name(instance_name):
     """ thank you to https://rob.salmond.ca/filtering-instances-by-name-with-boto3/ for having
     sufficient SEO to be a googleable answer on how to even do this. """
-    ec2_client = create_ec2_client()
-    return ec2_client.describe_instances(Filters=[{'Name': 'tag:Name', 'Values': [instance_name]}]
-    )['Reservations'][0]["Instances"]
+    ret = create_ec2_client().describe_instances(
+            Filters=[
+                {'Name': 'tag:Name',
+                 'Values': [instance_name]}]
+          )
+    try:
+        return ret['Reservations'][0]["Instances"]
+    except IndexError:
+        log.warn("could not find any instances matching the name '%s'" % instance_name)
+        return []
+    
 
-
-def get_instance_ip_by_id(instance_id):
+def get_instance_network_info(instance_id):
     """ returns a dictionary like the following
      {'PublicDnsName': 'ec2-18-216-26-40.us-east-2.compute.amazonaws.com',
       'PublicIp': '18.216.26.40'} """
-    instance = get_instance_by_id('i-0d9372b3f0bb8fa4b')
+    instance = get_instance_by_id(instance_id)
     ret = instance['NetworkInterfaces'][0]['PrivateIpAddresses'][0]['Association']
     ret.pop("IpOwnerId")
     return ret
-
 
 
 def get_most_recent_ubuntu():
@@ -145,8 +152,20 @@ def create_server(eb_environment_name, aws_server_type, security_groups=None):
     return get_instance_by_id(instance_id)
 
 
+def get_instance_security_group_by_eb_name(eb_environment_name):
+    return get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]
+
+
 def construct_rabbit_mq_security_group_name(eb_environment_name):
     return eb_environment_name + "_allow_rabbit_mq_connections"
+
+
+def open_ssh_by_eb_name(eb_environment_name):
+    open_tcp_port(get_instance_security_group_by_eb_name("test2")['GroupId'], 22)
+
+
+# TODO: implement
+# def close_ssh_by_eb_name(eb_environment_name):
 
 
 def get_or_create_rabbit_mq_security_group(eb_environment_name):

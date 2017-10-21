@@ -1,16 +1,13 @@
 import json
-from datetime import datetime
 from time import sleep
-from pprint import pprint
 
 from deployment_helpers.aws.boto_helpers import create_rds_client, create_ec2_resource
 from deployment_helpers.aws.security_groups import (create_security_group,
     create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group,
     get_security_group_by_name)
-from deployment_helpers.constants import (DBInstanceNotFound,
-    db_credentials_file_path)
+from deployment_helpers.constants import (DBInstanceNotFound, get_db_credentials_file_path)
 from deployment_helpers.general_utils import (random_password_string,
-    random_alphanumeric_starting_with_letter, retry, log, current_time_string)
+    random_alphanumeric_starting_with_letter, log, current_time_string)
 
 # DB_NAME = "beiwe-database"
 
@@ -56,14 +53,14 @@ def get_full_db_credentials_by_eb_name(eb_environment_name):
 
 
 def get_full_db_credentials_by_name(db_instance_identifier):
-    with open(db_credentials_file_path(db_instance_identifier), 'r') as f:
+    with open(get_db_credentials_file_path(db_instance_identifier), 'r') as f:
         credentials = json.load(f)
     credentials['RDS_HOSTNAME'] = get_db_info(db_instance_identifier)['Endpoint']['Address']
     return credentials
 
 
 def write_rds_credentials(db_instance_identifier, credentials):
-    db_credentials_path = db_credentials_file_path(db_instance_identifier)
+    db_credentials_path = get_db_credentials_file_path(db_instance_identifier)
     with open(db_credentials_path, 'w') as f:
         json.dump(credentials, f, indent=1)
         log.info("database credentials have been written to %s" % db_credentials_path)
