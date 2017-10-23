@@ -1,17 +1,12 @@
 {
-  "Version": "2012-10-17",
+  "Version": "2008-10-17",
   "Statement": [
     {
       "Effect": "Allow",
       "Principal": {
-        "Service": "elasticbeanstalk.amazonaws.com"
+        "Service": "ec2.amazonaws.com"
       },
-      "Action": "sts:AssumeRole",
-      "Condition": {
-        "StringEquals": {
-          "sts:ExternalId": "elasticbeanstalk"
-        }
-      }
+      "Action": "sts:AssumeRole"
     }
   ]
 }
