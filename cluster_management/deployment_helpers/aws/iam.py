@@ -2,7 +2,8 @@ from pprint import pprint
 
 ## The various errors we use.
 from deployment_helpers.aws.boto_helpers import create_iam_client
-from deployment_helpers.constants import EB_INSTANCE_PROFILE_ROLE, EB_INSTANCE_PROFILE_NAME
+from deployment_helpers.constants import (EB_INSTANCE_PROFILE_ROLE, EB_INSTANCE_PROFILE_NAME,
+    EB_SERVICE_ROLE)
 
 
 class PythonPlatformDiscoveryError(Exception): pass
@@ -47,19 +48,22 @@ def iam_find_instance_profile(iam_client, instance_profile_name):
     raise IamEntityMissingError("IAM could not find Instance Profile %s" % instance_profile_name)
 
 
-def iam_purge_instance_profiles():
+def iam_purge_everything():
     """ This function is purely for debugging.  It should be commented out in any production setting.
     Instance profiles are not well-exposed in the AWS Console (the online management tool), this
     command will delete the instance profiles that are defined in this codebase.
     Note: you will probabaly have to go and manually delete a service role, though the error message
     should provide sufficient information for you to work out what to do."""
     iam_client = create_iam_client()
-    try:
-        iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_ROLE)
-    except Exception as e:
-        print e
-    try:
-        iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_NAME)
-    except Exception as e:
-        print e
-        
+    try: iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_ROLE)
+    except Exception as e:print e
+    
+    try: iam_client.delete_instance_profile(InstanceProfileName=EB_INSTANCE_PROFILE_NAME)
+    except Exception as e: print e
+    
+    try: iam_client.delete_role(RoleName=EB_INSTANCE_PROFILE_ROLE)
+    except Exception as e: print e
+    
+    try: iam_client.delete_role(RoleName=EB_SERVICE_ROLE)
+    except Exception as e: print e
+    

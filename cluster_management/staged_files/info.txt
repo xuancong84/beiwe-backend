@@ -1,2 +1,0 @@
-Files in this directory are ignored by the repository.
-This is where cluster management stages the versions of the code that you can then push to Elastic Beanstalk.

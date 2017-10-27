@@ -11,9 +11,6 @@ from flask import json
 REMOTE_USERNAME = 'ubuntu'
 RABBIT_MQ_PORT = 50000
 
-GLOBAL_CONFIGURATION_KEYS = ("DEPLOYMENT_KEY_NAME", "VPC_ID", "AWS_REGION")
-AWS_CREDENTIAL_KEYS = ("AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY")
-
 ## EC2 Instance Deployment Variables
 APT_GET_INSTALLS = [
     'ack-grep',  # Search within files
@@ -52,6 +49,16 @@ EB_SEC_GRP_COUNT_ERROR = "%s has had multiple security groups associated with it
 VALIDATE_GLOBAL_CONFIGURATION_MESSAGE = "before you can take any action with this tool you must fill out the contents of the global_configuration.json file in the general_configuration folder."
 
 VALIDATE_AWS_CREDENTIALS_MESSAGE = "before you can take any action with this tool you must fill out the contents of the aws_credentials.json file in the general_configuration folder."
+
+GLOBAL_CONFIGURATION_FILE_KEYS = [
+    "DEPLOYMENT_KEY_NAME",
+    "DEPLOYMENT_KEY_FILE_PATH",
+    "VPC_ID",
+    "AWS_REGION",
+    "SYSTEM_ADMINISTRATOR_EMAIL"
+]
+
+AWS_CREDENTIALS_FILE_KEYS = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
 ####################################################################################################
 ######################################## Static Files ##############################################
 ####################################################################################################
@@ -61,7 +68,7 @@ CLUSTER_MANAGEMENT_FOLDER = abspath(__file__).rsplit('/', 2)[0]
 PUSHED_FILES_FOLDER = path_join(CLUSTER_MANAGEMENT_FOLDER, 'pushed_files')
 USER_SPECIFIC_CONFIG_FOLDER = path_join(CLUSTER_MANAGEMENT_FOLDER, 'environment_configuration')
 GENERAL_CONFIG_FOLDER = path_join(CLUSTER_MANAGEMENT_FOLDER, 'general_configuration')
-
+STAGED_FILES = path_join(CLUSTER_MANAGEMENT_FOLDER, 'staged_files')
 
 ## Global EC2 Instance __remote__ folder paths
 REMOTE_HOME_DIR = path_join('/home', REMOTE_USERNAME)
@@ -89,9 +96,8 @@ def get_aws_credentials():
 
 
 ## Elastic Beanstalk Environment Files
-ELASTICBEANSTALK_CONFIGURATION_FILE = path_join(USER_SPECIFIC_CONFIG_FOLDER,'elastic_beanstalk_configuration.json')
-ELASTICBEANSTALK_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(USER_SPECIFIC_CONFIG_FOLDER, "elasticbeanstalk_assume_role_policy_document.json")
-INSTANCE_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(USER_SPECIFIC_CONFIG_FOLDER, "instance_assume_role_policy_document.json")
+ELASTICBEANSTALK_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "elasticbeanstalk_assume_role_policy_document.json")
+INSTANCE_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "instance_assume_role_policy_document.json")
 
 ## Elastic Beanstalk File Loaders
 def get_elasticbeanstalk_assume_role_policy_document():
@@ -103,26 +109,53 @@ def get_instance_assume_role_policy_document():
         return document.read()
 
 
+## Worker and Processor server files
+# (files with the prefix LOCAL are on this machine, REMOTE files are file paths on the remote server)
+LOCAL_CRONJOB_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'celery_periodic_restart_cronjob.txt')
+REMOTE_CRONJOB_FILE_PATH = path_join(REMOTE_HOME_DIR, 'cronjob.txt')
+LOCAL_GIT_KEY_PATH = path_join(PUSHED_FILES_FOLDER, 'git_read_only_key')
+REMOTE_GIT_KEY_PATH = path_join(REMOTE_HOME_DIR, '.ssh/id_rsa')
+LOCAL_PYENV_INSTALLER_FILE = path_join(PUSHED_FILES_FOLDER, 'install_pyenv.sh')
+REMOTE_PYENV_INSTALLER_FILE = path_join(REMOTE_HOME_DIR, 'install_pyenv.sh')
+LOCAL_CELERY_FILE = path_join(PUSHED_FILES_FOLDER, 'install_celery_worker.sh')
+REMOTE_CELERY_FILE = path_join(REMOTE_HOME_DIR, 'install_celery_worker.sh')
 ####################################################################################################
 ####################################### Dynamic Files ##############################################
 ####################################################################################################
 
 ## EC2 Instance Configuration Files
-def get_db_credentials_file_path(database_name):
-    return path_join(USER_SPECIFIC_CONFIG_FOLDER, "database_credentials_for_%s" % database_name + ".json")
-
-def get_local_instance_env_file_path(eb_environment_name):
+def get_pushed_full_processing_server_env_file_path(eb_environment_name):
+    """ This is the python file that contains the environment details for an ubuntu install. """
     return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + '_remote_db_env.py')
 
+def get_finalized_credentials_file_path(eb_environment_name):
+    return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + '_finalized_settings.json')
+
+def get_finalized_environment_variables(eb_environment_name):
+    with open(get_finalized_credentials_file_path(eb_environment_name), 'r') as f:
+        return json.load(f)
+
+## Database configuration
+def get_db_credentials_file_path(eb_environment_name):
+    """ Use the get_full_db_credentials function in rds to get database credentials. """
+    return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + "_database_credentials.json")
+
 ## Beiwe Environment Files
-def get_beiwe_environment_file_path(eb_environment_name):
+def get_beiwe_python_environment_variables_file_path(eb_environment_name):
     return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + "_beiwe_environment_variables.json")
 
-## Elastic Beanstalk Files
-def get_environment_credentials_for_eb_deployment_path(eb_environment_name):
-    return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + '_environment_settings.json')
+def get_beiwe_environment_variables(eb_environment_name):
+    with open(get_beiwe_python_environment_variables_file_path(eb_environment_name), 'r') as f:
+        return json.load(f)
 
+## Processing worker and management servers
+def get_server_configuration_file_path(eb_environment_name):
+    return path_join(USER_SPECIFIC_CONFIG_FOLDER, eb_environment_name + '_server_settings.json')
 
+def get_server_configuration_file(eb_environment_name):
+    with open(get_server_configuration_file_path(eb_environment_name), 'r') as f:
+        return json.load(f)
+    
 ####################################################################################################
 ########################################## Strings #################################################
 ####################################################################################################
@@ -143,3 +176,21 @@ AWS_EB_ENHANCED_HEALTH = "arn:aws:iam::aws:policy/service-role/AWSElasticBeansta
 AWS_EB_MULTICONTAINER_DOCKER = "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker"
 AWS_EB_WEB_TIER = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
 AWS_EB_WORKER_TIER = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+
+
+####################################################################################################
+###################################### UI Strings ##################################################
+####################################################################################################
+
+DO_SETUP_EB_UPDATE_OPEN = "This command prepares the selected version of the codebase for deployment.  \n\nTo download the most recent version of the code base go to\nhttps://github.com/onnela-lab/beiwe-backend/tree/production\nand download the zip file version of the github repository, then place it into the staged_files folder.\n"
+
+ENVIRONMENT_NAME_RESTRICTIONS = "Names must be 4 to 40 characters in length.\n" \
+"Names can only contaiyn letters, numbers, and hyphens, and cannot start or end with a hyphen.\n"
+
+EXTANT_ENVIRONMENT_PROMPT = "Enter the name of the Elastic Beanstalk Environment you want to run this operation on:"
+
+DO_CREATE_ENVIRONMENT ="Please enter a name for your new environment."
+
+DO_CREATE_MANAGER = "Enter the name of the environment for which you want to create a data processing manager server:"
+
+HELP_SETUP_NEW_ENVIRONMENT = "Enter the name of the environment you want to create:"

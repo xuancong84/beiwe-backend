@@ -1,21 +1,26 @@
 import json
 from time import sleep
 
+import os
+
 from deployment_helpers.aws.boto_helpers import create_rds_client, create_ec2_resource
 from deployment_helpers.aws.security_groups import (create_security_group,
     create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group,
     get_security_group_by_name)
-from deployment_helpers.constants import (DBInstanceNotFound, get_db_credentials_file_path)
+from deployment_helpers.constants import (DBInstanceNotFound, get_db_credentials_file_path,
+    get_server_configuration_file)
 from deployment_helpers.general_utils import (random_password_string,
-    random_alphanumeric_starting_with_letter, log, current_time_string)
+    random_alphanumeric_starting_with_letter, log, current_time_string, EXIT)
 
-# DB_NAME = "beiwe-database"
-
-DB_SERVER_TYPE = "t2.medium"
 # t1.micro, m1.small, m1.medium, m1.large, m1.xlarge, m2.xlarge, m2.2xlarge, m2.4xlarge,
 # m3.medium, m3.large, m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge,
 # m4.10xlarge, r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge, r3.8xlarge, t2.micro, t2.small,
 # t2.medium, and t2.large.
+database_sec_group_description = \
+    "provides postgres access to everything with security group %s"
+
+instance_database_sec_group_description = \
+    "provides postgres access to the postgres database %s"
 
 MAINTAINANCE_WINDOW = "sat:08:00-sat:09:00"  # utc
 BACKUP_WINDOW = "04:34-05:04"
@@ -27,9 +32,9 @@ POSTGRES_PORT = 5432  # this is the default postgres port.
 # TODO: database encryption?
 
 
-##
-## Database credentials
-##
+####################################################################################################
+#################################### Database Credentials ##########################################
+####################################################################################################
 
 def generate_valid_postgres_credentials():
     """ Generates and prints credentials for database access. """
@@ -41,62 +46,42 @@ def generate_valid_postgres_credentials():
         # 1 to 63 alphanumeric characters, begin with a letter
         "database_name": random_alphanumeric_starting_with_letter(63)
     }
-    
     print "database username:", credentials['username']
     print "database password:", credentials['password']
     print "database name:", credentials['database_name']
     return credentials
 
 
-def get_full_db_credentials_by_eb_name(eb_environment_name):
-    return get_full_db_credentials_by_name(construct_db_name(eb_environment_name))
-
-
-def get_full_db_credentials_by_name(db_instance_identifier):
-    with open(get_db_credentials_file_path(db_instance_identifier), 'r') as f:
+def get_full_db_credentials(eb_environment_name):
+    """ reads in the database credentials for the project and dynamically identifies the hostname
+    parameter. """
+    with open(get_db_credentials_file_path(eb_environment_name), 'r') as f:
         credentials = json.load(f)
-    credentials['RDS_HOSTNAME'] = get_db_info(db_instance_identifier)['Endpoint']['Address']
+    credentials['RDS_HOSTNAME'] = get_db_info(eb_environment_name)['Endpoint']['Address']
     return credentials
 
 
-def write_rds_credentials(db_instance_identifier, credentials):
-    db_credentials_path = get_db_credentials_file_path(db_instance_identifier)
+def write_rds_credentials(eb_environment_name, credentials, test_for_existing_files):
+    """ Writes to the database credentials file for the environment. """
+    db_credentials_path = get_db_credentials_file_path(eb_environment_name)
+    if test_for_existing_files and os.path.exists(db_credentials_path):
+        msg = "Encountered a file at %s, abortiing." % db_credentials_path
+        log.error("Encountered a file at %s, abortiing.")
+        raise Exception(msg)
+    
     with open(db_credentials_path, 'w') as f:
         json.dump(credentials, f, indent=1)
         log.info("database credentials have been written to %s" % db_credentials_path)
 
+####################################################################################################
+##################################### RDS Security Groups ##########################################
+####################################################################################################
 
-##
-## RDS configuration utils
-##
+def construct_db_name(eb_environment_name):
+    return eb_environment_name + '-database'
 
-def get_most_recent_postgres_engine():
-    rds_client = create_rds_client()
-    for engine in reversed(rds_client.describe_db_engine_versions()['DBEngineVersions']):
-        if 'postgres' == engine["Engine"]:
-            return engine
-
-
-def get_db_info(db_identifier):
-    rds_client = create_rds_client()
-    # documentaation says this should only return the one result when using DBInstanceIdentifier.
-    try:
-        return rds_client.describe_db_instances(DBInstanceIdentifier=db_identifier)['DBInstances'][0]
-    except Exception as e:
-        # boto3 throws unimportable errors.
-        if e.__class__.__name__ == "DBInstanceNotFoundFault":
-            raise DBInstanceNotFound(db_identifier)
-        raise
-    
-
-database_sec_group_description = \
-    "provides postgres access to everything with security group %s"
-
-instance_database_sec_group_description = \
-    "provides postgres access to the postgres database %s"
 
 def get_rds_security_group_names(db_identifier):
-    """ These names are significantly """
     instance_sec_group_name = db_identifier + "_database_access"
     database_sec_group_name = db_identifier + "_allow_database_connections"
     return instance_sec_group_name, database_sec_group_name
@@ -142,18 +127,49 @@ def add_eb_environment_to_rds_database_security_group(eb_environment_name, eb_se
     db_sec_grp = get_security_group_by_name(database_sec_grp_name)
     sec_grp_resource = create_ec2_resource().SecurityGroup(db_sec_grp['GroupId'])
     sec_grp_resource.authorize_ingress(**ingress_params)
-    
-def construct_db_name(eb_environment_name):
-    return eb_environment_name + '-database'
+
+
+####################################################################################################
+##################################### RDS Configuration ############################################
+####################################################################################################
+
+def get_most_recent_postgres_engine():
+    rds_client = create_rds_client()
+    for engine in reversed(rds_client.describe_db_engine_versions()['DBEngineVersions']):
+        if 'postgres' == engine["Engine"]:
+            return engine
+
+
+def get_db_info(eb_environment_name):
+    db_identifier = construct_db_name(eb_environment_name)
+    rds_client = create_rds_client()
+    # documentaation says this should only return the one result when using DBInstanceIdentifier.
+    try:
+        return rds_client.describe_db_instances(DBInstanceIdentifier=db_identifier)['DBInstances'][0]
+    except Exception as e:
+        # boto3 throws unimportable errors.
+        if e.__class__.__name__ == "DBInstanceNotFoundFault":
+            raise DBInstanceNotFound(db_identifier)
+        raise
 
 
 def create_new_rds_instance(eb_environment_name):
-    engine = get_most_recent_postgres_engine()
     db_instance_identifier = construct_db_name(eb_environment_name)
-
+    # identify whether there is already a database with this name, we don't want to
+    try:
+        _ = get_db_info(eb_environment_name)
+        log.error("There is already a database named %s" % eb_environment_name)
+        EXIT()
+    except DBInstanceNotFound:
+        pass
+    
+    database_server_type = get_server_configuration_file(eb_environment_name)['DB_SERVER_TYPE']
+    engine = get_most_recent_postgres_engine()
+    
     credentials = generate_valid_postgres_credentials()
     log.info("writing database credentials to disk, database address will be added later.")
-    write_rds_credentials(db_instance_identifier, credentials)
+    
+    write_rds_credentials(eb_environment_name, credentials, True)
 
     # There is some weirdness involving security groups.  It looks like there is this concept of
     # non-vpc security groups, I am fairly certain that this interacts with cross-vpc, IAM based
@@ -167,7 +183,7 @@ def create_new_rds_instance(eb_environment_name):
     rds_instance = rds_client.create_db_instance(
             # server details
             DBInstanceIdentifier=db_instance_identifier,
-            DBInstanceClass="db." + DB_SERVER_TYPE,
+            DBInstanceClass="db." + database_server_type,
             MultiAZ=False,
             
             PubliclyAccessible=False,
@@ -235,7 +251,7 @@ def create_new_rds_instance(eb_environment_name):
     
     while True:
         try:
-            db = get_db_info(db_instance_identifier)
+            db = get_db_info(eb_environment_name)
         except DBInstanceNotFound:
             log.error("couldn't find database %s, hopefully this is a momentary glitch. Retrying.")
             sleep(5)
@@ -251,7 +267,9 @@ def create_new_rds_instance(eb_environment_name):
         else:
             raise Exception('encountered unknown database state "%s"' % db['DBInstanceStatus'])
     
-    loaded_credentials = get_full_db_credentials_by_name(db_instance_identifier)
+    # to assist future system administrators we will rewrite the database credentials file to
+    # contain the RDS_HOST parameter. (get_full_db_credentials dynamically fetches it)
+    loaded_credentials = get_full_db_credentials(eb_environment_name)
     log.info("writing full credentials with host address")
-    write_rds_credentials(db_instance_identifier, loaded_credentials)
+    write_rds_credentials(db_instance_identifier, loaded_credentials, False)
     return db

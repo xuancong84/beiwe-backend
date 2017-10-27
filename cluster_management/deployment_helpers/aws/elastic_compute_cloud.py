@@ -6,7 +6,7 @@ from deployment_helpers.aws.rds import (get_rds_security_groups_by_eb_name)
 from deployment_helpers.aws.security_groups import (
     create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group,
     create_security_group, get_security_group_by_name, InvalidSecurityGroupNameException,
-    open_tcp_port)
+    open_tcp_port, get_security_group_by_id)
 from deployment_helpers.constants import get_global_config, RABBIT_MQ_PORT
 from deployment_helpers.general_utils import log
 
@@ -15,16 +15,32 @@ GLOBAL_CONFIGURATION = get_global_config()
 RABBIT_MQ_SEC_GRP_DESCRIPTION = "allows connections to rabbitmq from servers with security group %s"
 PROCESSING_MANAGER_NAME = "%s data processing manager"
 
+####################################################################################################
+######################################## Accessors #################################################
+####################################################################################################
 
 def get_instance_by_id(instance_id):
     ec2_client = create_ec2_client()
     return ec2_client.describe_instances(InstanceIds=[instance_id])['Reservations'][0]["Instances"][0]
 
 
+def get_manager_private_ip(eb_environment_name):
+    instance = get_manager_instance_by_eb_environment_name(eb_environment_name)
+    return instance['NetworkInterfaces'][0]['PrivateIpAddress']
+
+
+def get_manager_public_ip(eb_environment_name):
+    """ returns a dictionary like the following
+     {'PublicDnsName': 'ec2-18-216-26-40.us-east-2.compute.amazonaws.com',
+      'PublicIp': '18.216.26.40'} """
+    instance = get_manager_instance_by_eb_environment_name(eb_environment_name)
+    return instance['NetworkInterfaces'][0]['PrivateIpAddresses'][0]['Association']['PublicIp']
+
+
 def get_manager_instance_by_eb_environment_name(eb_environment_name):
     manager = get_instances_by_name(PROCESSING_MANAGER_NAME % eb_environment_name)
     if len(manager) > 1:
-        log.error("discovered multiple manager servers.  This configuration is not supported and should be fixed.")
+        log.error("discovered multiple manager servers.  This configuration is not supported and should be corrected.")
     try:
         return manager[0]
     except IndexError:
@@ -44,17 +60,10 @@ def get_instances_by_name(instance_name):
     except IndexError:
         log.warn("could not find any instances matching the name '%s'" % instance_name)
         return []
-    
 
-def get_instance_network_info(instance_id):
-    """ returns a dictionary like the following
-     {'PublicDnsName': 'ec2-18-216-26-40.us-east-2.compute.amazonaws.com',
-      'PublicIp': '18.216.26.40'} """
-    instance = get_instance_by_id(instance_id)
-    ret = instance['NetworkInterfaces'][0]['PrivateIpAddresses'][0]['Association']
-    ret.pop("IpOwnerId")
-    return ret
-
+####################################################################################################
+######################################### Utilities ################################################
+####################################################################################################
 
 def get_most_recent_ubuntu():
     """ Unfortunately the different fundamental ec2 server types require a specific image type.
@@ -78,6 +87,40 @@ def get_most_recent_ubuntu():
     log.info("Using AMI '%s'" % images[-1]['Name'])
     return images[-1]
 
+####################################################################################################
+##################################### Security Groups ##############################################
+####################################################################################################
+
+def get_instance_security_group_by_eb_name(eb_environment_name):
+    return get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]
+
+
+def construct_rabbit_mq_security_group_name(eb_environment_name):
+    return eb_environment_name + "_allow_rabbit_mq_connections"
+
+
+def get_or_create_rabbit_mq_security_group(eb_environment_name):
+    rabbit_mq_sec_grp_name = construct_rabbit_mq_security_group_name(eb_environment_name)
+    # we assume that the group was created correctly, don't attempt to add rules if we find it
+    try:
+        return get_security_group_by_name(rabbit_mq_sec_grp_name)
+    except InvalidSecurityGroupNameException:
+        log.info("Did not find a security group named '%s,' creating it." % rabbit_mq_sec_grp_name)
+        instance_sec_grp_id = get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]['GroupId']
+        ingress_params = create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group(
+                tcp_port=RABBIT_MQ_PORT, sec_grp_id=instance_sec_grp_id
+        )
+        sec_grp = create_security_group(
+                rabbit_mq_sec_grp_name,
+                RABBIT_MQ_SEC_GRP_DESCRIPTION % instance_sec_grp_id,
+                list_of_dicts_of_ingress_kwargs=[ingress_params]
+        )
+        open_tcp_port(sec_grp['GroupId'], 22)
+        return get_security_group_by_id(sec_grp['GroupId'])
+    
+####################################################################################################
+#################################### Instance Creation #############################################
+####################################################################################################
 
 def create_server(eb_environment_name, aws_server_type, security_groups=None):
     ec2_client = create_ec2_client()
@@ -90,7 +133,8 @@ def create_server(eb_environment_name, aws_server_type, security_groups=None):
         'DeviceName': '/dev/sda1',  # boot drive...
         'Ebs': {
             'DeleteOnTermination': True,
-            'VolumeSize': 8,  # gigabytes, No storage is required on any ubuntu machines, 8 is default
+            'VolumeSize': 8,
+        # gigabytes, No storage is required on any ubuntu machines, 8 is default
             'VolumeType': 'gp2'}  # SSD...
     }
     
@@ -148,42 +192,8 @@ def create_server(eb_environment_name, aws_server_type, security_groups=None):
     instance_resource.wait_until_exists()
     log.info("Waiting until server %s is up and running (this may take a minute) ..." % instance_id)
     instance_resource.wait_until_running()
-    
     return get_instance_by_id(instance_id)
 
-
-def get_instance_security_group_by_eb_name(eb_environment_name):
-    return get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]
-
-
-def construct_rabbit_mq_security_group_name(eb_environment_name):
-    return eb_environment_name + "_allow_rabbit_mq_connections"
-
-
-def open_ssh_by_eb_name(eb_environment_name):
-    open_tcp_port(get_instance_security_group_by_eb_name("test2")['GroupId'], 22)
-
-
-# TODO: implement
-# def close_ssh_by_eb_name(eb_environment_name):
-
-
-def get_or_create_rabbit_mq_security_group(eb_environment_name):
-    rabbit_mq_sec_grp_name = construct_rabbit_mq_security_group_name(eb_environment_name)
-    # we assume that the group was created correctly, don't attempt to add rules if we find it
-    try:
-        return get_security_group_by_name(rabbit_mq_sec_grp_name)
-    except InvalidSecurityGroupNameException:
-        log.info("Did not find a security group named '%s,' creating it." % rabbit_mq_sec_grp_name)
-        instance_sec_grp_id = get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]['GroupId']
-        ingress_params = create_sec_grp_rule_parameters_allowing_traffic_from_another_security_group(
-                tcp_port=RABBIT_MQ_PORT, sec_grp_id=instance_sec_grp_id
-        )
-        return create_security_group(
-                rabbit_mq_sec_grp_name,
-                RABBIT_MQ_SEC_GRP_DESCRIPTION % instance_sec_grp_id,
-                list_of_dicts_of_ingress_kwargs=[ingress_params]
-        )
 
 def create_processing_server(eb_environment_name, aws_server_type):
     instance_sec_grp_id = get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]['GroupId']
@@ -194,6 +204,8 @@ def create_processing_server(eb_environment_name, aws_server_type):
         {"Key": "Name", "Value": "%s data processing server" % eb_environment_name},
         {"Key": "is_processing_worker", "Value": "1"}
     ])
+    return instance_info
+
 
 def create_processing_control_server(eb_environment_name, aws_server_type):
     """ The differences between a data processing worker server and a processing controller
