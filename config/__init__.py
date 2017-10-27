@@ -35,12 +35,9 @@ for attr_name, attr_value in provided_settings.items():
         errors.append(attr_name + " was not provided with a value.")
 
 MANDATORY_VARS = {
-    'AWS_ACCESS_KEY_ID',
-    'AWS_SECRET_ACCESS_KEY',
     'DOMAIN_NAME',
     'FLASK_SECRET_KEY',
     'IS_STAGING',
-    'S3_BACKUPS_BUCKET',
     'S3_BUCKET',
     'SENTRY_ANDROID_DSN',
     'SENTRY_DATA_PROCESSING_DSN',

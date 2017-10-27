@@ -1,0 +1,5 @@
+import os
+os.environ['RDS_DB_NAME']='a'
+os.environ['RDS_USERNAME']='b'
+os.environ['RDS_PASSWORD']='c'
+os.environ['RDS_HOSTNAME']='d'

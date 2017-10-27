@@ -1,19 +1,14 @@
 from _ssl import SSLError
+from httplib import IncompleteRead
 
 from boto import connect_s3
 from boto.s3.key import Key
 
 from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
-from config.settings import S3_BUCKET, S3_BACKUPS_BUCKET, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
+from config.settings import S3_BUCKET
 from libs import encryption
 
-#Errors
-from httplib import IncompleteRead
-from boto.s3.connection import OrdinaryCallingFormat
-
-
-CONN = connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                  aws_secret_access_key=AWS_SECRET_ACCESS_KEY, is_secure=True, calling_format=OrdinaryCallingFormat())
+CONN = connect_s3(is_secure=True)
 
 
 def _get_bucket(name):
@@ -55,10 +50,6 @@ def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAUL
         key_path = study_object_id + "/" + key_path
     encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)
     return encryption.decrypt_server(encrypted_data, study_object_id)
-
-
-def backup_retrieve(key_path, number_retries=DEFAULT_S3_RETRIES):
-    return _do_retrieve(S3_BACKUPS_BUCKET, key_path, number_retries=number_retries)
 
 
 def _do_retrieve(bucket_name, key_path, number_retries=DEFAULT_S3_RETRIES):

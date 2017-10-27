@@ -9,15 +9,9 @@ os.environ['S3_BUCKET'] = 'bucket_name'
 #  cryptographically secure string to this value.
 FLASK_SECRET_KEY = getenv("FLASK_SECRET_KEY")
 
-# These are your AWS (Amazon Web Services) access credentials.
-# (Amazon provides you with these credentials, you do not generate them.)
-AWS_ACCESS_KEY_ID = getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = getenv("AWS_SECRET_ACCESS_KEY")
-
 # the name of the s3 bucket that will be used to store user generated data, and backups of local
 # database information.
 S3_BUCKET = getenv("S3_BUCKET")
-S3_BACKUPS_BUCKET = getenv("S3_BACKUPS_BUCKET")
 
 # Domain name for the server
 DOMAIN_NAME = getenv("DOMAIN_NAME")
