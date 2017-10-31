@@ -1,8 +1,6 @@
 ## Ignore line length limits in this file.
-
+import json
 from os.path import join as path_join, abspath
-
-from flask import json
 
 ####################################################################################################
 ##################################### General Constants ############################################
