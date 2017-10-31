@@ -1,5 +1,7 @@
 from time import sleep
 
+from botocore.exceptions import ClientError
+
 from deployment_helpers.aws.boto_helpers import create_ec2_client, create_ec2_resource
 
 from deployment_helpers.aws.rds import (get_rds_security_groups_by_eb_name)
@@ -210,11 +212,13 @@ def create_processing_server(eb_environment_name, aws_server_type):
 def create_processing_control_server(eb_environment_name, aws_server_type):
     """ The differences between a data processing worker server and a processing controller
     server is that the controller needs to allow connections from the processors. """
+
+    get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]['GroupId']
     
     # TODO: functions that terminate all worker and all manager servers for an environment
     
     manager_info = get_manager_instance_by_eb_environment_name(eb_environment_name)
-    if manager_info is not None:
+    if manager_info is not None and manager_info['State']['Name'] != 'terminated':
         if manager_info['InstanceType'] == aws_server_type:
             msg = "A manager server, %s, already exists for this environment, and it is of the provided type (%s)." % (manager_info['InstanceId'], aws_server_type)
         else:
@@ -227,6 +231,14 @@ def create_processing_control_server(eb_environment_name, aws_server_type):
     
     rabbit_mq_sec_grp_id = get_or_create_rabbit_mq_security_group(eb_environment_name)['GroupId']
     instance_sec_grp_id = get_rds_security_groups_by_eb_name(eb_environment_name)["instance_sec_grp"]['GroupId']
+    
+    try:
+        open_tcp_port(instance_sec_grp_id, 22)
+    except ClientError:
+        # we need to open the ssh port for future worker servers, but it blows up with duplicate
+        # if a user ever creates two managers during the life of the environment.
+        pass
+    
     instance_info = create_server(eb_environment_name, aws_server_type,
                                   security_groups=[rabbit_mq_sec_grp_id, instance_sec_grp_id])
     instance_resource = create_ec2_resource().Instance(instance_info["InstanceId"])

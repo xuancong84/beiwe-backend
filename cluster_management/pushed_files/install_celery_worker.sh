@@ -44,16 +44,16 @@ port = 127.0.0.1:50001
 serverurl = http://127.0.0.1:50001
 
 [program:celery]
-directory = /var/www/beiwe-backend/
+directory = /home/ubuntu/beiwe-backend/
 command = celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
 stdout_logfile = /var/log/celery/celeryd.log
 stderr_logfile = /var/log/celery/celeryd.err
 autostart = true
 EOL
 
-#AJK TODO @Eli where should these print to?
-echo "Use 'supervisord' or 'processing-start' to start the celery data processing service,"
-echo "use 'killall supervisord' or 'processing-stop' to stop it."
-echo "Note: you should not run supervisord as the superuser."
+processing-start
+#echo "Use 'supervisord' or 'processing-start' to start the celery data processing service,"
+#echo "use 'killall supervisord' or 'processing-stop' to stop it."
+#echo "Note: you should not run supervisord as the superuser."
 #supervisord
 #tail -f /var/log/celery/celeryd.err

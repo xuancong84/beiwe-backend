@@ -201,8 +201,7 @@ def create_finalized_configuration(eb_environment_name):
     if "FLASK_SECRET_KEY" not in config:
         config['FLASK_SECRET_KEY'] = random_alphanumeric_string(80)
     if "S3_BUCKET" not in config:
-        config["S3_BUCKET_NAME"] = create_data_bucket(eb_environment_name)
-        
+        config["S3_BUCKET"] = create_data_bucket(eb_environment_name)
     with open(finalized_cred_path, 'w') as f:
         json.dump(config, f, indent=1)
     return config

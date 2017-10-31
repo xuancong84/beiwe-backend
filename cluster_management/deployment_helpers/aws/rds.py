@@ -40,15 +40,15 @@ def generate_valid_postgres_credentials():
     """ Generates and prints credentials for database access. """
     credentials = {
         # 1 to 63 alphanumeric characters, first character must be a letter.
-        "username": random_alphanumeric_starting_with_letter(63),
+        "RDS_USERNAME": random_alphanumeric_starting_with_letter(63),
         # 8 to 128 characters, typeable characters, not /, ", or @
-        "password": random_password_string(128),
+        "RDS_PASSWORD": random_password_string(128),
         # 1 to 63 alphanumeric characters, begin with a letter
-        "database_name": random_alphanumeric_starting_with_letter(63)
+        "RDS_DB_NAME": random_alphanumeric_starting_with_letter(63)
     }
-    print "database username:", credentials['username']
-    print "database password:", credentials['password']
-    print "database name:", credentials['database_name']
+    print "database username:", credentials['RDS_USERNAME']
+    print "database password:", credentials['RDS_PASSWORD']
+    print "database name:", credentials['RDS_DB_NAME']
     return credentials
 
 
@@ -211,9 +211,9 @@ def create_new_rds_instance(eb_environment_name):
             # TdeCredentialPassword='string',  # probably not something we will implement
             
             # Security
-            MasterUsername=credentials['username'],
-            MasterUserPassword=credentials['password'],
-            DBName=credentials['database_name'],
+            MasterUsername=credentials['RDS_USERNAME'],
+            MasterUserPassword=credentials['RDS_PASSWORD'],
+            DBName=credentials['RDS_DB_NAME'],
             
             EnableIAMDatabaseAuthentication=False,
             

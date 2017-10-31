@@ -43,12 +43,12 @@ def EXIT(n=None):
 
 
 def retry(func, *args, **kwargs):
-    for i in range(10):
+    for i in range(100):
         try:
             return func(*args, **kwargs)
         except (NetworkError, botoexceptions.ClientError, botoexceptions.WaiterError) as e:
             log.error('Encountered error of type %s with error message "%s"\nRetrying with attempt %s.'
-                      % (e.__name__, e, i+1) )
+                      % (type(e).__name__, e, i+1) )
             sleep(3)
 
 

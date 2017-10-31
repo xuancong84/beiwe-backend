@@ -111,14 +111,15 @@ def get_instance_assume_role_policy_document():
 
 ## Worker and Processor server files
 # (files with the prefix LOCAL are on this machine, REMOTE files are file paths on the remote server)
-LOCAL_CRONJOB_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'celery_periodic_restart_cronjob.txt')
+LOCAL_CRONJOB_WORKER_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'cron_worker.txt')
+LOCAL_CRONJOB_MANAGER_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'cron_manager.txt')
 REMOTE_CRONJOB_FILE_PATH = path_join(REMOTE_HOME_DIR, 'cronjob.txt')
 LOCAL_GIT_KEY_PATH = path_join(PUSHED_FILES_FOLDER, 'git_read_only_key')
 REMOTE_GIT_KEY_PATH = path_join(REMOTE_HOME_DIR, '.ssh/id_rsa')
 LOCAL_PYENV_INSTALLER_FILE = path_join(PUSHED_FILES_FOLDER, 'install_pyenv.sh')
 REMOTE_PYENV_INSTALLER_FILE = path_join(REMOTE_HOME_DIR, 'install_pyenv.sh')
-LOCAL_CELERY_FILE = path_join(PUSHED_FILES_FOLDER, 'install_celery_worker.sh')
-REMOTE_CELERY_FILE = path_join(REMOTE_HOME_DIR, 'install_celery_worker.sh')
+LOCAL_INSTALL_CELERY_WORKER = path_join(PUSHED_FILES_FOLDER, 'install_celery_worker.sh')
+REMOTE_INSTALL_CELERY_WORKER = path_join(REMOTE_HOME_DIR, 'install_celery_worker.sh')
 ####################################################################################################
 ####################################### Dynamic Files ##############################################
 ####################################################################################################
@@ -185,12 +186,10 @@ AWS_EB_WORKER_TIER = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
 DO_SETUP_EB_UPDATE_OPEN = "This command prepares the selected version of the codebase for deployment.  \n\nTo download the most recent version of the code base go to\nhttps://github.com/onnela-lab/beiwe-backend/tree/production\nand download the zip file version of the github repository, then place it into the staged_files folder.\n"
 
 ENVIRONMENT_NAME_RESTRICTIONS = "Names must be 4 to 40 characters in length.\n" \
-"Names can only contaiyn letters, numbers, and hyphens, and cannot start or end with a hyphen.\n"
+"Names can only contain letters, numbers, and hyphens, and cannot start or end with a hyphen.\n"
 
 EXTANT_ENVIRONMENT_PROMPT = "Enter the name of the Elastic Beanstalk Environment you want to run this operation on:"
 
 DO_CREATE_ENVIRONMENT ="Please enter a name for your new environment."
-
-DO_CREATE_MANAGER = "Enter the name of the environment for which you want to create a data processing manager server:"
 
 HELP_SETUP_NEW_ENVIRONMENT = "Enter the name of the environment you want to create:"
