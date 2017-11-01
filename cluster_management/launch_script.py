@@ -37,7 +37,7 @@ from deployment_helpers.configuration_utils import (
     validate_beiwe_environment_config, create_finalized_configuration,
     create_processing_server_configuration_file)
 from deployment_helpers.constants import (
-    APT_GET_INSTALLS, FILES_TO_PUSH, LOG_FILE,
+    FILES_TO_PUSH, LOG_FILE,
     PUSHED_FILES_FOLDER, REMOTE_HOME_DIR, REMOTE_USERNAME,
     DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH, STAGED_FILES,
     DO_SETUP_EB_UPDATE_OPEN,
@@ -48,7 +48,8 @@ from deployment_helpers.constants import (
     REMOTE_CRONJOB_FILE_PATH, get_finalized_environment_variables, get_server_configuration_file,
     LOCAL_GIT_KEY_PATH, REMOTE_GIT_KEY_PATH, REMOTE_PYENV_INSTALLER_FILE,
     LOCAL_PYENV_INSTALLER_FILE, REMOTE_INSTALL_CELERY_WORKER, LOCAL_INSTALL_CELERY_WORKER,
-    get_global_config, LOCAL_CRONJOB_WORKER_FILE_PATH, LOCAL_CRONJOB_MANAGER_FILE_PATH)
+    get_global_config, LOCAL_CRONJOB_WORKER_FILE_PATH, LOCAL_CRONJOB_MANAGER_FILE_PATH,
+    APT_MANAGER_INSTALLS, APT_WORKER_INSTALLS)
 from deployment_helpers.general_utils import log, EXIT, current_time_string, do_zip_reduction, retry
 
 
@@ -156,8 +157,13 @@ def setup_manager_cron():
     run('crontab -u {user} {file}'.format(file=REMOTE_CRONJOB_FILE_PATH, user=REMOTE_USERNAME))
     
 
-def apt_installs():
-    installs_string = ' '.join(APT_GET_INSTALLS)
+def apt_installs(manager=False):
+    if manager:
+        apt_installs = APT_MANAGER_INSTALLS
+    else:
+        apt_installs = APT_WORKER_INSTALLS
+    installs_string = " ".join(apt_installs)
+    
     sudo('apt-get -y update >> {log}'.format(log=LOG_FILE))
     sudo('apt-get -y install {installs} >> {log}'.format(installs=installs_string, log=LOG_FILE))
 
@@ -321,7 +327,7 @@ def do_create_manager():
     # TODO: fabric up the rabbitmq and cron task, ensure other servers can connect, watch data process
     configure_fabric(name, public_ip)
     push_files()
-    apt_installs()
+    apt_installs(manager=True)
     load_git_repo()
     setup_python()
     push_beiwe_configuration(name)

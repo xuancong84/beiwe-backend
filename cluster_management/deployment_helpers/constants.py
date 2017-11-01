@@ -5,12 +5,14 @@ from os.path import join as path_join, abspath
 ####################################################################################################
 ##################################### General Constants ############################################
 ####################################################################################################
+from copy import copy
 
 REMOTE_USERNAME = 'ubuntu'
+# Note: port 50,001 is used for supervisord
 RABBIT_MQ_PORT = 50000
 
 ## EC2 Instance Deployment Variables
-APT_GET_INSTALLS = [
+APT_WORKER_INSTALLS = [
     'ack-grep',  # Search within files
     'build-essential',  # Includes a C compiler for compiling python
     'htop',
@@ -18,14 +20,15 @@ APT_GET_INSTALLS = [
     'libreadline-gplv2-dev',
     'libsqlite3-dev',
     'libssl-dev',
-    # AJK TODO do I need this? github says I do
-    # 'mailutils',  # Necessary for cronutils
+    'mailutils',  # Necessary for cronutils
     'moreutils',  # Necessary for cronutils
     'nload',
-    'rabbitmq-server',  # Queue tasks to run using celery
     'sendmail',  # Necessary for cronutils
     'silversearcher-ag',  # Search within files
 ]
+
+APT_MANAGER_INSTALLS = copy(APT_WORKER_INSTALLS)
+APT_MANAGER_INSTALLS.append('rabbitmq-server')  # Queue tasks to run using celery
 
 # Files to push from the local server before the rest of launch
 # This is a list of 2-tuples of (local_path, remote_path) where local_path is located in
