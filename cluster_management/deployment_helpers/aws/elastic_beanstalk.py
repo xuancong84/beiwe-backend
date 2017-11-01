@@ -13,10 +13,10 @@ from deployment_helpers.aws.elastic_beanstalk_configuration import (get_base_eb_
     DynamicParameter)
 from deployment_helpers.aws.iam import (iam_find_role, IamEntityMissingError, iam_create_role,
     iam_attach_role_policy, iam_find_instance_profile, PythonPlatformDiscoveryError,
-    EnvironmentDeploymentFailure)
+    EnvironmentDeploymentFailure, get_or_create_automation_policy)
 from deployment_helpers.aws.rds import (add_eb_environment_to_rds_database_security_group)
 from deployment_helpers.aws.security_groups import get_security_group_by_name
-from deployment_helpers.constants import (OUR_CUSTOM_POLICY_ARN, EB_SERVICE_ROLE,
+from deployment_helpers.constants import (EB_SERVICE_ROLE,
     EB_INSTANCE_PROFILE_ROLE, BEIWE_APPLICATION_NAME, EB_INSTANCE_PROFILE_NAME,
     EB_SEC_GRP_COUNT_ERROR, get_elasticbeanstalk_assume_role_policy_document,
     get_instance_assume_role_policy_document, AWS_EB_SERVICE, AWS_EB_ENHANCED_HEALTH,
@@ -164,7 +164,7 @@ def get_or_create_eb_application():
             ApplicationName=BEIWE_APPLICATION_NAME,
             Description='Your Beiwe Application',
             ResourceLifecycleConfig={
-                'ServiceRole': OUR_CUSTOM_POLICY_ARN,
+                'ServiceRole': get_or_create_automation_policy()['Arn'],
                 # The ARN of an IAM service role that Elastic Beanstalk has permission to assume
                 'VersionLifecycleConfig': {
                     'MaxCountRule': {

@@ -3,7 +3,7 @@ from pprint import pprint
 ## The various errors we use.
 from deployment_helpers.aws.boto_helpers import create_iam_client
 from deployment_helpers.constants import (EB_INSTANCE_PROFILE_ROLE, EB_INSTANCE_PROFILE_NAME,
-    EB_SERVICE_ROLE)
+    EB_SERVICE_ROLE, get_automation_policy, BEIWE_AUTOMATION_POLICY_NAME)
 
 
 class PythonPlatformDiscoveryError(Exception): pass
@@ -35,6 +35,20 @@ def iam_find_role(iam_client, role_name):
         if role['RoleName'] == role_name:
             return role
     raise IamEntityMissingError("IAM could not find Role %s" % role_name)
+
+
+def get_or_create_automation_policy():
+    iam_client = create_iam_client()
+    
+    for policy in iam_client.list_policies()["Policies"]:
+        if BEIWE_AUTOMATION_POLICY_NAME == policy['PolicyName']:
+            return policy
+    
+    return iam_client.create_policy(
+            PolicyName="beiwe_automation_policy",
+            PolicyDocument=get_automation_policy(),
+            Description="permissions the beiwe elastic beanstalk application."
+    )['Policy']
 
 
 def iam_find_instance_profile(iam_client, instance_profile_name):

@@ -96,6 +96,7 @@ def get_aws_credentials():
 ## Elastic Beanstalk Environment Files
 ELASTICBEANSTALK_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "elasticbeanstalk_assume_role_policy_document.json")
 INSTANCE_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "instance_assume_role_policy_document.json")
+AUTOMATION_POLICY_PATH = path_join(GENERAL_CONFIG_FOLDER, "beiwe_automation_policy.json")
 
 ## Elastic Beanstalk File Loaders
 def get_elasticbeanstalk_assume_role_policy_document():
@@ -106,6 +107,9 @@ def get_instance_assume_role_policy_document():
     with open(INSTANCE_ASSUME_ROLE_POLICY_DOCUMENT_PATH) as document:
         return document.read()
 
+def get_automation_policy():
+    with open(AUTOMATION_POLICY_PATH, "r") as document:
+            return document.read()
 
 ## Worker and Processor server files
 # (files with the prefix LOCAL are on this machine, REMOTE files are file paths on the remote server)
@@ -159,7 +163,8 @@ def get_server_configuration_file(eb_environment_name):
 ########################################## Strings #################################################
 ####################################################################################################
 
-OUR_CUSTOM_POLICY_ARN = "AutomationPolicy"
+# IAM names
+BEIWE_AUTOMATION_POLICY_NAME = "beiwe_automation_policy"
 EB_SERVICE_ROLE = "beiwetest-elasticbeanstalk-service-role"
 EB_INSTANCE_PROFILE_ROLE = "beiwetest-elasticbeanstalk-instance-profile-role"
 EB_INSTANCE_PROFILE_NAME = "beiwetest-elasticbeanstalk-instance-profile"
