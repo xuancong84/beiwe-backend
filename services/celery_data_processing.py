@@ -12,10 +12,11 @@ STARTED_OR_WAITING = [states.PENDING, states.RECEIVED, states.STARTED]
 
 FAILED = [states.REVOKED, states.RETRY, states.FAILURE]
 
-# AJK TODO this was previously config.settings.MONGO_IP, but that no longer exists.
-# What should it be changed to?
+with open("~/manager_ip", 'r') as f:
+    manager_ip = f.read()
+
 celery_app = Celery("data_processing_tasks",
-                    broker='pyamqp://guest@%s//' % 'MONGO_IP',
+                    broker='pyamqp://guest@%s//' % manager_ip,
                     backend='rpc://',
                     task_publish_retry=False,
                     task_track_started=True )

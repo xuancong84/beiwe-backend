@@ -4,11 +4,8 @@ cronutils>=0.1.9
 Django==1.11.5
 django-extensions==1.7.8
 Flask==0.12.2
-mongobackup==0.2.2
-mongolia==0.6.0
 ipython==5.5.0
 nose==1.3.7
-pbkdf2==1.3
 psycopg2==2.7.3.1
 pycrypto==2.6.1
 python-dateutil==2.6.1

@@ -1,4 +1,4 @@
-from bson.json_util import dumps, loads
+from json import dumps, loads
 from flask import Blueprint, flash, redirect, request, Response
 
 from libs.admin_authentication import authenticate_system_admin

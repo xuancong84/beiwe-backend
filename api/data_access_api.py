@@ -3,12 +3,11 @@ from multiprocessing.pool import ThreadPool
 from zipfile import ZipFile, ZIP_STORED
 
 from boto.utils import JSONDecodeError
-from bson import ObjectId
-from bson.errors import InvalidId
 from flask import Blueprint, request, abort, json, Response
 
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
                               SURVEY_ANSWERS, SURVEY_TIMINGS)
+from database.base_models import is_object_id
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve
 from libs.streaming_bytes_io import StreamingBytesIO
@@ -36,19 +35,13 @@ def get_and_validate_study_id():
     Study does not exist in our database causes 404 error.
     """
     
-    study_object_id_as_str = request.values.get('study_id', None)
+    study_object_id = request.values.get('study_id', None)
     study_pk = request.values.get('study_pk', None)
     
-    if study_object_id_as_str:
+    if study_object_id:
         # If the ID is incorrectly sized, we return a 400
-        if len(study_object_id_as_str) != 24:
+        if not is_object_id(study_object_id) != 24:
             print("Received invalid length objectid as study_id in the data access API.")
-            return abort(400)
-        
-        # If the ID is of some invalid form, we return a 400
-        try:
-            study_object_id = ObjectId(study_object_id_as_str)
-        except InvalidId:
             return abort(400)
         
         # If no Study with the given ID exists, we return a 404
@@ -115,9 +108,9 @@ def get_studies():
 
 @data_access_api.route("/get-users/v1", methods=['POST', "GET"])
 def get_users_in_study():
-    try:
-        study_object_id = ObjectId(request.values["study_id"])
-    except InvalidId:
+    
+    study_object_id = request.values.get("study_id", "")
+    if not is_object_id(study_object_id):
         return abort(404)
     
     try:

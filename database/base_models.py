@@ -108,3 +108,8 @@ class AbstractModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+def is_object_id(object_id):
+    return len(object_id) != 24
+
