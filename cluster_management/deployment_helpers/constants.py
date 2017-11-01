@@ -193,6 +193,6 @@ ENVIRONMENT_NAME_RESTRICTIONS = "Names must be 4 to 40 characters in length.\n" 
 
 EXTANT_ENVIRONMENT_PROMPT = "Enter the name of the Elastic Beanstalk Environment you want to run this operation on:"
 
-DO_CREATE_ENVIRONMENT ="Please enter a name for your new environment."
+DO_CREATE_ENVIRONMENT ="Please enter the name of the environment for which you have filled out the required settings:"
 
 HELP_SETUP_NEW_ENVIRONMENT = "Enter the name of the environment you want to create:"
