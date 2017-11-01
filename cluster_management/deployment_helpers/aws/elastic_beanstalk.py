@@ -155,12 +155,12 @@ def get_or_create_eb_application():
     applications = eb_client.describe_applications().get('Applications', None)
     for app in applications:
         app_name = app.get('ApplicationName', None)
-        if app_name and BEIWE_APPLICATION_NAME in app_name.lower():
+        if app_name and BEIWE_APPLICATION_NAME.lower() in app_name.lower():
             log.info('Using Elastic Beanstalk application named "%s."' % app_name)
-            return app_name
+            return BEIWE_APPLICATION_NAME
         
     # raise Exception("no beiwe applications found")
-    return eb_client.create_application(
+    _ = eb_client.create_application(
             ApplicationName=BEIWE_APPLICATION_NAME,
             Description='Your Beiwe Application',
             ResourceLifecycleConfig={
@@ -180,6 +180,7 @@ def get_or_create_eb_application():
                 }
             }
     )
+    return BEIWE_APPLICATION_NAME
 
 
 def get_environment(eb_environment_name):
