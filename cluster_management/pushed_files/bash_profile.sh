@@ -71,8 +71,9 @@ alias up='update'
 alias update='cd $HOME/beiwe-backend; pyc; git pull; touch $HOME/beiwe-backend/wsgi.py'
 
 #supervisord (data processing)
-alias processing-start="sudo service rabbitmq-server restart; supervisord"
+alias processing-start="supervisord"
 alias processing-stop="killall supervisord"
+alias processing-restart="processing-stop; processing-start"
 
 #Logs
 alias log='nano +1000000000 /var/log/apache2/error.log' #open log, go to end

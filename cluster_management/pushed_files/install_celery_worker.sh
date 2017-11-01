@@ -51,7 +51,10 @@ stderr_logfile = /var/log/celery/celeryd.err
 autostart = true
 EOL
 
-processing-start
+# start data processing
+supervisord
+
+
 #echo "Use 'supervisord' or 'processing-start' to start the celery data processing service,"
 #echo "use 'killall supervisord' or 'processing-stop' to stop it."
 #echo "Note: you should not run supervisord as the superuser."
