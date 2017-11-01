@@ -71,18 +71,35 @@ def construct_eb_environment_variables(eb_environment_name):
 
 
 def get_python27_platform_arn():
-    """ gets the most recent platform arm for a python 2.7 elastic beanstalk cluster. """
+    """ gets the most recent platform arm for a python 2.7 elastic beanstalk cluster.
+    Warning! The query below returns different values in different AWS regions.
+    We've tested this in us-east-1, us-east-2, us-west-1, and us-west-2 on November 1, 2017
+    and confirmed that those 4 regions worked; however, this call may not work for other AWS
+    regions, and it may break if Amazon changes the return values in the future. """
     eb_client = create_eb_client()
     platforms = []
-    for platform in eb_client.list_platform_versions()['PlatformSummaryList']:
+    botoFilters = [{'Operator': 'contains', 'Type': 'PlatformName', 'Values': ['Python']}]
+    # Note: regardless of the MaxRecords value, we're only seeing boto3 return 100 records max
+    for platform in eb_client.list_platform_versions(MaxRecords=1000, Filters=botoFilters)['PlatformSummaryList']:
         if (platform.get('PlatformCategory', None) == 'Python' and
-                    "2.7" in platform.get('PlatformArn', [])):
+                    "2.7" in platform.get('PlatformArn', []) and
+                    "64bit" in platform.get('PlatformArn', []) and
+                    "Amazon Linux/2" in platform.get('PlatformArn', [])
+            ):
             platforms.append(platform['PlatformArn'])
-    
+
+    platforms.sort()
+
     if len(platforms) == 0:
         raise PythonPlatformDiscoveryError("could not find python 2.7 platform")
     if len(platforms) > 1:
-        raise PythonPlatformDiscoveryError("encountered multiple python 2.7 platforms: %s" % platforms)
+        log.error("\n***********************************************************\n"
+                  "Warning: encountered multiple Python 2.7 Elastic Beanstalk environment platforms.\n"
+                  "Beiwe did its best to automatically determine which environment to use.\n"
+                  "After deployment finishes, determine whether there is a platform upgrade you can\n"
+                  "apply for this cluster.\n"
+                  "***********************************************************")
+        return platforms[-1]
     if len(platforms) == 1:
         return platforms[0]
 
