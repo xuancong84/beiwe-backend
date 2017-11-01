@@ -266,10 +266,5 @@ def create_new_rds_instance(eb_environment_name):
             break
         else:
             raise Exception('encountered unknown database state "%s"' % db['DBInstanceStatus'])
-    
-    # to assist future system administrators we will rewrite the database credentials file to
-    # contain the RDS_HOST parameter. (get_full_db_credentials dynamically fetches it)
-    loaded_credentials = get_full_db_credentials(eb_environment_name)
-    log.info("writing full credentials with host address")
-    write_rds_credentials(db_instance_identifier, loaded_credentials, False)
+        
     return db
