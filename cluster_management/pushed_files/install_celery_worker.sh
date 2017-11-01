@@ -45,7 +45,7 @@ serverurl = http://127.0.0.1:50001
 
 [program:celery]
 directory = /home/ubuntu/beiwe-backend/
-command = celery -A celery_data_processing.data_processing_tasks worker --loglevel=info
+command = celery -A services.celery_data_processing worker --loglevel=info
 stdout_logfile = /var/log/celery/celeryd.log
 stderr_logfile = /var/log/celery/celeryd.err
 autostart = true
