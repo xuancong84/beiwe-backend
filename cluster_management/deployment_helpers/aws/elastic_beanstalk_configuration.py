@@ -200,7 +200,7 @@ def get_base_eb_configuration():
         }, {
             'Namespace': 'aws:elasticbeanstalk:command',
             'OptionName': 'IgnoreHealthCheck',
-            'Value': 'false'
+            'Value': 'true'
         }, { # Time at which a timeout occurs after deploying the environment - I think.
             'Namespace': 'aws:elasticbeanstalk:command',
             'OptionName': 'Timeout',
