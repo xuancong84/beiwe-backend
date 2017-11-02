@@ -12,7 +12,7 @@ STARTED_OR_WAITING = [states.PENDING, states.RECEIVED, states.STARTED]
 
 FAILED = [states.REVOKED, states.RETRY, states.FAILURE]
 
-with open("~/manager_ip", 'r') as f:
+with open("/home/ubuntu/manager_ip", 'r') as f:
     manager_ip = f.read()
 
 celery_app = Celery("data_processing_tasks",

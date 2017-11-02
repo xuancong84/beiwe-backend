@@ -44,6 +44,8 @@ MANDATORY_VARS = {
     'SENTRY_ELASTIC_BEANSTALK_DSN',
     'SENTRY_JAVASCRIPT_DSN',
     'SYSADMIN_EMAILS'
+    'S3_ACCESS_CREDENTIALS_USER',
+    'S3_ACCESS_CREDENTIALS_KEY'
 }
 
 # Check that all the mandatory variables exist...

@@ -2,13 +2,17 @@ from _ssl import SSLError
 from httplib import IncompleteRead
 
 from boto import connect_s3
+from boto.s3.connection import OrdinaryCallingFormat
 from boto.s3.key import Key
 
 from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
-from config.settings import S3_BUCKET
+from config.settings import S3_BUCKET, S3_ACCESS_CREDENTIALS_KEY, S3_ACCESS_CREDENTIALS_USER
 from libs import encryption
 
-CONN = connect_s3(is_secure=True)
+CONN = connect_s3(aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
+                  aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY,
+                  is_secure=True,
+                  calling_format=OrdinaryCallingFormat())
 
 
 def _get_bucket(name):
