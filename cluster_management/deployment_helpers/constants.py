@@ -100,6 +100,8 @@ def get_aws_credentials():
 ELASTICBEANSTALK_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "elasticbeanstalk_assume_role_policy_document.json")
 INSTANCE_ASSUME_ROLE_POLICY_DOCUMENT_PATH = path_join(GENERAL_CONFIG_FOLDER, "instance_assume_role_policy_document.json")
 AUTOMATION_POLICY_PATH = path_join(GENERAL_CONFIG_FOLDER, "beiwe_automation_policy.json")
+S3_BUCKET_ACCESS_PATH = path_join(GENERAL_CONFIG_FOLDER, "beiwe_s3_bucket_access.json")
+
 
 ## Elastic Beanstalk File Loaders
 def get_elasticbeanstalk_assume_role_policy_document():
@@ -113,6 +115,10 @@ def get_instance_assume_role_policy_document():
 def get_automation_policy():
     with open(AUTOMATION_POLICY_PATH, "r") as document:
             return document.read()
+
+def get_s3_bucket_access_policy():
+    with open(S3_BUCKET_ACCESS_PATH, "r") as document:
+        return document.read()
 
 ## Worker and Processor server files
 # (files with the prefix LOCAL are on this machine, REMOTE files are file paths on the remote server)

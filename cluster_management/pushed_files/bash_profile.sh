@@ -100,7 +100,7 @@ alias py="python"
 alias ipy="ipython"
 alias manage="python manage.py"
 alias shell="python manage.py shell_plus"
-alias ag+="clear; printf '_%.0s' {1..100}; echo ''; echo 'Silver results begin here:'; ag --column"
+alias ag="clear; printf '_%.0s' {1..100}; echo ''; echo 'Silver results begin here:'; ag --column"
 
 function run {
     nohup python -u $1 > ~/$1_log.out &

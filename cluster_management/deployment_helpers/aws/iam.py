@@ -1,9 +1,10 @@
 from pprint import pprint
 
 ## The various errors we use.
-from deployment_helpers.aws.boto_helpers import create_iam_client
+from deployment_helpers.aws.boto_helpers import create_iam_client, create_iam_resource
 from deployment_helpers.constants import (EB_INSTANCE_PROFILE_ROLE, EB_INSTANCE_PROFILE_NAME,
-    EB_SERVICE_ROLE, get_automation_policy, BEIWE_AUTOMATION_POLICY_NAME)
+    EB_SERVICE_ROLE, get_automation_policy, BEIWE_AUTOMATION_POLICY_NAME,
+    get_s3_bucket_access_policy)
 
 
 class PythonPlatformDiscoveryError(Exception): pass
@@ -40,7 +41,7 @@ def iam_find_role(iam_client, role_name):
 def get_or_create_automation_policy():
     iam_client = create_iam_client()
     
-    for policy in iam_client.list_policies()["Policies"]:
+    for policy in iam_client.list_policies(MaxItems=1000)["Policies"]:
         if BEIWE_AUTOMATION_POLICY_NAME == policy['PolicyName']:
             return policy
     
@@ -81,3 +82,35 @@ def iam_purge_everything():
     try: iam_client.delete_role(RoleName=EB_SERVICE_ROLE)
     except Exception as e: print e
     
+   
+def get_or_create_s3_access_policy(s3_bucket_name):
+    iam_client = create_iam_client()
+    
+    policy_name = "s3-data-access-" + s3_bucket_name
+    for policy in iam_client.list_policies(MaxItems=1000)["Policies"]:
+        if policy_name == policy['PolicyName']:
+            return policy
+
+    policy = get_s3_bucket_access_policy() % s3_bucket_name
+    return iam_client.create_policy(
+            PolicyName=policy_name,
+            PolicyDocument=policy,
+            Description="allows read and write access to s3 bucket %s" % s3_bucket_name
+    )['Policy']
+
+
+def create_s3_access_credentials(s3_bucket_name):
+    iam_client = create_iam_client()
+    user_name = "s3-data-access-user-" + s3_bucket_name
+    user_name = user_name[:63] # limited to 63 characters
+    user_info = iam_client.create_user(UserName=user_name)
+    s3_policy = get_or_create_s3_access_policy(s3_bucket_name)
+    iam_client.attach_user_policy(UserName=user_name, PolicyArn=s3_policy['Arn'])
+
+    iam_resource = create_iam_resource()
+    iam_user = iam_resource.User(user_name)
+    access_key_pair = iam_user.create_access_key_pair()
+    return {
+        "S3_ACCESS_CREDENTIALS_USER": access_key_pair.access_key_id,
+        "S3_ACCESS_CREDENTIALS_KEY": access_key_pair.secret_access_key,
+    }

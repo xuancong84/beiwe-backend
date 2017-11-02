@@ -45,3 +45,6 @@ def create_ec2_resource():
 
 def create_s3_resource():
     return _get_resource("s3")
+
+def create_iam_resource():
+    return _get_resource("iam")

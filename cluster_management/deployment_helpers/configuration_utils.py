@@ -4,6 +4,7 @@ import re
 from os.path import relpath
 from time import sleep
 
+from deployment_helpers.aws.iam import create_s3_access_credentials
 from deployment_helpers.aws.rds import get_full_db_credentials
 from deployment_helpers.aws.s3 import create_data_bucket
 from deployment_helpers.constants import (AWS_CREDENTIALS_FILE, get_global_config,
@@ -198,10 +199,10 @@ def create_finalized_configuration(eb_environment_name):
     
     config = validate_beiwe_environment_config(eb_environment_name)
     config.update(get_full_db_credentials(eb_environment_name))
-    if "FLASK_SECRET_KEY" not in config:
-        config['FLASK_SECRET_KEY'] = random_alphanumeric_string(80)
-    if "S3_BUCKET" not in config:
-        config["S3_BUCKET"] = create_data_bucket(eb_environment_name)
+    config['FLASK_SECRET_KEY'] = random_alphanumeric_string(80)
+    config["S3_BUCKET"] = create_data_bucket(eb_environment_name)
+    config.update(create_s3_access_credentials(config["S3_BUCKET"]))
+    
     with open(finalized_cred_path, 'w') as f:
         json.dump(config, f, indent=1)
     return config
