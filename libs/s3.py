@@ -90,10 +90,6 @@ def s3_list_files(prefix, as_generator=False):
     return _do_list_files(S3_BUCKET, prefix, as_generator=as_generator)
 
 
-def backup_list_files(prefix, as_generator=False):
-    return _do_list_files(S3_BACKUPS_BUCKET, prefix, as_generator=as_generator)
-
-
 def _do_list_files(bucket_name, prefix, as_generator=False):
     bucket = _get_bucket(bucket_name)
     results = bucket.list(prefix=prefix)
