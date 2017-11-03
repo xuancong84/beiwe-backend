@@ -25,16 +25,10 @@ config directory.
         default: 10
     FILE_PROCESS_PAGE_SIZE - the number of files pulled in for processing at a time
         default: 250
-    DATA_PROCESSING_NO_ERROR_STRING - a unique string provided in non-error reports
-        default: 2HEnBwlawY
-    MONGO_PORT - the port on which to connect to mongodb
-        default: 27017
     ASYMMETRIC_KEY_LENGTH - length of key files used in the app
         default: 2048
     ITERATIONS - PBKDF2 iteration count for passwords
         default: 1000
-    LOCAL_BACKUPS_DIRECTORY
-        default: /tmp/beiwe_backups/
 ```
 
 Mandatory Settings
@@ -42,16 +36,17 @@ If any of these are not provided, Beiwe will not run, empty and None values are
 considered invalid  Additional documentation can be found in config/setting.pys.
 
 ```
-    MONGO_USERNAME - the mongodb user name
-    MONGO_PASSWORD - the mongodb user password
     FLASK_SECRET_KEY - a unique, cryptographically secure string
     AWS_ACCESS_KEY_ID - AWS access key for S3
     AWS_SECRET_ACCESS_KEY - AWS secret key for S3
-    S3_BACKUPS_AWS_KEY_ID - AWS access key for backups
-    S3_BACKUPS_AWS_SECRET_ACCESS_KEY - AWS secret key for backups
     S3_BUCKET - the bucket for storing app-generated data
-    S3_BACKUPS_BUCKET - the bucket for storing beiwe database backups
     E500_EMAIL_ADDRESS - the source email address for 500 error alerts
     OTHER_EMAIL_ADDRESS - the source email address for other error events
     SYSADMIN_EMAILS - a comma separated list of email addresses for recipients of error reports. (whitespace before and after addresses will be ignored)
+    RDS_DB_NAME - postgress database name (the name of the database inside of postgres)
+    RDS_USERNAME - database username
+    RDS_PASSWORD - database password
+    RDS_HOSTNAME - database IP address or url
+    S3_ACCESS_CREDENTIALS_USER - the user id for s3 access for your deployment
+    S3_ACCESS_CREDENTIALS_KEY - the secret key for s3 access for your deployment
 ```
