@@ -28,7 +28,7 @@
     var randomize = settings.randomize || false;
     var randomizeWithMemory = settings.randomize_with_memory || false;
     var numberOfRandomQuestions = settings.number_of_random_questions || null;
-    var trackingSurvey = settings.tracking_survey || false;
+    var trackingSurvey = ('{{ survey.survey_type }}' == "tracking_survey");
   </script>
   <script src="/static/javascript/survey-editor/schedule.js"></script>
   <script src="/static/javascript/survey-editor/survey-editor.js"></script>
