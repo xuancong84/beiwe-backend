@@ -1,20 +1,22 @@
 import gc
-
-from boto.exception import S3ResponseError
 from collections import defaultdict, deque
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 from traceback import format_exc
+
+from boto.exception import S3ResponseError
 from cronutils.error_handler import ErrorHandler
 
+# noinspection PyUnresolvedReferences
+from config import load_django
 from config.constants import (
     API_TIME_FORMAT, IDENTIFIERS, WIFI, CALL_LOG, LOG_FILE, CHUNK_TIMESLICE_QUANTUM,
     FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER, SURVEY_DATA_FILES,
     CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES, DATA_PROCESSING_NO_ERROR_STRING,
     UPLOAD_FILE_TYPE_MAPPING
 )
-from libs.s3 import s3_retrieve, s3_upload
 from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Survey
+from libs.s3 import s3_retrieve, s3_upload
 
 
 class EverythingWentFine(Exception): pass
