@@ -30,6 +30,17 @@ APT_WORKER_INSTALLS = [
 APT_MANAGER_INSTALLS = copy(APT_WORKER_INSTALLS)
 APT_MANAGER_INSTALLS.append('rabbitmq-server')  # Queue tasks to run using celery
 
+APT_SINGLE_SERVER_AMI_INSTALLS = copy(APT_WORKER_INSTALLS)
+APT_SINGLE_SERVER_AMI_INSTALLS.extend([
+    'apache2',
+    'haveged',  # For generating Flask secret key random string
+    'libapache2-mod-wsgi',
+    'postgresql',
+    'postgresql-contrib',
+    'sysv-rc-conf',
+    'python-pip',
+])
+
 # Files to push from the local server before the rest of launch
 # This is a list of 2-tuples of (local_path, remote_path) where local_path is located in
 # PUSHED_FILES_FOLDER and remote_path is located in REMOTE_HOME_DIRECTORY.
@@ -38,7 +49,6 @@ FILES_TO_PUSH = [
     ('.inputrc', '.inputrc'),  # modifies what up-arrow, tab etc. do
     ('known_hosts', '.ssh/known_hosts'),  # allows git clone without further prompting
 ]
-
 
 ## Errors
 class DBInstanceNotFound(Exception): pass
@@ -124,6 +134,7 @@ def get_s3_bucket_access_policy():
 # (files with the prefix LOCAL are on this machine, REMOTE files are file paths on the remote server)
 LOCAL_CRONJOB_WORKER_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'cron_worker.txt')
 LOCAL_CRONJOB_MANAGER_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'cron_manager.txt')
+LOCAL_CRONJOB_SINGLE_SERVER_AMI_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'cron_ami.txt')
 REMOTE_CRONJOB_FILE_PATH = path_join(REMOTE_HOME_DIR, 'cronjob.txt')
 LOCAL_GIT_KEY_PATH = path_join(PUSHED_FILES_FOLDER, 'git_read_only_key')
 REMOTE_GIT_KEY_PATH = path_join(REMOTE_HOME_DIR, '.ssh/id_rsa')
@@ -131,6 +142,10 @@ LOCAL_PYENV_INSTALLER_FILE = path_join(PUSHED_FILES_FOLDER, 'install_pyenv.sh')
 REMOTE_PYENV_INSTALLER_FILE = path_join(REMOTE_HOME_DIR, 'install_pyenv.sh')
 LOCAL_INSTALL_CELERY_WORKER = path_join(PUSHED_FILES_FOLDER, 'install_celery_worker.sh')
 REMOTE_INSTALL_CELERY_WORKER = path_join(REMOTE_HOME_DIR, 'install_celery_worker.sh')
+LOCAL_AMI_ENV_CONFIG_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'ami_env_config.py')
+LOCAL_APACHE_CONFIG_FILE_PATH = path_join(PUSHED_FILES_FOLDER, 'ami_apache.conf')
+REMOTE_APACHE_CONFIG_FILE_PATH = path_join(REMOTE_HOME_DIR, 'ami_apache.conf')
+
 ####################################################################################################
 ####################################### Dynamic Files ##############################################
 ####################################################################################################

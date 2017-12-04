@@ -49,7 +49,9 @@ from deployment_helpers.constants import (
     LOCAL_GIT_KEY_PATH, REMOTE_GIT_KEY_PATH, REMOTE_PYENV_INSTALLER_FILE,
     LOCAL_PYENV_INSTALLER_FILE, REMOTE_INSTALL_CELERY_WORKER, LOCAL_INSTALL_CELERY_WORKER,
     get_global_config, LOCAL_CRONJOB_WORKER_FILE_PATH, LOCAL_CRONJOB_MANAGER_FILE_PATH,
-    APT_MANAGER_INSTALLS, APT_WORKER_INSTALLS)
+    LOCAL_CRONJOB_SINGLE_SERVER_AMI_FILE_PATH, APT_MANAGER_INSTALLS, APT_WORKER_INSTALLS,
+    APT_SINGLE_SERVER_AMI_INSTALLS, LOCAL_AMI_ENV_CONFIG_FILE_PATH, LOCAL_APACHE_CONFIG_FILE_PATH,
+    REMOTE_APACHE_CONFIG_FILE_PATH)
 from deployment_helpers.general_utils import log, EXIT, current_time_string, do_zip_reduction, retry
 
 
@@ -62,15 +64,20 @@ fabric_env.abort_on_prompts = True
 ################################### Fabric Operations ##############################################
 ####################################################################################################
 
-def configure_fabric(eb_environment_name, ip_address):
-    get_finalized_environment_variables(eb_environment_name)
+
+def configure_fabric(eb_environment_name, ip_address, key_filename=None):
+    if eb_environment_name is not None:
+        get_finalized_environment_variables(eb_environment_name)
+    if key_filename is None:
+        key_filename = get_global_config()['DEPLOYMENT_KEY_FILE_PATH']
     fabric_env.host_string = ip_address
     fabric_env.user = REMOTE_USERNAME
-    fabric_env.key_filename = get_global_config()['DEPLOYMENT_KEY_FILE_PATH']
+    fabric_env.key_filename = key_filename
     retry(run, "# waiting for ssh to be connectable...")
     run("echo >> {log}".format(log=LOG_FILE))
     sudo("chmod 666 {log}".format(log=LOG_FILE))
-    
+
+
 def push_manager_private_ip(eb_environment_name):
     ip = get_manager_private_ip(eb_environment_name)
     command = "printf {ip} > {manager_ip}".format(ip=ip,
@@ -104,37 +111,41 @@ def load_git_repo():
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
-def setup_python():
+def setup_python(using_pyenv=True):
     """
     Install pyenv as well as the latest version of Python 2, accessible
     via REMOTE_HOME_DIR/.pyenv/shims/python.
     """
-    
-    # Copy the installation script from the local repository onto the remote server,
-    # make it executable and execute it.
-    put(LOCAL_PYENV_INSTALLER_FILE, REMOTE_PYENV_INSTALLER_FILE)
-    run('chmod +x {file}'.format(file=REMOTE_PYENV_INSTALLER_FILE))
-    run(REMOTE_PYENV_INSTALLER_FILE)
+    if using_pyenv:
+        # Copy the installation script from the local repository onto the remote server,
+        # make it executable and execute it.
+        put(LOCAL_PYENV_INSTALLER_FILE, REMOTE_PYENV_INSTALLER_FILE)
+        run('chmod +x {file}'.format(file=REMOTE_PYENV_INSTALLER_FILE))
+        run(REMOTE_PYENV_INSTALLER_FILE)
 
-    # Install the latest python 2 version and set pyenv to default to that version.
-    # Note that this installation is slow, taking approximately a minute.
-    # -f: Install even if the version appears to be installed already
-    pyenv_exec = path_join(REMOTE_HOME_DIR, '.pyenv/bin/pyenv')
-    run('{pyenv} install -f 2.7.14'.format(pyenv=pyenv_exec))
-    run('{pyenv} global 2.7.14'.format(pyenv=pyenv_exec))
-    
-    # Display the version of python used by pyenv; this should print "Python 2.7.14".
-    pyenv_shims_dir = path_join(REMOTE_HOME_DIR, '.pyenv/shims')
-    run('{shims}/python --version'.format(shims=pyenv_shims_dir))
+        # Install the latest python 2 version and set pyenv to default to that version.
+        # Note that this installation is slow, taking approximately a minute.
+        # -f: Install even if the version appears to be installed already
+        pyenv_exec = path_join(REMOTE_HOME_DIR, '.pyenv/bin/pyenv')
+        run('{pyenv} install -f 2.7.14'.format(pyenv=pyenv_exec))
+        run('{pyenv} global 2.7.14'.format(pyenv=pyenv_exec))
 
-    # Upgrade pip, because we don't know what version the server came with.
-    run('{shims}/pip install --upgrade pip >> {log}'.format(log=LOG_FILE, shims=pyenv_shims_dir))
-    
-    # Install the python requirements for running the server code. Note that we are using the
-    # pyenv pip to ensure that the python requirements are installed into pyenv, rather than into
-    #  the system python.
-    run('{shims}/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
-        .format(home=REMOTE_HOME_DIR, log=LOG_FILE, shims=pyenv_shims_dir))
+        # Display the version of python used by pyenv; this should print "Python 2.7.14".
+        pyenv_shims_dir = path_join(REMOTE_HOME_DIR, '.pyenv/shims')
+        run('{shims}/python --version'.format(shims=pyenv_shims_dir))
+
+        # Upgrade pip, because we don't know what version the server came with.
+        run('{shims}/pip install --upgrade pip >> {log}'.format(log=LOG_FILE, shims=pyenv_shims_dir))
+
+        # Install the python requirements for running the server code. Note that we are using the
+        # pyenv pip to ensure that the python requirements are installed into pyenv, rather than into
+        #  the system python.
+        run('{shims}/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
+            .format(home=REMOTE_HOME_DIR, log=LOG_FILE, shims=pyenv_shims_dir))
+    else:
+        run('pip install --upgrade pip >> {log}'.format(log=LOG_FILE))
+        sudo('pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
+             .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
 def setup_celery_worker():
@@ -155,23 +166,47 @@ def setup_manager_cron():
     # Copy the cronjob file onto the remote server and add it to the remote crontab
     put(LOCAL_CRONJOB_MANAGER_FILE_PATH, REMOTE_CRONJOB_FILE_PATH)
     run('crontab -u {user} {file}'.format(file=REMOTE_CRONJOB_FILE_PATH, user=REMOTE_USERNAME))
-    
 
-def apt_installs(manager=False):
+
+def setup_single_server_ami_cron():
+    put(LOCAL_CRONJOB_SINGLE_SERVER_AMI_FILE_PATH, REMOTE_CRONJOB_FILE_PATH)
+    run('crontab -u {user} {file}'.format(file=REMOTE_CRONJOB_FILE_PATH, user=REMOTE_USERNAME))
+
+
+def apt_installs(manager=False, single_server_ami=False):
     if manager:
-        apt_installs = APT_MANAGER_INSTALLS
+        apt_install_list = APT_MANAGER_INSTALLS
+    elif single_server_ami:
+        apt_install_list = APT_SINGLE_SERVER_AMI_INSTALLS
     else:
-        apt_installs = APT_WORKER_INSTALLS
-    installs_string = " ".join(apt_installs)
+        apt_install_list = APT_WORKER_INSTALLS
+    installs_string = " ".join(apt_install_list)
     
     sudo('apt-get -y update >> {log}'.format(log=LOG_FILE))
     sudo('apt-get -y install {installs} >> {log}'.format(installs=installs_string, log=LOG_FILE))
 
 
-def push_beiwe_configuration(eb_environment_name):
-    python_config_file = get_pushed_full_processing_server_env_file_path(eb_environment_name)
-    put(python_config_file, DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH)
+def push_beiwe_configuration(eb_environment_name, single_server_ami=False):
+    if single_server_ami:
+        put(LOCAL_AMI_ENV_CONFIG_FILE_PATH,
+            DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH)
+    else:
+        put(get_pushed_full_processing_server_env_file_path(eb_environment_name),
+            DEPLOYMENT_ENVIRON_SETTING_REMOTE_FILE_PATH)
 
+
+def configure_apache():
+    put(LOCAL_APACHE_CONFIG_FILE_PATH, REMOTE_APACHE_CONFIG_FILE_PATH)
+    sudo("mv {file} /etc/apache2/sites-available/000-default.conf".format(file=REMOTE_APACHE_CONFIG_FILE_PATH))
+    sudo("service apache2 restart")
+
+
+def configure_local_postgres():
+    run("sudo -u postgres createuser -d -r -s ubuntu")
+    run("sudo -u postgres createdb ubuntu")
+    run('psql -U ubuntu -c "CREATE DATABASE beiweproject"')
+    run('psql -U ubuntu -c "CREATE USER beiweuser WITH PASSWORD \'password\'"')
+    run('psql -U ubuntu -c "GRANT ALL PRIVILEGES ON DATABASE beiweproject TO beiweuser"')
 
 ####################################################################################################
 #################################### CLI Utility ###################################################
@@ -372,7 +407,30 @@ def do_create_worker():
     push_manager_private_ip(name)
     setup_celery_worker()
     setup_worker_cron()
-    
+
+
+def do_create_single_server_ami(ip_address, key_filename):
+    """
+    Set up a beiwe-backend deployment on a single server suitable for turning into an AMI
+    :param ip_address: IP address of the server you're setting up as an AMI
+    :param key_filename: Full filepath of the key that lets you SSH into that server
+    """
+    configure_fabric(None, ip_address, key_filename=key_filename)
+    push_files()
+    apt_installs(single_server_ami=True)
+    load_git_repo()
+    """ Don't install .pyenv, because the single-server AMI uses mod_wsgi, which doesn't work
+    with .pyenv.  Just use the system version of Python. As of Dec 3, 2017, the system version
+    of Python is 2.7.12, which is good enough to run Beiwe). """
+    setup_python(using_pyenv=False)
+    push_beiwe_configuration(None, single_server_ami=True)
+    configure_local_postgres()
+    manage_script_filepath = path_join(REMOTE_HOME_DIR, "beiwe-backend/manage.py")
+    run('python {filename} migrate'.format(filename=manage_script_filepath))
+    run('python {filename} create_default_login'.format(filename=manage_script_filepath))
+    setup_single_server_ami_cron()
+    configure_apache()
+
 ####################################################################################################
 ####################################### Validation #################################################
 ####################################################################################################
@@ -402,7 +460,7 @@ def cli_args_validation():
             action="count",
             help= "assists in creation of configuration files for a beiwe environment deployment"
     )
-    
+
     # Notes:
     # this arguments variable is not iterable.
     # access entities as arguments.long_name_of_argument, like arguments.update_manager
