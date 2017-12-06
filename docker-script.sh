@@ -11,6 +11,7 @@ echo "  >>>>>  FAILURE: installation not complete"
 
 # Get git repo to put in the docker
 # TODO have a read-only key to this repo
+rm -rf Beiwe-Analysis  # Just in case. If this fails, there is no such folder, and that's fine.
 git clone git@github.com:onnela-lab/Beiwe-Analysis.git &&
 echo "  >>>>>  SUCCESS: repository cloned" ||
 echo "  >>>>>  FAILURE: repository not cloned"
