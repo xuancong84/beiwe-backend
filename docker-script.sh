@@ -29,7 +29,7 @@ echo "  >>>>>  SUCCESS: docker tagged" ||
 echo "  >>>>>  FAILURE: docker not tagged"
 
 # Push the docker file to AWS ECR
-eval $(aws ecr get-login --no-include-email) &&
+sudo $(aws ecr get-login --no-include-email) &&
 sudo docker push $REMOTE &&
 echo "  >>>>>  SUCCESS: docker pushed" ||
 echo "  >>>>>  FAILURE: docker not pushed"
