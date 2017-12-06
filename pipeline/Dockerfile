@@ -6,3 +6,4 @@ WORKDIR ~
 
 # Move the directory into the corresponding directory in the container
 ADD Beiwe-Analysis Beiwe-Analysis
+ADD runner.sh Beiwe-Analysis/runner.sh

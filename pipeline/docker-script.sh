@@ -10,14 +10,12 @@ echo "  >>>>>  SUCCESS: installation complete" ||
 echo "  >>>>>  FAILURE: installation not complete"
 
 # Get git repo to put in the docker
-# TODO have a read-only key to this repo
 rm -rf Beiwe-Analysis  # Just in case. If this fails, there is no such folder, and that's fine.
-git clone git@github.com:onnela-lab/Beiwe-Analysis.git &&
+git clone git@github.com:onnela-lab/Beiwe-Analysis.git --branch pipeline &&
 echo "  >>>>>  SUCCESS: repository cloned" ||
 echo "  >>>>>  FAILURE: repository not cloned"
 
 # Create the docker image. This expects there to be a file called Dockerfile in the same folder as this file
-# TODO does the tag have to be unique?
 sudo docker build -t beiwe-analysis . &&
 echo "  >>>>>  SUCCESS: docker built" ||
 echo "  >>>>>  FAILURE: docker not built"
