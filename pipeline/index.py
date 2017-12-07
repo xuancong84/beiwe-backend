@@ -22,21 +22,21 @@ def createJob(freq):
     )
 
 
-def hourly():
+def hourly(event, context):
     createJob('hourly')
 
 
-def daily():
+def daily(event, context):
     createJob('daily')
 
 
-def weekly():
+def weekly(event, context):
     createJob('weekly')
 
 
-def monthly():
+def monthly(event, context):
     createJob('monthly')
 
 
-def manually():
+def manually(event, context):
     createJob('manually')
