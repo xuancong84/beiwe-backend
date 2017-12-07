@@ -15,8 +15,12 @@ aws iam put-role-policy \
 zip lambda-upload.zip index.py
 # TODO see if this can be done in only two or one lambdas instead of five
 # TODO autogenerate the ARN
-SCHEDULES='hourly daily weekly monthly'
-for sch in $SCHEDULES; do
+N_SCHED=4
+SCHEDULES=( hourly daily weekly monthly )
+CRON=( "19 * * * ?" "36 4 * * ?" "49 2 ? * SUN" "2 1 19 * ?" )  # year not specified, assumed *
+for i in $(seq 1 $N_SCHED); do
+  sch=${SCHEDULES[i-1]}
+  cron=${CRON[i-1]}
   aws lambda create-function \
     --function-name create-$sch-batch-jobs \
     --runtime python3.6 \
@@ -25,14 +29,14 @@ for sch in $SCHEDULES; do
     --zip-file fileb://lambda-upload.zip
   aws events put-rule \
     --name $sch-trigger \
-    --schedule-expression "cron(19 * * * ? *)"
+    --schedule-expression "cron($cron *)"
   # TODO fix the schedule expression
   aws lambda add-permission \
     --function-name create-$sch-batch-jobs \
     --statement-id $sch-events \
     --action lambda:invokeFunction \
     --principal events.amazonaws.com \
-    --source-arn arn:aws:events:us-east-2:284616134063:rule/$sch
+    --source-arn arn:aws:events:us-east-2:284616134063:rule/$sch-trigger
   aws events put-targets \
     --rule $sch-trigger \
     --targets "Id"="1","Arn"="arn:aws:lambda:us-east-2:284616134063:function:create-$sch-batch-jobs"
