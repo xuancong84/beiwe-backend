@@ -20,9 +20,15 @@ sudo docker build -t beiwe-analysis . &&
 echo "  >>>>>  SUCCESS: docker built" ||
 echo "  >>>>>  FAILURE: docker not built"
 
+# Create an ECR repository to put the docker container into
+aws ecr create-repository \
+  --repository-name data-pipeline-docker
+
 # TODO ensure that AWS credentials are configured (or environment variables or whatever)
 # Delete the first five columns from the repository description, leaving only the remote repository name
-REMOTE=$(aws ecr describe-repositories --output=text | sed "s/\(\S\+\s\+\)\{5\}//") &&
+# TODO dynamically generate ARN
+# REMOTE=$(aws ecr describe-repositories --output=text | sed "s/\(\S\+\s\+\)\{5\}//") &&
+REMOTE="284616134063.dkr.ecr.us-east-2.amazonaws.com/data-pipeline-docker"
 sudo docker tag beiwe-analysis $REMOTE &&
 echo "  >>>>>  SUCCESS: docker tagged" ||
 echo "  >>>>>  FAILURE: docker not tagged"
