@@ -9,9 +9,9 @@ def createJob(freq):
     """
 
     resp = client.submit_job(
-        jobName='beiwe-test-batch-1-3',
+        jobName='beiwe-test-batch-1-4',
         jobDefinition='beiwe-test-batch-0:2',
-        jobQueue='beiwe-test-batch-2',
+        jobQueue='beiwe-test-batch-3',
         containerOverrides={
             'command': [
                 '/bin/bash',

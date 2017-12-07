@@ -9,10 +9,16 @@
 #  --policy-name batch-submit-policy
 aws iam delete-role \
   --role-name data-pipeline-lambda-role
+aws events remove-targets \
+  --rule hourly \
+  --ids "1"
+aws events delete-rule \
+  --name hourly
 aws lambda delete-function \
   --function-name createHourlyBatchJobs
 
 # Create a new IAM role for the lambdas
+# TODO add --description to stuff
 aws iam create-role \
   --role-name data-pipeline-lambda-role \
   --assume-role-policy-document file://assume-lambda-role.json
@@ -35,8 +41,13 @@ aws lambda create-function \
   --zip-file fileb://lambda-upload.zip
 aws events put-rule \
   --name hourly \
-  --schedule-expression 'cron(19 * * ? *)' \
-  --state ENABLED
+  --schedule-expression "cron(19 * * * ? *)"
+aws lambda add-permission \
+  --function-name createHourlyBatchJobs \
+  --statement-id hourly-events \
+  --action lambda:invokeFunction \
+  --principal events.amazonaws.com \
+  --source-arn arn:aws:events:us-east-2:284616134063:rule/hourly
 aws events put-targets \
   --rule hourly \
   --targets "Id"="1","Arn"="arn:aws:lambda:us-east-2:284616134063:function:createHourlyBatchJobs"
