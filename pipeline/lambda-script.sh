@@ -15,6 +15,7 @@ aws iam put-role-policy \
 zip lambda-upload.zip index.py
 # TODO see if this can be done in only two or one lambdas instead of five
 # TODO autogenerate the ARN
+# TODO add manual setup (probably direct API connection to batch w/o lambda)
 N_SCHED=4
 SCHEDULES=( hourly daily weekly monthly )
 CRON=( "19 * * * ?" "36 4 * * ?" "49 2 ? * SUN" "2 1 19 * ?" )  # year not specified, assumed *
