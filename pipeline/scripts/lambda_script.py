@@ -1,5 +1,6 @@
 import json
 import subprocess
+from time import sleep
 
 import boto3
 from botocore.exceptions import ClientError
@@ -42,6 +43,7 @@ def run(lambda_role, function_name, rule_name):
     # TODO add manual setup (probably direct API connection to batch w/o lambda)
     schedule_list = ('hourly', 'daily', 'weekly', 'monthly')
     cron_expr_list = ('19 * * * ? *', '36 4 * * ? *', '49 2 ? * SUN *', '2 1 19 * ? *')
+    print('Creating lambda functions...')
     for schedule, cron_expr in zip(schedule_list, cron_expr_list):
         tries = 0
         while True:
@@ -55,10 +57,12 @@ def run(lambda_role, function_name, rule_name):
                 )
             except ClientError:
                 tries += 1
-                if tries > 6:
+                if tries > 30:
                     raise
+                sleep(1)
             else:
                 break
+        
         function_arn = resp['FunctionArn']
         resp = events_client.put_rule(
             Name=rule_name.format(freq=schedule),
