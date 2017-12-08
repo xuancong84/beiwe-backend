@@ -2,6 +2,7 @@ import json
 import subprocess
 
 import boto3
+from botocore.exceptions import ClientError
 
 # Create a new IAM role for the lambdas
 # TODO add --description to stuff
@@ -42,13 +43,22 @@ def run(lambda_role, function_name, rule_name):
     schedule_list = ('hourly', 'daily', 'weekly', 'monthly')
     cron_expr_list = ('19 * * * ? *', '36 4 * * ? *', '49 2 ? * SUN *', '2 1 19 * ? *')
     for schedule, cron_expr in zip(schedule_list, cron_expr_list):
-        resp = lambda_client.create_function(
-            FunctionName=function_name.format(freq=schedule),
-            Runtime='python3.6',
-            Role=lambda_role_arn,
-            Handler='index.{}'.format(schedule),
-            Code={'ZipFile': lambda_code_bytes},
-        )
+        tries = 0
+        while True:
+            try:
+                resp = lambda_client.create_function(
+                    FunctionName=function_name.format(freq=schedule),
+                    Runtime='python3.6',
+                    Role=lambda_role_arn,
+                    Handler='index.{}'.format(schedule),
+                    Code={'ZipFile': lambda_code_bytes},
+                )
+            except ClientError:
+                tries += 1
+                if tries > 6:
+                    raise
+            else:
+                break
         function_arn = resp['FunctionArn']
         resp = events_client.put_rule(
             Name=rule_name.format(freq=schedule),
