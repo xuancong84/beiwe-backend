@@ -22,7 +22,7 @@ iam_client.put_role_policy(
 # TODO clean up batch-access.json, it has too much unnecessary stuff right now
 
 # Create the lambdas
-subprocess.check_call('zip lambda-upload.zip index.py')
+subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])
 lambda_client = boto3.client('lambda')
 events_client = boto3.client('events')
 # TODO see if this can be done in only two or one lambdas instead of five
