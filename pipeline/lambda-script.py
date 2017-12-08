@@ -24,12 +24,14 @@ iam_client.put_role_policy(
     PolicyName='batch-submit-policy',
     PolicyDocument=role_policy_json,
 )
+print('Lambda role created')
 # TODO clean up batch-access.json, it has too much unnecessary stuff right now
 
 # Zip up the code for the lambdas
 subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])
 with open('lambda-upload.zip', 'rb') as fn:
    lambda_code_bytes = fn.read()
+print('Lambda code zipped')
 
 # Create the lambdas
 lambda_client = boto3.client('lambda')
@@ -62,3 +64,4 @@ for schedule, cron_expr in zip(schedule_list, cron_expr_list):
         Rule='{}-trigger'.format(schedule),
         Targets=[{'Id': '1', 'Arn': function_arn}],
     )
+    print('Lambda {} function created'.format(schedule))

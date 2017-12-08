@@ -21,6 +21,7 @@ with open('compute-env.json') as fn:
     compute_resources_dict = json.load(fn)
 with open('container-props.json') as fn:
     container_props_dict = json.load(fn)
+print('JSON loaded')
 
 iam_client = boto3.client('iam')
 resp = iam_client.create_role(
@@ -33,6 +34,7 @@ iam_client.put_role_policy(
     PolicyName='aws-batch-service-policy',
     PolicyDocument=role_policy_json,
 )
+print('Batch role created')
 
 # Create the batch compute environment
 batch_client = boto3.client('batch')
@@ -57,6 +59,7 @@ while True:
         continue
     else:
         raise RuntimeError('Compute Environment is Invalid')
+print('Compute environment created')
 
 # Create the batch job queue
 batch_client.create_job_queue(
@@ -64,6 +67,7 @@ batch_client.create_job_queue(
     priority=1,
     computeEnvironmentOrder=[{'order': 0, 'computeEnvironment': comp_env_name}],
 )
+print('Job queue created')
 
 # Define a job definition
 batch_client.register_job_definition(
@@ -71,4 +75,4 @@ batch_client.register_job_definition(
     type='container',
     containerProperties=container_props_dict,
 )
-# TODO throw in some "it worked!" print statements
+print('Job definition created')
