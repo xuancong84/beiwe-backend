@@ -30,5 +30,6 @@ remote = resp['repository']['repositoryUri']
 subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', remote])
 
 # Push the docker file to AWS ECR
-subprocess.check_call(['sudo', '$(aws', 'ecr', 'get-login', '--no-include-email)'])
+# TODO make sure this isn't insecure (cause of using shell=True)
+subprocess.check_call('sudo $(aws ecr get-login --no-include-email)', shell=True)
 subprocess.check_call(['sudo', 'docker', 'push', remote])
