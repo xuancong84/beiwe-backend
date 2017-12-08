@@ -1,6 +1,5 @@
 # TODO create parent .sh file
 # TODO put constants in the parent .sh file, pass them here
-# TODO make errors block later commands from executing (string together with && or put || exit -1 everywhere
 # TODO create an IAM role for the EC2 instance, probably
 import json
 from time import sleep
