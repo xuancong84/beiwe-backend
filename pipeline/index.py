@@ -2,6 +2,8 @@ import boto3
 
 client = boto3.client('batch', region_name='us-east-2')
 
+
+# TODO get a lot of these bits from other files
 def createJob(freq):
     """
     Create a batch job on AWS
