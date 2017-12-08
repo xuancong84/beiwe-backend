@@ -56,6 +56,7 @@ def run(lambda_role, function_name, rule_name):
                     Code={'ZipFile': lambda_code_bytes},
                 )
             except ClientError:
+                # TODO be more specific, this should only try again for that one weird error
                 tries += 1
                 if tries > 30:
                     raise
