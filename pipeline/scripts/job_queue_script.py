@@ -3,8 +3,6 @@ from time import sleep
 
 import boto3
 
-# TODO create parent .sh file
-# TODO put constants in the parent .sh file, pass them here
 # TODO create an IAM role for the EC2 instance, probably
 
 
@@ -75,6 +73,7 @@ def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
     print('Job definition created')
 
 
+# For debugging only
 if __name__ == '__main__':
     _comp_env_role = 'AWSBatchServiceRole'
     _comp_env_name = 'data-pipeline-env'

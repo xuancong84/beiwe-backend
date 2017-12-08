@@ -1,19 +1,22 @@
+import json
+
 import boto3
 
 client = boto3.client('batch', region_name='us-east-2')
+with open('aws-object-names.json') as fn:
+    object_names = json.load(fn)
 
 
-# TODO get a lot of these bits from other files
 def createJob(freq):
     """
     Create a batch job on AWS
     :param freq: string e.g. 'daily', 'manually'
     """
 
-    resp = client.submit_job(
-        jobName='data-pipeline-{}-job'.format(freq),
-        jobDefinition='data-pipeline-job-defn',
-        jobQueue='data-pipeline-queue',
+    client.submit_job(
+        jobName=object_names['job_name'].format(freq=freq),
+        jobDefinition=object_names['job_defn_name'],
+        jobQueue=object_names['queue_name'],
         containerOverrides={
             'command': [
                 '/bin/bash',

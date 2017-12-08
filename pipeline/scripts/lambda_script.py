@@ -30,6 +30,7 @@ def run(lambda_role, function_name, rule_name):
     
     # Zip up the code for the lambdas
     subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])
+    subprocess.check_call(['zip', 'lambda-upload.zip', 'aws-object-names.json'])
     with open('lambda-upload.zip', 'rb') as fn:
         lambda_code_bytes = fn.read()
     print('Lambda code zipped')
@@ -68,6 +69,7 @@ def run(lambda_role, function_name, rule_name):
         print('Lambda {} function created'.format(schedule))
 
 
+# For debugging only
 if __name__ == '__main__':
     _lambda_role = 'data-pipeline-lambda-role'
     _function_name = 'create-{freq}-batch-jobs'

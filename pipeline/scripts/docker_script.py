@@ -41,6 +41,7 @@ def run(ecr_repo_name):
     print('Docker pushed')
 
 
+# For debugging only
 if __name__ == '__main__':
     _ecr_repo_name = 'data-pipeline-docker'
     run(_ecr_repo_name)
