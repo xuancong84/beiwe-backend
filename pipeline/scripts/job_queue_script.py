@@ -68,6 +68,7 @@ def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
     batch_client.register_job_definition(
         jobDefinitionName=job_defn_name,
         type='container',
+        # TODO ensure the stuff in the JSON that is repo-specific is auto-generated (e.g. "image" here)
         containerProperties=container_props_dict,
     )
     print('Job definition created')

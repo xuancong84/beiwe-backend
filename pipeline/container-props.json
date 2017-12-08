@@ -1,5 +1,5 @@
 {
-  "image": "arn:aws:ecr:us-east-2:284616134063:repository/data-pipeline-docker",
+  "image": "284616134063.dkr.ecr.us-east-2.amazonaws.com/data-pipeline-docker",
   "vcpus": 2,
   "memory": 2000
 }
