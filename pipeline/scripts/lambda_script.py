@@ -81,11 +81,3 @@ def run(lambda_role, function_name, rule_name):
             Targets=[{'Id': '1', 'Arn': function_arn}],
         )
         print('Lambda {} function created'.format(schedule))
-
-
-# For debugging only
-if __name__ == '__main__':
-    _lambda_role = 'data-pipeline-lambda-role'
-    _function_name = 'create-{freq}-batch-jobs'
-    _rule_name = '{freq}-trigger'
-    run(_lambda_role, _function_name, _rule_name)

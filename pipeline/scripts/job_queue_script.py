@@ -95,21 +95,3 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
         containerProperties=container_props_dict,
     )
     print('Job definition created')
-
-
-# For debugging only
-if __name__ == '__main__':
-    _comp_env_role = 'AWSBatchServiceRole'
-    _instance_profile = 'ecsInstanceRole'
-    _comp_env_name = 'data-pipeline-env'
-    _queue_name = 'data-pipeline-queue'
-    _job_defn_name = 'data-pipeline-job-defn'
-    _repo_uri = '284616134063.dkr.ecr.us-east-2.amazonaws.com/data-pipeline-docker'
-    run(
-        _comp_env_role,
-        _instance_profile,
-        _comp_env_name,
-        _queue_name,
-        _job_defn_name,
-        _repo_uri,
-    )
