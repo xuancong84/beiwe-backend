@@ -5,7 +5,6 @@ This should be run on a machine running Amazon Linux.
 
 import subprocess
 
-# TODO make sure to pip install this, however, wherever
 import boto3
 
 
@@ -26,7 +25,7 @@ def run(ecr_repo_name):
     print('Installations complete')
     
     # Get git repo to put in the docker
-    # TODO: when this branch has been merged with master, get rid of the --branch pipeline argument
+    # TODO: when the pipeline branch has been merged with master on Beiwe-Analysis, get rid of the --branch pipeline argument
     subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
                            '--branch', 'pipeline'])
     print('Git repository cloned')

@@ -64,8 +64,7 @@ def run(lambda_role, function_name, rule_name):
         while True:
             # For some reason, there is a ~10-second interval between creating the lambda
             # role and being able to create the lambda successfully. During that interval,
-            # attempting to create a lambda will raise an error.
-            # TODO what kind of error
+            # attempting to create a lambda will raise an InvalidParameterValueException.
             # For that reason, we try creating the lambda repeatedly.
             try:
                 resp = lambda_client.create_function(
@@ -75,12 +74,10 @@ def run(lambda_role, function_name, rule_name):
                     Handler='index.{}'.format(schedule),
                     Code={'ZipFile': lambda_code_bytes},
                 )
-            except ClientError as ce:
+            except ClientError:
                 # If the lambda is not created due to the timeout error, we wait one second
                 # and try again. If there is some other error, this except clause will not
                 # catch it, and it will be raised and stop the code from executing.
-                print(ce)
-                # TODO be more specific, this should only try again for that one weird error
                 tries += 1
                 if tries > 30:
                     # If the lambda has not been successfully created after 30 seconds, give up
