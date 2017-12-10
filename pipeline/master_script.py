@@ -14,7 +14,7 @@ def run(ecr_repo_name, comp_env_role, instance_profile, comp_env_name, queue_nam
 if __name__ == '__main__':
     # Get the AWS object names
     with open('aws-object-names.json') as fn:
-        object_names = json.load(fn)
+        aws_object_names = json.load(fn)
     
     # Pass them to the scripts that need them
-    run(**object_names)
+    run(**aws_object_names)

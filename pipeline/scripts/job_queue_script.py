@@ -9,14 +9,13 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     with open('assume-batch-role.json') as fn:
         assume_batch_role_policy_json = json.dumps(json.load(fn))
     with open('batch-service-role.json') as fn:
-        batch_role_policy_json = json.dumps(json.load(fn))
+        batch_service_role_policy_json = json.dumps(json.load(fn))
     with open('assume-ec2-role.json') as fn:
         assume_ec2_role_policy_json = json.dumps(json.load(fn))
     with open('batch-instance-role.json') as fn:
-        ec2_role_policy_json = json.dumps(json.load(fn))
-    with open('compute-env.json') as fn:
-        # TODO make filenames/variable names more consistent
-        compute_resources_dict = json.load(fn)
+        batch_instance_role_policy_json = json.dumps(json.load(fn))
+    with open('compute-environment.json') as fn:
+        compute_environment_dict = json.load(fn)
     with open('container-props.json') as fn:
         container_props_dict = json.load(fn)
     print('JSON loaded')
@@ -30,7 +29,7 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     iam_client.put_role_policy(
         RoleName=comp_env_role,
         PolicyName='aws-batch-service-policy',  # This name isn't used anywhere else
-        PolicyDocument=batch_role_policy_json,
+        PolicyDocument=batch_service_role_policy_json,
     )
     print('Batch role created')
     
@@ -40,14 +39,14 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     )
     iam_client.put_role_policy(
         RoleName=instance_profile,
-        PolicyName='aws-ec2-service-policy',  # This name isn't used anywhere else
-        PolicyDocument=ec2_role_policy_json,
+        PolicyName='aws-batch-instance-policy',  # This name isn't used anywhere else
+        PolicyDocument=batch_instance_role_policy_json,
     )
     resp = iam_client.create_instance_profile(
         InstanceProfileName=instance_profile,
     )
     instance_profile_arn = resp['InstanceProfile']['Arn']
-    compute_resources_dict['instanceRole'] = instance_profile_arn
+    compute_environment_dict['instanceRole'] = instance_profile_arn
     iam_client.add_role_to_instance_profile(
         InstanceProfileName=instance_profile,
         RoleName=instance_profile,
@@ -59,7 +58,7 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     batch_client.create_compute_environment(
         computeEnvironmentName=comp_env_name,
         type='MANAGED',
-        computeResources=compute_resources_dict,
+        computeResources=compute_environment_dict,
         serviceRole=comp_env_role_arn,
     )
     

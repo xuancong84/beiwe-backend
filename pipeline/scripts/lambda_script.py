@@ -12,20 +12,20 @@ from botocore.exceptions import ClientError
 def run(lambda_role, function_name, rule_name):
     # Load JSON files to pass to the clients
     with open('assume-lambda-role.json') as fn:
-        assume_role_policy_json = json.dumps(json.load(fn))
+        assume_lambda_role_policy_json = json.dumps(json.load(fn))
     with open('batch-access-role.json') as fn:
-        role_policy_json = json.dumps(json.load(fn))
+        batch_access_role_policy_json = json.dumps(json.load(fn))
     
     iam_client = boto3.client('iam')
     resp = iam_client.create_role(
         RoleName=lambda_role,
-        AssumeRolePolicyDocument=assume_role_policy_json,
+        AssumeRolePolicyDocument=assume_lambda_role_policy_json,
     )
     lambda_role_arn = resp['Role']['Arn']
     iam_client.put_role_policy(
         RoleName=lambda_role,
         PolicyName='batch-submit-policy',  # This name isn't used anywhere else
-        PolicyDocument=role_policy_json,
+        PolicyDocument=batch_access_role_policy_json,
     )
     print('Lambda role created')
     
