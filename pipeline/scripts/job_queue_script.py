@@ -4,7 +4,7 @@ from time import sleep
 import boto3
 
 
-def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
+def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name):
     # Create a new IAM role for the compute environment
     with open('assume-batch-role.json') as fn:
         assume_batch_role_policy_json = json.dumps(json.load(fn))
@@ -33,19 +33,25 @@ def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
     )
     print('Batch role created')
     
-    instance_role = 'ecsInstanceRole'
-    resp = iam_client.create_role(
-        RoleName=instance_role,
+    iam_client.create_role(
+        RoleName=instance_profile,
         AssumeRolePolicyDocument=assume_ec2_role_policy_json,
     )
-    instance_role_arn = resp['Role']['Arn']
-    compute_resources_dict['instanceRole'] = instance_role_arn
     iam_client.put_role_policy(
-        RoleName=instance_role,
+        RoleName=instance_profile,
         PolicyName='aws-ec2-service-policy',  # This name isn't used anywhere else
         PolicyDocument=ec2_role_policy_json,
     )
-    print('Instance role created')
+    resp = iam_client.create_instance_profile(
+        InstanceProfileName=instance_profile,
+    )
+    instance_profile_arn = resp['InstanceProfile']['Arn']
+    compute_resources_dict['instanceRole'] = instance_profile_arn
+    iam_client.add_role_to_instance_profile(
+        InstanceProfileName=instance_profile,
+        RoleName=instance_profile,
+    )
+    print('Instance profile created')
     
     # Create the batch compute environment
     batch_client = boto3.client('batch')
@@ -93,11 +99,13 @@ def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
 # For debugging only
 if __name__ == '__main__':
     _comp_env_role = 'AWSBatchServiceRole'
+    _instance_profile = 'ecsInstanceRole'
     _comp_env_name = 'data-pipeline-env'
     _queue_name = 'data-pipeline-queue'
     _job_defn_name = 'data-pipeline-job-defn'
     run(
         _comp_env_role,
+        _instance_profile,
         _comp_env_name,
         _queue_name,
         _job_defn_name,
