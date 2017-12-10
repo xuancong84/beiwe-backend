@@ -1,14 +1,24 @@
+"""
+A script for creating a docker image and uploading it to an AWS ECS repository.
+This should be run on a machine running Amazon Linux.
+"""
+
 import subprocess
 
 # TODO make sure to pip install this, however, wherever
 import boto3
 
-# This should be run on a machine running Amazon Linux
-
 
 def run(ecr_repo_name):
-    # Installations
+    """
+    Run the code
+    :param ecr_repo_name: Name of the repository we will create and upload to
+    :return: The repository's URI, to be used in creating AWS Batch jobs elsewhere
+    """
+    
+    # Install docker, git and AWS command line interface
     # -y means "don't ask for confirmation"
+    # check_call will raise an error if the command fails (i.e. returns nonzero)
     subprocess.check_call(['sudo', 'yum', 'update', '-y'])
     subprocess.check_call(['sudo', 'yum', 'install', '-y', 'docker'])
     subprocess.check_call(['sudo', 'yum', 'install', '-y', 'git'])
@@ -16,14 +26,16 @@ def run(ecr_repo_name):
     print('Installations complete')
     
     # Get git repo to put in the docker
-    subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git', '--branch', 'pipeline'])
+    # TODO: when this branch has been merged with master, get rid of the --branch pipeline argument
+    subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
+                           '--branch', 'pipeline'])
     print('Git repository cloned')
     
-    # Create the docker image. This expects there to be a file called Dockerfile in the same folder as this file.
+    # Create the docker image
     subprocess.check_call(['sudo', 'docker', 'build', '-t', 'beiwe-analysis', '.'])
     print('Docker image created')
     
-    # Create an ECR repository to put the docker container into, and get the ARN of the repository
+    # Create an AWS ECR repository to put the docker image into, and get the repository's URI
     client = boto3.client('ecr')
     resp = client.create_repository(
         repositoryName=ecr_repo_name,
@@ -32,9 +44,11 @@ def run(ecr_repo_name):
     print('ECR repository created')
     
     # TODO ensure that AWS credentials are configured (or environment variables or whatever)
+    # Tag the local docker image with the remote repository's URI. This is similar to
+    # having a local git branch track a remote one.
     subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', repo_uri])
     
-    # Push the docker file to AWS ECR
+    # Push the docker file to our new repository
     # TODO make sure this isn't insecure (cause of using shell=True)
     subprocess.check_call('sudo $(aws ecr get-login --no-include-email)', shell=True)
     subprocess.check_call(['sudo', 'docker', 'push', repo_uri])
