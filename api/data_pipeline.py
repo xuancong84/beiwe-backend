@@ -1,7 +1,8 @@
 import json
 
-from flask import Blueprint, redirect, request
+from flask import Blueprint, flash, redirect, request
 
+from database.models import Study
 from libs.admin_authentication import authenticate_admin_study_access
 from pipeline.boto_helpers import get_boto_client
 
@@ -16,7 +17,10 @@ def run_manual_code():
     client = get_boto_client('batch')
     with open('pipeline/aws-object-names.json') as fn:
         object_names = json.load(fn)
-
+    
+    study_id = request.values['study_id']
+    study_object_id = Study.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
+    
     # AJK TODO possibly use index.py post-merge (django-pipeline w/ pipeline) to reduce redundancy
     client.submit_job(
         jobName=object_names['job_name'].format(freq='manually'),
@@ -27,10 +31,10 @@ def run_manual_code():
                 '/bin/bash',
                 'runner.sh',
                 'Beiwe-Analysis/Pipeline/manually',
+                study_object_id,
             ]
         }
     )
+    flash('Data pipeline code successfully initiated!', 'success')
     
-    study_id = request.values['study_id']
-    # AJK TODO pass study id to job
     return redirect('/data-pipeline/{:s}'.format(study_id))
