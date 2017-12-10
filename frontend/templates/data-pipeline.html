@@ -4,8 +4,23 @@
 
 {% block content %}
 
-  <p>Ooooh content</p>
-  <p style="background-color: lawngreen">Look, it's shiiiiny!</p>
-  <p>Study ID: {{ study.id }}</p>
+  <div class="container">
+    <div class="span12">
+      <div class="row">
+        <h2>{{ study.name }}</h2>
+        <p>ID: {{ study.object_id }}</p>
+      </div>
+    </div>
+    
+    <div class="span12">
+      <div class="row">
+        <h3>Run data pipeline code</h3>
+        <form action="/run-manual-code" method="post">
+          <input type="hidden" name="study_id" value="{{ study.id }}">
+          <button type="submit" class="btn btn-primary add_new_patient_button">Run manually</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
