@@ -17,3 +17,5 @@ private/*
 *~
 *.pem
 
+# Files containing aws credentials
+pipeline/aws-config.json
