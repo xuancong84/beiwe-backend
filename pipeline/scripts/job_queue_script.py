@@ -4,7 +4,7 @@ from time import sleep
 import boto3
 
 
-def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name):
+def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, repo_uri):
     # Create a new IAM role for the compute environment
     with open('assume-batch-role.json') as fn:
         assume_batch_role_policy_json = json.dumps(json.load(fn))
@@ -15,6 +15,7 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     with open('batch-instance-role.json') as fn:
         ec2_role_policy_json = json.dumps(json.load(fn))
     with open('compute-env.json') as fn:
+        # TODO make filenames/variable names more consistent
         compute_resources_dict = json.load(fn)
     with open('container-props.json') as fn:
         container_props_dict = json.load(fn)
@@ -87,10 +88,10 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     print('Job queue created')
     
     # Define a job definition
+    container_props_dict['image'] = repo_uri
     batch_client.register_job_definition(
         jobDefinitionName=job_defn_name,
         type='container',
-        # TODO ensure the stuff in the JSON that is repo-specific is auto-generated (e.g. "image" here)
         containerProperties=container_props_dict,
     )
     print('Job definition created')
@@ -103,10 +104,12 @@ if __name__ == '__main__':
     _comp_env_name = 'data-pipeline-env'
     _queue_name = 'data-pipeline-queue'
     _job_defn_name = 'data-pipeline-job-defn'
+    _repo_uri = '284616134063.dkr.ecr.us-east-2.amazonaws.com/data-pipeline-docker'
     run(
         _comp_env_role,
         _instance_profile,
         _comp_env_name,
         _queue_name,
         _job_defn_name,
+        _repo_uri,
     )

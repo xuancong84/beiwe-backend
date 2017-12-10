@@ -28,17 +28,19 @@ def run(ecr_repo_name):
     resp = client.create_repository(
         repositoryName=ecr_repo_name,
     )
-    remote = resp['repository']['repositoryUri']
+    repo_uri = resp['repository']['repositoryUri']
     print('ECR repository created')
     
     # TODO ensure that AWS credentials are configured (or environment variables or whatever)
-    subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', remote])
+    subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', repo_uri])
     
     # Push the docker file to AWS ECR
     # TODO make sure this isn't insecure (cause of using shell=True)
     subprocess.check_call('sudo $(aws ecr get-login --no-include-email)', shell=True)
-    subprocess.check_call(['sudo', 'docker', 'push', remote])
+    subprocess.check_call(['sudo', 'docker', 'push', repo_uri])
     print('Docker pushed')
+    
+    return repo_uri
 
 
 # For debugging only
