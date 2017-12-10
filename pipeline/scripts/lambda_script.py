@@ -28,7 +28,6 @@ def run(lambda_role, function_name, rule_name):
         PolicyDocument=role_policy_json,
     )
     print('Lambda role created')
-    # TODO clean up batch-access.json, it has too much unnecessary stuff right now
     
     # Zip up the code for the lambdas
     subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])

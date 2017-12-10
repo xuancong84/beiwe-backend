@@ -5,6 +5,5 @@
   "desiredvCpus": 4,
   "instanceTypes": ["optimal"],
   "subnets": ["subnet-e7c23d8e"],
-  "securityGroupIds": ["sg-2d788644"],
-  "instanceRole": "arn:aws:iam::284616134063:instance-profile/ecsInstanceRole"
+  "securityGroupIds": ["sg-2d788644"]
 }

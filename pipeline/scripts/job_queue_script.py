@@ -3,15 +3,17 @@ from time import sleep
 
 import boto3
 
-# TODO create an IAM role for the EC2 instance, probably
-
 
 def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
     # Create a new IAM role for the compute environment
     with open('assume-batch-role.json') as fn:
-        assume_role_policy_json = json.dumps(json.load(fn))
+        assume_batch_role_policy_json = json.dumps(json.load(fn))
     with open('batch-service-role.json') as fn:
-        role_policy_json = json.dumps(json.load(fn))
+        batch_role_policy_json = json.dumps(json.load(fn))
+    with open('assume-ec2-role.json') as fn:
+        assume_ec2_role_policy_json = json.dumps(json.load(fn))
+    with open('batch-instance-role.json') as fn:
+        ec2_role_policy_json = json.dumps(json.load(fn))
     with open('compute-env.json') as fn:
         compute_resources_dict = json.load(fn)
     with open('container-props.json') as fn:
@@ -21,15 +23,29 @@ def run(comp_env_role, comp_env_name, queue_name, job_defn_name):
     iam_client = boto3.client('iam')
     resp = iam_client.create_role(
         RoleName=comp_env_role,
-        AssumeRolePolicyDocument=assume_role_policy_json,
+        AssumeRolePolicyDocument=assume_batch_role_policy_json,
     )
     comp_env_role_arn = resp['Role']['Arn']
     iam_client.put_role_policy(
         RoleName=comp_env_role,
         PolicyName='aws-batch-service-policy',  # This name isn't used anywhere else
-        PolicyDocument=role_policy_json,
+        PolicyDocument=batch_role_policy_json,
     )
     print('Batch role created')
+    
+    instance_role = 'ecsInstanceRole'
+    resp = iam_client.create_role(
+        RoleName=instance_role,
+        AssumeRolePolicyDocument=assume_ec2_role_policy_json,
+    )
+    instance_role_arn = resp['Role']['Arn']
+    compute_resources_dict['instanceRole'] = instance_role_arn
+    iam_client.put_role_policy(
+        RoleName=instance_role,
+        PolicyName='aws-ec2-service-policy',  # This name isn't used anywhere else
+        PolicyDocument=ec2_role_policy_json,
+    )
+    print('Instance role created')
     
     # Create the batch compute environment
     batch_client = boto3.client('batch')
