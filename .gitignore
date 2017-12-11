@@ -18,4 +18,5 @@ private/*
 *.pem
 
 # Files containing aws credentials
-pipeline/aws-config.json
+pipeline/configs/aws-config.json
+pipeline/configs/lambda-environment-variables.json

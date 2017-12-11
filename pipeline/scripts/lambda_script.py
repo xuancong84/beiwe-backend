@@ -30,6 +30,8 @@ def run(lambda_role, function_name, rule_name):
         assume_lambda_role_policy_json = json.dumps(json.load(fn))
     with open(os.path.join(configs_folder, 'batch-access-role.json')) as fn:
         batch_access_role_policy_json = json.dumps(json.load(fn))
+    with open(os.path.join(configs_folder, 'lambda-environment-variables.json')) as fn:
+        lambda_environment_variables_dict = json.load(fn)
     
     # Create a new IAM role for the lambdas
     iam_client = boto3.client('iam')
@@ -51,8 +53,8 @@ def run(lambda_role, function_name, rule_name):
     zip_file_path = os.path.join(pipeline_folder, 'lambda-upload.zip')
     index_file_path = os.path.join(pipeline_folder, 'index.py')
     aws_object_names_file_path = os.path.join(configs_folder, 'aws-object-names.json')
-    subprocess.check_call(['zip', zip_file_path, index_file_path])
-    subprocess.check_call(['zip', zip_file_path, aws_object_names_file_path])
+    subprocess.check_call(['zip', '-j', zip_file_path, index_file_path])
+    subprocess.check_call(['zip', '-j', zip_file_path, aws_object_names_file_path])
     with open(zip_file_path, 'rb') as fn:
         lambda_code_bytes = fn.read()
     print('Lambda code zipped')
@@ -77,10 +79,11 @@ def run(lambda_role, function_name, rule_name):
             try:
                 resp = lambda_client.create_function(
                     FunctionName=function_name.format(freq=schedule),
-                    Runtime='python3.6',
+                    Runtime='python2.7',
                     Role=lambda_role_arn,
                     Handler='index.{}'.format(schedule),
                     Code={'ZipFile': lambda_code_bytes},
+                    Environment={'Variables': lambda_environment_variables_dict},
                 )
             except ClientError:
                 # If the lambda is not created due to the timeout error, we wait one second

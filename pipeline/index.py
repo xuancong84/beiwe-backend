@@ -1,7 +1,8 @@
 import json
+import os
+import urllib
 
 import boto3
-import requests
 
 
 def create_one_job(freq, object_id, aws_object_names, client=None):
@@ -38,11 +39,12 @@ def create_all_jobs(freq):
     :param freq: string e.g. 'daily', 'manually'
     """
     
-    # TODO should /list-all-studies require permissions? If so, the lambda needs them.
-    # TODO get the correct URL (https://beiwe-whatever.com)
     # Get the list of all Study object_ids to pass to the Batch job
-    resp = requests.get('http://localhost:8080/list-all-study-ids')
-    object_id_list = json.loads(resp.content)['study_ids']
+    keys = {'access_key': os.environ['access_key'], 'secret_key': os.environ['secret_key']}
+    url = '{}/get-studies/v1'.format(os.environ['server_url'])
+    data = urllib.urlencode(keys)
+    resp = urllib.urlopen(url, data=data).read()
+    object_id_list = list(json.loads(resp).keys())
     
     # aws-object-names.json is in the same folder as index.py. This is meant to be run by an
     # AWS lambda, so we can guarantee that.
