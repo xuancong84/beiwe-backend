@@ -18,7 +18,6 @@ def run_manual_code(study_id):
     with open('pipeline/aws-object-names.json') as fn:
         object_names = json.load(fn)
     
-    # AJK TODO make a function common between this and index.py to reduce redundancy
     client.submit_job(
         jobName=object_names['job_name'].format(freq='manually'),
         jobDefinition=object_names['job_defn_name'],
