@@ -2,7 +2,7 @@ from flask import Blueprint, flash, jsonify, redirect, request
 
 from db.study_models import Studies
 from libs.admin_authentication import authenticate_admin_study_access
-from pipeline.boto_helpers import get_boto_client
+from pipeline.boto_helpers import get_boto_client, get_aws_object_names
 from pipeline.index import create_one_job
 
 
@@ -19,7 +19,8 @@ def run_manual_code(study_id):
     """
     
     client = get_boto_client('batch')
-    create_one_job('manually', str(study_id), client)
+    aws_object_names = get_aws_object_names()
+    create_one_job('manually', str(study_id), aws_object_names, client)
     
     flash('Data pipeline code successfully initiated!', 'success')
     

@@ -4,16 +4,12 @@ import boto3
 import requests
 
 
-# TODO this is getting relocated to somewhere that the normal frontend can access it
-with open('aws-object-names.json') as fn:
-    object_names = json.load(fn)
-
-
-def create_one_job(freq, object_id, client=None):
+def create_one_job(freq, object_id, aws_object_names, client=None):
     """
     Create an AWS batch job
     :param freq: string e.g. 'daily', 'manually'
     :param object_id: string representing the Study object_id e.g. '56325d8297013e33a2e57736'
+    :param aws_object_names: dict containing names for the job, job definition and job queue
     :param client: A boto3 client or None; if None, one will be created with implicit credentials
     """
     
@@ -22,9 +18,9 @@ def create_one_job(freq, object_id, client=None):
         client = boto3.client('batch', region_name='us-east-2')
 
     client.submit_job(
-        jobName=object_names['job_name'].format(freq=freq),
-        jobDefinition=object_names['job_defn_name'],
-        jobQueue=object_names['queue_name'],
+        jobName=aws_object_names['job_name'].format(freq=freq),
+        jobDefinition=aws_object_names['job_defn_name'],
+        jobQueue=aws_object_names['queue_name'],
         containerOverrides={
             'command': [
                 '/bin/bash',
@@ -48,9 +44,12 @@ def create_all_jobs(freq):
     resp = requests.get('http://localhost:8080/list-all-study-ids')
     object_id_list = json.loads(resp.content)['study_ids']
     
+    with open('aws-object-names.json') as fn:
+        aws_object_names = json.load(fn)
+    
     for object_id in object_id_list:
         # For each object_id, create a job
-        create_one_job(freq, object_id)
+        create_one_job(freq, object_id, aws_object_names)
 
 
 def hourly(event, context):

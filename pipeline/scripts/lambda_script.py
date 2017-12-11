@@ -42,6 +42,7 @@ def run(lambda_role, function_name, rule_name):
     # Zip up the code for the lambdas. We use the command line zip executable to perform the
     # actual zipping, and then we open the zip file in memory to pass the BytesIO object to
     # the boto3 client.
+    # TODO use full paths? test if that's necessary (i.e. run from other directories)
     subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])
     subprocess.check_call(['zip', 'lambda-upload.zip', 'aws-object-names.json'])
     with open('lambda-upload.zip', 'rb') as fn:
@@ -51,7 +52,6 @@ def run(lambda_role, function_name, rule_name):
     # Create the lambdas
     lambda_client = boto3.client('lambda')
     events_client = boto3.client('events')
-    # TODO add manual setup (probably direct API connection to batch w/o lambda)
     # We create one lambda for each for four schedules, as well as a trigger to run each
     # lambda. Each trigger has an associated cron expression that causes it to run at certain
     # times. See http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html

@@ -11,6 +11,11 @@ def get_aws_config():
         return json.load(fn)
 
 
+def get_aws_object_names():
+    with open('pipeline/aws-object-names.json') as fn:
+        return json.load(fn)
+
+
 def get_boto_client(client_type):
     aws_config = get_aws_config()
     
