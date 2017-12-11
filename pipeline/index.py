@@ -1,6 +1,7 @@
 import json
 
 import boto3
+import requests
 
 client = boto3.client('batch', region_name='us-east-2')
 # TODO this is getting relocated to somewhere that the normal frontend can access it
@@ -14,9 +15,10 @@ def createJob(freq):
     :param freq: string e.g. 'daily', 'manually'
     """
     
-    # TODO create /list-all-studies API endpoint (filter by deleted=False)
-    # TODO ping /list-all-studies endpoint to get object_id_list
-    object_id_list = ['804']
+    # TODO should /list-all-studies require permissions? If so, the lambda needs them.
+    # TODO get the correct URL (https://beiwe-whatever.com)
+    resp = requests.get('http://localhost:8080/list-all-study-ids')
+    object_id_list = json.loads(resp.content)['study_ids']
     
     for object_id in object_id_list:
         # TODO make a function common between this and run_manual_code to reduce redundancy

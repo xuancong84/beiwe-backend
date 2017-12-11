@@ -1,7 +1,8 @@
 import json
 
-from flask import Blueprint, flash, redirect, request
+from flask import Blueprint, flash, jsonify, redirect, request
 
+from db.study_models import Studies
 from libs.admin_authentication import authenticate_admin_study_access
 from pipeline.boto_helpers import get_boto_client
 
@@ -34,3 +35,19 @@ def run_manual_code(study_id):
     flash('Data pipeline code successfully initiated!', 'success')
     
     return redirect('/data-pipeline/{:s}'.format(study_id))
+
+
+@data_pipeline_api.route('/list-all-study-ids', methods=['GET'])
+def list_all_study_ids():
+    """
+    List all IDs of Study objects in the database that have not been deleted
+    :return: A Response object containing a JSON blob of the form {study_ids: ['blah', 'blah']}
+    """
+    
+    # Get the Study IDs and convert them to strings (they are ObjectIds initially)
+    # Django: study_ids = Study.objects.filter(deleted=False).values_list('object_id', flat=True)
+    study_ids_raw = Studies(deleted=False, field='_id')
+    study_ids = map(str, study_ids_raw)
+    
+    # Using flask.json.jsonify, make a nice HTTP Response out of the list
+    return jsonify(study_ids=study_ids)
