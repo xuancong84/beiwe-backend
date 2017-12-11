@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect
 from werkzeug.contrib.fixers import ProxyFix
 from pages import admin_pages, mobile_pages, survey_designer, system_admin_pages,\
     data_access_web_form
-from api import admin_api, copy_study_api, data_access_api, data_pipeline, mobile_api, survey_api
+from api import admin_api, copy_study_api, data_access_api, data_pipeline_api, mobile_api, survey_api
 from libs.admin_authentication import is_logged_in
 from libs.security import set_secret_key
 from config.secure_settings import SENTRY_DSN, SENTRY_JAVASCRIPT_DSN
@@ -31,7 +31,7 @@ app.register_blueprint(survey_api.survey_api)
 app.register_blueprint(data_access_api.data_access_api)
 app.register_blueprint(data_access_web_form.data_access_web_form)
 app.register_blueprint(copy_study_api.copy_study_api)
-app.register_blueprint(data_pipeline.data_pipeline)
+app.register_blueprint(data_pipeline_api.data_pipeline_api)
 
 
 if SENTRY_DSN != "USE_EMAIL_FALLBACK":
