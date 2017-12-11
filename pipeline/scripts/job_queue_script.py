@@ -4,9 +4,12 @@ job definition to use as a template for actual jobs.
 """
 
 import json
+import os.path
 from time import sleep
 
 import boto3
+
+from boto_helpers import get_configs_folder
 
 
 def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, repo_uri):
@@ -19,17 +22,19 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     
     # Load a bunch of JSON blobs containing policies and other things that boto3 clients
     # require as input.
-    with open('assume-batch-role.json') as fn:
+    configs_folder = get_configs_folder()
+    
+    with open(os.path.join(configs_folder, 'assume-batch-role.json')) as fn:
         assume_batch_role_policy_json = json.dumps(json.load(fn))
-    with open('batch-service-role.json') as fn:
+    with open(os.path.join(configs_folder, 'batch-service-role.json')) as fn:
         batch_service_role_policy_json = json.dumps(json.load(fn))
-    with open('assume-ec2-role.json') as fn:
+    with open(os.path.join(configs_folder, 'assume-ec2-role.json')) as fn:
         assume_ec2_role_policy_json = json.dumps(json.load(fn))
-    with open('batch-instance-role.json') as fn:
+    with open(os.path.join(configs_folder, 'batch-instance-role.json')) as fn:
         batch_instance_role_policy_json = json.dumps(json.load(fn))
-    with open('compute-environment.json') as fn:
+    with open(os.path.join(configs_folder, 'compute-environment.json')) as fn:
         compute_environment_dict = json.load(fn)
-    with open('container-props.json') as fn:
+    with open(os.path.join(configs_folder, 'container-props.json')) as fn:
         container_props_dict = json.load(fn)
     print('JSON loaded')
     

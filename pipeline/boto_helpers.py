@@ -1,4 +1,5 @@
 import json
+import os.path
 
 import boto3
 
@@ -25,3 +26,11 @@ def get_boto_client(client_type):
         aws_secret_access_key=aws_config["AWS_SECRET_ACCESS_KEY"],
         region_name=aws_config["AWS_REGION"],
     )
+
+
+def get_pipeline_folder():
+    return os.path.abspath(__file__).rsplit('/', 1)[0]
+
+
+def get_configs_folder():
+    return os.path.join(get_pipeline_folder(), 'configs')

@@ -1,5 +1,7 @@
 import json
+import os.path
 
+from boto_helpers import get_configs_folder
 from scripts import docker_script, job_queue_script, lambda_script
 
 
@@ -12,9 +14,12 @@ def run(ecr_repo_name, comp_env_role, instance_profile, comp_env_name, queue_nam
 
 
 if __name__ == '__main__':
+    configs_folder = get_configs_folder()
+    aws_object_names_file = os.path.join(configs_folder, 'aws-object-names.json')
+    
     # Get the AWS object names
-    with open('aws-object-names.json') as fn:
-        aws_object_names = json.load(fn)
+    with open(aws_object_names_file) as fn:
+        aws_object_names_dict = json.load(fn)
     
     # Pass them to the scripts that need them
-    run(**aws_object_names)
+    run(**aws_object_names_dict)

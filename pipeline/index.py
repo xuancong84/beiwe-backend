@@ -44,6 +44,8 @@ def create_all_jobs(freq):
     resp = requests.get('http://localhost:8080/list-all-study-ids')
     object_id_list = json.loads(resp.content)['study_ids']
     
+    # aws-object-names.json is in the same folder as index.py. This is meant to be run by an
+    # AWS lambda, so we can guarantee that.
     with open('aws-object-names.json') as fn:
         aws_object_names = json.load(fn)
     

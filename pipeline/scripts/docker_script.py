@@ -3,9 +3,12 @@ A script for creating a docker image and uploading it to an AWS ECS repository.
 This should be run on a machine running Amazon Linux.
 """
 
+import os.path
 import subprocess
 
 import boto3
+
+from boto_helpers import get_pipeline_folder
 
 
 def run(ecr_repo_name):
@@ -26,12 +29,14 @@ def run(ecr_repo_name):
     
     # Get git repo to put in the docker
     # TODO: when the pipeline branch has been merged with master on Beiwe-Analysis, get rid of the --branch pipeline argument
+    pipeline_folder = get_pipeline_folder()
+    git_destination = os.path.join(pipeline_folder, 'Beiwe-Analysis')
     subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
-                           '--branch', 'pipeline'])
+                           git_destination, '--branch', 'pipeline'])
     print('Git repository cloned')
     
     # Create the docker image
-    subprocess.check_call(['sudo', 'docker', 'build', '-t', 'beiwe-analysis', '.'])
+    subprocess.check_call(['sudo', 'docker', 'build', '-t', 'beiwe-analysis', pipeline_folder])
     print('Docker image created')
     
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI

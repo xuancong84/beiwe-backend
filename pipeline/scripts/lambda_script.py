@@ -3,11 +3,14 @@ A script for creating some AWS lambdas and some AWS CloudWatch event triggers to
 """
 
 import json
+import os.path
 import subprocess
 from time import sleep
 
 import boto3
 from botocore.exceptions import ClientError
+
+from boto_helpers import get_configs_folder, get_pipeline_folder
 
 
 def run(lambda_role, function_name, rule_name):
@@ -19,10 +22,13 @@ def run(lambda_role, function_name, rule_name):
     complaining that we are trying to create multiple lambdas with the same name.
     """
     
+    pipeline_folder = get_pipeline_folder()
+    configs_folder = get_configs_folder()
+    
     # Load a bunch of JSON blobs containing policies, which boto3 clients require as input
-    with open('assume-lambda-role.json') as fn:
+    with open(os.path.join(configs_folder, 'assume-lambda-role.json')) as fn:
         assume_lambda_role_policy_json = json.dumps(json.load(fn))
-    with open('batch-access-role.json') as fn:
+    with open(os.path.join(configs_folder, 'batch-access-role.json')) as fn:
         batch_access_role_policy_json = json.dumps(json.load(fn))
     
     # Create a new IAM role for the lambdas
@@ -42,10 +48,12 @@ def run(lambda_role, function_name, rule_name):
     # Zip up the code for the lambdas. We use the command line zip executable to perform the
     # actual zipping, and then we open the zip file in memory to pass the BytesIO object to
     # the boto3 client.
-    # TODO use full paths? test if that's necessary (i.e. run from other directories)
-    subprocess.check_call(['zip', 'lambda-upload.zip', 'index.py'])
-    subprocess.check_call(['zip', 'lambda-upload.zip', 'aws-object-names.json'])
-    with open('lambda-upload.zip', 'rb') as fn:
+    zip_file_path = os.path.join(pipeline_folder, 'lambda-upload.zip')
+    index_file_path = os.path.join(pipeline_folder, 'index.py')
+    aws_object_names_file_path = os.path.join(configs_folder, 'aws-object-names.json')
+    subprocess.check_call(['zip', zip_file_path, index_file_path])
+    subprocess.check_call(['zip', zip_file_path, aws_object_names_file_path])
+    with open(zip_file_path, 'rb') as fn:
         lambda_code_bytes = fn.read()
     print('Lambda code zipped')
     
