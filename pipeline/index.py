@@ -59,7 +59,22 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
                 '/bin/bash',
                 'runner.sh',
                 freq,
-                object_id,
+            ],
+            'environment': [
+                # AJK TODO pass the server url also
+                # AJK TODO maybe put these in the job definition?
+                {
+                    'name': 'access_key_ssm_name',
+                    'value': aws_object_names['access_key_ssm_name'],
+                },
+                {
+                    'name': 'secret_key_ssm_name',
+                    'value': aws_object_names['secret_key_ssm_name'],
+                },
+                {
+                    'name': 'study_object_id',
+                    'value': object_id,
+                },
             ]
         }
     )
