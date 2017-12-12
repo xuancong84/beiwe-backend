@@ -41,7 +41,7 @@ def get_and_validate_study_id():
     
     if len(request.values["study_id"]) != 24:
         # Don't proceed with large sized input.
-        print "Received invalid length objectid as study_id in the data access API."
+        print("Received invalid length objectid as study_id in the data access API.")
         return abort(400)
     
     try:  # If the ID is of some invalid form, we catch that and return a 400
@@ -76,13 +76,26 @@ def get_and_validate_admin(study_obj):
 
 @data_access_api.route("/get-studies/v1", methods=['POST', "GET"])
 def get_studies():
-    # Cases: invalid access creds
+    """
+    Retrieve a dict containing the object ID and name of all Study objects that the user can access
+    If a GET request, access_key and secret_key must be provided in the URL as GET params. If
+    a POST request (strongly preferred!), access_key and secret_key must be in the POST
+    request body.
+    :return: string: JSON-dumped dict {object_id: name}
+    """
+    
+    # Get the access keys
     access_key = request.values["access_key"]
-    access_secret = request.values["secret_key"]
+    secret_key = request.values["secret_key"]
+    
+    # Get the Researcher whose access keys those are. If either key is invalid, raise a 403 error.
     admin = Admin(access_key_id=access_key)
-    if not admin: return abort(403)  # access key DNE
-    if not admin.validate_access_credentials(access_secret):
+    if not admin:
+        return abort(403)  # access key DNE
+    if not admin.validate_access_credentials(secret_key):
         return abort(403)  # incorrect secret key
+    
+    # TODO filter on deleted=False
     return json.dumps({str(study._id): study.name for study in Studies(admins=str(admin._id))})
 
 

@@ -2,7 +2,7 @@
 FROM ubuntu:16.04
 
 # Install necessaries
-# AJK TODO install R
+# TODO install R
 RUN apt-get update && apt-get install -y python
 
 # Work from home directory
