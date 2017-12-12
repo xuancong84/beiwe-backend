@@ -23,7 +23,7 @@ def run(
     job_queue_script.run(
         comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, repo_uri,
     )
-    lambda_script.run(lambda_role, function_name, rule_name)
+    # lambda_script.run(lambda_role, function_name, rule_name)
 
 
 if __name__ == '__main__':

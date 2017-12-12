@@ -40,6 +40,7 @@ def run(ecr_repo_name):
     print('Docker image created')
     
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI
+    # TODO first check if it exists
     client = boto3.client('ecr')
     resp = client.create_repository(
         repositoryName=ecr_repo_name,
@@ -60,3 +61,5 @@ def run(ecr_repo_name):
     print('Docker pushed')
     
     return repo_uri
+
+# TODO this has to be runnable from command line directly

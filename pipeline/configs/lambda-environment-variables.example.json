@@ -1,5 +1,0 @@
-{
-  "server_url": "something like https://staging.beiwe.org",
-  "access_key": "Data access pipeline access key",
-  "secret_key": "Data access pipeline secret key"
-}

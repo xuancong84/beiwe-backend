@@ -8,5 +8,8 @@
   "job_name": "data-pipeline-{freq}-job",
   "lambda_role": "data-pipeline-lambda-role",
   "function_name": "create-{freq}-batch-jobs",
-  "rule_name": "{freq}-trigger"
+  "rule_name": "{freq}-trigger",
+  "server_url_ssm_name": "beiwe-daa-key-0",
+  "access_key_ssm_name": "beiwe-daa-key-1",
+  "secret_key_ssm_name": "beiwe-daa-key-2"
 }

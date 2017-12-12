@@ -104,6 +104,22 @@ class Admin( DatabaseObject ):
         return super(Admin, cls).create(new_admin)
     
     @classmethod
+    def create_without_password(cls, username):
+        """
+        Create a new Admin with provided username and no password
+        """
+        
+        new_admin = {
+            ID_KEY: username,
+            'password': None,
+            'salt': 'cab',
+            'system_admin': False,
+            'access_key_id': None,
+            'access_key_secret': None,
+        }
+        return super(Admin, cls).create(new_admin)
+    
+    @classmethod
     def check_password(cls, username, compare_me ):
         """ Checks if the provided password matches the hash of the provided
             Admin's password."""

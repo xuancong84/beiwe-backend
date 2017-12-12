@@ -4,7 +4,8 @@
         {
             "Effect": "Allow",
             "Action": [
-                "batch:SubmitJob"
+                "batch:SubmitJob",
+                "ssm:GetParameter"
             ],
             "Resource": "*"
         }

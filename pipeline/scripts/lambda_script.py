@@ -2,6 +2,9 @@
 A script for creating some AWS lambdas and some AWS CloudWatch event triggers to run the lambdas
 """
 
+# TODO: This is no longer used!
+# TODO delete lambda config .json files
+
 import json
 import os.path
 import subprocess
@@ -29,9 +32,8 @@ def run(lambda_role, function_name, rule_name):
     with open(os.path.join(configs_folder, 'assume-lambda-role.json')) as fn:
         assume_lambda_role_policy_json = json.dumps(json.load(fn))
     with open(os.path.join(configs_folder, 'batch-access-role.json')) as fn:
+        # TODO rename this file
         batch_access_role_policy_json = json.dumps(json.load(fn))
-    with open(os.path.join(configs_folder, 'lambda-environment-variables.json')) as fn:
-        lambda_environment_variables_dict = json.load(fn)
     
     # Create a new IAM role for the lambdas
     iam_client = boto3.client('iam')
@@ -83,7 +85,6 @@ def run(lambda_role, function_name, rule_name):
                     Role=lambda_role_arn,
                     Handler='index.{}'.format(schedule),
                     Code={'ZipFile': lambda_code_bytes},
-                    Environment={'Variables': lambda_environment_variables_dict},
                     Timeout=30,  # the lambda takes around Studies.count()/3 seconds
                 )
             except ClientError:
