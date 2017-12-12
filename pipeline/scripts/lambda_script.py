@@ -84,6 +84,7 @@ def run(lambda_role, function_name, rule_name):
                     Handler='index.{}'.format(schedule),
                     Code={'ZipFile': lambda_code_bytes},
                     Environment={'Variables': lambda_environment_variables_dict},
+                    Timeout=30,  # the lambda takes around Studies.count()/3 seconds
                 )
             except ClientError:
                 # If the lambda is not created due to the timeout error, we wait one second
@@ -118,4 +119,5 @@ def run(lambda_role, function_name, rule_name):
             Rule=rule_name.format(freq=schedule),
             Targets=[{'Id': '1', 'Arn': function_arn}],
         )
+        # TODO figure out if/why the rules are being doubled
         print('Lambda {} function created'.format(schedule))

@@ -4,6 +4,8 @@ import urllib
 
 import boto3
 
+from datetime import datetime
+
 
 def create_one_job(freq, object_id, aws_object_names, client=None):
     """
@@ -15,8 +17,8 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
     """
     
     if client is None:
-        # TODO pass region in via .json as well
-        client = boto3.client('batch', region_name='us-east-2')
+        # Make a batch client in the Lambda's own region
+        client = boto3.client('batch', region_name=os.environ['AWS_REGION'])
 
     client.submit_job(
         jobName=aws_object_names['job_name'].format(freq=freq),
@@ -39,6 +41,13 @@ def create_all_jobs(freq):
     :param freq: string e.g. 'daily', 'manually'
     """
     
+    # When this code was written (2017-12-11), AWS Lambda only provided boto3 version 1.4.7.
+    # Version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the task this
+    # functions performs. As such, this print statement is here to alert the user if AWS
+    # Lambda has upgraded to version 1.4.8, at which time we should switch to using Array Jobs.
+    # TODO switch to using Array Jobs when possible
+    print('Boto3 version: ' + boto3.__version__)
+    
     # Get the list of all Study object_ids to pass to the Batch job
     keys = {'access_key': os.environ['access_key'], 'secret_key': os.environ['secret_key']}
     url = '{}/get-studies/v1'.format(os.environ['server_url'])
@@ -47,7 +56,7 @@ def create_all_jobs(freq):
     object_id_list = list(json.loads(resp).keys())
     
     # aws-object-names.json is in the same folder as index.py. This is meant to be run by an
-    # AWS lambda, so we can guarantee that.
+    # AWS Lambda, so we can guarantee that fact.
     with open('aws-object-names.json') as fn:
         aws_object_names = json.load(fn)
     

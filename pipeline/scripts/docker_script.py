@@ -53,8 +53,9 @@ def run(ecr_repo_name):
     subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', repo_uri])
     
     # Push the docker file to our new repository
-    # TODO make sure this isn't insecure (cause of using shell=True)
-    subprocess.check_call('sudo $(aws ecr get-login --no-include-email)', shell=True)
+    ecr_login = subprocess.check_output(['aws', 'ecr', 'get-login', '--no-include-email'])
+    ecr_login_as_list = ['sudo'] + ecr_login.strip('\n').split(' ')
+    subprocess.check_call(ecr_login_as_list)
     subprocess.check_call(['sudo', 'docker', 'push', repo_uri])
     print('Docker pushed')
     
