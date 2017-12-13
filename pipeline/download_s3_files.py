@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 
 import boto3
@@ -9,21 +10,18 @@ access_key_ssm_name = os.getenv('access_key_ssm_name')
 secret_key_ssm_name = os.getenv('secret_key_ssm_name')
 study_object_id = os.getenv('study_object_id')
 region_name = os.getenv('region_name')
+server_url = os.getenv('server_url')
 
 # Get the necessary credentials for pinging the Beiwe server
 ssm_client = boto3.client('ssm', region_name=region_name)
-access_key = ssm_client.get_parameter(
-    Name=access_key_ssm_name,
+resp = ssm_client.get_parameters(
+    Names=(access_key_ssm_name, secret_key_ssm_name),
     WithDecryption=True,
-)['Parameter']['Value']
-secret_key = ssm_client.get_parameter(
-    Name=secret_key_ssm_name,
-    WithDecryption=True,
-)['Parameter']['Value']
+)['Parameters']
+access_key, secret_key = [p['Value'] for p in resp]
 
 # TODO softcode this
-base_url = 'https://staging.beiwe.org'
-data_access_api_url = '{}/get-data/v1'.format(base_url)
+data_access_api_url = '{}/get-data/v1'.format(server_url)
 
 payload = {
     'access_key': access_key,
