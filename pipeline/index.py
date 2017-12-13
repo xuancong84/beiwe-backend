@@ -82,10 +82,15 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
                     'name': 'study_object_id',
                     'value': object_id,
                 },
+                # AJK TODO softcode
                 {
                     'name': 'region_name',
                     'value': 'us-east-2',
                 },
+                {
+                    'name': 'server_url',
+                    'value': 'https://staging.beiwe.org'
+                }
             ]
         }
     )

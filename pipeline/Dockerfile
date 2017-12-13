@@ -20,5 +20,3 @@ RUN ["pip", "install", "-r", "Beiwe-Analysis/Pipeline/python2-requirements.txt"]
 RUN ["pip3", "install", "--upgrade", "pip"]
 RUN ["pip3", "install", "-r", "Beiwe-Analysis/Pipeline/python3-requirements.txt"]
 RUN ["pip3", "install", "boto3==1.4.8", "requests==2.18.4"]
-
-ENV access_key_ssm_name="abc", secret_key_ssm_name="abc", study_object_id="583", region_name="us-east-2", server_url="https://staging.beiwe.org"
