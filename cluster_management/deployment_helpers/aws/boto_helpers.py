@@ -37,14 +37,25 @@ def create_rds_client():
     return _get_client('rds')
 
 def create_s3_client():
-    return _get_client("s3")
+    return boto3.client(
+            "s3",
+            aws_access_key_id=AWS_CREDENTIIALS["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=AWS_CREDENTIIALS["AWS_SECRET_ACCESS_KEY"],
+            region_name="us-east-1",
+    )
+    
 
 ## Resources.
 def create_ec2_resource():
     return _get_resource("ec2")
 
-def create_s3_resource():
-    return _get_resource("s3")
-
 def create_iam_resource():
     return _get_resource("iam")
+
+def create_s3_resource():
+    return boto3.resource(
+            "s3",
+            aws_access_key_id=AWS_CREDENTIIALS["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=AWS_CREDENTIIALS["AWS_SECRET_ACCESS_KEY"],
+            region_name="us-east-1",
+    )

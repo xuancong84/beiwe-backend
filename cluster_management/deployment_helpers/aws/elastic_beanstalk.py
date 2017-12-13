@@ -311,3 +311,42 @@ def check_if_eb_environment_exists(name):
     if name.lower() in [n.lower() for n in extant_environments]:
         return True
     return False
+
+
+def fix_deploy(eb_environment_name):
+    # {
+    #     'ResourceName': 'string',
+    #     'Namespace': 'string',
+    #     'OptionName': 'string',
+    #     'Value': 'string'
+    # },
+    eb_client = create_eb_client()
+    return eb_client.update_environment(
+            # ApplicationName='string',
+            # EnvironmentId='string',
+            EnvironmentName=eb_environment_name,
+            # GroupName='string',
+            # Description='string',
+            # Tier={
+            #     'Name': 'string',
+            #     'Type': 'string',
+            #     'Version': 'string'
+            # # },
+            # VersionLabel='string',
+            # TemplateName='string',
+            # SolutionStackName='string',
+            # PlatformArn='string',
+            OptionSettings=[
+                {'Namespace': 'aws:elasticbeanstalk:command',
+                 'OptionName': 'IgnoreHealthCheck',
+                 'Value': 'true'
+                 },
+            ],
+            # OptionsToRemove=[
+            #     {
+            #         'ResourceName': 'string',
+            #         'Namespace': 'string',
+            #         'OptionName': 'string'
+            #     },
+            # ]
+    )

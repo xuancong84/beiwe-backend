@@ -26,7 +26,7 @@ from os.path import relpath, join as path_join
 from fabric.api import put, run, sudo, env as fabric_env
 
 from deployment_helpers.aws.elastic_beanstalk import (create_eb_environment,
-    check_if_eb_environment_exists)
+    check_if_eb_environment_exists, fix_deploy)
 from deployment_helpers.aws.elastic_compute_cloud import\
     (get_manager_instance_by_eb_environment_name, create_processing_control_server,
     create_processing_server, get_manager_public_ip, get_manager_private_ip)
@@ -430,6 +430,19 @@ def do_create_single_server_ami(ip_address, key_filename):
     run('python {filename} create_default_login'.format(filename=manage_script_filepath))
     setup_single_server_ami_cron()
     configure_apache()
+    
+    
+def do_fix_health_checks():
+    name = prompt_for_extant_eb_environment_name()
+    do_fail_if_environment_does_not_exist(name)
+    try:
+        print "Setting environment to ignore health checks"
+        fix_deploy(name)
+    except Exception as e:
+        log.error("unable to run command due to the following error:\n %s" % e)
+        raise
+    print "Success."
+    
 
 ####################################################################################################
 ####################################### Validation #################################################
@@ -460,9 +473,13 @@ def cli_args_validation():
             action="count",
             help= "assists in creation of configuration files for a beiwe environment deployment"
     )
-
-    # Notes:
-    # this arguments variable is not iterable.
+    parser.add_argument(
+            "-fix-health-checks-blocking-deployment",
+            action="count",
+            help="sometimes deployment operations fail stating that health checks do not have sufficient permissions, run this command to fix that."
+    )
+    
+    # Note: this arguments variable is not iterable.
     # access entities as arguments.long_name_of_argument, like arguments.update_manager
     arguments = parser.parse_args()
 
@@ -501,4 +518,8 @@ if __name__ == "__main__":
     
     if arguments.create_worker:
         do_create_worker()
+        EXIT(0)
+
+    if arguments.fix_health_checks_blocking_deployment:
+        do_fix_health_checks()
         EXIT(0)
