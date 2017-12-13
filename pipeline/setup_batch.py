@@ -25,6 +25,7 @@ def run(ecr_repo_name, comp_env_role, instance_profile, comp_env_name, queue_nam
 if __name__ == '__main__':
     
     # Get the file containing the AWS object names
+    # TODO use boto_helpers.get_aws_object_names (here and everywhere)
     configs_folder = get_configs_folder()
     aws_object_names_file = os.path.join(configs_folder, 'aws-object-names.json')
     

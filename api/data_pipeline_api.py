@@ -1,7 +1,6 @@
 from flask import Blueprint, flash, jsonify, redirect, request
 
 from libs.admin_authentication import authenticate_admin_study_access
-from pipeline.boto_helpers import get_boto_client, get_aws_object_names
 from pipeline.index import create_one_job
 
 
@@ -16,10 +15,9 @@ def run_manual_code(study_id):
     :param study_id: ObjectId of a Study
     """
     
-    client = get_boto_client('batch')
-    aws_object_names = get_aws_object_names()
-    create_one_job('manually', str(study_id), aws_object_names, client)
+    create_one_job('manually', str(study_id))
     
+    # The success message gets displayed to the user upon redirect
     flash('Data pipeline code successfully initiated!', 'success')
     
     return redirect('/data-pipeline/{:s}'.format(study_id))

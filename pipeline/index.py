@@ -1,10 +1,6 @@
-import json
-
-import boto3
-
-from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 from db.study_models import Studies
 from db.user_models import Admin
+from pipeline.boto_helpers import get_boto_client, get_aws_object_names
 
 
 # AJK TODO annotate
@@ -13,18 +9,14 @@ def refresh_data_access_credentials(freq, aws_object_names):
     mock_admin = Admin(admin_name)
     if not mock_admin:
         mock_admin = Admin.create_without_password(admin_name)
-        for study in Studies():
-            study.add_admin(mock_admin._id)
+    
+    for study in Studies():
+        study.add_admin(mock_admin._id)
     
     access_key, secret_key = mock_admin.reset_access_credentials()
 
     # Get the necessary credentials for pinging the Beiwe server
-    ssm_client = boto3.client(
-        'ssm',
-        region_name='us-east-2',
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    )
+    ssm_client = get_boto_client('ssm')
     ssm_client.put_parameter(
         Name=aws_object_names['access_key_ssm_name'],
         Value=access_key,
@@ -39,37 +31,41 @@ def refresh_data_access_credentials(freq, aws_object_names):
     )
 
 
-def create_one_job(freq, object_id, aws_object_names, client=None):
+def create_one_job(freq, object_id, aws_object_names=None, client=None):
     """
     Create an AWS batch job
+    The aws_object_names and client parameters are optional. They are provided in case
+    that this function is run as part of a loop, to avoid an unnecessarily large number of
+    file operations or API calls.
     :param freq: string e.g. 'daily', 'manually'
     :param object_id: string representing the Study object_id e.g. '56325d8297013e33a2e57736'
-    :param aws_object_names: dict containing names for the job, job definition and job queue
-    :param client: A boto3 client or None; if None, one will be created with implicit credentials
+    :param aws_object_names: dict containing various parameters for the batch job or None
+    :param client: a credentialled boto3 client or None
     """
     
+    # Get the AWS parameters and client if not provided
+    if aws_object_names is None:
+        aws_object_names = get_aws_object_names()
     if client is None:
-        # AJK TODO get the region name for cron jobs (here and everywhere)
-        client = boto3.client(
-            'batch',
-            region_name='us-east-2',
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        )
+        client = get_boto_client('batch')
 
     client.submit_job(
         jobName=aws_object_names['job_name'].format(freq=freq),
         jobDefinition=aws_object_names['job_defn_name'],
         jobQueue=aws_object_names['queue_name'],
         containerOverrides={
+            # AJK TODO this can also go in the job def'n, then freq can be an env variable
             'command': [
                 '/bin/bash',
                 'runner.sh',
                 freq,
             ],
             'environment': [
-                # AJK TODO pass the server url also
                 # AJK TODO maybe put these in the job definition?
+                {
+                    'name': 'study_object_id',
+                    'value': object_id,
+                },
                 {
                     'name': 'access_key_ssm_name',
                     'value': aws_object_names['access_key_ssm_name'],
@@ -79,36 +75,29 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
                     'value': aws_object_names['secret_key_ssm_name'],
                 },
                 {
-                    'name': 'study_object_id',
-                    'value': object_id,
-                },
-                # AJK TODO softcode
-                {
                     'name': 'region_name',
-                    'value': 'us-east-2',
+                    'value': aws_object_names['region_name'],
                 },
                 {
                     'name': 'server_url',
-                    'value': 'https://staging.beiwe.org'
-                }
-            ]
-        }
+                    'value': aws_object_names['server_url'],
+                },
+            ],
+        },
     )
 
 
 def create_all_jobs(freq):
     """
     Create one AWS batch job for each Study object
-    :param freq: string e.g. 'daily', 'manually'
+    :param freq: string e.g. 'daily', 'monthly'. This is only used for naming the batch jobs.
     """
     
     # Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
     # task this function performs. We should switch to using them.
     # TODO switch to using Array Jobs ASAP
-    print('Boto3 version: ' + boto3.__version__)
     
-    with open('pipeline/configs/aws-object-names.json') as fn:
-        aws_object_names = json.load(fn)
+    aws_object_names = get_aws_object_names()
     
     refresh_data_access_credentials(freq, aws_object_names)
     
