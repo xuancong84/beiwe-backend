@@ -3,12 +3,14 @@ A script for creating a docker image and uploading it to an AWS ECS repository.
 This should be run on a machine running Amazon Linux.
 """
 
+import json
 import os.path
 import subprocess
 
 import boto3
+from botocore.exceptions import ClientError
 
-from boto_helpers import get_pipeline_folder
+from boto_helpers import get_configs_folder, get_pipeline_folder
 
 
 def run(ecr_repo_name):
@@ -40,13 +42,20 @@ def run(ecr_repo_name):
     print('Docker image created')
     
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI
-    # TODO first check if it exists
+    # If such a repository already exists, get the repository's URI
     client = boto3.client('ecr')
-    resp = client.create_repository(
-        repositoryName=ecr_repo_name,
-    )
-    repo_uri = resp['repository']['repositoryUri']
-    print('ECR repository created')
+    try:
+        resp = client.create_repository(
+            repositoryName=ecr_repo_name,
+        )
+        repo_uri = resp['repository']['repositoryUri']
+        print('ECR repository created')
+    except ClientError:
+        resp = client.describe_repositories(
+            repositoryNames=(ecr_repo_name,),
+        )
+        repo_uri = resp['repositories'][0]['repositoryUri']
+        print('Existing ECR repository found')
     
     # TODO ensure that AWS credentials are configured (or environment variables or whatever)
     # Tag the local docker image with the remote repository's URI. This is similar to
@@ -63,3 +72,17 @@ def run(ecr_repo_name):
     return repo_uri
 
 # TODO this has to be runnable from command line directly
+
+
+if __name__ == '__main__':
+    
+    # Get the file containing the AWS object names
+    configs_folder = get_configs_folder()
+    aws_object_names_file = os.path.join(configs_folder, 'aws-object-names.json')
+    
+    # Get the AWS object names from the file
+    with open(aws_object_names_file) as fn:
+        aws_object_names_dict = json.load(fn)
+    
+    # Update and upload the docker image
+    run(aws_object_names_dict['ecr_repo_name'])

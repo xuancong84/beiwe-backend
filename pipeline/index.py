@@ -1,21 +1,10 @@
-import imp as _imp
-from os.path import abspath as _abspath
-
-_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
-_imp.load_source("__init__", _current_folder_init)
-
-
 import json
-import os
 
 import boto3
 
 from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
-
 from db.study_models import Studies
 from db.user_models import Admin
-
-# AJK TODO see about moving this out of the pipeline folder
 
 
 # AJK TODO annotate
@@ -30,7 +19,12 @@ def refresh_data_access_credentials(freq, aws_object_names):
     access_key, secret_key = mock_admin.reset_access_credentials()
 
     # Get the necessary credentials for pinging the Beiwe server
-    ssm_client = boto3.client('ssm', region_name='us-east-2', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    ssm_client = boto3.client(
+        'ssm',
+        region_name='us-east-2',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    )
     ssm_client.put_parameter(
         Name=aws_object_names['access_key_ssm_name'],
         Value=access_key,
@@ -57,8 +51,12 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
     if client is None:
         # Make a batch client in the Lambda's own region
         # AJK TODO get the region name for cron jobs (here and everywhere)
-        client = boto3.client('batch', region_name='us-east-2', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=
-AWS_SECRET_ACCESS_KEY)
+        client = boto3.client(
+            'batch',
+            region_name='us-east-2',
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        )
 
     client.submit_job(
         jobName=aws_object_names['job_name'].format(freq=freq),
@@ -85,6 +83,10 @@ AWS_SECRET_ACCESS_KEY)
                     'name': 'study_object_id',
                     'value': object_id,
                 },
+                {
+                    'name': 'region_name',
+                    'value': 'us-east-2',
+                },
             ]
         }
     )
@@ -103,8 +105,6 @@ def create_all_jobs(freq):
     # TODO switch to using Array Jobs ASAP
     print('Boto3 version: ' + boto3.__version__)
     
-    # aws-object-names.json is in the same folder as index.py. This is meant to be run by an
-    # AWS Lambda, so we can guarantee that fact.
     with open('pipeline/configs/aws-object-names.json') as fn:
         aws_object_names = json.load(fn)
     
@@ -116,17 +116,17 @@ def create_all_jobs(freq):
         create_one_job(freq, object_id, aws_object_names)
 
 
-def hourly(event, context):
+def hourly():
     create_all_jobs('hourly')
 
 
-def daily(event, context):
+def daily():
     create_all_jobs('daily')
 
 
-def weekly(event, context):
+def weekly():
     create_all_jobs('weekly')
 
 
-def monthly(event, context):
+def monthly():
     create_all_jobs('monthly')

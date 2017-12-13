@@ -1,16 +1,17 @@
 import os
 
-# TODO put these in the Dockerfile
 import boto3
 import requests
 
 
+# Grab environment variables
 access_key_ssm_name = os.getenv('access_key_ssm_name')
 secret_key_ssm_name = os.getenv('secret_key_ssm_name')
 study_object_id = os.getenv('study_object_id')
+region_name = os.getenv('region_name')
 
 # Get the necessary credentials for pinging the Beiwe server
-ssm_client = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
+ssm_client = boto3.client('ssm', region_name=region_name)
 access_key = ssm_client.get_parameter(
     Name=access_key_ssm_name,
     WithDecryption=True,
