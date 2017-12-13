@@ -9,15 +9,13 @@ from time import sleep
 
 import boto3
 
-from boto_helpers import get_configs_folder
+from boto_helpers import get_aws_object_names, get_configs_folder
 
 
-def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, repo_uri):
+def run(repo_uri):
     """
-    Run the code.
-    All parameters except for repo_uri can be arbitrary strings, as long as they do not
-    conflict with existing AWS objects in your account. repo_uri must be the URI of an
-    existing AWS ECR repository.
+    Run the code
+    :param repo_uri: string, the URI of an existing AWS ECR repository.
     """
     
     # Load a bunch of JSON blobs containing policies and other things that boto3 clients
@@ -36,7 +34,13 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
         compute_environment_dict = json.load(fn)
     with open(os.path.join(configs_folder, 'container-props.json')) as fn:
         container_props_dict = json.load(fn)
+    aws_object_names = get_aws_object_names()
     print('JSON loaded')
+    
+    # Grab the names from aws_object_names
+    comp_env_role = aws_object_names['comp_env_role']
+    comp_env_name = aws_object_names['comp_env_name']
+    instance_profile = aws_object_names['instance_profile']
     
     # Create a new IAM role for the compute environment
     iam_client = boto3.client('iam')
@@ -108,7 +112,7 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     
     # Create a batch job queue
     batch_client.create_job_queue(
-        jobQueueName=queue_name,
+        jobQueueName=aws_object_names['queue_name'],
         priority=1,
         computeEnvironmentOrder=[{'order': 0, 'computeEnvironment': comp_env_name}],
     )
@@ -116,8 +120,26 @@ def run(comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_nam
     
     # Create a batch job definition
     container_props_dict['image'] = repo_uri
+    container_props_dict['environment'] = [
+        {
+            'name': 'access_key_ssm_name',
+            'value': aws_object_names['access_key_ssm_name'],
+        },
+        {
+            'name': 'secret_key_ssm_name',
+            'value': aws_object_names['secret_key_ssm_name'],
+        },
+        {
+            'name': 'region_name',
+            'value': aws_object_names['region_name'],
+        },
+        {
+            'name': 'server_url',
+            'value': aws_object_names['server_url'],
+        },
+    ]
     batch_client.register_job_definition(
-        jobDefinitionName=job_defn_name,
+        jobDefinitionName=aws_object_names['job_defn_name'],
         type='container',
         containerProperties=container_props_dict,
     )

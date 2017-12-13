@@ -1,6 +1,6 @@
 from db.study_models import Studies
 from db.user_models import Admin
-from pipeline.boto_helpers import get_boto_client, get_aws_object_names
+from pipeline.boto_helpers import get_aws_object_names, get_boto_client
 
 
 # AJK TODO annotate
@@ -54,33 +54,14 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
         jobDefinition=aws_object_names['job_defn_name'],
         jobQueue=aws_object_names['queue_name'],
         containerOverrides={
-            # AJK TODO this can also go in the job def'n, then freq can be an env variable
-            'command': [
-                '/bin/bash',
-                'runner.sh',
-                freq,
-            ],
             'environment': [
-                # AJK TODO maybe put these in the job definition?
                 {
                     'name': 'study_object_id',
                     'value': object_id,
                 },
                 {
-                    'name': 'access_key_ssm_name',
-                    'value': aws_object_names['access_key_ssm_name'],
-                },
-                {
-                    'name': 'secret_key_ssm_name',
-                    'value': aws_object_names['secret_key_ssm_name'],
-                },
-                {
-                    'name': 'region_name',
-                    'value': aws_object_names['region_name'],
-                },
-                {
-                    'name': 'server_url',
-                    'value': aws_object_names['server_url'],
+                    'name': 'FREQ',
+                    'value': freq,
                 },
             ],
         },
@@ -90,7 +71,7 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
 def create_all_jobs(freq):
     """
     Create one AWS batch job for each Study object
-    :param freq: string e.g. 'daily', 'monthly'. This is only used for naming the batch jobs.
+    :param freq: string e.g. 'daily', 'monthly'
     """
     
     # Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the

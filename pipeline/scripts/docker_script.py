@@ -9,13 +9,12 @@ import subprocess
 import boto3
 from botocore.exceptions import ClientError
 
-from boto_helpers import get_pipeline_folder
+from boto_helpers import get_aws_object_names, get_pipeline_folder
 
 
-def run(ecr_repo_name):
+def run():
     """
     Run the code
-    :param ecr_repo_name: Name of the repository we will create and upload to
     :return: The repository's URI, to be used in creating AWS Batch jobs elsewhere
     """
     
@@ -48,6 +47,7 @@ def run(ecr_repo_name):
     
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI
     # If such a repository already exists, get the repository's URI
+    ecr_repo_name = get_aws_object_names()['ecr_repo_name']
     client = boto3.client('ecr')
     try:
         resp = client.create_repository(
