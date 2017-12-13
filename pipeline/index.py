@@ -1,7 +1,16 @@
+import imp as _imp
+from os.path import abspath as _abspath
+
+_current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
+_imp.load_source("__init__", _current_folder_init)
+
+
 import json
 import os
 
 import boto3
+
+from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 
 from db.study_models import Studies
 from db.user_models import Admin
@@ -21,7 +30,7 @@ def refresh_data_access_credentials(freq, aws_object_names):
     access_key, secret_key = mock_admin.reset_access_credentials()
 
     # Get the necessary credentials for pinging the Beiwe server
-    ssm_client = boto3.client('ssm', region_name='us-east-2')
+    ssm_client = boto3.client('ssm', region_name='us-east-2', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     ssm_client.put_parameter(
         Name=aws_object_names['access_key_ssm_name'],
         Value=access_key,
@@ -48,7 +57,8 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
     if client is None:
         # Make a batch client in the Lambda's own region
         # AJK TODO get the region name for cron jobs (here and everywhere)
-        client = boto3.client('batch', region_name='us-east-2')
+        client = boto3.client('batch', region_name='us-east-2', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=
+AWS_SECRET_ACCESS_KEY)
 
     client.submit_job(
         jobName=aws_object_names['job_name'].format(freq=freq),
@@ -95,14 +105,14 @@ def create_all_jobs(freq):
     
     # aws-object-names.json is in the same folder as index.py. This is meant to be run by an
     # AWS Lambda, so we can guarantee that fact.
-    with open('aws-object-names.json') as fn:
+    with open('pipeline/configs/aws-object-names.json') as fn:
         aws_object_names = json.load(fn)
     
     refresh_data_access_credentials(freq, aws_object_names)
     
     for study in Studies(deleted=False):
         # For each study, create a job
-        object_id = study._id
+        object_id = str(study._id)
         create_one_job(freq, object_id, aws_object_names)
 
 
