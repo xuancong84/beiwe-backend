@@ -49,7 +49,6 @@ def create_one_job(freq, object_id, aws_object_names, client=None):
     """
     
     if client is None:
-        # Make a batch client in the Lambda's own region
         # AJK TODO get the region name for cron jobs (here and everywhere)
         client = boto3.client(
             'batch',
@@ -98,10 +97,8 @@ def create_all_jobs(freq):
     :param freq: string e.g. 'daily', 'manually'
     """
     
-    # When this code was written (2017-12-11), AWS Lambda only provided boto3 version 1.4.7.
-    # Version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the task this
-    # functions performs. AWS Lambda now provides boto3 version 1.4.8, so we should switch to
-    # using Array Jobs.
+    # Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
+    # task this function performs. We should switch to using them.
     # TODO switch to using Array Jobs ASAP
     print('Boto3 version: ' + boto3.__version__)
     
@@ -116,6 +113,8 @@ def create_all_jobs(freq):
         create_one_job(freq, object_id, aws_object_names)
 
 
+# TODO establish cron jobs to call these
+# I've been using ('19 * * * ? *', '36 4 * * ? *', '49 2 ? * SUN *', '2 1 1 * ? *') up til now
 def hourly():
     create_all_jobs('hourly')
 

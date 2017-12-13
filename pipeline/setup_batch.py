@@ -6,13 +6,10 @@ import json
 import os.path
 
 from boto_helpers import get_configs_folder
-from scripts import docker_script, job_queue_script, lambda_script
+from scripts import docker_script, job_queue_script
 
 
-def run(
-        ecr_repo_name, comp_env_role, instance_profile, comp_env_name, queue_name,
-        job_defn_name, lambda_role, function_name, rule_name, **_
-):
+def run(ecr_repo_name, comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, **_):
     """
     Run the actual code. The various arguments are passed to the sub-scripts. Note that the
     variable names MUST match the keys in aws-object-names.json, or else they will not be
@@ -23,7 +20,6 @@ def run(
     job_queue_script.run(
         comp_env_role, instance_profile, comp_env_name, queue_name, job_defn_name, repo_uri,
     )
-    # lambda_script.run(lambda_role, function_name, rule_name)
 
 
 if __name__ == '__main__':

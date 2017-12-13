@@ -3,14 +3,13 @@ A script for creating a docker image and uploading it to an AWS ECS repository.
 This should be run on a machine running Amazon Linux.
 """
 
-import json
 import os.path
 import subprocess
 
 import boto3
 from botocore.exceptions import ClientError
 
-from boto_helpers import get_configs_folder, get_pipeline_folder
+from boto_helpers import get_pipeline_folder
 
 
 def run(ecr_repo_name):
@@ -38,6 +37,7 @@ def run(ecr_repo_name):
                                git_destination, '--branch', 'pipeline'])
         print('Git repository cloned')
     except subprocess.CalledProcessError:
+        # TODO: when the pipeline branch has been merged with master on Beiwe-Analysis, change 'pipeline' to 'master'
         subprocess.check_call(['git', '-C', git_destination, 'checkout', 'pipeline'])
         subprocess.check_call(['git', '-C', git_destination, 'pull'])
         print('Git repository updated')
@@ -75,19 +75,3 @@ def run(ecr_repo_name):
     print('Docker pushed')
     
     return repo_uri
-
-# TODO this has to be runnable from command line directly
-
-
-if __name__ == '__main__':
-    
-    # Get the file containing the AWS object names
-    configs_folder = get_configs_folder()
-    aws_object_names_file = os.path.join(configs_folder, 'aws-object-names.json')
-    
-    # Get the AWS object names from the file
-    with open(aws_object_names_file) as fn:
-        aws_object_names_dict = json.load(fn)
-    
-    # Update and upload the docker image
-    run(aws_object_names_dict['ecr_repo_name'])
