@@ -33,9 +33,14 @@ def run(ecr_repo_name):
     # TODO: when the pipeline branch has been merged with master on Beiwe-Analysis, get rid of the --branch pipeline argument
     pipeline_folder = get_pipeline_folder()
     git_destination = os.path.join(pipeline_folder, 'Beiwe-Analysis')
-    subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
-                           git_destination, '--branch', 'pipeline'])
-    print('Git repository cloned')
+    try:
+        subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
+                               git_destination, '--branch', 'pipeline'])
+        print('Git repository cloned')
+    except subprocess.CalledProcessError:
+        subprocess.check_call(['git', '-C', git_destination, 'checkout', 'pipeline'])
+        subprocess.check_call(['git', '-C', git_destination, 'pull'])
+        print('Git repository updated')
     
     # Create the docker image
     subprocess.check_call(['sudo', 'docker', 'build', '-t', 'beiwe-analysis', pipeline_folder])
