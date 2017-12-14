@@ -3,8 +3,6 @@ import os.path
 
 import boto3
 
-from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
-
 # This is all cribbed from the django branch's cluster_management/deployment_helpers folder
 # TODO once the branches are merged, use that code and NOT this code
 
@@ -16,6 +14,8 @@ def get_aws_object_names():
 
 
 def get_boto_client(client_type):
+    from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
+
     aws_object_names = get_aws_object_names()
     
     return boto3.client(
