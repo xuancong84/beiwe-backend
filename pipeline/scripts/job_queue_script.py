@@ -12,7 +12,8 @@ import boto3
 from boto_helpers import get_aws_object_names, get_configs_folder
 
 
-def run(repo_uri):
+# TODO reannotate
+def run(repo_uri, ami_id):
     """
     Run the code
     :param repo_uri: string, the URI of an existing AWS ECR repository.
@@ -79,6 +80,7 @@ def run(repo_uri):
     
     # Create the batch compute environment
     batch_client = boto3.client('batch')
+    compute_environment_dict['imageId'] = ami_id
     batch_client.create_compute_environment(
         computeEnvironmentName=comp_env_name,
         type='MANAGED',

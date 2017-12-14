@@ -1,5 +1,6 @@
 {
   "ecr_repo_name": "data-pipeline-docker",
+  "ami_name": "data-pipeline-ami",
   "comp_env_role": "AWSBatchServiceRole",
   "instance_profile": "ecsInstanceRole",
   "comp_env_name": "data-pipeline-env",
