@@ -3,7 +3,33 @@
 1.  Create an IAM Role with the necessary permissions for running the deploy script.
     1.  Go to <https://console.aws.amazon.com/iam/home?#/policies$new>.
     1.  Select the _JSON_ tab.
-    1.  Replace the existing text with the full text of `pipeline-setup-policy.json`.
+    1.  Replace the existing text with the following blob:
+        ```json
+        {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Action": [
+              "batch:CreateComputeEnvironment",
+              "batch:CreateJobQueue",
+              "batch:DescribeComputeEnvironments",
+              "batch:RegisterJobDefinition",
+              "iam:CreateInstanceProfile",
+              "ec2:CopyImage",
+              "ec2:CreateImage",
+              "ec2:DeregisterImage",
+              "ec2:RunInstances",
+              "ec2:TerminateInstances",
+              "ecr:*",
+              "iam:AddRoleToInstanceProfile",
+              "iam:CreateRole",
+              "iam:PassRole",
+              "iam:PutRolePolicy"
+            ],
+            "Resource": "*"
+          }]
+        }
+        ```
     1.  Click _Review policy_.
     1.  Enter a name and click _Create policy_.
     1.  Go to <https://console.aws.amazon.com/iam/home?#/roles$new?step=permissions&selectedService=EC2&selectedUseCase=EC2>.
@@ -45,13 +71,13 @@
     1.  The next step takes several minutes to run to completion. You will have to enter your git credentials again towards the beginning.
     1.  If you are setting up your Beiwe Data Pipeline for the first time:
         1.  Run the following line of code:
-            ```
+            ```bash
             python beiwe-backend/pipeline/setup_batch.py
             ```
         1.  When that has completed, you should see the line `Job definition created` printed.
     1.  If you already have the Beiwe Data Pipeline set up, and you want to update the code it is executing: 
         1.  Run the following line of code:
-            ```
+            ```bash
             python beiwe-backend/pipeline/update-docker.py
             ```
         1.  When that has completed, you should see the line `Docker pushed` printed.
