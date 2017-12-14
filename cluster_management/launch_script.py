@@ -78,6 +78,14 @@ def configure_fabric(eb_environment_name, ip_address, key_filename=None):
     sudo("chmod 666 {log}".format(log=LOG_FILE))
 
 
+def remove_unneeded_ssh_keys():
+    """ This is based on a recommendation from AWS documentation:
+    https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/
+    building-shared-amis.html?icmpid=docs_ec2_console#remove-ssh-host-key-pairs
+    Once you run this, you can't SSH into the server until you've rebooted it. """
+    sudo("shred -u /etc/ssh/*_key /etc/ssh/*_key.pub")
+
+
 def push_manager_private_ip(eb_environment_name):
     ip = get_manager_private_ip(eb_environment_name)
     command = "printf {ip} > {manager_ip}".format(ip=ip,
@@ -430,6 +438,7 @@ def do_create_single_server_ami(ip_address, key_filename):
     run('python {filename} create_default_login'.format(filename=manage_script_filepath))
     setup_single_server_ami_cron()
     configure_apache()
+    remove_unneeded_ssh_keys()
     
     
 def do_fix_health_checks():
