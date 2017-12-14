@@ -3,7 +3,7 @@
 1.  Create an IAM Role with the necessary permissions for running the deploy script.
     1.  Go to <https://console.aws.amazon.com/iam/home?#/policies$new>.
     1.  Select the _JSON_ tab.
-    1.  Replace the existing text with the full text of `pipeline-setup-policy.json`. ***TODO write this json***
+    1.  Replace the existing text with the full text of `pipeline-setup-policy.json`.
     1.  Click _Review policy_.
     1.  Enter a name and click _Create policy_.
     1.  Go to <https://console.aws.amazon.com/iam/home?#/roles$new?step=permissions&selectedService=EC2&selectedUseCase=EC2>.
