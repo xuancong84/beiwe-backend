@@ -32,7 +32,7 @@ def run():
     pipeline_folder = get_pipeline_folder()
     git_destination = os.path.join(pipeline_folder, 'Beiwe-Analysis')
     try:
-        subprocess.check_call(['git', 'clone', 'git@github.com:onnela-lab/Beiwe-Analysis.git',
+        subprocess.check_call(['git', 'clone', 'https://github.com/onnela-lab/Beiwe-Analysis.git',
                                git_destination, '--branch', 'pipeline'])
         print('Git repository cloned')
     except subprocess.CalledProcessError:
@@ -42,12 +42,18 @@ def run():
         print('Git repository updated')
     
     # Create the docker image
+    subprocess.check_call(['sudo', 'service', 'docker', 'start'])
     subprocess.check_call(['sudo', 'docker', 'build', '-t', 'beiwe-analysis', pipeline_folder])
     print('Docker image created')
     
+    # Configure AWS ECR
+    aws_object_names = get_aws_object_names()
+    region_name = aws_object_names['region_name']
+    subprocess.check_call(['aws', 'configure', 'set', 'default.region', region_name])
+
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI
     # If such a repository already exists, get the repository's URI
-    ecr_repo_name = get_aws_object_names()['ecr_repo_name']
+    ecr_repo_name = aws_object_names['ecr_repo_name']
     client = boto3.client('ecr')
     try:
         resp = client.create_repository(

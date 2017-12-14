@@ -16,6 +16,7 @@
       "batch:DescribeComputeEnvironments",
       "iam:AddRoleToInstanceProfile",
       "batch:CreateJobQueue",
+      "iam:PassRole",
       "batch:RegisterJobDefinition",
       "ecr:*"
     ],

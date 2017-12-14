@@ -1,4 +1,5 @@
 boto==2.48.0
+boto3==1.4.8
 cronutils>=0.1.9
 # Django==1.11.5
 mongobackup==0.2.2
