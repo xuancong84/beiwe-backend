@@ -12,11 +12,11 @@ import boto3
 from boto_helpers import get_aws_object_names, get_configs_folder
 
 
-# TODO reannotate
 def run(repo_uri, ami_id):
     """
     Run the code
     :param repo_uri: string, the URI of an existing AWS ECR repository.
+    :param ami_id: string, the id of an existing AWS AMI.
     """
     
     # Load a bunch of JSON blobs containing policies and other things that boto3 clients

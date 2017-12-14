@@ -3,19 +3,32 @@ from db.user_models import Admin
 from pipeline.boto_helpers import get_aws_object_names, get_boto_client
 
 
-# AJK TODO annotate
 def refresh_data_access_credentials(freq, aws_object_names):
+    """
+    Refresh the data access credentials for a particular BATCH USER user and upload them
+    (encrypted) to the AWS Parameter Store. This enables AWS batch jobs to get the
+    credentials and thereby access the data access API (DAA).
+    :param freq: string, one of 'hourly' | 'daily' | 'weekly' | 'monthly' | 'manually'
+    :param aws_object_names: dict with keys access_key_ssm_name and secret_key_ssm_name.
+    This is used to know what call the data access credentials on AWS.
+    """
+    
+    # Get or create an Admin with no password. This means that nobody can log in as this
+    # Admin in the web interface.
     admin_name = 'BATCH USER {}'.format(freq)
     mock_admin = Admin(admin_name)
     if not mock_admin:
         mock_admin = Admin.create_without_password(admin_name)
     
+    # Ensure that the Admin is attached to all Studies. This allows them to access all
+    # data via the DAA.
     for study in Studies():
         study.add_admin(mock_admin._id)
     
+    # Reset the credentials. This ensures that they aren't stale.
     access_key, secret_key = mock_admin.reset_access_credentials()
 
-    # Get the necessary credentials for pinging the Beiwe server
+    # Put the credentials (encrypted) into AWS Parameter Store
     ssm_client = get_boto_client('ssm')
     ssm_client.put_parameter(
         Name=aws_object_names['access_key_ssm_name'],
@@ -74,14 +87,15 @@ def create_all_jobs(freq):
     :param freq: string e.g. 'daily', 'monthly'
     """
     
-    # Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
+    # TODO: Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
     # task this function performs. We should switch to using them.
-    # TODO switch to using Array Jobs ASAP
     
     aws_object_names = get_aws_object_names()
     
     refresh_data_access_credentials(freq, aws_object_names)
     
+    # TODO: If there are issues with servers not getting spun up in time, make this a
+    # ThreadPool with random spacing over the course of 5-10 minutes.
     for study in Studies(deleted=False):
         # For each study, create a job
         object_id = str(study._id)

@@ -2,7 +2,6 @@
 FROM ubuntu:16.04
 
 # Install system requirements
-# TODO ensure we have the correct versions of R and python
 RUN ["apt-get", "update"]
 RUN ["apt-get", "install", "-y", "python-pip", "python3-pip", "r-base"]
 
