@@ -50,7 +50,7 @@ def run():
     aws_object_names = get_aws_object_names()
     region_name = aws_object_names['region_name']
     subprocess.check_call(['aws', 'configure', 'set', 'default.region', region_name])
-
+    
     # Create an AWS ECR repository to put the docker image into, and get the repository's URI
     # If such a repository already exists, get the repository's URI
     ecr_repo_name = aws_object_names['ecr_repo_name']
@@ -68,7 +68,6 @@ def run():
         repo_uri = resp['repositories'][0]['repositoryUri']
         print('Existing ECR repository found')
     
-    # TODO ensure that AWS credentials are configured (or environment variables or whatever)
     # Tag the local docker image with the remote repository's URI. This is similar to
     # having a local git branch track a remote one.
     subprocess.check_call(['sudo', 'docker', 'tag', 'beiwe-analysis', repo_uri])
