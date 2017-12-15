@@ -88,6 +88,7 @@ API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 CHUNK_TIMESLICE_QUANTUM = 3600
 # the name of the s3 folder that contains chunked data
 CHUNKS_FOLDER = "CHUNKED_DATA"
+PIPELINE_FOLDER = "PIPELINE_DATA"
 
 ## Constants for for the keys in data_stream_to_s3_file_name_string
 ACCELEROMETER = "accelerometer"

@@ -1,9 +1,16 @@
-import os
+import random
+import string
+
 from datetime import datetime
+from mongolia.constants import REQUIRED_STRING, REQUIRED_DATETIME, REQUIRED_LIST, REQUIRED_OBJECTID
+
+from config.constants import (CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, CONCURRENT_NETWORK_OPS,
+    API_TIME_FORMAT, PIPELINE_FOLDER)
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
+from db.study_models import Studies
+from db.user_models import Users
 from libs.security import chunk_hash, low_memory_chunk_hash
-from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, CONCURRENT_NETWORK_OPS
-from mongolia.constants import REQUIRED_STRING
+
 
 class FileProcessingLockedError(Exception): pass
 
@@ -108,3 +115,101 @@ class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess
 class FileProcessLockCollection(DatabaseCollection):
     OBJTYPE = FileProcessLock
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
+
+class InvalidUploadParameterError(Exception): pass
+
+
+class PipelineUpload(DatabaseObject):
+    PATH = "beiwe.pipeline_registry"
+    
+    REQUIREDS = {
+        "study_id": REQUIRED_OBJECTID,
+        "tags": REQUIRED_LIST,
+        "file_name": REQUIRED_STRING
+    }
+    
+    INTERNALS = {
+        "creation_time": REQUIRED_DATETIME,
+        "s3_path": REQUIRED_STRING,
+        "file_hash": REQUIRED_STRING,
+    }
+    
+    DEFAULTS = {}
+    DEFAULTS.update(INTERNALS)
+    DEFAULTS.update(REQUIREDS)
+
+
+    @classmethod
+    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None, start=None, end=None):
+        """ This function uses mongo query syntax to provide datetimes and have mongo do the
+        comparison operation, and the 'in' operator to have mongo only match the user list
+        provided. """
+        query = {"study_id": study_id}
+        if user_ids:
+            query["user_id"] = {"$in": user_ids}
+        if data_types:
+            query["data_type"] = {"$in": data_types}
+        print query
+        return cls.iterator(query=query, page_size=10 * CONCURRENT_NETWORK_OPS)
+    
+    
+    @classmethod
+    def get_creation_arguments(self, params, file_object):
+        errors = []
+        
+        # block extra keys
+        for key in params.iterkeys():
+            if key not in PipelineUpload.REQUIREDS:
+                errors.append('encountered invalid parameter: "%s"' % key)
+        
+        # ensure required are present, we don't allow falsey contents.
+        for key in PipelineUpload.DEFAULTS:
+            if not params.get(key, None):
+                errors.append('missing required parameter: "%s"' % key)
+        
+        # validate study_id
+        if not Studies(_id=params["study_id"]):
+            errors.append(
+                    'encountered invalid study_id: "%s"'
+                    % params["study_id"] if params["study_id"] else None
+            )
+        
+        if len(params['file_name']) > 256:
+            errors.append("encountered invalid file_name, file_names cannot be more than 256 characters")
+        
+        if PipelineUploads.count(file_name=params['file_name']):
+            errors.append('a file with the name "%s" already exists')
+        
+        if errors:
+            raise InvalidUploadParameterError("\n".join(errors))
+        
+        creation_time = datetime.utcnow()
+        file_hash = low_memory_chunk_hash(file_object.read())
+        file_object.seek(0)
+        
+        s3_path = "%s/%s/%s/%s/%s" % (
+            PIPELINE_FOLDER,
+            params["study_id"],
+            params["file_name"],
+            creation_time.isoformat(),
+            ''.join(random.choice(string.ascii_letters + string.digits) for i in range(32)),
+            # todo: file_name?
+        )
+        
+        return {
+            "creation_time": creation_time,
+            "s3_path": s3_path,
+            "study_id": params["study_id"],  # required
+            "data_stream": params["data_stream"],  # required
+            "file_name": params["file_name"],
+            "file_hash": file_hash,
+            "user_id": params.get("user_id", None),  # optional, force None
+        }
+    
+    
+class PipelineUploads(DatabaseCollection):
+    OBJTYPE = PipelineUpload
