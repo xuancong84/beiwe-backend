@@ -102,8 +102,6 @@ def create_all_jobs(freq):
         create_one_job(freq, object_id, aws_object_names)
 
 
-# TODO establish cron jobs to call these
-# I've been using ('19 * * * ? *', '36 4 * * ? *', '49 2 ? * SUN *', '2 1 1 * ? *') up til now
 def hourly():
     create_all_jobs('hourly')
 
