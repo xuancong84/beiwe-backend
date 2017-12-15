@@ -90,8 +90,9 @@ def create_study():
                                system_admin=admin_is_system_admin())
     name = request.form.get('name')
     encryption_key = request.form.get('encryption_key')
+    is_test = request.form.get('is_test') == 'true'  # 'true' -> True, 'false' -> False
     try:
-        study = Study.create_default_study(name, encryption_key)
+        study = Study.create_default_study(name, encryption_key, is_test)
         flash("Successfully created a new study.", 'success')
         copy_existing_study_if_asked_to(study)
         return redirect('/device_settings/' + str(study._id))

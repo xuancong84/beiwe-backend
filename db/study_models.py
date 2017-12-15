@@ -2,20 +2,23 @@ from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
 from config.constants import SURVEY_TYPES
 
 
-class Study( DatabaseObject ):
+class Study(DatabaseObject):
     PATH = "beiwe.studies"
     
-    DEFAULTS = { "name": REQUIRED,
-                 "admins": [],          #admins for the study.
-                 "super_admins":[],     #admins that can add admins. this variable can be used in the yet-to-be-implemented 3-tier user model.
-                 "surveys": [],         #the surveys pushed in this study.
-                 "device_settings": REQUIRED,  #the device settings for the study.
-                 "encryption_key": REQUIRED, #the study's config encryption key.
-                 "deleted": False 
-                }
+    DEFAULTS = {
+        "name": REQUIRED,
+        "admins": [],  # admins for the study.
+        "super_admins": [],  # admins that can add admins. this variable can be used in the yet-to-be-implemented 3-tier user model.
+        "surveys": [],  # the surveys pushed in this study.
+        "device_settings": REQUIRED,  # the device settings for the study.
+        "encryption_key": REQUIRED,  # the study's config encryption key.
+        "deleted": False,
+        # TODO: Implement this difference in the Data Access API
+        "is_test": True,
+    }
     
     @classmethod
-    def create_default_study(cls, name, encryption_key):
+    def create_default_study(cls, name, encryption_key, is_test):
         if Studies(name=name):
             raise StudyAlreadyExistsError("a study named %s already exists" % name)
         if len(encryption_key) != 32:
@@ -23,9 +26,12 @@ class Study( DatabaseObject ):
                          "entered %d characters" % len(encryption_key)
             raise InvalidEncryptionKeyError(error_text)
         device_settings = StudyDeviceSettings.create_default()
-        study = { "name":name,
-                 "encryption_key":encryption_key,
-                 "device_settings":device_settings._id }
+        study = {
+            "name": name,
+            "encryption_key": encryption_key,
+            "device_settings": device_settings._id,
+            "is_test": is_test,
+        }
         return Study.create(study, random_id=True)
         
     #Editors
@@ -146,12 +152,14 @@ class Survey( DatabaseObject ):
     
     # it doesn't need to be in this document, but this should say where to find it.
     PATH = "beiwe.surveys"
-    DEFAULTS = {"content": [],
-                "timings": [ [], [], [], [], [], [], [] ],
-                "survey_type": REQUIRED,
-                "settings":{} }
+    DEFAULTS = {
+        "content": [],
+        "timings": [[], [], [], [], [], [], []],
+        "survey_type": REQUIRED,
+        "settings": {},
+    }
 
-    #enhanced audio survey.   The following settings will be added to the settings dict
+    # enhanced audio survey.   The following settings will be added to the settings dict
     # "audio_survey_type" maps to either "compressed" or "raw"
     # The app should default to a "compressed" survey if audio_survey_type is not present.
     # "raw" should always be paired with the keyword "sample_rate", which should map to
@@ -163,9 +171,8 @@ class Survey( DatabaseObject ):
     #       map to an integer value.  Valid values are... 32, 64, 96, 128, 192, and 256.
     #     (The app should default to 64 if no value is provided.  This will occur when
     #       audio_survey_type is not provided.)
-    #Example settings dict parameters:
+    # Example settings dict parameters:
     #   'settings': {'audio_survey_type': 'compressed', 'bit_rate': 64000}
-
 
     @classmethod
     def create_default_survey(cls, survey_type):

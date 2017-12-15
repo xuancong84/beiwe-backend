@@ -10,9 +10,14 @@
         </div>
         <div class="row">
           <h2>{{ study_name }}</h2>
-
         </div>
       </div>
+    
+      {% if study.is_test %}
+          This is a test study. Researchers will be able to download raw data and processed data output from the Data Analysis Pipeline.
+      {% else %}
+          This is a production study. Researchers will only be able to download processed data output from the Data Analysis Pipeline.
+      {% endif %}
 
       <div class="span12">
         <div class="row">
