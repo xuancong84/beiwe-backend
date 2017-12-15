@@ -100,6 +100,10 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
 
     # A Django query with a slice (e.g. .all()[x:y]) makes a LIMIT query, so it
     # only gets from the database those FTPs that are in the slice.
+    print participant.as_native_python()
+    print len(participant.files_to_process.all())
+    print count
+    print skip_count
     for data in pool.map(batch_retrieve_for_processing,
                          participant.files_to_process.all()[skip_count:count+skip_count],
                          chunksize=1):
@@ -303,12 +307,20 @@ def construct_s3_chunk_path(study_id, user_id, data_type, time_bin):
 
 
 def file_path_to_data_type(file_path):
-    # Look through each folder name in file_path to see if it corresponds to a data type
+    # Look through each folder name in file_path to see if it corresponds to a data type. Due to
+    # a dumb mistake ages ago the identifiers file has an underscore where it should have a
+    # slash, and we have to handle that case.  Also, it looks like we are hitting that case with
+    # the identifiers file separately but without any slashes in it, sooooo we need to for-else.
     for file_piece in file_path.split('/'):
         data_type = UPLOAD_FILE_TYPE_MAPPING.get(file_piece, None)
+        if data_type and "identifiers" in data_type:
+            return IDENTIFIERS
         if data_type:
             return data_type
-    
+    else:
+        if "identifiers" in file_path:
+            return IDENTIFIERS
+        
     # If no data type has been selected; i.e. if none of the data types are present in file_path,
     # raise an error
     raise Exception("data type unknown: %s" % file_path)
@@ -652,7 +664,6 @@ def batch_upload(upload):
 """ Exceptions """
 class HeaderMismatchException(Exception): pass
 class ChunkFailedToExist(Exception): pass
-
 
 # This is useful for performance testing, replace the real threadpool with this one and everything
 # will suddenly be single-threaded, making it much easier to profile.

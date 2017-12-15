@@ -23,7 +23,6 @@ data_access_api = Blueprint('data_access_api', __name__)
 upload_stream_map = {"survey_answers": ("surveyAnswers", "csv"),
                      "audio": ("voiceRecording", "mp4")}
 
-
 #########################################################################################
 
 def get_and_validate_study_id():
@@ -250,12 +249,12 @@ def determine_file_name(chunk):
     extension = chunk["chunk_path"][-3:]  # get 3 letter file extension from the source.
     if chunk["data_type"] == SURVEY_ANSWERS:
         # add the survey_id from the file path.
-        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
+        return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                    str(chunk["time_bin"]).replace(":", "_"), extension)
     
     elif chunk["data_type"] == SURVEY_TIMINGS:
         # add the survey_id from the database entry.
-        return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["survey_id"],
+        return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["survey_id"],
                                    str(chunk["time_bin"]).replace(":", "_"), extension)
     
     elif chunk["data_type"] == VOICE_RECORDING:
@@ -264,11 +263,13 @@ def determine_file_name(chunk):
         # correct this.  We can identify those files by checking for the existence of the extra /.
         # When we don't find it, we revert to original behavior.
         if chunk["chunk_path"].count("/") == 4:  #
-            return "%s/%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
+            return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                        str(chunk["time_bin"]).replace(":", "_"), extension)
     
     # all other files have this form:
-    return "%s/%s/%s.%s" % (chunk["user_id"], chunk["data_type"],
+    from pprint import pprint
+    pprint(chunk)
+    return "%s/%s/%s.%s" % (chunk['participant_id'], chunk["data_type"],
                             str(chunk["time_bin"]).replace(":", "_"), extension)
 
 
@@ -283,7 +284,9 @@ def str_to_datetime(time_string):
 
 def batch_retrieve_s3(chunk):
     """ Data is returned in the form (chunk_object, file_data). """
-    return chunk, s3_retrieve(chunk["chunk_path"], chunk["study_id"], raw_path=True)
+    return chunk, s3_retrieve(chunk["chunk_path"],
+                              study_object_id=Study.objects.get(id=chunk["study_id"]).object_id,
+                              raw_path=True)
 
 
 #########################################################################################
@@ -344,7 +347,7 @@ def handle_database_query(study_id, query, registry=None):
     
     # If there is no registry, just return all the chunks.
     if not registry:
-        return chunks
+        return chunks.values()
     
     # If there is a registry, we need to filter the chunks
     else:
@@ -364,7 +367,7 @@ def handle_database_query(study_id, query, registry=None):
         # Return a QuerySet of the chunks that aren't in the registry
         unregistered_chunks = chunks.exclude(pk__in=registered_chunk_pks)
         
-        return unregistered_chunks
+        return unregistered_chunks.values()
 
 #########################################################################################
 
