@@ -1,6 +1,6 @@
 {
   "InstanceType": "c4.large",
-  "ImageId": "ami-15e9c770",
+  "ImageId": "ami-58f5db3d",
   "MinCount": 1,
   "MaxCount": 1,
   "BlockDeviceMappings": [{
