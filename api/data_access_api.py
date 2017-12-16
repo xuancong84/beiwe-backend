@@ -1,14 +1,14 @@
-from datetime import datetime
 from multiprocessing.pool import ThreadPool
 from zipfile import ZipFile, ZIP_STORED
 
 from boto.utils import JSONDecodeError
 from bson import ObjectId
 from bson.errors import InvalidId
+from datetime import datetime
 from flask import Blueprint, request, abort, json, Response
 
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
-                              SURVEY_ANSWERS, SURVEY_TIMINGS)
+    SURVEY_ANSWERS, SURVEY_TIMINGS)
 from db.data_access_models import (ChunksRegistry, InvalidUploadParameterError, PipelineUploads,
     PipelineUpload)
 from db.study_models import Study, Studies
@@ -23,10 +23,7 @@ from libs.streaming_bytes_io import StreamingBytesIO
 # The debug log has many lines without timestamps.
 
 data_access_api = Blueprint('data_access_api', __name__)
-
-upload_stream_map = {"survey_answers":("surveyAnswers", "csv"),
-                     "audio":("voiceRecording", "mp4")}
-
+upload_stream_map = {"survey_answers":("surveyAnswers", "csv"), "audio":("voiceRecording", "mp4")}
 
 #########################################################################################
 
@@ -36,7 +33,6 @@ def get_and_validate_study_id():
         Study id malformed (not 24 characters) causes 400 error.
         Study id otherwise invalid causes 400 error.
         Study id does not exist in our database causes _404_ error."""
-    
     if "study_id" not in request.values:
         return abort(400)
     
@@ -54,7 +50,6 @@ def get_and_validate_study_id():
     # Study object will be None if there is no matching study id.
     if not study_obj:  # additional case: if study object exists but is empty
         return abort(404)
-    
     return study_obj
 
 
@@ -344,13 +339,15 @@ def handle_database_query(study_id, query, registry=None):
 #########################################################################################
 #########################################################################################
 
+VALID_PIPELINE_POST_PARAMS = PipelineUpload.REQUIREDS.keys()
+VALID_PIPELINE_POST_PARAMS.append("access_key")
+VALID_PIPELINE_POST_PARAMS.append("secret_key")
+
 # before reenabling, audio filenames on s3 were incorrectly enforced to have millisecond
 # precision, remove trailing zeros this does not affect data downloading because those file times
-#  are generated from the chunk registry
-@data_access_api.route("/data-upload-apiv1", methods=['POST'])
-def data_upload():
-    print "got something!"
-    
+    #  are generated from the chunk registry
+@data_access_api.route("/pipeline-upload/v1", methods=['POST', 'GET'])
+def data_pipeline_upload():
     #Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
@@ -359,7 +356,6 @@ def data_upload():
         return abort(403) # access key DNE
     if not admin.validate_access_credentials( access_secret ):
         return abort( 403 )  # incorrect secret key
-    
     # case: invalid study
     try:
         study_id = ObjectId(request.values["study_id"])
@@ -368,54 +364,53 @@ def data_upload():
     study_obj = Study(study_id)
     if not study_obj:
         return abort(404)
-    
     # case: study not authorized for user
     study_obj = Study(study_id)
     if admin._id not in study_obj['admins']:
         return abort(403)
-    
-    from pprint import pprint
-    pprint(request.files)
-    pprint(request.values)
 
-    #todo: file_name?
+    # block extra keys
+    errors = []
+    for key in request.values.iterkeys():
+        if key not in VALID_PIPELINE_POST_PARAMS:
+            errors.append('encountered invalid parameter: "%s"' % key)
+    
+    if errors:
+        return Response("\n".join(errors), 400)
+        
     try:
         creation_args = PipelineUpload.get_creation_arguments(request.values, request.files['file'])
     except InvalidUploadParameterError as e:
-        return Response(e.message, status=400)
-    
+        return Response(e.message, 400)
     s3_upload(
             creation_args['s3_path'],
             request.files['file'].read(),
             creation_args['study_id'],
             raw_path=True
     )
-
-    PipelineUpload.create(random_id=True, **creation_args)
-    
-    return Response("SUCCESS", status=400)
+    PipelineUpload.create(creation_args, random_id=True)
+    return Response("SUCCESS", status=200)
 
 
-# TODO: make sure that no tags parameter causes all data to be returned
-# TODO: make sure that tag-based filtering works and has match-any behavior
+@data_access_api.route("/get-pipeline/v1", methods=["GET", "POST"])
 def pipeline_data_download():
     study_obj = get_and_validate_study_id()
     get_and_validate_admin(study_obj)
     
     # the following two cases are for difference in content wrapping between the CLI script and
     # the download page.
-    # the mongo $in command below is "get all entities that match any of the things in this list"
     if 'tags' in request.values:
         try:
-            tags = json.loads(request.values['data_streams'])
+            tags = json.loads(request.values['tags'])
         except JSONDecodeError:
-            tags = request.form.getlist('data_streams')
+            tags = request.form.getlist('tags')
+        # the mongo $in command is "get all entities that match any of the things in this list"
         query = PipelineUploads.iterator(study_id=study_obj._id, tags={"$in": tags})
+        
     else:
         query = PipelineUploads.iterator(study_id=study_obj._id)
     
     ####################################
-    
     return Response(
             zip_generator_for_pipeline(query),
             mimetype="zip",
@@ -427,8 +422,6 @@ def zip_generator_for_pipeline(files_list):
     pool = ThreadPool(3)
     zip_output = StreamingBytesIO()
     zip_input = ZipFile(zip_output, mode="w", compression=ZIP_STORED, allowZip64=True)
-    # random_id = generate_random_string()[:32]
-    # print "returning data for query %s" % random_id
     try:
         # chunks_and_content is a list of tuples, of the chunk and the content of the file.
         # chunksize (which is a keyword argument of imap, not to be confused with Beiwe Chunks)
@@ -438,7 +431,7 @@ def zip_generator_for_pipeline(files_list):
         chunks_and_content = pool.imap_unordered(batch_retrieve_pipeline_s3, files_list, chunksize=1)
         for pipeline_upload, file_contents in chunks_and_content:
             # file_name = determine_file_name(chunk)
-            zip_input.writestr(pipeline_upload['file_name'], file_contents)
+            zip_input.writestr("data/" + pipeline_upload['file_name'], file_contents)
             # These can be large, and we don't want them sticking around in memory as we wait for the yield
             del file_contents, pipeline_upload
             yield zip_output.getvalue()  # yield the (compressed) file information
@@ -459,8 +452,17 @@ def zip_generator_for_pipeline(files_list):
         pool.close()
         pool.terminate()
         
+        
 def batch_retrieve_pipeline_s3(pipeline_upload):
     """ Data is returned in the form (chunk_object, file_data). """
-    return pipeline_upload, s3_retrieve(pipeline_upload["file_path"],
+    return pipeline_upload, s3_retrieve(pipeline_upload["s3_path"],
                                         pipeline_upload["study_id"],
                                         raw_path=True)
+
+
+# class dummy_threadpool():
+#     def imap_unordered(self, *args, **kwargs): #the existance of that self variable is key
+#         # we actually want to cut off any threadpool args, which is conveniently easy because map does not use kwargs!
+#         return map(*args)
+#     def terminate(self): pass
+#     def close(self): pass

@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, Markup, render_template, session
 
 from config.constants import ALL_DATA_STREAMS
+from db.data_access_models import PipelineUploads
 from db.user_models import Admin, Users
 from libs.admin_authentication import authenticate_admin_login,\
     get_admins_allowed_studies, admin_is_system_admin
@@ -19,6 +20,7 @@ def data_api_web_form_page():
     users_by_study = {str(study["_id"]) :
                       [user["_id"] for user in Users(study_id=study['_id'])]
                       for study in allowed_studies }
+    
     return render_template("data_api_web_form.html",
                            allowed_studies=allowed_studies,
                            users_by_study=users_by_study,
@@ -32,3 +34,31 @@ def warn_admin_if_hasnt_yet_generated_access_key(admin):
         can download data. Go to <a href='/manage_credentials'> Manage Credentials</a> and click
         'Reset Data-Download API Access Credentials'. """
         flash(Markup(msg), 'danger')
+
+
+@data_access_web_form.route("/pipeline_access_web_form", methods=['GET'])
+@authenticate_admin_login
+def pipeline_download_page():
+    admin = Admin(session['admin_username'])
+    warn_admin_if_hasnt_yet_generated_access_key(admin)
+    allowed_studies = get_admins_allowed_studies()
+    # dict of {study ids : list of user ids}
+    users_by_study = {str(study["_id"]):
+                          [user["_id"] for user in Users(study_id=study['_id'])]
+                      for study in allowed_studies}
+
+    # it is a bit obnoxious to get this data, we need to deduplcate it and then turn it back into a list
+    tags = set()
+    for study in allowed_studies:
+        for tags_list in PipelineUploads(study_id=study._id, field="tags"):
+            for tag in tags_list:
+                tags.add(tag)
+    tags = [_ for _ in tags]
+    tags.sort()
+    return render_template(
+            "data_pipeline_web_form.html",
+            allowed_studies=allowed_studies,
+            users_by_study=users_by_study,
+            tags=tags,
+            system_admin=admin_is_system_admin()
+    )

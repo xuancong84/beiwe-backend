@@ -1,6 +1,8 @@
 import random
 import string
+import json
 
+from bson import ObjectId
 from datetime import datetime
 from mongolia.constants import REQUIRED_STRING, REQUIRED_DATETIME, REQUIRED_LIST, REQUIRED_OBJECTID
 
@@ -141,56 +143,54 @@ class PipelineUpload(DatabaseObject):
     DEFAULTS = {}
     DEFAULTS.update(INTERNALS)
     DEFAULTS.update(REQUIREDS)
-
-
-    @classmethod
-    def get_chunks_time_range(cls, study_id, user_ids=None, data_types=None, start=None, end=None):
-        """ This function uses mongo query syntax to provide datetimes and have mongo do the
-        comparison operation, and the 'in' operator to have mongo only match the user list
-        provided. """
-        query = {"study_id": study_id}
-        if user_ids:
-            query["user_id"] = {"$in": user_ids}
-        if data_types:
-            query["data_type"] = {"$in": data_types}
-        print query
-        return cls.iterator(query=query, page_size=10 * CONCURRENT_NETWORK_OPS)
-    
     
     @classmethod
     def get_creation_arguments(self, params, file_object):
         errors = []
-        
-        # block extra keys
-        for key in params.iterkeys():
-            if key not in PipelineUpload.REQUIREDS:
-                errors.append('encountered invalid parameter: "%s"' % key)
-        
+    
         # ensure required are present, we don't allow falsey contents.
-        for key in PipelineUpload.DEFAULTS:
+        for key in PipelineUpload.REQUIREDS:
             if not params.get(key, None):
                 errors.append('missing required parameter: "%s"' % key)
         
+        # if we escape here early we can simplify the code that requires all parameters later
+        if errors:
+            raise InvalidUploadParameterError("\n".join(errors))
+        
         # validate study_id
-        if not Studies(_id=params["study_id"]):
+        study_id_object_id = ObjectId(params["study_id"])
+        if not Studies(_id=study_id_object_id):
             errors.append(
                     'encountered invalid study_id: "%s"'
                     % params["study_id"] if params["study_id"] else None
             )
-        
+    
+        print 'file_name' in params
+        print params['file_name']
         if len(params['file_name']) > 256:
             errors.append("encountered invalid file_name, file_names cannot be more than 256 characters")
-        
+    
         if PipelineUploads.count(file_name=params['file_name']):
-            errors.append('a file with the name "%s" already exists')
-        
+            errors.append('a file with the name "%s" already exists' % params['file_name'])
+            
+        try:
+            tags = json.loads(params["tags"])
+            if not isinstance(tags, list):
+                # must be json list, can't be json dict, number, or string.
+                raise ValueError()
+            if not tags:
+                errors.append("you must provide at least one tag for your file.")
+            tags = [str(_) for _ in tags]
+        except ValueError:
+            errors.append("could not parse tags, ensure that your uploaded list of tags is a json compatible array.")
+            
         if errors:
             raise InvalidUploadParameterError("\n".join(errors))
-        
+    
         creation_time = datetime.utcnow()
         file_hash = low_memory_chunk_hash(file_object.read())
         file_object.seek(0)
-        
+    
         s3_path = "%s/%s/%s/%s/%s" % (
             PIPELINE_FOLDER,
             params["study_id"],
@@ -199,15 +199,14 @@ class PipelineUpload(DatabaseObject):
             ''.join(random.choice(string.ascii_letters + string.digits) for i in range(32)),
             # todo: file_name?
         )
-        
+    
         return {
             "creation_time": creation_time,
             "s3_path": s3_path,
-            "study_id": params["study_id"],  # required
-            "data_stream": params["data_stream"],  # required
+            "study_id": study_id_object_id,
+            "tags": tags,
             "file_name": params["file_name"],
             "file_hash": file_hash,
-            "user_id": params.get("user_id", None),  # optional, force None
         }
     
     
