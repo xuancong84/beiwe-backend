@@ -10,6 +10,6 @@
   "server_url_ssm_name": "beiwe-daa-key-0",
   "access_key_ssm_name": "beiwe-daa-key-1",
   "secret_key_ssm_name": "beiwe-daa-key-2",
-  "region_name": "us-east-2",
+  "region_name": "us-west-2",
   "server_url": "https://staging.beiwe.org"
 }
