@@ -145,7 +145,7 @@ class PipelineUpload(DatabaseObject):
     DEFAULTS.update(REQUIREDS)
     
     @classmethod
-    def get_creation_arguments(self, params, file_object):
+    def get_creation_arguments(cls, params, file_object):
         errors = []
     
         # ensure required are present, we don't allow falsey contents.
