@@ -1,6 +1,6 @@
 {
   "InstanceType": "c4.large",
-  "ImageId": "ami-58f5db3d",
+  "ImageName": "amzn-ami-2017.09.d-amazon-ecs-optimized",
   "MinCount": 1,
   "MaxCount": 1,
   "BlockDeviceMappings": [{

@@ -27,8 +27,13 @@ def run():
     aws_object_names = get_aws_object_names()
     print('JSON loaded')
     
-    # Create an EC2 instance to model the AMI off of
+    # Get the AMI ID for the local region
     ec2_client = boto3.client('ec2')
+    image_name = ami_ec2_instance_props_dict.pop('ImageName')
+    resp = ec2_client.describe_images(Filters=[{'Name': 'name', 'Values': [image_name]}])
+    ami_ec2_instance_props_dict['ImageId'] = resp['Images'][0]['ImageId']
+    
+    # Create an EC2 instance to model the AMI off of
     resp = ec2_client.run_instances(**ami_ec2_instance_props_dict)
     ec2_instance_id = resp['Instances'][0]['InstanceId']
     print('EC2 instance created')
