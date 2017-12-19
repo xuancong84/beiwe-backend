@@ -90,8 +90,6 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
     return_data = ""
     file_data = [line for line in original_data.split('\n') if line != ""]
     
-    del original_data  # memory optimization
-    
     try: #get the decryption key from the file.
         decoded_key = decode_base64(file_data[0].encode("utf-8"))
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
