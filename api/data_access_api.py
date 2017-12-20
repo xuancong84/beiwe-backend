@@ -51,7 +51,7 @@ def get_and_validate_study_id():
     if not study_obj:  # additional case: if study object exists but is empty
         return abort(404)
     if not study_obj['is_test']:
-        return abort(403)  # You're only allowed to download chunked data from test studies
+        return abort(404)  # You're only allowed to download chunked data from test studies
     return study_obj
 
 
