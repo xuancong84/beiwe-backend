@@ -13,7 +13,7 @@ class Study(DatabaseObject):
         "device_settings": REQUIRED,  # the device settings for the study.
         "encryption_key": REQUIRED,  # the study's config encryption key.
         "deleted": False,
-        # TODO: Implement this difference in the Data Access API
+        # is_test means the test is a test study, and therefore cannot download raw data.
         "is_test": True,
     }
     
