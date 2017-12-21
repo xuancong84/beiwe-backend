@@ -1,9 +1,17 @@
-import os
+import json
+import random
+import string
+
+from bson import ObjectId
 from datetime import datetime
+from mongolia.constants import REQUIRED_STRING, REQUIRED_DATETIME, REQUIRED_LIST, REQUIRED_OBJECTID
+
+from config.constants import (CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, CONCURRENT_NETWORK_OPS,
+    PIPELINE_FOLDER)
 from db.mongolia_setup import DatabaseObject, DatabaseCollection, REQUIRED
+from db.study_models import Studies
 from libs.security import chunk_hash, low_memory_chunk_hash
-from config.constants import CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, CONCURRENT_NETWORK_OPS
-from mongolia.constants import REQUIRED_STRING
+
 
 class FileProcessingLockedError(Exception): pass
 
@@ -109,3 +117,98 @@ class FilesToProcess(DatabaseCollection):
     OBJTYPE = FileToProcess
 class FileProcessLockCollection(DatabaseCollection):
     OBJTYPE = FileProcessLock
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
+
+class InvalidUploadParameterError(Exception): pass
+
+
+class PipelineUpload(DatabaseObject):
+    PATH = "beiwe.pipeline_registry"
+    
+    REQUIREDS = {
+        "study_id": REQUIRED_OBJECTID,
+        "tags": REQUIRED_LIST,
+        "file_name": REQUIRED_STRING
+    }
+    
+    INTERNALS = {
+        "creation_time": REQUIRED_DATETIME,
+        "s3_path": REQUIRED_STRING,
+        "file_hash": REQUIRED_STRING,
+    }
+    
+    DEFAULTS = {}
+    DEFAULTS.update(INTERNALS)
+    DEFAULTS.update(REQUIREDS)
+    
+    @classmethod
+    def get_creation_arguments(cls, params, file_object):
+        errors = []
+    
+        # ensure required are present, we don't allow falsey contents.
+        for key in PipelineUpload.REQUIREDS:
+            if not params.get(key, None):
+                errors.append('missing required parameter: "%s"' % key)
+        
+        # if we escape here early we can simplify the code that requires all parameters later
+        if errors:
+            raise InvalidUploadParameterError("\n".join(errors))
+        
+        # validate study_id
+        study_id_object_id = ObjectId(params["study_id"])
+        if not Studies(_id=study_id_object_id):
+            errors.append(
+                    'encountered invalid study_id: "%s"'
+                    % params["study_id"] if params["study_id"] else None
+            )
+    
+        print 'file_name' in params
+        print params['file_name']
+        if len(params['file_name']) > 256:
+            errors.append("encountered invalid file_name, file_names cannot be more than 256 characters")
+    
+        if PipelineUploads.count(file_name=params['file_name']):
+            errors.append('a file with the name "%s" already exists' % params['file_name'])
+            
+        try:
+            tags = json.loads(params["tags"])
+            if not isinstance(tags, list):
+                # must be json list, can't be json dict, number, or string.
+                raise ValueError()
+            if not tags:
+                errors.append("you must provide at least one tag for your file.")
+            tags = [str(_) for _ in tags]
+        except ValueError:
+            errors.append("could not parse tags, ensure that your uploaded list of tags is a json compatible array.")
+            
+        if errors:
+            raise InvalidUploadParameterError("\n".join(errors))
+    
+        creation_time = datetime.utcnow()
+        file_hash = low_memory_chunk_hash(file_object.read())
+        file_object.seek(0)
+    
+        s3_path = "%s/%s/%s/%s/%s" % (
+            PIPELINE_FOLDER,
+            params["study_id"],
+            params["file_name"],
+            creation_time.isoformat(),
+            ''.join(random.choice(string.ascii_letters + string.digits) for i in range(32)),
+            # todo: file_name?
+        )
+    
+        return {
+            "creation_time": creation_time,
+            "s3_path": s3_path,
+            "study_id": study_id_object_id,
+            "tags": tags,
+            "file_name": params["file_name"],
+            "file_hash": file_hash,
+        }
+    
+    
+class PipelineUploads(DatabaseCollection):
+    OBJTYPE = PipelineUpload
