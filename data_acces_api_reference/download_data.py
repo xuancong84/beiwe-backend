@@ -13,13 +13,14 @@ BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
 IDENTIFIERS = "identifiers"
-LOG_FILE = "app_log"
+ANDROID_LOG = "app_log"
 POWER_STATE = "power_state"
 SURVEY_ANSWERS = "survey_answers"
 SURVEY_TIMINGS = "survey_timings"
 TEXTS_LOG = "texts"
 VOICE_RECORDING = "audio_recordings"
 WIFI = "wifi"
+IOS_LOG = "ios_log"
 
 DEBUG = False
 
