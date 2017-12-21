@@ -85,7 +85,7 @@ def download_page():
 
 @admin_api.route("/download")
 def download_current():
-    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe.apk")
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-2.2.3-onnelaLabServer-release.apk")
 
 
 @admin_api.route("/download_debug")
@@ -104,6 +104,12 @@ def download_beta():
 @authenticate_admin_login
 def download_beta_debug():
     return redirect("https://s3.amazonaws.com/beiwe-app-backups/debug/Beiwe-debug.apk")
+
+
+@admin_api.route("/download_beta_release")
+@authenticate_admin_login
+def download_beta_release():
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-2.2.3-onnelaLabServer-release.apk")
 
 
 @admin_api.route("/privacy_policy")
