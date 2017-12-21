@@ -1,0 +1,8 @@
+{
+  "vcpus": 2,
+  "memory": 2000,
+  "command": [
+    "/bin/bash",
+    "runner.sh"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "InstanceType": "c4.large",
+  "ImageName": "amzn-ami-2017.09.d-amazon-ecs-optimized",
+  "MinCount": 1,
+  "MaxCount": 1,
+  "BlockDeviceMappings": [{
+    "DeviceName": "/dev/xvda",
+    "Ebs": {
+      "VolumeSize": 20,
+      "VolumeType": "gp2"
+    }
+  }]
+}
