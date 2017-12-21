@@ -1,16 +1,17 @@
 import json
 from os import urandom
-from security import decode_base64
 
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from flask import request
-from werkzeug.datastructures import FileStorage
 
 from config.constants import ASYMMETRIC_KEY_LENGTH
 from config.settings import IS_STAGING
-from libs.logging import log_error
 from database.models import Study, DecryptionKeyError, EncryptionErrorMetadata, LineEncryptionError
+from db.profiling import DecryptionKeyError, LineEncryptionError, EncryptionErrorMetadata
+from db.study_models import Study
+from libs.logging import log_error
+from security import decode_base64
 
 
 class DecryptionKeyInvalidError(Exception): pass
@@ -88,20 +89,12 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
                 prev_line=file_data[i - 1] if i > 0 else '',
                 next_line=file_data[i + 1] if i < len(file_data) - 1 else '',
             )
-    
-    if isinstance(original_data, FileStorage):
-        file_data = original_data.read()
-    elif isinstance(original_data, (unicode, str)):
-        #namespace is immediately overwritten, this is fine.
-        file_data = original_data
-    else:
-        raise TypeError("expected string or werkzeug.datastructures.FileStorage")
-    
+            
     bad_lines = []
     error_types = []
     error_count = 0
     return_data = ""
-    file_data = [line for line in file_data.split('\n') if line != ""]
+    file_data = [line for line in original_data.split('\n') if line != ""]
     
     try: #get the decryption key from the file.
         decoded_key = decode_base64(file_data[0].encode("utf-8"))
@@ -109,7 +102,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
     except (TypeError, IndexError) as e:
         DecryptionKeyError.objects.create(
             file_path=request.values['file_name'],
-            contents='\n'.join(file_data),
+            contents=original_data,
             participant=user,
         )
         raise DecryptionKeyInvalidError("invalid decryption key. %s" % e.message)
