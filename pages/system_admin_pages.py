@@ -118,8 +118,11 @@ def create_study():
 
     name = request.form.get('name', '')
     encryption_key = request.form.get('encryption_key', '')
+    
+    # FIXME: implement is_test boolean (means the study is a test study, used to determine whether researchers have access to raw data.
+    is_test = request.form.get('is_test') == 'true'  # 'true' -> True, 'false' -> False
     try:
-        study = Study.create_with_object_id(name=name, encryption_key=encryption_key)
+        study = Study.create_with_object_id(name=name, encryption_key=encryption_key, is_test=is_test)
         copy_existing_study_if_asked_to(study)
         flash('Successfully created study {}.'.format(name), 'success')
         return redirect('/device_settings/{:d}'.format(study.pk))
