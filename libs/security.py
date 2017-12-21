@@ -14,7 +14,7 @@ from os import urandom
 
 class DatabaseIsDownError(Exception): pass
 class PaddingException(Exception): pass
-
+class OurBase64Error(Exception): pass
 
 def set_secret_key(app):
     """grabs the Flask secret key"""
@@ -50,6 +50,7 @@ def encode_base64(data):
         new lines."""
     return base64.urlsafe_b64encode(data).replace("\n","")
 
+
 def decode_base64(data):
     """ unpacks url safe base64 encoded string. """
     #there seemed to be some problems with inserting a config.encode('utf-8') here,
@@ -57,10 +58,25 @@ def decode_base64(data):
     try:
         return base64.urlsafe_b64decode(data)
     except TypeError as e:
+        # print "this is the error:"
+        # print e
+        # print "this is the data:";
+        # try:
+        #     print data.encode("string_escape")
+        # except Exception as e2:
+        #     print "could not print data because of this error:", e2
+        
         if "Incorrect padding" == e.message:
             raise PaddingException
         else:
-            raise
+            try:
+                return base64.standard_b64decode(data)
+            except TypeError as e2:
+                if "Incorrect padding" == e2.message:
+                    raise PaddingException
+                else:
+                    raise OurBase64Error(e.message)
+        raise OurBase64Error(e.message)  # should be unreachable
 
 
 def generate_user_hash_and_salt(password):
