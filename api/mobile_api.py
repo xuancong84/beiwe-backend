@@ -1,21 +1,26 @@
 import calendar
-from datetime import datetime
 import time
 
-from flask import Blueprint, request, abort, render_template, json
+#TODO: fix this import issue
+from config.secure_settings import IS_STAGING
 
+from datetime import datetime
+from flask import Blueprint, request, abort, render_template, json
+from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
 
 from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER
 from database.models import FileToProcess, Participant, UploadTracking
+from db.data_access_models import FileToProcess
+from db.profiling import UploadTracking
 from libs.android_error_reporting import send_android_error_report
-from libs.encryption import decrypt_device_file, DecryptionKeyInvalidError, HandledError
-from libs.sentry import make_sentry_client
-from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
-from libs.user_authentication import authenticate_user, authenticate_user_registration
-from libs.logging import log_error
+from libs.encryption import decrypt_device_file, HandledError
 from libs.http_utils import determine_os_api
-
+from libs.logging import log_error
+from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
+from libs.security import OurBase64Error
+from libs.sentry import make_sentry_client
+from libs.user_authentication import authenticate_user, authenticate_user_registration
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -84,9 +89,12 @@ def upload(OS_API=""):
         uploaded_file = request.values['file']
     else:
         uploaded_file = request.data
+    
+    if isinstance(uploaded_file, FileStorage):
+        uploaded_file = uploaded_file.read()
 
     file_name = request.values['file_name']
-#     print "uploaded file name:", file_name, len(uploaded_file)
+    # print "uploaded file name:", file_name, len(uploaded_file)
     if "crashlog" in file_name.lower():
         send_android_error_report(patient_id, uploaded_file)
         return render_template('blank.html'), 200
@@ -104,8 +112,19 @@ def upload(OS_API=""):
         print("the following error was handled:")
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message))
         return render_template('blank.html'), 200
-    except DecryptionKeyInvalidError:
-        return render_template('blank.html'), 200
+    except OurBase64Error:
+        if IS_STAGING:
+            print "decryption problems" + "#"*200
+            print
+            print patient_id
+            print
+            print file_name
+            print uploaded_file
+            print
+        raise
+# This is what the decryption failure mode SHOULD be, but we are still identifying the decryption bug
+#     except DecryptionKeyInvalidError:
+#         return render_template('blank.html'), 200
 
     # print "decryption success:", file_name
     # if uploaded data a) actually exists, B) is validly named and typed...
@@ -119,7 +138,6 @@ def upload(OS_API=""):
             participant=user,
         )
         return render_template('blank.html'), 200
-    
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
