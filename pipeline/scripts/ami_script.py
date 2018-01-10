@@ -39,7 +39,7 @@ def run():
     print('EC2 instance created')
     
     # Create an AMI based off of the EC2 instance. It takes some time for the EC2 instance to
-    # be ready, so we delay up to ten seconds.
+    # be ready, so we delay up to thirty seconds.
     print('Waiting for unencrypted AMI...')
     tries = 0
     while True:
@@ -51,7 +51,7 @@ def run():
         except ClientError:
             # In case the EC2 instance isn't ready yet
             tries += 1
-            if tries > 10:
+            if tries > 30:
                 raise
             sleep(1)
         else:
@@ -76,7 +76,7 @@ def run():
         except ClientError:
             # In case the unencrypted AMI isn't ready yet
             tries += 1
-            if tries > 10:
+            if tries > 30:
                 raise
             sleep(1)
         else:
