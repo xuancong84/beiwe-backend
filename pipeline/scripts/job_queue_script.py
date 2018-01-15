@@ -42,6 +42,7 @@ def run(repo_uri, ami_id):
     comp_env_role = aws_object_names['comp_env_role']
     comp_env_name = aws_object_names['comp_env_name']
     instance_profile = aws_object_names['instance_profile']
+    security_group = aws_object_names['security_group']
     
     # Create a new IAM role for the compute environment
     iam_client = boto3.client('iam')
@@ -77,6 +78,15 @@ def run(repo_uri, ami_id):
         RoleName=instance_profile,
     )
     print('Instance profile created')
+    
+    # Create a security group for the compute environment
+    ec2_client = boto3.client('ec2')
+    resp = ec2_client.create_security_group(
+        Description='Security group for AWS Batch',
+        GroupName=security_group,
+    )
+    group_id = resp['GroupId']
+    compute_environment_dict['securityGroupIds'] = [group_id]
     
     # Create the batch compute environment
     batch_client = boto3.client('batch')

@@ -3,6 +3,7 @@
   "ami_name": "data-pipeline-ami",
   "comp_env_role": "AWSBatchServiceRole",
   "instance_profile": "ecsInstanceRole",
+  "security_group": "data-pipeline-security-group",
   "comp_env_name": "data-pipeline-env",
   "queue_name": "data-pipeline-queue",
   "job_defn_name": "data-pipeline-job-defn",
