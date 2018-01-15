@@ -99,8 +99,8 @@ def create_all_jobs(freq):
     # TODO: Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
     # task this function performs. We should switch to using them.
     
+    # Get new data access credentials for the user
     aws_object_names = get_aws_object_names()
-    
     refresh_data_access_credentials(freq, aws_object_names)
     
     # TODO: If there are issues with servers not getting spun up in time, make this a

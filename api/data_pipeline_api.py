@@ -1,7 +1,8 @@
 from flask import Blueprint, flash, redirect
 
 from libs.admin_authentication import authenticate_admin_study_access
-from pipeline.index import create_one_job
+from pipeline.boto_helpers import get_aws_object_names
+from pipeline.index import create_one_job, refresh_data_access_credentials
 
 
 data_pipeline_api = Blueprint('data_pipeline_api', __name__)
@@ -15,6 +16,11 @@ def run_manual_code(study_id):
     :param study_id: ObjectId of a Study
     """
     
+    # Get new data access credentials for the manual user
+    aws_object_names = get_aws_object_names()
+    refresh_data_access_credentials('manually', aws_object_names)
+    
+    # Submit a manual job
     create_one_job('manually', study_id)
     
     # The success message gets displayed to the user upon redirect
