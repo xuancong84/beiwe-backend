@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 """
-Upload files pertaining to a particular study to the Beiwe Data Pipeline Upload API. The
-relevant AWS object names and study information are passed as environment variables, and the
-file names required are passed as function or command line arguments.
+Upload files pertaining to a particular study to the Beiwe Data Pipeline Upload API.
+
+The relevant AWS object names and study information are passed as environment variables,
+and the file names required are passed as function or command line arguments.
 """
 
 import json
@@ -15,6 +16,8 @@ import requests
 
 def run(local_file, remote_file):
     """
+    Run the actual code.
+    
     :param local_file: path to the local file to be uploaded
     :param remote_file: name of the file this will be saved as remotely (on Amazon S3)
     """

@@ -1,21 +1,23 @@
 #!/usr/bin/python3
 """
-Download files pertaining to a particular study from the Beiwe Data Access API. The relevant
-AWS object names and study information are passed as environment variables.
+Download files pertaining to a particular study from the Beiwe Data Access API.
+
+The relevant AWS object names and study information are passed as environment variables,
+and the file names required are passed as function or command line arguments.
 """
 
 import os
+import sys
 
 import boto3
 import requests
 
 
-def run():
+def run(local_file):
     """
     Run the actual code.
     
-    This is in a separate function in case we subsequently want to add command-line inputs
-    (e.g. local filename), so that we can handle them separately from the actual download code.
+    :param local_file: path to the local zip file where the downloaded files will go
     """
     
     # Grab environment variables
@@ -44,9 +46,10 @@ def run():
     # TODO do this as a generator, if simple
     resp = requests.post(data_access_api_url, data=payload)
     byte_stream = resp.content
-    with open('study-data.zip', 'xb') as fn:
+    with open(local_file, 'xb') as fn:
         fn.write(byte_stream)
 
 
 if __name__ == '__main__':
-    run()
+    _local_file = sys.argv[1]
+    run(_local_file)

@@ -1,4 +1,4 @@
-from db.study_models import Studies
+from db.study_models import Studies, Study
 from db.user_models import Admin
 from pipeline.boto_helpers import get_aws_object_names, get_boto_client
 
@@ -56,7 +56,7 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
     that this function is run as part of a loop, to avoid an unnecessarily large number of
     file operations or API calls.
     :param freq: string e.g. 'daily', 'manually'
-    :param object_id: string representing the Study object_id e.g. '56325d8297013e33a2e57736'
+    :param object_id: bson ObjectId e.g. ObjectId('56325d8297013e33a2e57736')
     :param aws_object_names: dict containing various parameters for the batch job or None
     :param client: a credentialled boto3 client or None
     """
@@ -75,7 +75,11 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
             'environment': [
                 {
                     'name': 'study_object_id',
-                    'value': object_id,
+                    'value': str(object_id),
+                },
+                {
+                    'name': 'study_name',
+                    'value': Study(object_id).name,
                 },
                 {
                     'name': 'FREQ',
@@ -103,7 +107,7 @@ def create_all_jobs(freq):
     # ThreadPool with random spacing over the course of 5-10 minutes.
     for study in Studies(deleted=False):
         # For each study, create a job
-        object_id = str(study._id)
+        object_id = study._id
         create_one_job(freq, object_id, aws_object_names)
 
 

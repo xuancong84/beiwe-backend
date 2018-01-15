@@ -15,7 +15,7 @@ def run_manual_code(study_id):
     :param study_id: ObjectId of a Study
     """
     
-    create_one_job('manually', str(study_id))
+    create_one_job('manually', study_id)
     
     # The success message gets displayed to the user upon redirect
     flash('Data pipeline code successfully initiated!', 'success')
