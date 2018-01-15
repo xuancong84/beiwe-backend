@@ -27,17 +27,22 @@ def refresh_data_access_credentials(freq, aws_object_names):
     
     # Reset the credentials. This ensures that they aren't stale.
     access_key, secret_key = mock_admin.reset_access_credentials()
+    
+    # Append the frequency to the SSM (AWS Systems Manager) names. This ensures that the
+    # different frequency jobs' keys do not overwrite each other.
+    access_key_ssm_name = '{}-{}'.format(aws_object_names['access_key_ssm_name'], freq)
+    secret_key_ssm_name = '{}-{}'.format(aws_object_names['secret_key_ssm_name'], freq)
 
     # Put the credentials (encrypted) into AWS Parameter Store
     ssm_client = get_boto_client('ssm')
     ssm_client.put_parameter(
-        Name=aws_object_names['access_key_ssm_name'],
+        Name=access_key_ssm_name,
         Value=access_key,
         Type='SecureString',
         Overwrite=True,
     )
     ssm_client.put_parameter(
-        Name=aws_object_names['secret_key_ssm_name'],
+        Name=secret_key_ssm_name,
         Value=secret_key,
         Type='SecureString',
         Overwrite=True,

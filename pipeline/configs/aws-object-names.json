@@ -7,9 +7,8 @@
   "queue_name": "data-pipeline-queue",
   "job_defn_name": "data-pipeline-job-defn",
   "job_name": "data-pipeline-{freq}-job",
-  "server_url_ssm_name": "beiwe-daa-key-0",
-  "access_key_ssm_name": "beiwe-daa-key-1",
-  "secret_key_ssm_name": "beiwe-daa-key-2",
+  "access_key_ssm_name": "beiwe-daa-key-0",
+  "secret_key_ssm_name": "beiwe-daa-key-1",
   "region_name": "us-west-2",
   "server_url": "https://staging.beiwe.org"
 }

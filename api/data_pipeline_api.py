@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, jsonify, redirect, request
+from flask import Blueprint, flash, redirect
 
 from libs.admin_authentication import authenticate_admin_study_access
 from pipeline.index import create_one_job

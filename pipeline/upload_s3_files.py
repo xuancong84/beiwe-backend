@@ -20,8 +20,9 @@ def run(local_file, remote_file):
     """
     
     # Grab environment variables
-    access_key_ssm_name = os.getenv('access_key_ssm_name')
-    secret_key_ssm_name = os.getenv('secret_key_ssm_name')
+    freq = os.getenv('FREQ')
+    access_key_ssm_name = '{}-{}'.format(os.getenv('access_key_ssm_name'), freq)
+    secret_key_ssm_name = '{}-{}'.format(os.getenv('secret_key_ssm_name'), freq)
     study_object_id = os.getenv('study_object_id')
     region_name = os.getenv('region_name')
     server_url = os.getenv('server_url')
