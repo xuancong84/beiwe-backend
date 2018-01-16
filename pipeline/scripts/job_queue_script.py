@@ -9,7 +9,7 @@ from time import sleep
 
 import boto3
 
-from boto_helpers import get_aws_object_names, get_configs_folder
+from boto_helpers import get_aws_object_names, get_configs_folder, set_default_region
 
 
 def run(repo_uri, ami_id):
@@ -45,6 +45,7 @@ def run(repo_uri, ami_id):
     security_group = aws_object_names['security_group']
     
     # Create a new IAM role for the compute environment
+    set_default_region()
     iam_client = boto3.client('iam')
     resp = iam_client.create_role(
         RoleName=comp_env_role,
