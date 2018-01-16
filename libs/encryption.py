@@ -90,6 +90,9 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
     return_data = ""
     file_data = [line for line in original_data.split('\n') if line != ""]
     
+    if not file_data:
+        raise HandledError("The file had no data in it.  Return 200 to delete file from device.")
+        
     try: #get the decryption key from the file.
         decoded_key = decode_base64(file_data[0].encode("utf-8"))
         decrypted_key = decode_base64(private_key.decrypt( decoded_key ) )
