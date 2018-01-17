@@ -1,4 +1,4 @@
-from db.study_models import Studies
+from db.study_models import Studies, Study
 from db.user_models import Admin
 from pipeline.boto_helpers import get_aws_object_names, get_boto_client
 
@@ -27,17 +27,22 @@ def refresh_data_access_credentials(freq, aws_object_names):
     
     # Reset the credentials. This ensures that they aren't stale.
     access_key, secret_key = mock_admin.reset_access_credentials()
+    
+    # Append the frequency to the SSM (AWS Systems Manager) names. This ensures that the
+    # different frequency jobs' keys do not overwrite each other.
+    access_key_ssm_name = '{}-{}'.format(aws_object_names['access_key_ssm_name'], freq)
+    secret_key_ssm_name = '{}-{}'.format(aws_object_names['secret_key_ssm_name'], freq)
 
     # Put the credentials (encrypted) into AWS Parameter Store
     ssm_client = get_boto_client('ssm')
     ssm_client.put_parameter(
-        Name=aws_object_names['access_key_ssm_name'],
+        Name=access_key_ssm_name,
         Value=access_key,
         Type='SecureString',
         Overwrite=True,
     )
     ssm_client.put_parameter(
-        Name=aws_object_names['secret_key_ssm_name'],
+        Name=secret_key_ssm_name,
         Value=secret_key,
         Type='SecureString',
         Overwrite=True,
@@ -51,7 +56,7 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
     that this function is run as part of a loop, to avoid an unnecessarily large number of
     file operations or API calls.
     :param freq: string e.g. 'daily', 'manually'
-    :param object_id: string representing the Study object_id e.g. '56325d8297013e33a2e57736'
+    :param object_id: bson ObjectId e.g. ObjectId('56325d8297013e33a2e57736')
     :param aws_object_names: dict containing various parameters for the batch job or None
     :param client: a credentialled boto3 client or None
     """
@@ -70,7 +75,11 @@ def create_one_job(freq, object_id, aws_object_names=None, client=None):
             'environment': [
                 {
                     'name': 'study_object_id',
-                    'value': object_id,
+                    'value': str(object_id),
+                },
+                {
+                    'name': 'study_name',
+                    'value': Study(object_id).name,
                 },
                 {
                     'name': 'FREQ',
@@ -90,15 +99,15 @@ def create_all_jobs(freq):
     # TODO: Boto3 version 1.4.8 has AWS Batch Array Jobs, which are extremely useful for the
     # task this function performs. We should switch to using them.
     
+    # Get new data access credentials for the user
     aws_object_names = get_aws_object_names()
-    
     refresh_data_access_credentials(freq, aws_object_names)
     
     # TODO: If there are issues with servers not getting spun up in time, make this a
     # ThreadPool with random spacing over the course of 5-10 minutes.
     for study in Studies(deleted=False):
         # For each study, create a job
-        object_id = str(study._id)
+        object_id = study._id
         create_one_job(freq, object_id, aws_object_names)
 
 
