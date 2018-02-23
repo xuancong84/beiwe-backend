@@ -26,10 +26,26 @@
                 <label for="encryption_key">32-Character Encryption Key</label>
                 <input type="text" name="encryption_key" id="encryption_key" class="form-control" required>
             </div>
-
+            
             <p><i>Note: You MUST copy down the encryption key somewhere; if you lose it, you cannot access any data from this study!</i></p>
             <p><i>We recommend you use a random string generator (like the one on <a href="https://www.random.org/strings/">random.org</a>) to create the 32-character encryption key.</i></p>
-            <br>
+            <br/>
+
+            <div id="isTestBox">
+                <div class="radio">
+                    <p><b>This study involves:</b></p>
+                    <label>
+                        <input type="radio" name="is_test" value="true">
+                        Test data: researchers will be able to download raw data and processed data output from the Data Analysis Pipeline. Use this setting for testing and debugging.
+                    </label>
+                    <br/>
+                    <label>
+                        <input type="radio" name="is_test" value="false" checked>
+                        Production data: researchers will only be able to download processed data output from the Data Analysis Pipeline. This setting is higher security. Use this setting if your study will involve actual patient data.
+                    </label>
+                </div>
+            </div>
+            <br/>
 
             {# Copy settings and surveys from an existing study #}
             <div id="filterableList" ng-controller="FilterableListController">

@@ -49,7 +49,14 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="study_selector">Study</label>
-                <select id="study_selector" ng-model="selectedStudy" ng-options="study.name for study in allowedStudies track by study.id" name="study_pk" class="form-control"></select>
+                <select class="form-control" name="study_id" id="study_selector">
+                  {% for study in allowed_studies %}
+                    {# Only show test studies as options to download from #}
+                    {% if study['is_test'] == True %}
+                      <option value="{{ study._id }}">{{ study.name }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
               </div>
             </div>
 
