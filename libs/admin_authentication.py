@@ -5,7 +5,6 @@ from flask import session, redirect, request
 from werkzeug.exceptions import abort
 
 from database.models import Researcher, Study
-from db.study_models import Study
 from libs.security import generate_easy_alphanumeric_string
 
 
