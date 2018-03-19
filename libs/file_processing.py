@@ -14,7 +14,6 @@ from config.constants import (ANDROID_LOG_FILE, UPLOAD_FILE_TYPE_MAPPING, API_TI
     SURVEY_DATA_FILES, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
     DATA_PROCESSING_NO_ERROR_STRING)
 from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Survey
-from db.data_access_models import (FileToProcess, ChunkRegistry, FileProcessLock)
 from libs.s3 import s3_retrieve, s3_upload
 
 
