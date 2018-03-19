@@ -1,8 +1,44 @@
 import functools
+
 from flask import request, abort
 from werkzeug.datastructures import MultiDict
 
 from database.models import Participant
+
+
+####################################################################################################
+
+
+def authenticate_user_ignore_password(some_function):
+    @functools.wraps(some_function)
+    def authenticate_and_call(*args, **kwargs):
+        correct_for_basic_auth()
+        if validate_post_ignore_password():
+            return some_function(*args, **kwargs)
+        return abort(401 if (kwargs["OS_API"] == Participant.IOS_API) else 403)
+    return authenticate_and_call
+
+
+def validate_post_ignore_password():
+    """Check if user exists, that a password was provided but ignores its validation, and if the
+    device id matches. """
+    if ("patient_id" not in request.values
+        or "password" not in request.values
+        or "device_id" not in request.values):
+        return False
+
+    participant_set = Participant.objects.filter(patient_id=request.values['patient_id'])
+    if not participant_set.exists():
+        return False
+    participant = participant_set.get()
+    # Disabled
+    # if not participant.validate_password(request.values['password']):
+    #     return False
+    if not participant.device_id == request.values['device_id']:
+        return False
+    return True
+
+####################################################################################################
 
 
 def authenticate_user(some_function):
@@ -15,17 +51,15 @@ def authenticate_user(some_function):
    password, a parameter named "device_id" with a unique identifier derived from that device. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        check_for_basic_auth(*args, **kwargs)
-        is_this_user_valid = validate_post(*args, **kwargs)
-        if is_this_user_valid:
+        correct_for_basic_auth()
+        if validate_post():
             return some_function(*args, **kwargs)
         return abort(401 if (kwargs["OS_API"] == Participant.IOS_API) else 403)
     return authenticate_and_call
 
 
-def validate_post(*args, **kwargs):
-    """Check if user exists, check if the provided passwords match, and if the
-    device id matches."""
+def validate_post():
+    """Check if user exists, check if the provided passwords match, and if the device id matches."""
     # print "user info:  ", request.values.items()
     # print "file info:  ", request.files.items()
     if ("patient_id" not in request.values
@@ -53,15 +87,14 @@ def authenticate_user_registration(some_function):
    password. """
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
-        check_for_basic_auth(*args, **kwargs)
-        is_this_user_valid = validate_registration(*args, **kwargs)
-        if is_this_user_valid:
+        correct_for_basic_auth()
+        if validate_registration():
             return some_function(*args, **kwargs)
         return abort(401 if (kwargs["OS_API"] == Participant.IOS_API) else 403)
     return authenticate_and_call
 
 
-def validate_registration(*args, **kwargs):
+def validate_registration():
     """Check if user exists, check if the provided passwords match"""
     if ("patient_id" not in request.values
             or "password" not in request.values
@@ -76,25 +109,32 @@ def validate_registration(*args, **kwargs):
     return True
 
 
-def check_for_basic_auth(*args, **kwargs):
-    """If basic authentication exists and is in the correct format, move the patient_id,
-    device_id, and password into request.values for processing by the existing user
-    authentication functions """
+def correct_for_basic_auth():
+    """
+    Basic auth is used in IOS.
     
-    # Flask automatically parses a Basic authentication header into request.authorization
-    #
-    # If this is set, and the username portion is in the form xxxxxx@yyyyyyy, then assume
-    # this is patient_id@device_id.  
-    #
-    # Parse out the patient_id, device_id from username, and then store patient_id, device_id and
-    # password as if they were passed as parameters (into request.values)
-    #
-    # Note:  Because request.values is immutable in Flask, copy it and replace with a mutable
-    # dict first.
-    """Check if user exists, check if the provided passwords match"""
+    If basic authentication exists and is in the correct format, move the patient_id,
+    device_id, and password into request.values for processing by the existing user
+    authentication functions.
+    
+    Flask automatically parses a Basic authentication header into request.authorization
+    
+    If this is set, and the username portion is in the form xxxxxx@yyyyyyy, then assume this is
+    patient_id@device_id.
+    
+    Parse out the patient_id, device_id from username, and then store patient_id, device_id and
+    password as if they were passed as parameters (into request.values)
+    
+    Note:  Because request.values is immutable in Flask, copy it and replace with a mutable dict
+    first.
+    
+    Check if user exists, check if the provided passwords match.
+    """
+    
     auth = request.authorization
     if not auth:
         return
+    
     username_parts = auth.username.split('@')
     if len(username_parts) == 2:
         replace_dict = MultiDict(request.values.to_dict())
