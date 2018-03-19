@@ -9,7 +9,7 @@ from datetime import datetime
 
 # noinspection PyUnresolvedReferences
 from config import load_django
-from config.constants import (LOG_FILE, UPLOAD_FILE_TYPE_MAPPING, API_TIME_FORMAT, IDENTIFIERS,
+from config.constants import (ANDROID_LOG_FILE, UPLOAD_FILE_TYPE_MAPPING, API_TIME_FORMAT, IDENTIFIERS,
     WIFI, CALL_LOG, CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER,
     SURVEY_DATA_FILES, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
     DATA_PROCESSING_NO_ERROR_STRING)
@@ -391,7 +391,7 @@ def process_csv_data(data):
     
     if participant.os_type == Participant.ANDROID_API:
         # Do fixes for Android
-        if data["data_type"] == LOG_FILE:
+        if data["data_type"] == ANDROID_LOG_FILE:
             data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])
 
         header, csv_rows_list = csv_to_list(data['file_contents'])
