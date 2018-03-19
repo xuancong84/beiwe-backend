@@ -5,6 +5,8 @@ from flask import Flask, render_template, redirect
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 
+from config import load_django
+
 from api import (participant_administration, admin_api, copy_study_api, data_access_api,
     data_pipeline_api, mobile_api, survey_api)
 from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN, SENTRY_JAVASCRIPT_DSN
