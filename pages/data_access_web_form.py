@@ -44,7 +44,7 @@ def warn_researcher_if_hasnt_yet_generated_access_key(researcher):
 @authenticate_admin_login
 def pipeline_download_page():
     admin = Admin(session['admin_username'])
-    warn_admin_if_hasnt_yet_generated_access_key(admin)
+    warn_researcher_if_hasnt_yet_generated_access_key(admin)
     allowed_studies = get_admins_allowed_studies()
     # dict of {study ids : list of user ids}
     users_by_study = {str(study["_id"]):
@@ -66,3 +66,5 @@ def pipeline_download_page():
             tags=tags,
             system_admin=admin_is_system_admin()
     )
+
+
