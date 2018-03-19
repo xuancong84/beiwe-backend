@@ -7,14 +7,12 @@ from bson.errors import InvalidId
 from datetime import datetime
 from flask import Blueprint, request, abort, json, Response
 
+from config import load_django
+
 from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS,
     SURVEY_ANSWERS, SURVEY_TIMINGS)
 from database.base_models import is_object_id
 from database.models import ChunkRegistry, Participant, Researcher, Study
-from db.data_access_models import (InvalidUploadParameterError, PipelineUploads,
-    PipelineUpload)
-from db.study_models import Study
-from db.user_models import Admin
 from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve, s3_upload
 from libs.streaming_bytes_io import StreamingBytesIO
