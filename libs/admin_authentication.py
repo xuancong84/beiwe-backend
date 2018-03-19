@@ -1,10 +1,13 @@
 import functools
 from datetime import datetime, timedelta
-from flask import redirect, request, session
+
+from flask import session, redirect, request
 from werkzeug.exceptions import abort
 
-from libs.security import generate_easy_alphanumeric_string
 from database.models import Researcher, Study
+from db.study_models import Study
+from libs.security import generate_easy_alphanumeric_string
+
 
 ################################################################################
 ############################ Website Functions #################################
@@ -14,6 +17,7 @@ from database.models import Researcher, Study
 def authenticate_admin_login(some_function):
     """Decorator for functions (pages) that require a login.
        Redirects to index if not authenticate_admin_login"""
+    
     @functools.wraps(some_function)
     def authenticate_and_call(*args, **kwargs):
         if is_logged_in():
@@ -48,9 +52,6 @@ def is_logged_in():
 
 class ArgumentMissingException(Exception): pass
 
-
-#TODO: Low Priority. Josh/Alvin. permission denied page.
-#TODO: Low Priority. Josh/Alvin. we need a survey does not exist error page.
 def authenticate_admin_study_access(some_function):
     """ This authentication decorator checks whether the user has permission to to access the
     study/survey they are accessing.

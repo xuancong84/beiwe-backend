@@ -1,15 +1,13 @@
 import calendar
 import time
-
-#TODO: fix this import issue
-from config.secure_settings import IS_STAGING
-
 from datetime import datetime
+
 from flask import Blueprint, request, abort, render_template, json
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
 
 from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER
+from config.settings import IS_STAGING
 from database.models import FileToProcess, Participant, UploadTracking
 from db.data_access_models import FileToProcess
 from db.profiling import UploadTracking
@@ -20,7 +18,8 @@ from libs.logging import log_error
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.security import OurBase64Error
 from libs.sentry import make_sentry_client
-from libs.user_authentication import authenticate_user, authenticate_user_registration
+from libs.user_authentication import (authenticate_user, authenticate_user_registration,
+    authenticate_user_ignore_password)
 
 ################################################################################
 ############################# GLOBALS... #######################################
@@ -43,7 +42,8 @@ mobile_api = Blueprint('mobile_api', __name__)
 @mobile_api.route('/upload', methods=['POST'])
 @mobile_api.route('/upload/ios/', methods=['GET', 'POST'])
 @determine_os_api
-@authenticate_user
+# @authenticate_user
+@authenticate_user_ignore_password
 def upload(OS_API=""):
     """ Entry point to upload GPS, Accelerometer, Audio, PowerState, Calls Log, Texts Log,
     Survey Response, and debugging files to s3.
