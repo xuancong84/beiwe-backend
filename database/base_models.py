@@ -25,9 +25,16 @@ class AbstractModel(models.Model):
     AbstractModel descendants have a delete flag and function to mark as deleted, because
     we rarely want to truly delete an object. They also have a function to express the
     object as a JSON dict containing all fields and values of the object.
+    
+    All abstract models are also "timestamped" models, which means they record when they were
+    created and when they were last updated.  This is a useful standard practice that does
+    not have enough overhead for it to be a problem
     """
+    
     deleted = models.BooleanField(default=False)
-
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    
     def mark_deleted(self):
         self.deleted = True
         self.save()

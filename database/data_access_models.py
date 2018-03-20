@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import models
 
 from config.constants import ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM
+from database.validators import LengthValidator
 from libs.security import chunk_hash, low_memory_chunk_hash
 from database.base_models import AbstractModel
 from database.study_models import Study
@@ -133,3 +134,32 @@ class FileProcessLock(AbstractModel):
     @classmethod
     def get_time_since_locked(cls):
         return datetime.utcnow() - FileProcessLock.objects.last().lock_time
+
+
+class PipelineUpload(AbstractModel):
+    REQUIREDS = {
+        "study_id":"study",
+        "tags": "tags", # related field
+        "file_name": "file_name"
+    }
+    INTERNALS = {
+        "creation_time": "created_on",
+        "s3_path": "s3_path",
+        "file_hash":"file_hash"
+    }
+    DEFAULTS = {}
+    DEFAULTS.update(INTERNALS)
+    DEFAULTS.update(REQUIREDS)
+    
+    # no related name, this is
+    object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)])
+    study = models.ForeignKey(Study, related_name="pipeline_uploads")
+    file_name = models.TextField()
+    s3_path = models.TextField()
+    file_hash = models.CharField(max_length=128)
+    
+
+class PipelineUploadTags(AbstractModel):
+    pipeline_upload = models.ForeignKey(PipelineUpload, related_name="tags")
+    tag = models.CharField(max_length=1024, validators=[LengthValidator(1024)])
+    
