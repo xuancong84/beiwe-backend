@@ -242,8 +242,6 @@ def zip_generator(files_list, construct_registry=False):
         if duplicate_files:
             duplcate_file_message = "encountered duplicate files: %s" % ",".join(
                     str(name_path) for name_path in duplicate_files)
-            email_system_administrators(duplcate_file_message,
-                                        "encountered duplicate files in a data download")
 
 
 #########################################################################################
