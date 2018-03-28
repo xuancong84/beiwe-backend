@@ -30,6 +30,7 @@ from deployment_helpers.aws.elastic_beanstalk import (create_eb_environment,
 from deployment_helpers.aws.elastic_compute_cloud import\
     (get_manager_instance_by_eb_environment_name, create_processing_control_server,
     create_processing_server, get_manager_public_ip, get_manager_private_ip)
+from deployment_helpers.aws.iam import iam_purge_instance_profiles
 from deployment_helpers.aws.rds import create_new_rds_instance
 from deployment_helpers.configuration_utils import (
     are_aws_credentials_present, is_global_configuration_valid,
@@ -456,12 +457,21 @@ def do_fix_health_checks():
 ####################################################################################################
 ####################################### Validation #################################################
 ####################################################################################################
-    
+purge_command_blurb = """
+DO NOT RUN THIS COMMAND ON A FUNCTIONAL ELASTIC BEANSTALK DEPLOYMENT.
+Only run this if you are having first-run deployment issues and only if you want to start over.
+
+This command exists because Instance Profiles are not fully-exposed on the AWS Console website and you will not be able to appropriately clear out all of the IAM entities for the
+
+Note 1: Run this command repeatedly until it tells you it cannot delete anything.
+Note 2: You may have to go and manually delete a Service Role if you are intent on totally resetting your Elastic Beanstalk cluster.
+"""
+
 def cli_args_validation():
     # Warning: any change to format here requires you re-check all parameter validation
     parser = argparse.ArgumentParser(
              description="interactive set of commands for deploying a Beiwe Cluster")
-    
+    # Use '"count"' as the type, don't try and be fancy, argparse is a pain.
     parser.add_argument(
             '-create-environment',
             action="count",
@@ -487,6 +497,12 @@ def cli_args_validation():
             action="count",
             help="sometimes deployment operations fail stating that health checks do not have sufficient permissions, run this command to fix that."
     )
+    parser.add_argument(
+            "-purge-instance-profiles",
+            action="count",
+            help=purge_command_blurb
+    )
+    
     
     # Note: this arguments variable is not iterable.
     # access entities as arguments.long_name_of_argument, like arguments.update_manager
@@ -531,4 +547,9 @@ if __name__ == "__main__":
 
     if arguments.fix_health_checks_blocking_deployment:
         do_fix_health_checks()
+        EXIT(0)
+    
+    if arguments.purge_instance_profiles:
+        print purge_command_blurb, "\n\n\n"
+        iam_purge_instance_profiles()
         EXIT(0)
