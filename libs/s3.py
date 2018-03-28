@@ -99,6 +99,7 @@ def _do_list_files(bucket_name, prefix, as_generator=False):
 
 
 def s3_delete(key_path):
+    raise Exception("NOOO")
     if CHUNKS_FOLDER not in key_path:
         raise Exception("absolutely not deleting %s" % key_path)
     key = Key(_get_bucket(S3_BUCKET), key_path)
