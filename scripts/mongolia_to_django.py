@@ -108,6 +108,7 @@ def migrate_studies():
                 encryption_key=m_study['encryption_key'],
                 object_id=m_study['_id'],
                 deleted=m_study['deleted'],
+                is_test=m_study['is_test'],
             )
     
             # Validate the new Study object and add it to the bulk create list

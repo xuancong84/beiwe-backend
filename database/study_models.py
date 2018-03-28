@@ -34,6 +34,8 @@ class Study(AbstractModel):
     object_id = models.CharField(max_length=24, unique=True, validators=[LengthValidator(24)],
                                  help_text='ID used for naming S3 files')
 
+    is_test = models.BooleanField(default=True)
+
     @classmethod
     def create_with_object_id(cls, **kwargs):
         """
