@@ -3,9 +3,10 @@ import json
 from flask import Blueprint, flash, Markup, render_template, session
 
 from config.constants import ALL_DATA_STREAMS
+from database.data_access_models import PipelineUploadTags
 from database.models import Researcher
-from db.data_access_models import PipelineUploads
-from db.user_models import Admin, Users
+from database.study_models import Participant
+
 from libs.admin_authentication import (get_admins_allowed_studies_as_query_set,
     authenticate_admin_login, get_admins_allowed_studies, admin_is_system_admin)
 
@@ -43,25 +44,27 @@ def warn_researcher_if_hasnt_yet_generated_access_key(researcher):
 @data_access_web_form.route("/pipeline_access_web_form", methods=['GET'])
 @authenticate_admin_login
 def pipeline_download_page():
-    admin = Admin(session['admin_username'])
-    warn_researcher_if_hasnt_yet_generated_access_key(admin)
+    researcher = Researcher.objects.get(username=session['admin_username'])
+    warn_researcher_if_hasnt_yet_generated_access_key(researcher)
     allowed_studies = get_admins_allowed_studies()
+    iteratable_studies = json.loads(allowed_studies)
     # dict of {study ids : list of user ids}
-    users_by_study = {str(study["_id"]):
-                          [user["_id"] for user in Users(study_id=study['_id'])]
-                      for study in allowed_studies}
+
+    users_by_study = {str(study['id']):
+                      [user.id for user in Participant.objects.filter(study__id=study['id'])]
+                      for study in iteratable_studies}
 
     # it is a bit obnoxious to get this data, we need to deduplcate it and then turn it back into a list
     tags = set()
-    for study in allowed_studies:
-        for tags_list in PipelineUploads(study_id=study._id, field="tags"):
+    for study in iteratable_studies:
+        for tags_list in PipelineUploadTags.objects.filter(pipeline_upload__study__id=study['id']).values_list("tag", flat=True):
             for tag in tags_list:
                 tags.add(tag)
     tags = [_ for _ in tags]
     tags.sort()
     return render_template(
             "data_pipeline_web_form.html",
-            allowed_studies=allowed_studies,
+            allowed_studies=iteratable_studies,
             users_by_study=users_by_study,
             tags=tags,
             system_admin=admin_is_system_admin()

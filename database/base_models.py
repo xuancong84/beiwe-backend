@@ -59,14 +59,14 @@ class AbstractModel(models.Model):
         return object_id
     
     @classmethod
-    def query_set_as_native_json(cls, query_set):
-        return json.dumps([obj.as_native_python() for obj in query_set])
+    def query_set_as_native_json(cls, query_set, remove_timestamps=True):
+        return json.dumps([obj.as_native_python(remove_timestamps) for obj in query_set])
 
     def as_dict(self):
         """ Provides a dictionary representation of the object """
         return {field.name: getattr(self, field.name) for field in self._meta.fields}
 
-    def as_native_python(self):
+    def as_native_python(self, remove_timestamps=True):
         """
         Collect all of the fields of the model and return their values in a python dict,
         with json fields appropriately deserialized.
@@ -81,17 +81,20 @@ class AbstractModel(models.Model):
                 # If the field is a JSONTextField, load the field's value before returning
                 field_raw_val = getattr(self, field_name)
                 field_dict[field_name] = json.loads(field_raw_val)
+            elif remove_timestamps and (field_name == "created_on" or field_name == "last_updated"):
+                continue
             else:
                 # Otherwise, just return the field's value
                 field_dict[field_name] = getattr(self, field_name)
+
         return field_dict
 
-    def as_native_json(self):
+    def as_native_json(self, remove_timestamps=True):
         """
         Collect all of the fields of the model and return their values in a python dict,
         with json fields appropriately serialized.
         """
-        return json.dumps(self.as_native_python())
+        return json.dumps(self.as_native_python(remove_timestamps))
 
     def save(self, *args, **kwargs):
         # TODO if we encounter ValidationErrors here after the SQL migration, allow

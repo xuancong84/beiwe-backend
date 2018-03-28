@@ -2,8 +2,6 @@ from multiprocessing.pool import ThreadPool
 from zipfile import ZipFile, ZIP_STORED
 
 from boto.utils import JSONDecodeError
-from bson import ObjectId
-from bson.errors import InvalidId
 from datetime import datetime
 from flask import Blueprint, request, abort, json, Response
 
@@ -13,9 +11,10 @@ from config.constants import (API_TIME_FORMAT, VOICE_RECORDING, ALL_DATA_STREAMS
     SURVEY_ANSWERS, SURVEY_TIMINGS)
 from database.base_models import is_object_id
 from database.models import ChunkRegistry, Participant, Researcher, Study
-from libs.logging import email_system_administrators
 from libs.s3 import s3_retrieve, s3_upload
 from libs.streaming_bytes_io import StreamingBytesIO
+
+from database.data_access_models import PipelineUpload, InvalidUploadParameterError
 
 # Data Notes
 # The call log has the timestamp column as the 3rd column instead of the first.
@@ -381,10 +380,10 @@ def handle_database_query(study_id, query, registry=None):
 
 
 #########################################################################################
-#########################################################################################
+################################### Pipeline ############################################
 #########################################################################################
 
-VALID_PIPELINE_POST_PARAMS = PipelineUpload.REQUIREDS.keys()
+VALID_PIPELINE_POST_PARAMS = PipelineUpload.REQUIREDS
 VALID_PIPELINE_POST_PARAMS.append("access_key")
 VALID_PIPELINE_POST_PARAMS.append("secret_key")
 
@@ -396,22 +395,22 @@ def data_pipeline_upload():
     #Cases: invalid access creds
     access_key = request.values["access_key"]
     access_secret = request.values["secret_key"]
-    admin = Admin(access_key_id=access_key)
-    if not admin:
+
+    if not Researcher.objects.filter(access_key_id=access_key).exists():
         return abort(403) # access key DNE
-    if not admin.validate_access_credentials( access_secret ):
+    researcher = Researcher.objects.get(access_key_id=access_key)
+    if not researcher.validate_access_credentials(access_secret):
         return abort( 403 )  # incorrect secret key
     # case: invalid study
-    try:
-        study_id = ObjectId(request.values["study_id"])
-    except InvalidId:
-        study_id = None
-    study_obj = Study(study_id)
-    if not study_obj:
+    study_id = request.values["study_id"]
+
+    if not Study.objects.exists(object_id=study_id):
         return abort(404)
+
+    study_obj = Study.objects.get(object_id=study_id)
+
     # case: study not authorized for user
-    study_obj = Study(study_id)
-    if admin._id not in study_obj['admins']:
+    if not study_obj.get_reserachers().filter(id=researcher.id).exists():
         return abort(403)
 
     # block extra keys
@@ -433,7 +432,8 @@ def data_pipeline_upload():
             creation_args['study_id'],
             raw_path=True
     )
-    PipelineUpload.create(creation_args, random_id=True)
+    pipeline_upload = PipelineUpload(creation_args, random_id=True)
+    pipeline_upload.save()
     return Response("SUCCESS", status=200)
 
 
@@ -449,11 +449,11 @@ def pipeline_data_download():
             tags = json.loads(request.values['tags'])
         except JSONDecodeError:
             tags = request.form.getlist('tags')
-        # the mongo $in command is "get all entities that match any of the things in this list"
-        query = PipelineUploads.iterator(study_id=study_obj._id, tags={"$in": tags})
+
+        query = PipelineUpload.objects.filter(study_id=study_obj.id, tags={"$in": tags})
         
     else:
-        query = PipelineUploads.iterator(study_id=study_obj._id)
+        query = PipelineUpload.objects.filter(study_id=study_obj.id)
     
     ####################################
     return Response(

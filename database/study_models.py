@@ -71,6 +71,9 @@ class Study(AbstractModel):
     def get_study_device_settings(self):
         return self.device_settings
 
+    def get_researchers(self):
+        return Researcher.objects.filter(study=self)
+
 
 class AbstractSurvey(AbstractModel):
     
