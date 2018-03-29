@@ -65,7 +65,7 @@ def get_and_validate_study_id():
         return abort(400)
 
 
-def get_and_validate_admin(study):
+def get_and_validate_researcher(study):
     """
     Finds researcher based on the secret key provided.
     Returns 403 if researcher doesn't exist, is not credentialed on the study, or if
@@ -128,7 +128,7 @@ def get_users_in_study():
     except Study.DoesNotExist:
         return abort(404)
     
-    get_and_validate_admin(study)
+    get_and_validate_researcher(study)
     return json.dumps(list(study.participants.values_list('patient_id', flat=True)))
 
 
@@ -139,8 +139,8 @@ def get_data():
     Strings: date-start, date-end - format as "YYYY-MM-DDThh:mm:ss"
     optional: top-up = a file (registry.dat)
     cases handled:
-        missing creds or study, invalid admin or study, admin does not have access
-        admin creds are invalid
+        missing creds or study, invalid researcher or study, researcher does not have access
+        researcher creds are invalid
         (Flask automatically returns a 400 response if a parameter is accessed
         but does not exist in request.values() )
     Returns a zip file of all data files found by the query. """
@@ -149,7 +149,7 @@ def get_data():
     # return abort(503)
     
     study = get_and_validate_study_id()
-    get_and_validate_admin(study)
+    get_and_validate_researcher(study)
     
     query = {}
     determine_data_streams_for_db_query(query)  # select data streams
@@ -440,7 +440,7 @@ def data_pipeline_upload():
 @data_access_api.route("/get-pipeline/v1", methods=["GET", "POST"])
 def pipeline_data_download():
     study_obj = get_and_validate_study_id()
-    get_and_validate_admin(study_obj)
+    get_and_validate_researcher(study_obj)
     
     # the following two cases are for difference in content wrapping between the CLI script and
     # the download page.

@@ -12,8 +12,8 @@ def refresh_data_access_credentials(freq, aws_object_names):
     This is used to know what call the data access credentials on AWS.
     """
     
-    # Get or create an Admin with no password. This means that nobody can log in as this
-    # Admin in the web interface.
+    # Get or create Researcher with no password. This means that nobody can log in as this
+    # Researcher in the web interface.
     researcher_name = 'BATCH USER {}'.format(freq)
     mock_researchers = Researcher.objects.filter(username=researcher_name)
     if not mock_researchers.exists():

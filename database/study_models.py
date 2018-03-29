@@ -314,7 +314,7 @@ class Researcher(AbstractPasswordUser):
     @classmethod
     def create_without_password(cls, username):
         """
-        Create a new Admin with provided username and no password
+        Create a new Researcher with provided username and no password
         """
 
         r = cls(username=username, password='fakepassword', salt='cab', admin=False)
