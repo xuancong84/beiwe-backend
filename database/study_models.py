@@ -312,6 +312,16 @@ class Researcher(AbstractPasswordUser):
         return researcher
 
     @classmethod
+    def create_without_password(cls, username):
+        """
+        Create a new Admin with provided username and no password
+        """
+
+        r = cls(username=username, password='fakepassword', salt='cab', admin=False)
+        r.reset_access_credentials()
+        return r
+
+    @classmethod
     def check_password(cls, username, compare_me):
         """
         Checks if the provided password matches the hash of the provided Researcher's password.

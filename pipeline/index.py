@@ -1,5 +1,4 @@
-from db.study_models import Studies
-from db.user_models import Admin
+from database.study_models import Study, Researcher
 from pipeline.boto_helpers import get_aws_object_names, get_boto_client
 
 
@@ -15,18 +14,22 @@ def refresh_data_access_credentials(freq, aws_object_names):
     
     # Get or create an Admin with no password. This means that nobody can log in as this
     # Admin in the web interface.
-    admin_name = 'BATCH USER {}'.format(freq)
-    mock_admin = Admin(admin_name)
-    if not mock_admin:
-        mock_admin = Admin.create_without_password(admin_name)
-    
-    # Ensure that the Admin is attached to all Studies. This allows them to access all
+    researcher_name = 'BATCH USER {}'.format(freq)
+    mock_researchers = Researcher.objects.filter(username=researcher_name)
+    if not mock_researchers.exists():
+        mock_researcher = Researcher.create_without_password(researcher_name)
+    else:
+        mock_researcher = mock_researchers.get()
+
+        mock_researcher.save()
+
+    # Ensure that the Researcher is attached to all Studies. This allows them to access all
     # data via the DAA.
-    for study in Studies():
-        study.add_admin(mock_admin._id)
+    for study in Study.objects.all():
+        study.researchers.add(mock_researcher)
     
     # Reset the credentials. This ensures that they aren't stale.
-    access_key, secret_key = mock_admin.reset_access_credentials()
+    access_key, secret_key = mock_researcher.reset_access_credentials()
 
     # Put the credentials (encrypted) into AWS Parameter Store
     ssm_client = get_boto_client('ssm')
@@ -96,9 +99,9 @@ def create_all_jobs(freq):
     
     # TODO: If there are issues with servers not getting spun up in time, make this a
     # ThreadPool with random spacing over the course of 5-10 minutes.
-    for study in Studies(deleted=False):
+    for study in Study.objects.filter(deleted=False):
         # For each study, create a job
-        object_id = str(study._id)
+        object_id = str(study.id)
         create_one_job(freq, object_id, aws_object_names)
 
 
