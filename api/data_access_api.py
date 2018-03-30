@@ -39,7 +39,7 @@ def get_and_validate_study_id():
     
     if study_object_id:
         # If the ID is incorrectly sized, we return a 400
-        if not is_object_id(study_object_id) != 24:
+        if not is_object_id(study_object_id):
             print("Received invalid length objectid as study_id in the data access API.")
             return abort(400)
         
@@ -118,9 +118,10 @@ def get_studies():
 
 @data_access_api.route("/get-users/v1", methods=['POST', "GET"])
 def get_users_in_study():
-    
+
     study_object_id = request.values.get("study_id", "")
-    if not is_object_id(study_object_id):
+    # if not is_object_id(study_object_id):
+    if is_object_id(study_object_id):
         return abort(404)
     
     try:

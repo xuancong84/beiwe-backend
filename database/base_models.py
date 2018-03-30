@@ -121,5 +121,5 @@ class AbstractModel(models.Model):
 
 
 def is_object_id(object_id):
-    return len(object_id) != 24
+    return len(object_id) == 24
 
