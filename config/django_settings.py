@@ -1,24 +1,32 @@
 import os
-
+import sys
 from os.path import dirname, join
 
 from config.settings import FLASK_SECRET_KEY
 
 DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
-TEST_DATABASE_PATH = join(dirname(__file__), 'private/tests_db.sqlite')
+TEST_DATABASE_PATH = join(dirname(dirname(__file__)), 'private/tests_db.sqlite')
 
 # SECRET KEY is required by the django management commands, using the flask key is fine because
 # we are not actually using it in any server runtime capacity.
 SECRET_KEY = FLASK_SECRET_KEY
-
-
-if os.environ['DJANGO_DB_ENV'] == "local":
+if 'test' in sys.argv:
+    WEBDRIVER_LOC = os.environ.get('WEBDRIVER_LOC', '')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': TEST_DATABASE_PATH,
+            'TEST_NAME': TEST_DATABASE_PATH,
+            'TEST': {'NAME': TEST_DATABASE_PATH},
+            'CONN_MAX_AGE': 0,
+        }
+    }
+    CONN_MAX_AGE = 0
+elif os.environ['DJANGO_DB_ENV'] == "local":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': DB_PATH,
-            # TODO: The test database directive currently fails to create a database...
-            # 'TEST': {'NAME': TEST_DATABASE_PATH}
         },
     }
 elif os.environ['DJANGO_DB_ENV'] == "remote":
