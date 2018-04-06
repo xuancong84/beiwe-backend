@@ -16,7 +16,7 @@ def reindex_all_files_to_process():
     clears the ChunksRegistry DB, readds all relevant files on S3 to the
     FilesToProcess registry and then rechunks them.
     """
-    
+    raise Exception("This code has not been tested since converting database backends")
     # Delete all preexisting FTP and ChunkRegistry objects
     FileProcessLock.lock()
     print('{!s} purging FileToProcess: {:d}'.format(datetime.now(), FileToProcess.objects.count()))
@@ -58,16 +58,17 @@ def reindex_all_files_to_process():
 
 
 def reindex_specific_data_type(data_type):
+    raise Exception("This code has not been tested since converting database backends")
     FileProcessLock.lock()
     print("starting...")
     # Convert the data type; raise an error if something is wrong with it
     file_name_key = data_stream_to_s3_file_name_string(data_type)
-    
+
     # Get all chunk paths of the given data type
     relevant_chunks = ChunkRegistry.objects.filter(data_type=data_type)
     # list() ensures that the QuerySet is evaluated before all of its elements are deleted (otherwise it would be empty)
     relevant_indexed_files = list(relevant_chunks.values_list('chunk_path', flat=True))
-    
+
     # Delete the old ChunkRegistry objects
     print("purging old data...")
     relevant_chunks.delete()
@@ -84,7 +85,7 @@ def reindex_specific_data_type(data_type):
                 patient_id = fp.split('/', 2)[1]
                 participant_pk = Participant.objects.filter(patient_id=patient_id).values_list('pk', flat=True).get()
                 FileToProcess.append_file_for_processing(fp, fp.split("/", 1)[0], participant_id=participant_pk)
-    
+
     del files_lists, l
     pool.close()
     pool.terminate()

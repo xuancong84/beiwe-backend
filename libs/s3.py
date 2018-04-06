@@ -1,49 +1,20 @@
-from _ssl import SSLError
-from httplib import IncompleteRead
+import boto3
 
-from boto import connect_s3
-from boto.s3.connection import OrdinaryCallingFormat
-from boto.s3.key import Key
-
-from config.constants import DEFAULT_S3_RETRIES, CHUNKS_FOLDER
-from config.settings import S3_BUCKET, S3_ACCESS_CREDENTIALS_KEY, S3_ACCESS_CREDENTIALS_USER
+from config.constants import DEFAULT_S3_RETRIES
+from config.settings import S3_BUCKET, S3_ACCESS_CREDENTIALS_KEY, S3_ACCESS_CREDENTIALS_USER, S3_REGION_NAME
 from libs import encryption
 
-CONN = connect_s3(aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
-                  aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY,
-                  is_secure=True,
-                  calling_format=OrdinaryCallingFormat())
-
-
-def _get_bucket(name):
-    """ Gets a connection to a bucket, raises an S3ResponseError on failure. """
-    return CONN.get_bucket(name)
-
-
-# def s3_upload_raw( key_name, some_string ):
-#     """ Method uploads string to bucket with key_name"""
-#     bucket = _get_bucket(S3_BUCKET)
-#     key = bucket.new_key(key_name)
-#     key.set_contents_from_string(some_string)
+conn = boto3.client('s3',
+                    aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
+                    aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY,
+                    region_name=S3_REGION_NAME)
 
 
 def s3_upload(key_path, data_string, study_object_id, raw_path=False):
-    """ Uploads data to s3, ensures data is encrypted with the key from the provided study.
-    Takes an optional argument, raw_path, which defaults to false.  When false the study_id is
-    prepended to the S3 file path (key_path), placing the file in the appropriate study folder. """
-
     if not raw_path:
         key_path = study_object_id + "/" + key_path
-
     data = encryption.encrypt_for_server(data_string, study_object_id)
-    key = _get_bucket(S3_BUCKET).new_key(key_path)
-    key.set_contents_from_string(data)
-
-
-# def s3_retrieve_raw( key_name ):
-#     """ Method returns file contents with specified S3 key path"""
-#     key = Key(_get_bucket(S3_BUCKET), key_name)
-#     return key.read()
+    conn.put_object(Body=data, Bucket=S3_BUCKET, Key=key_path, ContentType='string')
 
 
 def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):
@@ -52,35 +23,19 @@ def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAUL
     appropriate study_id folder. """
     if not raw_path:
         key_path = study_object_id + "/" + key_path
-    encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)
+    encrypted_data = _do_retrieve(S3_BUCKET, key_path, number_retries=number_retries)['Body'].read()
     return encryption.decrypt_server(encrypted_data, study_object_id)
 
 
 def _do_retrieve(bucket_name, key_path, number_retries=DEFAULT_S3_RETRIES):
     """ Run-logic to do a data retrieval for a file in an S3 bucket."""
-    key = Key(_get_bucket(bucket_name), key_path)
     try:
-        return key.read()
-    except IncompleteRead:
+        return conn.get_object(Bucket=bucket_name, Key=key_path, ResponseContentType='string')
+    except Exception:
         if number_retries > 0:
             print("s3_retrieve failed with incomplete read, retrying on %s" % key_path)
             return _do_retrieve(bucket_name, key_path, number_retries=number_retries - 1)
         raise
-    except SSLError as e:
-        if 'The read operation timed out' == e.message:
-            print "s3_retreive failed with timeout, retrying on %s" % key_path
-            return _do_retrieve(bucket_name, key_path, number_retries=number_retries - 1)
-        raise
-
-
-# def s3_retrieve_or_none(key_path, study_id, raw_path=False):
-#     """ Like s3_retreive except returns None if the key does not exist instead
-#         of erroring.  This API makes an additional network request, increasing
-#         cost and latency. """
-#     if not raw_path: key_path = str(study_id) + "/" + key_path
-#     key = _get_bucket(S3_BUCKET).get_key(key_path) #this line is the only difference.
-#     if not key: return None
-#     return encryption.decrypt_server(key.read(), study_id)
 
 
 def s3_list_files(prefix, as_generator=False):
@@ -91,31 +46,29 @@ def s3_list_files(prefix, as_generator=False):
 
 
 def _do_list_files(bucket_name, prefix, as_generator=False):
-    bucket = _get_bucket(bucket_name)
-    results = bucket.list(prefix=prefix)
+    paginator = conn.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
     if as_generator:
-        return (i.name.strip("/") for i in results)
-    return [i.name.strip("/") for i in results]
+        return _do_list_files_generator(page_iterator)
+    else:
+        items = []
+        for page in page_iterator:
+            if 'Contents' in page.keys():
+                for item in page['Contents']:
+                    items.append(item['Key'].strip("/"))
+        return items
+
+
+def _do_list_files_generator(page_iterator):
+    for page in page_iterator:
+        if 'Contents' not in page.keys():
+            return
+        for item in page['Contents']:
+            yield item['Key'].strip("/")
 
 
 def s3_delete(key_path):
-    raise Exception("NOOO")
-    if CHUNKS_FOLDER not in key_path:
-        raise Exception("absolutely not deleting %s" % key_path)
-    key = Key(_get_bucket(S3_BUCKET), key_path)
-    key.delete()
-
-
-#unused file based upload function, not up to date with new upload file names.
-# def s3_upload_handler_file( key_name, file_obj ):
-#     """ Method uploads file object to bucket with key_name"""
-#     bucket = _get_bucket(S3_BUCKET)
-#     key = bucket.new_key(key_name)
-#     key.set_metadata('Content-Type', mimetypes.guess_type(key_name))
-#     # seek to the beginning of the file and read it into the key
-#     file_obj.seek(0)
-#     key.set_contents_from_file(file_obj)
-
+    raise Exception("NO DONT DELETE")
 
 ################################################################################
 ######################### Client Key Management ################################
