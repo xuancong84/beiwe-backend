@@ -85,7 +85,7 @@ def download_page():
 
 @admin_api.route("/download")
 def download_current():
-    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-2.2.3-onnelaLabServer-release.apk")
+    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-2.2.5-onnelaLabServer-release.apk")
 
 
 @admin_api.route("/download_debug")
