@@ -4,12 +4,29 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+from libs.security import generate_random_string, generate_hash_and_salt
+
 
 def add_admin_user_if_not_exists(apps, schema_editor):
     Researcher = apps.get_model('database', 'Researcher')
-    if Researcher.objects.filter(admin=True).count == 0:
-        r = Researcher.create_without_password()
-        r.admin = True
+
+    if Researcher.objects.count() == 0:
+        access_key = generate_random_string()[:64]
+        secret_key = generate_random_string()[:64]
+        secret_hash, secret_salt = generate_hash_and_salt(secret_key)
+        access_key_id = access_key
+        access_key_secret = secret_hash
+        access_key_secret_salt = secret_salt
+        password, salt = generate_hash_and_salt("abc123")
+
+        r = Researcher(username="default_admin",
+                       password=password,
+                       salt=salt,
+                       admin=True,
+                       access_key_id=access_key_id,
+                       access_key_secret=access_key_secret,
+                       access_key_secret_salt=access_key_secret_salt
+                       )
         r.save()
 
 
