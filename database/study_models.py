@@ -82,10 +82,12 @@ class AbstractSurvey(AbstractModel):
     AUDIO_SURVEY = 'audio_survey'
     TRACKING_SURVEY = 'tracking_survey'
     DUMMY_SURVEY = 'dummy'
+    IMAGE_SURVEY = 'image_survey'
     SURVEY_TYPE_CHOICES = (
         (AUDIO_SURVEY, AUDIO_SURVEY),
         (TRACKING_SURVEY, TRACKING_SURVEY),
-        (DUMMY_SURVEY, DUMMY_SURVEY)
+        (DUMMY_SURVEY, DUMMY_SURVEY),
+        (IMAGE_SURVEY, IMAGE_SURVEY)
     )
     
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
@@ -308,6 +310,8 @@ class Researcher(AbstractPasswordUser):
         """
 
         researcher = cls(username=username, **kwargs)
+        # todo add check to see if access credentials are in kwargs
+        researcher.reset_access_credentials()
         researcher.set_password(password)
         return researcher
 

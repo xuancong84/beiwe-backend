@@ -281,7 +281,7 @@ def migrate_admins():
                 access_key_id=m_admin['access_key_id'] or None,  # access_key_id is unique and therefore nullable
                 access_key_secret=m_admin['access_key_secret'] or '',
                 access_key_secret_salt=m_admin['access_key_secret_salt'] or '',
-                password=m_admin['password'],
+                password=m_admin['password'] or 'NoPassword',
                 salt=m_admin['salt'],
                 deleted=False,
             )
