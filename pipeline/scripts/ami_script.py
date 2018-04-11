@@ -9,7 +9,7 @@ from time import sleep
 import boto3
 from botocore.exceptions import ClientError
 
-from boto_helpers import get_aws_object_names, get_configs_folder
+from boto_helpers import get_aws_object_names, get_configs_folder, set_default_region
 
 
 def run():
@@ -28,6 +28,7 @@ def run():
     print('JSON loaded')
     
     # Get the AMI ID for the local region
+    set_default_region()
     ec2_client = boto3.client('ec2')
     image_name = ami_ec2_instance_props_dict.pop('ImageName')
     resp = ec2_client.describe_images(Filters=[{'Name': 'name', 'Values': [image_name]}])
