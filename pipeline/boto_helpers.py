@@ -15,7 +15,7 @@ def get_aws_object_names():
 
 
 def get_boto_client(client_type):
-    from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
+    from config.settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 
     aws_object_names = get_aws_object_names()
     
