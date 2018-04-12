@@ -12,8 +12,12 @@ STARTED_OR_WAITING = [states.PENDING, states.RECEIVED, states.STARTED]
 
 FAILED = [states.REVOKED, states.RETRY, states.FAILURE]
 
-with open("/home/ubuntu/manager_ip", 'r') as f:
-    manager_ip = f.read()
+try:
+    with open("/home/ubuntu/manager_ip", 'r') as f:
+        manager_ip = f.read()
+except IOError:
+    print "could not load the manager ip file, defaulting to 127.0.0.1"
+    manager_ip = "127.0.0.1"
 
 celery_app = Celery("data_processing_tasks",
                     broker='pyamqp://guest@%s//' % manager_ip,
