@@ -85,14 +85,14 @@ def create_file_processing_tasks():
         print("starting.")
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct()
+        participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct().values_list("id", flat=True)
         running = []
         
-        for participant in participant_set:
+        for participant_id in participant_set:
             # Queue all users' file processing, and generate a list of currently running jobs
             # to use to detect when all jobs are finished running.
             running.append(safe_queue_user(
-                args=[participant],
+                args=[participant_id],
                 max_retries=0,
                 expires=expiry,
                 task_track_started=True,
@@ -161,13 +161,14 @@ class LogList(list):
         super(LogList, self).extend(iterable)
         
         
-def celery_process_file_chunks(participant):
+def celery_process_file_chunks(participant_id):
     """
     This is the function that is called from celery.  It runs through all new files that have
     been uploaded and 'chunks' them. Handles logic for skipping bad files, raising errors
     appropriately.
     This runs automatically and periodically as a Celery task.
     """
+    participant = Participant.objects.get(id=participant_id)
     log = LogList()
     number_bad_files = 0
     tags = {'user_id': participant.patient_id}
