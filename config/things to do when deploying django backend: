@@ -1,0 +1,198 @@
+things to do when deploying django backend:
+
+0. killed the cron jobs
+0.5. run processing-stop
+1. copy settings file, drop changes in settings file
+2. check out onto branch, pull branch
+3. try running python manage.py shell_plus, it should give you this:
+
+Traceback (most recent call last):
+  File "manage.py", line 5, in <module>
+    import config
+  File "/var/www/beiwe-backend/config/__init__.py", line 77, in <module>
+    raise BadServerConfigurationError("\n" + "\n".join(errors))
+config.BadServerConfigurationError: 
+SENTRY_ANDROID_DSN was not provided with a value.
+SENTRY_ELASTIC_BEANSTALK_DSN was not provided with a value.
+SENTRY_DATA_PROCESSING_DSN was not provided with a value.
+S3_ACCESS_CREDENTIALS_KEY was not provided with a value.
+SYSADMIN_EMAILS was not provided with a value.
+DOMAIN_NAME was not provided with a value.
+S3_ACCESS_CREDENTIALS_USER was not provided with a value.
+FLASK_SECRET_KEY was not provided with a value.
+SENTRY_JAVASCRIPT_DSN was not provided with a value.
+S3_BUCKET was not provided with a value.
+
+
+4. Looks like I had a lot of it set up, just needed to cp settings.py.save settings.py
+    Sorta, I had to edit it to match current requirements
+
+5. cleared out existing database with this (had to run it twice):
+try: ChunkRegistry.objects.all().delete()
+except Exception as e: print e
+try: FileProcessLock.objects.all().delete()
+except Exception as e: print e
+try: FileToProcess.objects.all().delete()
+except Exception as e: print e
+try: PipelineUpload.objects.all().delete()
+except Exception as e: print e
+try: PipelineUploadTags.objects.all().delete()
+except Exception as e: print e
+try: DecryptionKeyError.objects.all().delete()
+except Exception as e: print e
+try: EncryptionErrorMetadata.objects.all().delete()
+except Exception as e: print e
+try: LineEncryptionError.objects.all().delete()
+except Exception as e: print e
+try: UploadTracking.objects.all().delete()
+except Exception as e: print e
+try: DeviceSettings.objects.all().delete()
+except Exception as e: print e
+try: Participant.objects.all().delete()
+except Exception as e: print e
+try: Researcher.objects.all().delete()
+except Exception as e: print e
+try: Study.objects.all().delete()
+except Exception as e: print e
+try: Survey.objects.all().delete()
+except Exception as e: print e
+try: SurveyArchive.objects.all().delete()
+except Exception as e: print e
+
+
+6. ran /Volumes/Arno/Cygwin/home/Eli/beiwe-backend/scripts/purge_chunk_duplicates.py  -- this needs to be updated to check hashes before running on production.
+
+7. stuck the new deployment variables into the staging cluster environment variables
+
+8. updated security group "used by stagingsql" to allow connections from sg-a47162d9, the beiweCluster-staging sec group that is applied to all elastic beanstalk instances for staging.
+
+9. okay, it looks like staging just up and broke somewhere in here.  Restarting App Servers didn't fix it, going to app versions and deploying the currently deployed version DID fix it.  They were mongo connection errors.  Yay? last time we ever see that maybe?
+
+10. We got some uploads, so I needed to disable the upload url, deploy that to staging, revert data processing back to a non django branch to run data processing, then rerun steps 5 and 7.  Uhg.
+
+11. OKAY had to use this stack overflow to determine how the hell to forward the RDS password (which hack $ and ! in it) to the environment, and had to do all deployments twice.  (used the stupid echo hack, not the \\\)
+
+12. OKAY I could finally deploy the development branch..... but it was in the stupid broken state and I had to deploy the functional version of the prior codebase... nope broken
+
+13. OKAY, it looked like the security group for the database to let the EB servers connect was not correctly configured at all??? what?  Fixed this, made attempt, hitting other errors....
+
+14. OKAY, though it LOOKED like i had a password wrong, it turned out that I was missing a migration...
+
+15. and then EVEN THOUGH I COULD LITERALLY FIND THE FUCKING FOLDER AND RUN THE FUCKING MIGRATION THE SERVER IS GETTING A CONNECTION PROBLEM TO THE DATABASE WTF.
+
+16. Fuckit.  Killing the server by deploying a new app amazon linux version. seriously this was retahded.
+
+17. I was missing the DJANGO_DB_ENV variable.  >_o
+NOPE NOT THE PROBLEM
+
+18. Jesus fucking christ.  The management commands and the actual server runtime import the passwords differently.  It needs to be raw and unescaped for management commands and the echo blah blah pattern for apache.
+when running in apache it doesn't have dollar signs, when running migration it has dollar signs.
+This is stupid.
+
+
+Solution: make new database that doesn't have this password escaping problem.
+
+
+OKAY NEXT DAY
+
+Deployed successfully to development server, it works if the password has no special characters
+
+
+GETTING DATA PROCESSING TO WORK STARTS HERE:
+GETTING DATA PROCESSING TO WORK STARTS HERE:
+GETTING DATA PROCESSING TO WORK STARTS HERE:
+GETTING DATA PROCESSING TO WORK STARTS HERE:
+
+1. new cron config, it is a fusion of the manager and worker cron scripts in cluster management:
+
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+
+PATH=/home/ubuntu/.pyenv/shims:/usr/bin:/bin
+
+# Note: we actually run the"five_minutes" cron job every 15 minutes.
+
+PROJECT_PATH="/var/www/beiwe-backend/services/"
+
+# m h  dom mon dow   command
+*/15 * * * * : five_minutes; cd $PROJECT_PATH; chronic python cron_target.py five_minutes
+0 */1 * * * : hourly; cd $PROJECT_PATH; chronic python cron_target.py hourly
+30 */4 * * * : four_hourly; cd $PROJECT_PATH; chronic python cron_target.py four_hourly
+@daily : daily; cd $PROJECT_PATH; chronic python cron_target.py daily
+0 2 * * 0 : weekly; cd $PROJECT_PATH; chronic python cron_target.py weekly
+
+# at 4:29am restart celery by restarting supervisord
+29 4 * * *: pkill -HUP supervisord
+
+
+2. paste everything between the ======= signs into the terminal.  This is the reconfiguration of the celery tasks, it differs from the contents of the celery config scripts ONLY in that it has a different folder for celery to go to (/var/www)
+
+
+======================================================
+#this is almost definitely overkill/unnecessary
+sudo mkdir -p /etc/supervisor/conf.d/
+sudo mkdir -p /var/log/celery/
+sudo rm -f /var/log/celery/celeryd.log
+sudo touch /var/log/celery/celeryd.log
+sudo chmod 666 /var/log/celery/celeryd.log
+sudo rm -f /var/log/celery/celeryd.err
+sudo touch /var/log/celery/celeryd.err
+sudo chmod 666 /var/log/celery/celeryd.err
+sudo mkdir -p /var/log/supervisor/
+sudo rm -f /var/log/supervisor/supervisord.log
+sudo touch /var/log/supervisor/supervisord.log
+sudo chmod 666 /var/log/supervisor/supervisord.log
+
+sudo tee /etc/supervisord.conf >/dev/null <<EOL
+[supervisord]
+logfile = /var/log/supervisor/supervisord.log
+logfile_maxbytes = 50MB
+logfile_backups=10
+loglevel = info
+pidfile = /tmp/supervisord.pid
+nodaemon = false
+minfds = 1024
+minprocs = 200
+umask = 022
+identifier = supervisor
+directory = /tmp
+childlogdir = /tmp
+strip_ansi = false
+
+[inet_http_server]
+port = 127.0.0.1:50001
+
+[supervisorctl]
+serverurl = http://127.0.0.1:50001
+
+[program:celery]
+directory = /var/www/beiwe-backend/
+command = celery -A services.celery_data_processing worker --loglevel=info
+stdout_logfile = /var/log/celery/celeryd.log
+stderr_logfile = /var/log/celery/celeryd.err
+autostart = true
+EOL
+======================================================
+
+3.
+AND THEN DELETE THE DEFAULT ADMIN USER
