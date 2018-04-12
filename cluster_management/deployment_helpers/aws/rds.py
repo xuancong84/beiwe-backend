@@ -9,7 +9,7 @@ from deployment_helpers.aws.security_groups import (create_security_group,
 from deployment_helpers.constants import (DBInstanceNotFound, get_db_credentials_file_path,
     get_server_configuration_file)
 from deployment_helpers.general_utils import (random_alphanumeric_starting_with_letter, log,
-    current_time_string, EXIT)
+    current_time_string, EXIT, random_alphanumeric_string)
 
 # t1.micro, m1.small, m1.medium, m1.large, m1.xlarge, m2.xlarge, m2.2xlarge, m2.4xlarge,
 # m3.medium, m3.large, m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge,
