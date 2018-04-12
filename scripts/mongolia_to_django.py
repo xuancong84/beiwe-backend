@@ -491,13 +491,21 @@ def migrate_upload_trackers():
 
 
 def run_all_migrations():
+    print "migrate_studies..."
     migrate_studies()
+    print "remap_study_relationships..."
     remap_study_relationships()
+    print "migrate_surveys..."
     migrate_surveys()
+    print "migrate_settings..."
     migrate_settings()
+    print "migrate_admins..."
     migrate_admins()
+    print "migrate_users..."
     migrate_users()
+    print "migrate_chunk_registries..."
     migrate_chunk_registries()
+    print "migrate_upload_trackers..."
     migrate_upload_trackers()
 
 
