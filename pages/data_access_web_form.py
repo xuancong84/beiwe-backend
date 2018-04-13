@@ -56,9 +56,8 @@ def pipeline_download_page():
     # it is a bit obnoxious to get this data, we need to deduplcate it and then turn it back into a list
     tags = set()
     for study in iteratable_studies:
-        for tags_list in PipelineUploadTags.objects.filter(pipeline_upload__study__id=study['id']).values_list("tag", flat=True):
-            for tag in tags_list:
-                tags.add(tag)
+        for tag in PipelineUploadTags.objects.filter(pipeline_upload__study__id=study['id']).values_list("tag", flat=True):
+            tags.add(tag)
     tags = [_ for _ in tags]
     tags.sort()
     return render_template(
