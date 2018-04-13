@@ -115,7 +115,7 @@ def get_admins_allowed_studies_as_query_set():
     return Study.get_all_studies_by_name().filter(researchers=researcher)
 
 
-def get_admins_allowed_studies():
+def get_admins_allowed_studies(as_json=True):
     """
     Return a list of studies which the currently logged-in researcher is authorized to view and edit.
     """
@@ -125,7 +125,10 @@ def get_admins_allowed_studies():
         Study.get_all_studies_by_name().filter(researchers=researcher)
             .values("name", "object_id", "id", "is_test")
     ]
-    return json.dumps(study_set)
+    if as_json:
+        return json.dumps(study_set)
+    else:
+        return study_set
 
 
 ################################################################################

@@ -50,7 +50,7 @@
               <div class="form-group">
                 <label for="study_selector">Study</label>
                 <select class="form-control" name="study_id" id="study_selector">
-                  {% for study in allowed_studies %}
+                  {% for study in downloadable_studies %}
                     {# Only show test studies as options to download from #}
                     {% if study['is_test'] == True %}
                       <option value="{{ study._id }}">{{ study.name }}</option>
