@@ -310,9 +310,9 @@ class Researcher(AbstractPasswordUser):
         """
 
         researcher = cls(username=username, **kwargs)
+        researcher.set_password(password)
         # todo add check to see if access credentials are in kwargs
         researcher.reset_access_credentials()
-        researcher.set_password(password)
         return researcher
 
     @classmethod
