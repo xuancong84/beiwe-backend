@@ -47,11 +47,8 @@
               <div class="form-group">
                 <label for="study_selector">Study</label>
                   {# TODO: it would be nice if this selected the first option by default #}
-                  <select
-                    class="form-control"
-                    name="study_id"
-                    ng-model="selectedStudyId"
-                    ng-options="study.id as study.name for study in allowedStudies | filter: {is_test: true}" >
+                  <select class="form-control" name="study_pk" ng-model="selectedStudyId">
+                    <option ng-repeat="study in allowedStudies | filter: {is_test: true}" value="{%raw%}{{ study.id }}{%endraw%}">{%raw%}{{ study.name }}{%endraw%}</option>
                   </select>
               </div>
             </div>
