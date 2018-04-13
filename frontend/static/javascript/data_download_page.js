@@ -1,9 +1,4 @@
-var users_by_study = {};
-
-
 $(document).ready(function() {
-	patients_dict = JSON.parse(users_by_study);
-
 	/* Set up Date/Time pickers */
     $('#start_datetimepicker').datetimepicker();
     $('#end_datetimepicker').datetimepicker();
