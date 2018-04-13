@@ -27,6 +27,7 @@ elif os.environ['DJANGO_DB_ENV'] == "local":
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': DB_PATH,
+            'CONN_MAX_AGE': 0,
         },
     }
 elif os.environ['DJANGO_DB_ENV'] == "remote":
@@ -37,6 +38,7 @@ elif os.environ['DJANGO_DB_ENV'] == "remote":
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
+            'CONN_MAX_AGE': 0,
         },
     }
 else:
