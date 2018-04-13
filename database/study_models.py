@@ -74,7 +74,7 @@ class Study(AbstractModel):
         return self.device_settings
 
     def get_researchers(self):
-        return Researcher.objects.filter(study=self)
+        return Researcher.objects.filter(studies=self)
 
 
 class AbstractSurvey(AbstractModel):
@@ -310,9 +310,9 @@ class Researcher(AbstractPasswordUser):
         """
 
         researcher = cls(username=username, **kwargs)
+        researcher.set_password(password)
         # todo add check to see if access credentials are in kwargs
         researcher.reset_access_credentials()
-        researcher.set_password(password)
         return researcher
 
     @classmethod
