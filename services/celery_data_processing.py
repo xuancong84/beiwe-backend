@@ -196,3 +196,4 @@ def celery_process_file_chunks(participant_id):
                 break
             else:
                 continue
+    exit()
