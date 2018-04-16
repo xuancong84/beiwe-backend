@@ -33,16 +33,21 @@ def get_and_validate_study_id():
     Study object id otherwise invalid causes 400 error.
     Study does not exist in our database causes 404 error.
     """
-    
-    study_object_id = request.values.get('study_id', None)
-    study_pk = request.values.get('study_pk', None)
-    
+    study = _get_study_or_abort_404(request.values.get('study_id', None),
+                                    request.values.get('study_pk', None))
+    if not study.is_test:
+        # You're only allowed to download chunked data from test studies
+        return abort(404)
+    else:
+        return study
+
+
+def _get_study_or_abort_404(study_object_id, study_pk):
     if study_object_id:
         # If the ID is incorrectly sized, we return a 400
         if not is_object_id(study_object_id):
             print("Received invalid length objectid as study_id in the data access API.")
             return abort(400)
-        
         # If no Study with the given ID exists, we return a 404
         try:
             study = Study.objects.get(object_id=study_object_id)
@@ -57,9 +62,6 @@ def get_and_validate_study_id():
         except Study.DoesNotExist:
             return abort(404)
         else:
-            if not study.is_test:
-                # You're only allowed to download chunked data from test studies
-                return abort(404)
             return study
     else:
         return abort(400)
