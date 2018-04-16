@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import datetime
 import json
 
 from django.db import models
 from django.db.models import F, Func
+from django.utils import timezone
 
 from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
@@ -155,7 +155,7 @@ class Survey(AbstractSurvey):
 class SurveyArchive(AbstractSurvey):
     
     archive_start = models.DateTimeField()
-    archive_end = models.DateTimeField(default=datetime.utcnow)
+    archive_end = models.DateTimeField(default=timezone.now)
     
     survey = models.ForeignKey('Survey', on_delete=models.PROTECT, related_name='archives')
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys_archive')
