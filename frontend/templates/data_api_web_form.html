@@ -10,12 +10,9 @@
   <script type="text/javascript" src="../static/javascript/libraries/collapse.js"></script>
   <script type="text/javascript" src="../static/javascript/libraries/bootstrap-datetimepicker.js"></script>
   <script type="text/javascript" src="../static/javascript/data_download_page.js"></script>
-  <script type="text/javascript">
-    var users_by_study = '{{ users_by_study|safe }}';
-  </script>
   <script>
-    allowedStudies = {{ allowed_studies|safe }};
-    participantsByStudy = {{ users_by_study|safe }};
+    var allowedStudies = {{ allowed_studies|safe }};
+    var participantsByStudy = {{ users_by_study|safe }};
   </script>
   <script src="/static/javascript/app/survey-builder/controllers/data-access-web-form-controller.js"></script>
 {% endblock %}
@@ -49,14 +46,11 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="study_selector">Study</label>
-                <select class="form-control" name="study_id" id="study_selector">
-                  {% for study in allowed_studies %}
-                    {# Only show test studies as options to download from #}
-                    {% if study['is_test'] == True %}
-                      <option value="{{ study._id }}">{{ study.name }}</option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
+                  {# TODO: it would be nice if this selected the first option by default #}
+                  <select class="form-control" name="study_pk" ng-model="selectedStudyId">
+                      <option value="" disabled>--- Select Study ---</option>
+                    <option ng-repeat="study in allowedStudies | filter: {is_test: true}" value="{%raw%}{{ study.id }}{%endraw%}">{%raw%}{{ study.name }}{%endraw%}</option>
+                  </select>
               </div>
             </div>
 
@@ -64,7 +58,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 <label for="patient_selector">Patients</label>
-                <select id="patient_selector" ng-model="selectedPatient" ng-options="participant for participant in participantsByStudy[selectedStudy.id] track by participant" name="user_ids" class="form-control" size=12 multiple></select>
+                <select id="patient_selector" ng-model="selectedPatient" ng-options="participant for participant in participantsByStudy[selectedStudyId] track by participant" name="user_ids" class="form-control" size=12 multiple></select>
               </div>
             </div>
 
@@ -79,14 +73,9 @@
                 </select>
               </div>
             </div>
-
-          </div>
-          <br>
-
-
-          {# Time Range #}
-          <div class="row">
-
+            <br>
+              {# Time Range #}
+            <div class="row">
             {# Start Datetime #}
             <div class="col-sm-4">
               <div class="form-group">
@@ -112,8 +101,7 @@
                 </div>
               </div>
             </div>
-
-          </div>
+            </div>
           <br><br>
 
           {# Hidden Input to tell Data Download API that this request came from the web form (not from the command-line) #}
@@ -121,16 +109,15 @@
 
           <div class="row">
             <div class="col-sm-2">
-              <input type="submit" class="btn btn-success" value="Download Data" id="download_submit_button">
+              <input type="submit" class="btn btn-success" value="Download Data" id="download_submit_button" ng-disabled="!selectedStudyId" />
             </div>
             <div class="col-sm-10">
               <p id="explanation_paragraph" hidden><b>It may take several minutes to compile your data and download it as a .zip file. Do not click "Reload" or "Back" until your data finishes downloading. Once your data file downloads, you must reload this page before you can download another datafile.</b></p>
             </div>
           </div>
-
+          </div>
         </form>
       </div>
-
 
     </div>
 

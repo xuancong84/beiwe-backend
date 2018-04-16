@@ -70,6 +70,9 @@ class Study(AbstractModel):
     def get_survey_ids_for_study(self, survey_type='tracking_survey'):
         return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', flat=True)
 
+    def get_survey_ids_and_object_ids_for_study(self, survey_type='tracking_survey'):
+        return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', 'object_id')
+
     def get_study_device_settings(self):
         return self.device_settings
 

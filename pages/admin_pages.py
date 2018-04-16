@@ -40,8 +40,8 @@ def choose_study():
 @authenticate_admin_study_access
 def view_study(study_id=None):
     study = Study.objects.get(pk=study_id)
-    tracking_survey_ids = study.get_survey_ids_for_study('tracking_survey')
-    audio_survey_ids = study.get_survey_ids_for_study('audio_survey')
+    tracking_survey_ids = study.get_survey_ids_and_object_ids_for_study('tracking_survey')
+    audio_survey_ids = study.get_survey_ids_and_object_ids_for_study('audio_survey')
     participants = study.participants.all()
 
     return render_template(

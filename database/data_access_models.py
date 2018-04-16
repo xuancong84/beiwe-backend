@@ -224,5 +224,4 @@ class PipelineUpload(AbstractModel):
 
 class PipelineUploadTags(AbstractModel):
     pipeline_upload = models.ForeignKey(PipelineUpload, related_name="tags")
-    tag = models.CharField(max_length=1024, validators=[LengthValidator(1024)])
-    
+    tag = models.TextField()

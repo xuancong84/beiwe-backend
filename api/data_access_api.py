@@ -33,16 +33,21 @@ def get_and_validate_study_id():
     Study object id otherwise invalid causes 400 error.
     Study does not exist in our database causes 404 error.
     """
-    
-    study_object_id = request.values.get('study_id', None)
-    study_pk = request.values.get('study_pk', None)
-    
+    study = _get_study_or_abort_404(request.values.get('study_id', None),
+                                    request.values.get('study_pk', None))
+    if not study.is_test:
+        # You're only allowed to download chunked data from test studies
+        return abort(404)
+    else:
+        return study
+
+
+def _get_study_or_abort_404(study_object_id, study_pk):
     if study_object_id:
         # If the ID is incorrectly sized, we return a 400
         if not is_object_id(study_object_id):
             print("Received invalid length objectid as study_id in the data access API.")
             return abort(400)
-        
         # If no Study with the given ID exists, we return a 404
         try:
             study = Study.objects.get(object_id=study_object_id)
@@ -57,9 +62,6 @@ def get_and_validate_study_id():
         except Study.DoesNotExist:
             return abort(404)
         else:
-            if not study.is_test:
-                # You're only allowed to download chunked data from test studies
-                return abort(404)
             return study
     else:
         return abort(400)
@@ -259,12 +261,12 @@ def determine_file_name(chunk):
     extension = chunk["chunk_path"][-3:]  # get 3 letter file extension from the source.
     if chunk["data_type"] == SURVEY_ANSWERS:
         # add the survey_id from the file path.
-        return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
+        return "%s/%s/%s/%s.%s" % (chunk["participant__patient_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                    str(chunk["time_bin"]).replace(":", "_"), extension)
     
     elif chunk["data_type"] == SURVEY_TIMINGS:
         # add the survey_id from the database entry.
-        return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["survey_id"],
+        return "%s/%s/%s/%s.%s" % (chunk["participant__patient_id"], chunk["data_type"], chunk["survey_id"],
                                    str(chunk["time_bin"]).replace(":", "_"), extension)
     
     elif chunk["data_type"] == VOICE_RECORDING:
@@ -273,13 +275,13 @@ def determine_file_name(chunk):
         # correct this.  We can identify those files by checking for the existence of the extra /.
         # When we don't find it, we revert to original behavior.
         if chunk["chunk_path"].count("/") == 4:  #
-            return "%s/%s/%s/%s.%s" % (chunk["participant_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
+            return "%s/%s/%s/%s.%s" % (chunk["participant__patient_id"], chunk["data_type"], chunk["chunk_path"].rsplit("/", 2)[1],
                                        str(chunk["time_bin"]).replace(":", "_"), extension)
     
     # all other files have this form:
     from pprint import pprint
     pprint(chunk)
-    return "%s/%s/%s.%s" % (chunk['participant_id'], chunk["data_type"],
+    return "%s/%s/%s.%s" % (chunk['participant__patient_id'], chunk["data_type"],
                             str(chunk["time_bin"]).replace(":", "_"), extension)
 
 
@@ -352,13 +354,14 @@ def handle_database_query(study_id, query, registry=None):
     """
     Runs the database query and returns a QuerySet.
     """
-    
+    chunk_fields = ["pk", "participant_id", "data_type", "chunk_path", "time_bin", "chunk_hash",
+                    "participant__patient_id", "study_id", "survey_id"]
+
     chunks = ChunkRegistry.get_chunks_time_range(study_id, **query)
-    
-    # If there is no registry, just return all the chunks.
+
     if not registry:
-        return chunks.values()
-    
+        return chunks.values(*chunk_fields)
+
     # If there is a registry, we need to filter the chunks
     else:
         # AJK TODO make sure this works well
@@ -377,7 +380,7 @@ def handle_database_query(study_id, query, registry=None):
         # Return a QuerySet of the chunks that aren't in the registry
         unregistered_chunks = chunks.exclude(pk__in=registered_chunk_pks)
         
-        return unregistered_chunks.values()
+        return unregistered_chunks.values(*chunk_fields)
 
 
 #########################################################################################
