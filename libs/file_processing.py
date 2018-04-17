@@ -9,10 +9,11 @@ from datetime import datetime
 
 # noinspection PyUnresolvedReferences
 from config import load_django
-from config.constants import (ANDROID_LOG_FILE, UPLOAD_FILE_TYPE_MAPPING, API_TIME_FORMAT, IDENTIFIERS,
+from config.constants import (ANDROID_LOG_FILE, UPLOAD_FILE_TYPE_MAPPING, API_TIME_FORMAT,
+    IDENTIFIERS,
     WIFI, CALL_LOG, CHUNK_TIMESLICE_QUANTUM, FILE_PROCESS_PAGE_SIZE, SURVEY_TIMINGS, ACCELEROMETER,
     SURVEY_DATA_FILES, CONCURRENT_NETWORK_OPS, CHUNKS_FOLDER, CHUNKABLE_FILES,
-    DATA_PROCESSING_NO_ERROR_STRING)
+    DATA_PROCESSING_NO_ERROR_STRING, IOS_LOG_FILE)
 from database.models import ChunkRegistry, FileProcessLock, FileToProcess, Participant, Survey
 from libs.s3 import s3_retrieve, s3_upload
 
@@ -318,7 +319,8 @@ def file_path_to_data_type(file_path):
     else:
         if "identifiers" in file_path:
             return IDENTIFIERS
-        
+        if "ios/log" in file_path:
+            return IOS_LOG_FILE
     # If no data type has been selected; i.e. if none of the data types are present in file_path,
     # raise an error
     raise Exception("data type unknown: %s" % file_path)
