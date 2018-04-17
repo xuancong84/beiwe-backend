@@ -266,7 +266,7 @@ def determine_file_name(chunk):
     
     elif chunk["data_type"] == SURVEY_TIMINGS:
         # add the survey_id from the database entry.
-        return "%s/%s/%s/%s.%s" % (chunk["participant__patient_id"], chunk["data_type"], chunk["survey_id"],
+        return "%s/%s/%s/%s.%s" % (chunk["participant__patient_id"], chunk["data_type"], chunk["survey__object_id"],
                                    str(chunk["time_bin"]).replace(":", "_"), extension)
     
     elif chunk["data_type"] == VOICE_RECORDING:
@@ -355,7 +355,7 @@ def handle_database_query(study_id, query, registry=None):
     Runs the database query and returns a QuerySet.
     """
     chunk_fields = ["pk", "participant_id", "data_type", "chunk_path", "time_bin", "chunk_hash",
-                    "participant__patient_id", "study_id", "survey_id"]
+                    "participant__patient_id", "study_id", "survey_id", "survey__object_id"]
 
     chunks = ChunkRegistry.get_chunks_time_range(study_id, **query)
 
