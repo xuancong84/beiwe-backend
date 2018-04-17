@@ -1,5 +1,5 @@
-from datetime import datetime
 
+from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -72,4 +72,4 @@ def create_survey_archive(sender, **kwargs):
         # If the survey has not been edited, we don't save the new archive. Update the
         # previous archive to extend to the current time. Note that object.update saves the
         # object, unlike QuerySet.update. See base_models.AbstractModel for details.
-        last_archive.update(archive_end=datetime.utcnow())
+        last_archive.update(archive_end=timezone.now())

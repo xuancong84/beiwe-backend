@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.db import models
+from django.utils import timezone
 
 from config.constants import UPLOAD_FILE_TYPE_MAPPING
 from libs.security import decode_base64
@@ -70,11 +71,11 @@ class UploadTracking(AbstractModel):
     
     @classmethod
     def get_trailing(cls, time_delta):
-        return cls.objects.filter(timestamp__gte=datetime.utcnow() - time_delta)
+        return cls.objects.filter(timestamp__gte=timezone.now() - time_delta)
     
     @classmethod
     def get_trailing_count(cls, time_delta):
-        cls.objects.filter(timestamp__gte=datetime.utcnow() - time_delta).count()
+        cls.objects.filter(timestamp__gte=timezone.now() - time_delta).count()
     
     @classmethod
     def weekly_stats(cls, days=7, get_usernames=False):
