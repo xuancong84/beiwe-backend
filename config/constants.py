@@ -31,11 +31,12 @@ CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECOND
 
 
 ## Data streams and survey types ##
-ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
+ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
-MEDIA_EXTENSIONS = [".mp4", ".wav"]
+# These don't appear to be used...
+MEDIA_EXTENSIONS = [".mp4", ".wav", ".jpg"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
-              'bluetoothLog', 'surveyAnswers', 'surveyTimings']
+              'bluetoothLog', 'surveyAnswers', 'surveyTimings', 'imageSurvey']
 
 
 ## HTML lists ##
@@ -98,12 +99,15 @@ SURVEY_ANSWERS = "survey_answers"
 SURVEY_TIMINGS = "survey_timings"
 TEXTS_LOG = "texts"
 VOICE_RECORDING = "audio_recordings"
+IMAGE_FILE = "image_survey"
 WIFI = "wifi"
 PROXIMITY = "proximity"
 GYRO = "gyro"
 MAGNETOMETER = "magnetometer"
 DEVICEMOTION = "devicemotion"
 REACHABILITY = "reachability"
+
+
 
 ALL_DATA_STREAMS = [ACCELEROMETER,
                     BLUETOOTH,
@@ -122,7 +126,8 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     MAGNETOMETER,
                     DEVICEMOTION,
                     REACHABILITY,
-                    IOS_LOG_FILE]
+                    IOS_LOG_FILE,
+                    IMAGE_FILE]
 
 SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
@@ -144,6 +149,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "wifiLog": WIFI,
     "proximity": PROXIMITY,
     "ios_log": IOS_LOG_FILE,
+    "imageSurvey":IMAGE_FILE,
 }
 
 
@@ -168,6 +174,7 @@ def data_stream_to_s3_file_name_string(data_type):
     if data_type == DEVICEMOTION: return "devicemotion"
     if data_type == REACHABILITY: return "reachability"
     if data_type == IOS_LOG_FILE: return "ios_log"
+    if data_type == IMAGE_FILE: "imageSurvey"
     raise Exception("unknown data type: %s" % data_type)
 
 CHUNKABLE_FILES = {ACCELEROMETER,

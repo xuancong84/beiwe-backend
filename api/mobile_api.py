@@ -1,7 +1,7 @@
 import calendar
 import time
-from datetime import datetime
 
+from django.utils import timezone
 from flask import Blueprint, request, abort, render_template, json
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
@@ -132,7 +132,7 @@ def upload(OS_API=""):
         UploadTracking.objects.create(
             file_path=file_name.replace("_", "/"),
             file_size=len(uploaded_file),
-            timestamp=datetime.utcnow(),
+            timestamp=timezone.now(),
             participant=user,
         )
         return render_template('blank.html'), 200

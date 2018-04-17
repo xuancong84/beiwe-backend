@@ -1,7 +1,7 @@
 import functools
 from datetime import datetime, timedelta
 
-from flask import session, redirect, request
+from flask import session, redirect, request, json
 from werkzeug.exceptions import abort
 
 from database.models import Researcher, Study
@@ -115,13 +115,20 @@ def get_admins_allowed_studies_as_query_set():
     return Study.get_all_studies_by_name().filter(researchers=researcher)
 
 
-def get_admins_allowed_studies():
+def get_admins_allowed_studies(as_json=True):
     """
     Return a list of studies which the currently logged-in researcher is authorized to view and edit.
     """
     researcher = Researcher.objects.get(username=session['admin_username'])
-    study_set = Study.get_all_studies_by_name().filter(researchers=researcher)
-    return Study.query_set_as_native_json(study_set)
+    study_set = [
+        study for study in
+        Study.get_all_studies_by_name().filter(researchers=researcher)
+            .values("name", "object_id", "id", "is_test")
+    ]
+    if as_json:
+        return json.dumps(study_set)
+    else:
+        return study_set
 
 
 ################################################################################

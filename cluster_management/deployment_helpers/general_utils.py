@@ -54,12 +54,6 @@ def retry(func, *args, **kwargs):
 
 ALPHANUMERICS = string.ascii_letters + string.digits
 
-#postgress passwords are alphanumerics plus "typable special characters" that are not not /, ", or @
-POSTGRESS_PASSWORD_CHARACTERS = ALPHANUMERICS + '!#$%^&*()<>?[]{}_+='
-
-def random_password_string(length):
-    return ''.join(random.choice(POSTGRESS_PASSWORD_CHARACTERS) for _ in xrange(length))
-
 def random_alphanumeric_string(length):
     return ''.join(random.choice(ALPHANUMERICS) for _ in xrange(length))
 

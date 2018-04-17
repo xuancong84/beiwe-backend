@@ -1,5 +1,6 @@
 import json
 import os.path
+import subprocess
 
 import boto3
 
@@ -14,7 +15,7 @@ def get_aws_object_names():
 
 
 def get_boto_client(client_type):
-    from config.secure_settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
+    from config.settings import AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID
 
     aws_object_names = get_aws_object_names()
     
@@ -32,3 +33,9 @@ def get_pipeline_folder():
 
 def get_configs_folder():
     return os.path.join(get_pipeline_folder(), 'configs')
+
+
+def set_default_region():
+    aws_object_names = get_aws_object_names()
+    region_name = aws_object_names['region_name']
+    subprocess.check_call(['aws', 'configure', 'set', 'default.region', region_name])

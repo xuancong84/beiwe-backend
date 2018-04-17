@@ -18,15 +18,15 @@ if 'test' in sys.argv:
             'NAME': TEST_DATABASE_PATH,
             'TEST_NAME': TEST_DATABASE_PATH,
             'TEST': {'NAME': TEST_DATABASE_PATH},
-            'CONN_MAX_AGE': 0,
+            'CONN_MAX_AGE': None,
         }
     }
-    CONN_MAX_AGE = 0
 elif os.environ['DJANGO_DB_ENV'] == "local":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': DB_PATH,
+            'CONN_MAX_AGE': None,
         },
     }
 elif os.environ['DJANGO_DB_ENV'] == "remote":
@@ -37,6 +37,7 @@ elif os.environ['DJANGO_DB_ENV'] == "remote":
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
+            'CONN_MAX_AGE': None,
         },
     }
 else:

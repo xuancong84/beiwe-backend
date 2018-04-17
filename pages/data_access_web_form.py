@@ -46,8 +46,7 @@ def warn_researcher_if_hasnt_yet_generated_access_key(researcher):
 def pipeline_download_page():
     researcher = Researcher.objects.get(username=session['admin_username'])
     warn_researcher_if_hasnt_yet_generated_access_key(researcher)
-    allowed_studies = get_admins_allowed_studies()
-    iteratable_studies = json.loads(allowed_studies)
+    iteratable_studies = get_admins_allowed_studies(as_json=False)
     # dict of {study ids : list of user ids}
 
     users_by_study = {str(study['id']):
@@ -57,14 +56,14 @@ def pipeline_download_page():
     # it is a bit obnoxious to get this data, we need to deduplcate it and then turn it back into a list
     tags = set()
     for study in iteratable_studies:
-        for tags_list in PipelineUploadTags.objects.filter(pipeline_upload__study__id=study['id']).values_list("tag", flat=True):
-            for tag in tags_list:
-                tags.add(tag)
+        for tag in PipelineUploadTags.objects.filter(pipeline_upload__study__id=study['id']).values_list("tag", flat=True):
+            tags.add(tag)
     tags = [_ for _ in tags]
     tags.sort()
     return render_template(
             "data_pipeline_web_form.html",
-            allowed_studies=iteratable_studies,
+            allowed_studies=get_admins_allowed_studies(),
+            downloadable_studies=iteratable_studies,
             users_by_study=users_by_study,
             tags=tags,
             system_admin=admin_is_system_admin()

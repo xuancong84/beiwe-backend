@@ -1,7 +1,6 @@
 import json
-from time import sleep
-
 import os
+from time import sleep
 
 from deployment_helpers.aws.boto_helpers import create_rds_client, create_ec2_resource
 from deployment_helpers.aws.security_groups import (create_security_group,
@@ -9,8 +8,8 @@ from deployment_helpers.aws.security_groups import (create_security_group,
     get_security_group_by_name)
 from deployment_helpers.constants import (DBInstanceNotFound, get_db_credentials_file_path,
     get_server_configuration_file)
-from deployment_helpers.general_utils import (random_password_string,
-    random_alphanumeric_starting_with_letter, log, current_time_string, EXIT)
+from deployment_helpers.general_utils import (random_alphanumeric_starting_with_letter, log,
+    current_time_string, EXIT, random_alphanumeric_string)
 
 # t1.micro, m1.small, m1.medium, m1.large, m1.xlarge, m2.xlarge, m2.2xlarge, m2.4xlarge,
 # m3.medium, m3.large, m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge,
@@ -42,7 +41,7 @@ def generate_valid_postgres_credentials():
         # 1 to 63 alphanumeric characters, first character must be a letter.
         "RDS_USERNAME": random_alphanumeric_starting_with_letter(63),
         # 8 to 128 characters, typeable characters, not /, ", or @
-        "RDS_PASSWORD": random_password_string(128),
+        "RDS_PASSWORD": random_alphanumeric_string(128),
         # 1 to 63 alphanumeric characters, begin with a letter
         "RDS_DB_NAME": random_alphanumeric_starting_with_letter(63)
     }

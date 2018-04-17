@@ -41,7 +41,7 @@ def create_s3_client():
             "s3",
             aws_access_key_id=AWS_CREDENTIIALS["AWS_ACCESS_KEY_ID"],
             aws_secret_access_key=AWS_CREDENTIIALS["AWS_SECRET_ACCESS_KEY"],
-            region_name="us-east-1",
+            region_name=GLOBAL_CONFIGURATION["AWS_REGION"],
     )
     
 
@@ -57,5 +57,5 @@ def create_s3_resource():
             "s3",
             aws_access_key_id=AWS_CREDENTIIALS["AWS_ACCESS_KEY_ID"],
             aws_secret_access_key=AWS_CREDENTIIALS["AWS_SECRET_ACCESS_KEY"],
-            region_name="us-east-1",
+            region_name=GLOBAL_CONFIGURATION["AWS_REGION"],
     )

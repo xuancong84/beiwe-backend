@@ -5,9 +5,12 @@ from deployment_helpers.general_utils import random_alphanumeric_string, log
 GLOBAL_CONFIGURATION = get_global_config()
 
 def s3_create_bucket(bucket_name):
+    kwargs = {}
+    # If region is us-east-1, then we cannot send this argument, or else the create_bucket command will fail
+    if GLOBAL_CONFIGURATION["AWS_REGION"] != 'us-east-1':
+        kwargs = {'CreateBucketConfiguration': {'LocationConstraint': GLOBAL_CONFIGURATION["AWS_REGION"]}}
     s3_client = create_s3_client()
-    s3_client.create_bucket(ACL='private', Bucket=bucket_name,
-    CreateBucketConfiguration = {'LocationConstraint': GLOBAL_CONFIGURATION["AWS_REGION"]})
+    s3_client.create_bucket(ACL='private', Bucket=bucket_name, **kwargs)
     
 def check_bucket_name_available(bucket_name):
     s3_resource = create_s3_resource()

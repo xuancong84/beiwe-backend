@@ -4,6 +4,5 @@
   "desiredvCpus": 0,
   "maxvCpus": 256,
   "instanceTypes": ["m4"],
-  "subnets": ["subnet-e7c23d8e"],
-  "securityGroupIds": ["sg-2d788644"]
+  "subnets": ["subnet-e7c23d8e"]
 }

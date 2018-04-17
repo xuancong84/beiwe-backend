@@ -5,6 +5,7 @@ import string
 from datetime import datetime
 
 from django.db import models
+from django.utils import timezone
 
 from config.constants import ALL_DATA_STREAMS, CHUNKABLE_FILES, CHUNK_TIMESLICE_QUANTUM, PIPELINE_FOLDER
 from database.validators import LengthValidator
@@ -125,7 +126,7 @@ class FileProcessLock(AbstractModel):
         if cls.islocked():
             raise FileProcessingLockedError('File processing already locked')
         else:
-            cls.objects.create(lock_time=datetime.utcnow())
+            cls.objects.create(lock_time=timezone.now())
     
     @classmethod
     def unlock(cls):
@@ -137,7 +138,7 @@ class FileProcessLock(AbstractModel):
     
     @classmethod
     def get_time_since_locked(cls):
-        return datetime.utcnow() - FileProcessLock.objects.last().lock_time
+        return timezone.now() - FileProcessLock.objects.last().lock_time
 
 
 class InvalidUploadParameterError(Exception): pass
@@ -199,7 +200,7 @@ class PipelineUpload(AbstractModel):
         if errors:
             raise InvalidUploadParameterError("\n".join(errors))
 
-        creation_time = datetime.utcnow()
+        creation_time = timezone.now()
         file_hash = low_memory_chunk_hash(file_object.read())
         file_object.seek(0)
 
@@ -224,5 +225,4 @@ class PipelineUpload(AbstractModel):
 
 class PipelineUploadTags(AbstractModel):
     pipeline_upload = models.ForeignKey(PipelineUpload, related_name="tags")
-    tag = models.CharField(max_length=1024, validators=[LengthValidator(1024)])
-    
+    tag = models.TextField()

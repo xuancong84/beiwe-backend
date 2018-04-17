@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import datetime
 import json
 
 from django.db import models
 from django.db.models import F, Func
+from django.utils import timezone
 
 from config.study_constants import (
     ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
@@ -70,11 +70,14 @@ class Study(AbstractModel):
     def get_survey_ids_for_study(self, survey_type='tracking_survey'):
         return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', flat=True)
 
+    def get_survey_ids_and_object_ids_for_study(self, survey_type='tracking_survey'):
+        return self.surveys.filter(survey_type=survey_type, deleted=False).values_list('id', 'object_id')
+
     def get_study_device_settings(self):
         return self.device_settings
 
     def get_researchers(self):
-        return Researcher.objects.filter(study=self)
+        return Researcher.objects.filter(studies=self)
 
 
 class AbstractSurvey(AbstractModel):
@@ -82,10 +85,12 @@ class AbstractSurvey(AbstractModel):
     AUDIO_SURVEY = 'audio_survey'
     TRACKING_SURVEY = 'tracking_survey'
     DUMMY_SURVEY = 'dummy'
+    IMAGE_SURVEY = 'image_survey'
     SURVEY_TYPE_CHOICES = (
         (AUDIO_SURVEY, AUDIO_SURVEY),
         (TRACKING_SURVEY, TRACKING_SURVEY),
-        (DUMMY_SURVEY, DUMMY_SURVEY)
+        (DUMMY_SURVEY, DUMMY_SURVEY),
+        (IMAGE_SURVEY, IMAGE_SURVEY)
     )
     
     content = JSONTextField(default='[]', help_text='JSON blob containing information about the survey questions.')
@@ -153,7 +158,7 @@ class Survey(AbstractSurvey):
 class SurveyArchive(AbstractSurvey):
     
     archive_start = models.DateTimeField()
-    archive_end = models.DateTimeField(default=datetime.utcnow)
+    archive_end = models.DateTimeField(default=timezone.now)
     
     survey = models.ForeignKey('Survey', on_delete=models.PROTECT, related_name='archives')
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='surveys_archive')
@@ -309,6 +314,8 @@ class Researcher(AbstractPasswordUser):
 
         researcher = cls(username=username, **kwargs)
         researcher.set_password(password)
+        # todo add check to see if access credentials are in kwargs
+        researcher.reset_access_credentials()
         return researcher
 
     @classmethod

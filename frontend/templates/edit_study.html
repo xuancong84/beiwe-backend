@@ -28,19 +28,26 @@
         <div class="row">
             <h2>Authorized researchers on this study</h2>
             <div class="list-group">
-                {% if not study.admins %}
+                {% if not study.get_researchers() %}
                     <p><i>No researchers are authorized to view or edit this study.</i></p>
+                {% else %}
+                    {% for researcher in study.get_researchers()|sort(case_sensitive=False, attribute='username') %}
+                        <div class="list-group-item">
+                            <form action="/remove_researcher_from_study" method="post">
+                                <div class="form-inline">
+                                    <b>{{ researcher.username }}</b>
+                                    <div class="pull-right" style="margin-top: -6px">
+                                        <input type="hidden" name="study_id" value="{{ study.id }}"/>
+                                        <input type="hidden" name="researcher_id" value="{{ researcher.id }}"/>
+                                        <input type="hidden" name="redirect_url" value="{{ redirect_url }}"/>
+                                        <button class="btn btn-link remove_researcher_from_study_button">Remove authorization</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    {% endfor %}
                 {% endif %}
-
-                {% for admin in study.admins|sort(case_sensitive=False) %}
-                    <div class="list-group-item">
-                        <b>{{ admin }}</b>
-                        <a href="#" onclick="remove_admin_from_study('{{ admin }}', '{{ study._id }}');return false;" class="pull-right remove_admin_from_study_button">remove authorization</a>
-                    </div>
-                {% endfor %}
-
             </div>
-          {% endfor %}
         </div>
     </div>
 

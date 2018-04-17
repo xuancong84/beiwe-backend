@@ -12,8 +12,12 @@ STARTED_OR_WAITING = [states.PENDING, states.RECEIVED, states.STARTED]
 
 FAILED = [states.REVOKED, states.RETRY, states.FAILURE]
 
-with open("/home/ubuntu/manager_ip", 'r') as f:
-    manager_ip = f.read()
+try:
+    with open("/home/ubuntu/manager_ip", 'r') as f:
+        manager_ip = f.read()
+except IOError:
+    print "could not load the manager ip file, defaulting to 127.0.0.1"
+    manager_ip = "127.0.0.1"
 
 celery_app = Celery("data_processing_tasks",
                     broker='pyamqp://guest@%s//' % manager_ip,
@@ -81,14 +85,14 @@ def create_file_processing_tasks():
         print("starting.")
         now = datetime.now()
         expiry = now + timedelta(minutes=CELERY_EXPIRY_MINUTES)
-        participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct()
+        participant_set = Participant.objects.filter(files_to_process__isnull=False).distinct().values_list("id", flat=True)
         running = []
         
-        for participant in participant_set:
+        for participant_id in participant_set:
             # Queue all users' file processing, and generate a list of currently running jobs
             # to use to detect when all jobs are finished running.
             running.append(safe_queue_user(
-                args=[participant],
+                args=[participant_id],
                 max_retries=0,
                 expires=expiry,
                 task_track_started=True,
@@ -157,13 +161,14 @@ class LogList(list):
         super(LogList, self).extend(iterable)
         
         
-def celery_process_file_chunks(participant):
+def celery_process_file_chunks(participant_id):
     """
     This is the function that is called from celery.  It runs through all new files that have
     been uploaded and 'chunks' them. Handles logic for skipping bad files, raising errors
     appropriately.
     This runs automatically and periodically as a Celery task.
     """
+    participant = Participant.objects.get(id=participant_id)
     log = LogList()
     number_bad_files = 0
     tags = {'user_id': participant.patient_id}
@@ -191,3 +196,6 @@ def celery_process_file_chunks(participant):
                 break
             else:
                 continue
+                
+    with make_error_sentry('data2', tags=tags):
+        error_sentry.raise_errors()
