@@ -22,8 +22,6 @@ class EverythingWentFine(Exception): pass
 class ProcessingOverlapError(Exception): pass
 
 
-SENTRY_ERROR_PREPEND = "YOU ARE SEEING THIS EXCEPTION WITHOUT A STACK TRACE BECAUSE IT OCCURRED INSIDE POOL.MAP, ON ANOTHER THREAD\n"
-
 """########################## Hourly Update Tasks ###########################"""
 
 
@@ -120,7 +118,10 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
             if data['exception']:
                 print("\n" + data['ftp']['s3_file_path'])
                 print(data['traceback'])
-                data['exception'].message = SENTRY_ERROR_PREPEND + data['exception'].message
+                ################################################################
+                # YOU ARE SEEING THIS EXCEPTION WITHOUT A STACK TRACE
+                # BECAUSE IT OCCURRED INSIDE POOL.MAP, ON ANOTHER THREAD
+                ################################################################
                 raise data['exception']
 
             if data['chunkable']:
