@@ -6,6 +6,7 @@ GLOBAL_CONFIGURATION = get_global_config()
 
 def s3_create_bucket(bucket_name):
     kwargs = {}
+    # If region is us-east-1, then we cannot send this argument, or else the create_bucket command will fail
     if GLOBAL_CONFIGURATION["AWS_REGION"] != 'us-east-1':
         kwargs = {'CreateBucketConfiguration': {'LocationConstraint': GLOBAL_CONFIGURATION["AWS_REGION"]}}
     s3_client = create_s3_client()
