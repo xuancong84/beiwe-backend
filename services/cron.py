@@ -5,7 +5,7 @@ _current_folder_init = _abspath(__file__).rsplit('/', 1)[0]+ "/__init__.py"
 _imp.load_source("__init__", _current_folder_init)
 
 from sys import argv
-from cronutils import runch_tasks
+from cronutils import run_tasks
 
 from services.db_maintenance import run_database_tasks
 from celery_data_processing.data_processing_tasks import create_file_processing_tasks

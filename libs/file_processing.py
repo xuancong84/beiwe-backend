@@ -21,6 +21,9 @@ from libs.s3 import s3_retrieve, s3_upload
 class EverythingWentFine(Exception): pass
 class ProcessingOverlapError(Exception): pass
 
+
+SENTRY_ERROR_PREPEND = "YOU ARE SEEING THIS EXCEPTION WITHOUT A STACK TRACE BECAUSE IT OCCURRED INSIDE POOL.MAP, ON ANOTHER THREAD\n"
+
 """########################## Hourly Update Tasks ###########################"""
 
 
@@ -36,35 +39,39 @@ def process_file_chunks():
     if FileProcessLock.islocked():
         raise ProcessingOverlapError("Data processing overlapped with a previous data indexing run.")
     FileProcessLock.lock()
-    number_bad_files = 0
-    
-    # Get the list of participants with open files to process
-    participants = Participant.objects.filter(files_to_process__isnull=False).distinct()
-    print("processing files for the following users: %s" % ",".join(participants.values_list('patient_id', flat=True)))
-    
-    for participant in participants:
-        while True:
-            previous_number_bad_files = number_bad_files
-            starting_length = participant.files_to_process.count()
-            
-            print("%s processing %s, %s files remaining" % (datetime.now(), participant.patient_id, starting_length))
-            
-            # Process the desired number of files and calculate the number of unprocessed files
-            number_bad_files += do_process_user_file_chunks(
-                    count=FILE_PROCESS_PAGE_SIZE,
-                    error_handler=error_handler,
-                    skip_count=number_bad_files,
-                    participant=participant,
-            )
-            
-            # If no files were processed, quit processing
-            if (participant.files_to_process.count() == starting_length
-                    and previous_number_bad_files == number_bad_files):
-                # Cases:
-                #   every file broke, might as well fail here, and would cause infinite loop otherwise.
-                #   no new files.
-                break
-    FileProcessLock.unlock()
+
+    try:
+        number_bad_files = 0
+
+        # Get the list of participants with open files to process
+        participants = Participant.objects.filter(files_to_process__isnull=False).distinct()
+        print("processing files for the following users: %s" % ",".join(participants.values_list('patient_id', flat=True)))
+
+        for participant in participants:
+            while True:
+                previous_number_bad_files = number_bad_files
+                starting_length = participant.files_to_process.count()
+
+                print("%s processing %s, %s files remaining" % (datetime.now(), participant.patient_id, starting_length))
+
+                # Process the desired number of files and calculate the number of unprocessed files
+                number_bad_files += do_process_user_file_chunks(
+                        count=FILE_PROCESS_PAGE_SIZE,
+                        error_handler=error_handler,
+                        skip_count=number_bad_files,
+                        participant=participant,
+                )
+
+                # If no files were processed, quit processing
+                if (participant.files_to_process.count() == starting_length
+                        and previous_number_bad_files == number_bad_files):
+                    # Cases:
+                    #   every file broke, might as well fail here, and would cause infinite loop otherwise.
+                    #   no new files.
+                    break
+    finally:
+        FileProcessLock.unlock()
+
     error_handler.raise_errors()
     raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
 
@@ -113,6 +120,7 @@ def do_process_user_file_chunks(count, error_handler, skip_count, participant):
             if data['exception']:
                 print("\n" + data['ftp']['s3_file_path'])
                 print(data['traceback'])
+                data['exception'].message = SENTRY_ERROR_PREPEND + data['exception'].message
                 raise data['exception']
 
             if data['chunkable']:
