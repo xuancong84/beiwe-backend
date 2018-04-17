@@ -31,11 +31,12 @@ CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECOND
 
 
 ## Data streams and survey types ##
-ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt'}
+ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
-MEDIA_EXTENSIONS = [".mp4", ".wav"]
+# These don't appear to be used...
+MEDIA_EXTENSIONS = [".mp4", ".wav", ".jpg"]
 FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
-              'bluetoothLog', 'surveyAnswers', 'surveyTimings']
+              'bluetoothLog', 'surveyAnswers', 'surveyTimings', 'imageSurvey']
 
 
 ## HTML lists ##
