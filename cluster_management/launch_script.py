@@ -116,7 +116,7 @@ def load_git_repo():
     # Make sure the code is on the right branch
     # git checkout prints to both stderr *and* stdout, so redirect them both to the log file
     # FIXME: for local testing this uses the django branch
-    run('cd {home}/beiwe-backend; git checkout django 1>> {log} 2>> {log}'
+    run('cd {home}/beiwe-backend; git checkout development 1>> {log} 2>> {log}'
         .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
@@ -152,9 +152,8 @@ def setup_python(using_pyenv=True):
         run('{shims}/pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
             .format(home=REMOTE_HOME_DIR, log=LOG_FILE, shims=pyenv_shims_dir))
     else:
-        run('pip install --upgrade pip >> {log}'.format(log=LOG_FILE))
-        sudo('pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
-             .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
+        run('pip install -r {home}/beiwe-backend/Requirements.txt >> {log}'
+            .format(home=REMOTE_HOME_DIR, log=LOG_FILE))
 
 
 def setup_celery_worker():
