@@ -196,3 +196,6 @@ def celery_process_file_chunks(participant_id):
                 break
             else:
                 continue
+                
+    with make_error_sentry('data2', tags=tags):
+        error_sentry.raise_errors()
