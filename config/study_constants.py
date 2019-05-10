@@ -23,6 +23,8 @@ ABOUT_PAGE_TEXT = (
     'application was built by Zagaran, Inc., in Cambridge, Massachusetts.'
 )
 
+CALL_BUTTON_TEXT = 'Call My Clinician'
+
 CONSENT_FORM_TEXT = (
     'I have read and understood the information about the study and all of my questions about the '
     'study have been answered by the study researchers.'

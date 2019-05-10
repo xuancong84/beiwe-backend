@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, redirect, request
+from flask import abort, Blueprint, redirect, request, send_from_directory, send_file
 from flask.templating import render_template
 
 from config.settings import DOMAIN_NAME, IS_STAGING
@@ -84,14 +84,15 @@ def download_page():
 
 
 @admin_api.route("/download")
+@authenticate_admin_login
 def download_current():
-    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-2.2.5-onnelaLabServer-release.apk")
+    return send_file(filename_or_fp="./files/beiwe.apk", as_attachment=True, attachment_filename="beiwe.apk")
 
 
 @admin_api.route("/download_debug")
 @authenticate_admin_login
 def download_current_debug():
-    return redirect("https://s3.amazonaws.com/beiwe-app-backups/release/Beiwe-debug.apk")
+    return send_file(filename_or_fp="./files/beiwe-dev.apk", as_attachment=True, attachment_filename="beiwe-dev.apk")
 
 
 @admin_api.route("/download_beta")

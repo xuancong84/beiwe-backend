@@ -6,7 +6,7 @@ from werkzeug.exceptions import abort
 
 from database.models import Researcher, Study
 from libs.security import generate_easy_alphanumeric_string
-
+from config.settings import SESSION_EXPIRE_IN_SECONDS
 
 ################################################################################
 ############################ Website Functions #################################
@@ -29,7 +29,7 @@ def authenticate_admin_login(some_function):
 
 def log_in_admin(username):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
-    session['expiry'] = datetime.now() + timedelta(hours=6)
+    session['expiry'] = datetime.now() + timedelta(seconds=SESSION_EXPIRE_IN_SECONDS)
     session['admin_username'] = username
 
 
@@ -41,8 +41,9 @@ def logout_loggedin_admin():
 
 
 def is_logged_in():
-    if 'expiry' in session and session['expiry'] > datetime.now():
-        return 'admin_uuid' in session
+    if 'expiry' in session and session['expiry'] > datetime.now() and 'admin_uuid' in session:
+        session['expiry'] = datetime.now() + timedelta(seconds=SESSION_EXPIRE_IN_SECONDS)
+        return True
     logout_loggedin_admin()
 
 ################################################################################

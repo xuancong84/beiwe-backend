@@ -6,11 +6,9 @@ import json
 from django.db import models
 from django.db.models import F, Func
 from django.utils import timezone
+from config.constants import ALL_DEVICE_PARAMETERS
 
-from config.study_constants import (
-    ABOUT_PAGE_TEXT, CONSENT_FORM_TEXT, DEFAULT_CONSENT_SECTIONS_JSON,
-    SURVEY_SUBMIT_SUCCESS_TOAST_TEXT, AUDIO_SURVEY_SETTINGS
-)
+from config.study_constants import *
 from libs.security import (
     compare_password, device_hash, generate_easy_alphanumeric_string, generate_hash_and_salt,
     generate_random_string, generate_user_hash_and_salt
@@ -381,54 +379,61 @@ class DeviceSettings(AbstractModel):
     """
 
     # Whether various device options are turned on
-    accelerometer = models.BooleanField(default=True)
-    gps = models.BooleanField(default=True)
-    calls = models.BooleanField(default=True)
-    texts = models.BooleanField(default=True)
-    wifi = models.BooleanField(default=True)
-    bluetooth = models.BooleanField(default=False)
-    power_state = models.BooleanField(default=True)
+    type_map = {bool: 'Boolean', int: 'Integer', float: 'Float', str: 'Text'}
+    for params in ALL_DEVICE_PARAMETERS:
+        for key, value in params:
+            cmd = '%s = models.%sField(default=%s)' % (key, type_map[type(value)], value)
+            exec(cmd)
 
-    # Whether iOS-specific data streams are turned on
-    proximity = models.BooleanField(default=False)
-    gyro = models.BooleanField(default=False)
-    magnetometer = models.BooleanField(default=False)
-    devicemotion = models.BooleanField(default=False)
-    reachability = models.BooleanField(default=True)
-
-    # Upload over cellular data or only over WiFi (WiFi-only is default)
-    allow_upload_over_cellular_data = models.BooleanField(default=False)
-
-    # Timer variables
-    accelerometer_off_duration_seconds = models.PositiveIntegerField(default=10)
-    accelerometer_on_duration_seconds = models.PositiveIntegerField(default=10)
-    bluetooth_on_duration_seconds = models.PositiveIntegerField(default=60)
-    bluetooth_total_duration_seconds = models.PositiveIntegerField(default=300)
-    bluetooth_global_offset_seconds = models.PositiveIntegerField(default=0)
-    check_for_new_surveys_frequency_seconds = models.PositiveIntegerField(default=3600 * 6)
-    create_new_data_files_frequency_seconds = models.PositiveIntegerField(default=15 * 60)
-    gps_off_duration_seconds = models.PositiveIntegerField(default=600)
-    gps_on_duration_seconds = models.PositiveIntegerField(default=60)
-    seconds_before_auto_logout = models.PositiveIntegerField(default=600)
-    upload_data_files_frequency_seconds = models.PositiveIntegerField(default=3600)
-    voice_recording_max_time_length_seconds = models.PositiveIntegerField(default=240)
-    wifi_log_frequency_seconds = models.PositiveIntegerField(default=300)
-
-    # iOS-specific timer variables
-    gyro_off_duration_seconds = models.PositiveIntegerField(default=600)
-    gyro_on_duration_seconds = models.PositiveIntegerField(default=60)
-    magnetometer_off_duration_seconds = models.PositiveIntegerField(default=600)
-    magnetometer_on_duration_seconds = models.PositiveIntegerField(default=60)
-    devicemotion_off_duration_seconds = models.PositiveIntegerField(default=600)
-    devicemotion_on_duration_seconds = models.PositiveIntegerField(default=60)
-
-    # Text strings
-    about_page_text = models.TextField(default=ABOUT_PAGE_TEXT)
-    call_clinician_button_text = models.TextField(default='Call My Clinician')
-    consent_form_text = models.TextField(default=CONSENT_FORM_TEXT)
-    survey_submit_success_toast_text = models.TextField(default=SURVEY_SUBMIT_SUCCESS_TOAST_TEXT)
-
-    # Consent sections
+    # accelerometer = models.BooleanField(default=True)
+    # ambientlight = models.BooleanField(default=True)
+    # gps = models.BooleanField(default=True)
+    # calls = models.BooleanField(default=True)
+    # texts = models.BooleanField(default=True)
+    # wifi = models.BooleanField(default=True)
+    # bluetooth = models.BooleanField(default=False)
+    # power_state = models.BooleanField(default=True)
+    #
+    # # Whether iOS-specific data streams are turned on
+    # proximity = models.BooleanField(default=False)
+    # gyro = models.BooleanField(default=False)
+    # magnetometer = models.BooleanField(default=False)
+    # devicemotion = models.BooleanField(default=False)
+    # reachability = models.BooleanField(default=True)
+    #
+    # # Upload over cellular data or only over WiFi (WiFi-only is default)
+    # allow_upload_over_cellular_data = models.BooleanField(default=False)
+    #
+    # # Timer variables
+    # accelerometer_off_duration_seconds = models.PositiveIntegerField(default=10)
+    # accelerometer_on_duration_seconds = models.PositiveIntegerField(default=10)
+    # bluetooth_on_duration_seconds = models.PositiveIntegerField(default=60)
+    # bluetooth_total_duration_seconds = models.PositiveIntegerField(default=300)
+    # bluetooth_global_offset_seconds = models.PositiveIntegerField(default=0)
+    # check_for_new_surveys_frequency_seconds = models.PositiveIntegerField(default=3600 * 6)
+    # create_new_data_files_frequency_seconds = models.PositiveIntegerField(default=15 * 60)
+    # gps_off_duration_seconds = models.PositiveIntegerField(default=600)
+    # gps_on_duration_seconds = models.PositiveIntegerField(default=60)
+    # seconds_before_auto_logout = models.PositiveIntegerField(default=600)
+    # upload_data_files_frequency_seconds = models.PositiveIntegerField(default=3600)
+    # voice_recording_max_time_length_seconds = models.PositiveIntegerField(default=240)
+    # wifi_log_frequency_seconds = models.PositiveIntegerField(default=300)
+    #
+    # # iOS-specific timer variables
+    # gyro_off_duration_seconds = models.PositiveIntegerField(default=600)
+    # gyro_on_duration_seconds = models.PositiveIntegerField(default=60)
+    # magnetometer_off_duration_seconds = models.PositiveIntegerField(default=600)
+    # magnetometer_on_duration_seconds = models.PositiveIntegerField(default=60)
+    # devicemotion_off_duration_seconds = models.PositiveIntegerField(default=600)
+    # devicemotion_on_duration_seconds = models.PositiveIntegerField(default=60)
+    #
+    # # Text strings
+    # about_page_text = models.TextField(default=ABOUT_PAGE_TEXT)
+    # call_clinician_button_text = models.TextField(default='Call My Clinician')
+    # consent_form_text = models.TextField(default=CONSENT_FORM_TEXT)
+    # survey_submit_success_toast_text = models.TextField(default=SURVEY_SUBMIT_SUCCESS_TOAST_TEXT)
+    #
+    # # Consent sections
     consent_sections = JSONTextField(default=DEFAULT_CONSENT_SECTIONS_JSON)
 
     study = models.OneToOneField('Study', on_delete=models.PROTECT, related_name='device_settings')

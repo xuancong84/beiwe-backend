@@ -12,6 +12,7 @@ FLASK_SECRET_KEY = getenv("FLASK_SECRET_KEY")
 # the name of the s3 bucket that will be used to store user generated data, and backups of local
 # database information.
 S3_BUCKET = getenv("S3_BUCKET")
+S3_ENDPOINT_URL = getenv("S3_ENDPOINT_URL")
 
 # Domain name for the server
 DOMAIN_NAME = getenv("DOMAIN_NAME")
@@ -34,3 +35,5 @@ S3_ACCESS_CREDENTIALS_USER = getenv("S3_ACCESS_CREDENTIALS_USER")
 S3_ACCESS_CREDENTIALS_KEY = getenv("S3_ACCESS_CREDENTIALS_KEY")
 
 S3_REGION_NAME = getenv("S3_REGION_NAME", "us-east-1")
+
+SESSION_EXPIRE_IN_SECONDS = 9999

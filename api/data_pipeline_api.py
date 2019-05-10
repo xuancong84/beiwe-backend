@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect
+from flask import Blueprint, flash, redirect, abort
 
 from libs.admin_authentication import authenticate_admin_study_access
 from pipeline.boto_helpers import get_aws_object_names
@@ -15,7 +15,8 @@ def run_manual_code(study_id):
     Create an AWS Batch job for the Study specified
     :param study_id: ObjectId of a Study
     """
-    
+    return abort(401)
+
     # Get new data access credentials for the manual user
     aws_object_names = get_aws_object_names()
     refresh_data_access_credentials('manually', aws_object_names)

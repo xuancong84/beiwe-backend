@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+        {% extends "base.html" %}
 
 {% block content %}
 
@@ -31,6 +31,14 @@
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="accelerometer" id="accelerometer" type="checkbox" {{ "checked" if settings["accelerometer"] }} {{ "disabled" if readonly }}/>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="ambientlight" class="col-xs-8 control-label">AmbientLight:</label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="ambientlight" id="ambientlight" type="checkbox" {{ "checked" if settings["ambientlight"] }} {{ "disabled" if readonly }}/>
                     </label>
                 </div>
             </div>
@@ -163,6 +171,12 @@
                 <label for="accelerometer_off_duration_seconds" class="col-xs-8 control-label">Accelerometer <b>off</b> duration:</label>
                 <div class="col-xs-4">
                     <input id="accelerometer_off_duration_seconds" name="accelerometer_off_duration_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['accelerometer_off_duration_seconds'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="ambientlight_interval_seconds" class="col-xs-8 control-label">AmbientLight <b>sensor</b> interval:</label>
+                <div class="col-xs-4">
+                    <input id="ambientlight_interval_seconds" name="ambientlight_interval_seconds" class="form-control" type="number" placeholder="Enter interval here (seconds)" value="{{ settings['ambientlight_interval_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
             <div class="form-group">

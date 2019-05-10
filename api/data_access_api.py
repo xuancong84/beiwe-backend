@@ -149,7 +149,7 @@ def get_data():
     Returns a zip file of all data files found by the query. """
     
     # uncomment the following line when doing a reindex
-    # return abort(503)
+    return abort(401)
     
     study = get_and_validate_study_id()
     get_and_validate_researcher(study)

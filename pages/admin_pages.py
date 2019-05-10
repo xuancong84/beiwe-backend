@@ -20,6 +20,10 @@ admin_pages = Blueprint('admin_pages', __name__)
 @admin_pages.route('/choose_study', methods=['GET'])
 @authenticate_admin_login
 def choose_study():
+    username = session['admin_username']
+    if username == 'moht':
+        return redirect('/downloads')
+
     allowed_studies = get_admins_allowed_studies_as_query_set()
 
     # If the admin is authorized to view exactly 1 study, redirect to that study
@@ -92,7 +96,7 @@ def login():
         password = request.values["password"]
         if Researcher.check_password(username, password):
             admin_authentication.log_in_admin(username)
-            return redirect("/choose_study")
+            return redirect("/downloads" if username=="moht" else "/choose_study")
         else:
             flash("Incorrect username & password combination; try again.", 'danger')
 
@@ -102,7 +106,12 @@ def login():
 @admin_pages.route('/manage_credentials')
 @authenticate_admin_login
 def manage_credentials():
-    return render_template('manage_credentials.html',
+    username = session['admin_username']
+    if username == 'moht':
+        flash("This user is created for downloading APP only, please do not change its password!", 'danger')
+        return redirect('/downloads')
+    else:
+        return render_template('manage_credentials.html',
                            allowed_studies=get_admins_allowed_studies(),
                            system_admin=admin_is_system_admin())
 

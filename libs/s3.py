@@ -1,20 +1,28 @@
-import boto3
+import boto3, getpass
 
 from config.constants import DEFAULT_S3_RETRIES
-from config.settings import S3_BUCKET, S3_ACCESS_CREDENTIALS_KEY, S3_ACCESS_CREDENTIALS_USER, S3_REGION_NAME
+from config.settings import S3_BUCKET, S3_ENDPOINT_URL, S3_ACCESS_CREDENTIALS_KEY, S3_ACCESS_CREDENTIALS_USER, S3_REGION_NAME
 from libs import encryption
 
-conn = boto3.client('s3',
-                    aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
-                    aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY,
-                    region_name=S3_REGION_NAME)
+# conn = boto3.client('s3',
+#                     aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
+#                     aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY,
+#                     region_name=S3_REGION_NAME)
 
+conn = boto3.client('s3',
+                    endpoint_url=S3_ENDPOINT_URL,
+                    aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
+                    aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY)
 
 def s3_upload(key_path, data_string, study_object_id, raw_path=False):
     if not raw_path:
         key_path = study_object_id + "/" + key_path
     data = encryption.encrypt_for_server(data_string, study_object_id)
-    conn.put_object(Body=data, Bucket=S3_BUCKET, Key=key_path, ContentType='string')
+    try:
+        conn.put_object(Body=data, Bucket=S3_BUCKET, Key=key_path, ContentType='string')
+    except:
+        print 'S3.put_object Failed!'
+        assert False
 
 
 def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):

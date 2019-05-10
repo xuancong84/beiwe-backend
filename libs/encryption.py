@@ -68,6 +68,12 @@ def decrypt_server(data, study_object_id):
     data = data[16:]
     return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( data )
 
+def decrypt_server_by_key(data, encryption_key):
+    """ Decrypts config encrypted by the encrypt_for_server function."""
+    iv = data[:16]
+    data = data[16:]
+    return AES.new( encryption_key, AES.MODE_CFB, segment_size=8, IV=iv ).decrypt( data )
+
 
 ########################### User/Device Decryption #############################
 

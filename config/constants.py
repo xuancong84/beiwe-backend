@@ -1,5 +1,5 @@
 from os import getenv
-
+from config.study_constants import *
 from config.settings import DOMAIN_NAME
 
 ### Environment settings ###
@@ -35,44 +35,66 @@ ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 # These don't appear to be used...
 MEDIA_EXTENSIONS = [".mp4", ".wav", ".jpg"]
-FILE_TYPES = ['gps', 'accel', 'voiceRecording', 'powerState', 'callLog', 'textLog',
+FILE_TYPES = ['gps', 'accel', 'light', 'voiceRecording', 'powerState', 'callLog', 'textLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings', 'imageSurvey']
 
+## All device parameters
+ALL_DEVICE_PARAMETERS = [
+    [["accelerometer", True], ["accelerometer_off_duration_seconds", 10], ["accelerometer_on_duration_seconds", 10]],
+    [["ambientlight", True], ["ambientlight_interval_seconds", 60]],
+    [["gps", True], ["gps_off_duration_seconds", 600], ["gps_on_duration_seconds", 60]],
+    [["bluetooth", False], ["bluetooth_on_duration_seconds", 60], ["bluetooth_total_duration_seconds", 300], ["bluetooth_global_offset_seconds", 0]],
+    [["gyro", False], ["gyro_off_duration_seconds", 600], ["gyro_on_duration_seconds", 60]],
+    [["magnetometer", False], ["magnetometer_off_duration_seconds", 600], ["magnetometer_on_duration_seconds", 60]],
+    [["devicemotion", False], ["devicemotion_off_duration_seconds", 600], ["devicemotion_on_duration_seconds", 60]],
+    [["wifi", True]],
+    [["power_state", True]],
+    [["proximity", False]],
+    [["reachability", True]],
+    [["allow_upload_over_cellular_data", False]],
+    [["calls", True], ["texts", True], ["check_for_new_surveys_frequency_seconds", 3600*6], ["create_new_data_files_frequency_seconds", 30*60],
+     ["seconds_before_auto_logout", 600], ["upload_data_files_frequency_seconds", 3600], ["voice_recording_max_time_length_seconds", 240],
+     ["wifi_log_frequency_seconds", 300], ["about_page_text", 'ABOUT_PAGE_TEXT'], ["call_clinician_button_text", 'CALL_BUTTON_TEXT'],
+     ["consent_form_text", 'CONSENT_FORM_TEXT'], ["survey_submit_success_toast_text", 'SURVEY_SUBMIT_SUCCESS_TOAST_TEXT']]
+]
 
 ## HTML lists ##
-CHECKBOX_TOGGLES = ["accelerometer",
-                    "gps",
-                    "calls",
-                    "texts",
-                    "wifi",
-                    "bluetooth",
-                    "power_state",
-                    "proximity",
-                    "gyro",
-                    "magnetometer",
-                    "devicemotion",
-                    "reachability",
-                    "allow_upload_over_cellular_data" ]
+# CHECKBOX_TOGGLES = ["accelerometer",
+#                     "ambientlight",
+#                     "gps",
+#                     "calls",
+#                     "texts",
+#                     "wifi",
+#                     "bluetooth",
+#                     "power_state",
+#                     "proximity",
+#                     "gyro",
+#                     "magnetometer",
+#                     "devicemotion",
+#                     "reachability",
+#                     "allow_upload_over_cellular_data" ]
 
-TIMER_VALUES = ["accelerometer_off_duration_seconds",
-                "accelerometer_on_duration_seconds",
-                "bluetooth_on_duration_seconds",
-                "bluetooth_total_duration_seconds",
-                "bluetooth_global_offset_seconds", 
-                "check_for_new_surveys_frequency_seconds",
-                "create_new_data_files_frequency_seconds",
-                "gps_off_duration_seconds",
-                "gps_on_duration_seconds",
-                "seconds_before_auto_logout",
-                "upload_data_files_frequency_seconds",
-                "voice_recording_max_time_length_seconds",
-                "wifi_log_frequency_seconds",
-                "gyro_off_duration_seconds",
-                "gyro_on_duration_seconds",
-                "magnetometer_off_duration_seconds",
-                "magnetometer_on_duration_seconds",
-                "devicemotion_off_duration_seconds",
-                "devicemotion_on_duration_seconds" ]
+# TIMER_VALUES = ["accelerometer_off_duration_seconds",
+#                 "accelerometer_on_duration_seconds",
+#                 "ambientlight_off_duration_seconds",
+#                 "ambientlight_on_duration_seconds",
+#                 "bluetooth_on_duration_seconds",
+#                 "bluetooth_total_duration_seconds",
+#                 "bluetooth_global_offset_seconds",
+#                 "check_for_new_surveys_frequency_seconds",
+#                 "create_new_data_files_frequency_seconds",
+#                 "gps_off_duration_seconds",
+#                 "gps_on_duration_seconds",
+#                 "seconds_before_auto_logout",
+#                 "upload_data_files_frequency_seconds",
+#                 "voice_recording_max_time_length_seconds",
+#                 "wifi_log_frequency_seconds",
+#                 "gyro_off_duration_seconds",
+#                 "gyro_on_duration_seconds",
+#                 "magnetometer_off_duration_seconds",
+#                 "magnetometer_on_duration_seconds",
+#                 "devicemotion_off_duration_seconds",
+#                 "devicemotion_on_duration_seconds" ]
 
 # The format that dates should be in throughout the codebase
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -88,6 +110,7 @@ PIPELINE_FOLDER = "PIPELINE_DATA"
 
 ## Constants for for the keys in data_stream_to_s3_file_name_string
 ACCELEROMETER = "accelerometer"
+AMBIENTLIGHT = "ambientlight"
 BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
@@ -110,6 +133,7 @@ REACHABILITY = "reachability"
 
 
 ALL_DATA_STREAMS = [ACCELEROMETER,
+                    AMBIENTLIGHT,
                     BLUETOOTH,
                     CALL_LOG,
                     GPS,
@@ -133,6 +157,7 @@ SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
 UPLOAD_FILE_TYPE_MAPPING = {
     "accel": ACCELEROMETER,
+    "light": AMBIENTLIGHT,
     "bluetoothLog": BLUETOOTH,
     "callLog": CALL_LOG,
     "devicemotion": DEVICEMOTION,
@@ -152,32 +177,18 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "imageSurvey":IMAGE_FILE,
 }
 
-
 def data_stream_to_s3_file_name_string(data_type):
     """Maps a data type to the internal string representation used throughout the codebase.
         (could be a dict mapping, but it is fine) """
-    if data_type == ACCELEROMETER: return "accel"
-    if data_type == BLUETOOTH: return "bluetoothLog"
-    if data_type == CALL_LOG: return "callLog"
-    if data_type == GPS: return "gps"
-    if data_type == IDENTIFIERS: return "identifiers"
-    if data_type == ANDROID_LOG_FILE: return "logFile"
-    if data_type == POWER_STATE: return "powerState"
-    if data_type == SURVEY_ANSWERS: return "surveyAnswers"
-    if data_type == SURVEY_TIMINGS: return "surveyTimings"
-    if data_type == TEXTS_LOG: return "textsLog"
-    if data_type == VOICE_RECORDING: return "voiceRecording"
-    if data_type == WIFI: return "wifiLog"
-    if data_type == PROXIMITY: return "proximity"
-    if data_type == GYRO: return "gyro"
-    if data_type == MAGNETOMETER: return "magnetometer"
-    if data_type == DEVICEMOTION: return "devicemotion"
-    if data_type == REACHABILITY: return "reachability"
-    if data_type == IOS_LOG_FILE: return "ios_log"
-    if data_type == IMAGE_FILE: "imageSurvey"
+    if data_type == IDENTIFIERS:
+        return "identifiers"
+    for k, v in UPLOAD_FILE_TYPE_MAPPING.iteritems():
+        if data_type == v:
+            return k
     raise Exception("unknown data type: %s" % data_type)
 
 CHUNKABLE_FILES = {ACCELEROMETER,
+                   AMBIENTLIGHT,
                    BLUETOOTH,
                    CALL_LOG,
                    GPS,

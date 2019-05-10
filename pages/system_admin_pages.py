@@ -1,16 +1,13 @@
 import json
 
 from django.core.exceptions import ValidationError
-from flask import abort, Blueprint, flash, redirect, render_template, request,\
-    session
+from flask import abort, Blueprint, flash, redirect, render_template, request, session
 
-from config.constants import CHECKBOX_TOGGLES, TIMER_VALUES
+from config.constants import *
 from libs.admin_authentication import authenticate_system_admin,\
     get_admins_allowed_studies, admin_is_system_admin,\
     authenticate_admin_study_access
 from libs.copy_study import copy_existing_study_if_asked_to
-from libs.http_utils import checkbox_to_boolean, combined_multi_dict_to_dict,\
-    string_to_int
 from database.models import Researcher, Study
 
 system_admin_pages = Blueprint('system_admin_pages', __name__)
@@ -163,8 +160,14 @@ def device_settings(study_id=None):
         abort(403)
         
     settings = study.get_study_device_settings()
-    params = combined_multi_dict_to_dict( request.values )
-    params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
-    params = string_to_int(TIMER_VALUES, params)
+    params = {key: value for key, value in request.values.items()}
+    #params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
+    #params = string_to_int(TIMER_VALUES, params)
+    for i in ALL_DEVICE_PARAMETERS:
+        for k, v in i:
+            if type(v) == int:
+                params[k] = int(params[k])
+            elif type(v) == bool:
+                params[k] = k in params
     settings.update(**params)
     return redirect('/edit_study/{:d}'.format(study.id))

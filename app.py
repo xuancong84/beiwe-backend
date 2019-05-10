@@ -1,4 +1,4 @@
-import os
+import os, sys, psycopg2, boto3
 
 import jinja2
 from flask import Flask, render_template, redirect
@@ -73,11 +73,49 @@ if not __name__ == '__main__':
     def e404(e):
         return render_template("404.html", is_logged_in=is_logged_in()), 404
 
+
+
 # Extra Debugging settings
 if __name__ == '__main__':
+    # Test PostgreSQL connection
+    try:
+        conn = psycopg2.connect(host=os.environ['RDS_HOSTNAME'],
+                                database=os.environ['RDS_DB_NAME'],
+                                user=os.environ['RDS_USERNAME'],
+                                password=os.environ['RDS_PASSWORD'])
+        conn.close()
+    except:
+        print "PostgreSQL server connection failed, continue? (y/n)"
+        if raw_input().lower() != 'y':
+            sys.exit(1)
+
+    # Test S3 bucket connection
+    try:
+        conn = boto3.client('s3',
+                            endpoint_url=os.environ['S3_ENDPOINT_URL'],
+                            aws_access_key_id=os.environ['S3_ACCESS_CREDENTIALS_USER'],
+                            aws_secret_access_key=os.environ['S3_ACCESS_CREDENTIALS_KEY'])
+        buckets = conn.list_buckets()
+        if 'Buckets' not in buckets or \
+                os.environ['S3_BUCKET'] not in [d['Name'] for d in buckets['Buckets']]:
+            conn.create_bucket(Bucket=os.environ['S3_BUCKET'])
+            conn.put_object(Bucket=os.environ['S3_BUCKET'], Key='test-key', Body='test-body')
+            obj = conn.get_object(Bucket=os.environ['S3_BUCKET'], Key='test-key')
+            assert (obj['Body']._raw_stream.data == 'test-body')
+        else:
+            obj = conn.get_object(Bucket=os.environ['S3_BUCKET'], Key='test-key')
+            assert (obj['Body']._raw_stream.data == 'test-body')
+    except:
+        print "S3 bucket access failed, continue? (y/n)"
+        if raw_input().lower() != 'y':
+            sys.exit(1)
+
     # might be necessary if running on windows/linux subsystem on windows.
     # from gevent.wsgi import WSGIServer
     # http_server = WSGIServer(('', 8080), app)
     # http_server.serve_forever()
-    app.run(host='0.0.0.0', port=int(os.getenv("PORT", "8080")), debug=True)
+    if os.getenv('USE_HTTP') == '1':
+        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "80")), debug=False)
+    else:
+        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "443")), ssl_context=('./ssl/ssl.crt', './ssl/ssl.key'), debug=False)
 
