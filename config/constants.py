@@ -49,6 +49,7 @@ ALL_DEVICE_PARAMETERS = [
     [["devicemotion", False], ["devicemotion_off_duration_seconds", 600], ["devicemotion_on_duration_seconds", 60]],
     [["wifi", True]],
     [["power_state", True]],
+    [["taps", False]],
     [["proximity", False]],
     [["reachability", True]],
     [["allow_upload_over_cellular_data", False]],
@@ -114,6 +115,7 @@ AMBIENTLIGHT = "ambientlight"
 BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
+TAPS = "taps"
 IDENTIFIERS = "identifiers"
 ANDROID_LOG_FILE = "app_log"
 IOS_LOG_FILE = "ios_log"
@@ -142,6 +144,7 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     POWER_STATE,
                     SURVEY_ANSWERS,
                     SURVEY_TIMINGS,
+                    TAPS,
                     TEXTS_LOG,
                     VOICE_RECORDING,
                     WIFI,
@@ -163,6 +166,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "devicemotion": DEVICEMOTION,
     "gps": GPS,
     "gyro": GYRO,
+    "taps": TAPS,
     "logFile": ANDROID_LOG_FILE,
     "magnetometer": MAGNETOMETER,
     "powerState": POWER_STATE,
@@ -192,6 +196,7 @@ CHUNKABLE_FILES = {ACCELEROMETER,
                    BLUETOOTH,
                    CALL_LOG,
                    GPS,
+                   TAPS,
                    IDENTIFIERS,
                    ANDROID_LOG_FILE,
                    POWER_STATE,
