@@ -43,6 +43,14 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="accessibility" class="col-xs-8 control-label">Accessibility:</label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="accessibility" id="accessibility" type="checkbox" {{ "checked" if settings["accessibility"] }} {{ "disabled" if readonly }}/>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="gps" class="col-xs-8 control-label">GPS:</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>

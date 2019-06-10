@@ -35,7 +35,7 @@ ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 # These don't appear to be used...
 MEDIA_EXTENSIONS = [".mp4", ".wav", ".jpg"]
-FILE_TYPES = ['gps', 'accel', 'light', 'voiceRecording', 'powerState', 'callLog', 'textLog',
+FILE_TYPES = ['gps', 'accel', 'light', 'voiceRecording', 'powerState', 'callLog', 'textLog', 'accessibilityLog',
               'bluetoothLog', 'surveyAnswers', 'surveyTimings', 'imageSurvey']
 
 ## All device parameters
@@ -50,6 +50,7 @@ ALL_DEVICE_PARAMETERS = [
     [["wifi", True]],
     [["power_state", True]],
     [["taps", False]],
+    [["accessibility", False]],
     [["proximity", False]],
     [["reachability", True]],
     [["allow_upload_over_cellular_data", False]],
@@ -112,6 +113,7 @@ PIPELINE_FOLDER = "PIPELINE_DATA"
 ## Constants for for the keys in data_stream_to_s3_file_name_string
 ACCELEROMETER = "accelerometer"
 AMBIENTLIGHT = "ambientlight"
+ACCESSIBILITY = "accessibility"
 BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
@@ -136,6 +138,7 @@ REACHABILITY = "reachability"
 
 ALL_DATA_STREAMS = [ACCELEROMETER,
                     AMBIENTLIGHT,
+                    ACCESSIBILITY,
                     BLUETOOTH,
                     CALL_LOG,
                     GPS,
@@ -160,6 +163,7 @@ SURVEY_DATA_FILES = [SURVEY_ANSWERS, SURVEY_TIMINGS]
 
 UPLOAD_FILE_TYPE_MAPPING = {
     "accel": ACCELEROMETER,
+    "accessibilityLog": ACCESSIBILITY,
     "light": AMBIENTLIGHT,
     "bluetoothLog": BLUETOOTH,
     "callLog": CALL_LOG,
@@ -193,6 +197,7 @@ def data_stream_to_s3_file_name_string(data_type):
 
 CHUNKABLE_FILES = {ACCELEROMETER,
                    AMBIENTLIGHT,
+                   ACCESSIBILITY,
                    BLUETOOTH,
                    CALL_LOG,
                    GPS,
