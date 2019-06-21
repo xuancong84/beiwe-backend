@@ -47,6 +47,7 @@ ALL_DEVICE_PARAMETERS = [
     [["gyro", False], ["gyro_off_duration_seconds", 600], ["gyro_on_duration_seconds", 60]],
     [["magnetometer", False], ["magnetometer_off_duration_seconds", 600], ["magnetometer_on_duration_seconds", 60]],
     [["devicemotion", False], ["devicemotion_off_duration_seconds", 600], ["devicemotion_on_duration_seconds", 60]],
+    [["usage", False], ["usage_update_interval_seconds", 30*60]],
     [["wifi", True]],
     [["power_state", True]],
     [["taps", False]],
@@ -59,44 +60,6 @@ ALL_DEVICE_PARAMETERS = [
      ["wifi_log_frequency_seconds", 300], ["about_page_text", 'ABOUT_PAGE_TEXT'], ["call_clinician_button_text", 'CALL_BUTTON_TEXT'],
      ["consent_form_text", 'CONSENT_FORM_TEXT'], ["survey_submit_success_toast_text", 'SURVEY_SUBMIT_SUCCESS_TOAST_TEXT']]
 ]
-
-## HTML lists ##
-# CHECKBOX_TOGGLES = ["accelerometer",
-#                     "ambientlight",
-#                     "gps",
-#                     "calls",
-#                     "texts",
-#                     "wifi",
-#                     "bluetooth",
-#                     "power_state",
-#                     "proximity",
-#                     "gyro",
-#                     "magnetometer",
-#                     "devicemotion",
-#                     "reachability",
-#                     "allow_upload_over_cellular_data" ]
-
-# TIMER_VALUES = ["accelerometer_off_duration_seconds",
-#                 "accelerometer_on_duration_seconds",
-#                 "ambientlight_off_duration_seconds",
-#                 "ambientlight_on_duration_seconds",
-#                 "bluetooth_on_duration_seconds",
-#                 "bluetooth_total_duration_seconds",
-#                 "bluetooth_global_offset_seconds",
-#                 "check_for_new_surveys_frequency_seconds",
-#                 "create_new_data_files_frequency_seconds",
-#                 "gps_off_duration_seconds",
-#                 "gps_on_duration_seconds",
-#                 "seconds_before_auto_logout",
-#                 "upload_data_files_frequency_seconds",
-#                 "voice_recording_max_time_length_seconds",
-#                 "wifi_log_frequency_seconds",
-#                 "gyro_off_duration_seconds",
-#                 "gyro_on_duration_seconds",
-#                 "magnetometer_off_duration_seconds",
-#                 "magnetometer_on_duration_seconds",
-#                 "devicemotion_off_duration_seconds",
-#                 "devicemotion_on_duration_seconds" ]
 
 # The format that dates should be in throughout the codebase
 API_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -125,6 +88,7 @@ POWER_STATE = "power_state"
 SURVEY_ANSWERS = "survey_answers"
 SURVEY_TIMINGS = "survey_timings"
 TEXTS_LOG = "texts"
+USAGE = "usage"
 VOICE_RECORDING = "audio_recordings"
 IMAGE_FILE = "image_survey"
 WIFI = "wifi"
@@ -149,6 +113,7 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     SURVEY_TIMINGS,
                     TAPS,
                     TEXTS_LOG,
+                    USAGE,
                     VOICE_RECORDING,
                     WIFI,
                     PROXIMITY,
@@ -178,6 +143,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "surveyAnswers": SURVEY_ANSWERS,
     "surveyTimings": SURVEY_TIMINGS,
     "textsLog": TEXTS_LOG,
+    "usage": USAGE,
     "voiceRecording": VOICE_RECORDING,
     "wifiLog": WIFI,
     "proximity": PROXIMITY,
@@ -207,6 +173,7 @@ CHUNKABLE_FILES = {ACCELEROMETER,
                    POWER_STATE,
                    SURVEY_TIMINGS,
                    TEXTS_LOG,
+                   USAGE,
                    WIFI,
                    PROXIMITY,
                    GYRO,

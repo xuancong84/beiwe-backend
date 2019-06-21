@@ -83,6 +83,14 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="texts" class="col-xs-8 control-label">Usage:</label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="usage" id="usage" type="checkbox" {{ "checked" if settings["usage"] }} {{ "disabled" if readonly }} />
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="proximity" class="col-xs-8 control-label">Proximity:</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
@@ -146,13 +154,15 @@
                     </label>
                 </div>
             </div>
-
             <div class="form-group">
-                <label for="check_for_new_surveys_frequency_seconds" class="col-xs-8 control-label">Check for new surveys frequency:</label>
-                <div class="col-xs-4">
-                    <input id="check_for_new_surveys_frequency_seconds" name="check_for_new_surveys_frequency_seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['check_for_new_surveys_frequency_seconds'] }}" {{ "disabled" if readonly }}>
+                <label for="allow_upload_over_cellular_data" class="col-xs-8 control-label">Allow data upload over a cellular data plan: </label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="allow_upload_over_cellular_data" id="allow_upload_over_cellular_data" type="checkbox" {{ "checked" if settings["allow_upload_over_cellular_data"] }} {{ "disabled" if readonly }}/>
+                    </label>
                 </div>
             </div>
+
             <div class="form-group">
                 <label for="create_new_data_files_frequency_seconds" class="col-xs-8 control-label">Create new data files frequency:</label>
                 <div class="col-xs-4">
@@ -165,16 +175,6 @@
                     <input id="upload_data_files_frequency_seconds" name="upload_data_files_frequency_seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['upload_data_files_frequency_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label for="allow_upload_over_cellular_data" class="col-xs-8 control-label">Allow data upload over a cellular data plan: </label>
-                <div class="col-xs-4 checkbox checkbox-custom">
-                    <label>
-                        <input name="allow_upload_over_cellular_data" id="allow_upload_over_cellular_data" type="checkbox" {{ "checked" if settings["allow_upload_over_cellular_data"] }} {{ "disabled" if readonly }}/>
-                    </label>
-                </div>
-            </div>
-
         </div>
         <div class="col-xs-6">
             <div class="form-group">
@@ -217,6 +217,12 @@
                 <label for="gyro_off_duration_seconds" class="col-xs-8 control-label">Gyro <b>off</b> duration:</label>
                 <div class="col-xs-4">
                     <input id="gyro_off_duration_seconds" name="gyro_off_duration_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['gyro_off_duration_seconds'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="usage_update_interval_seconds" class="col-xs-8 control-label">Usage update interval:</label>
+                <div class="col-xs-4">
+                    <input id="usage_update_interval_seconds" name="usage_update_interval_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['usage_update_interval_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
             <div class="form-group">
@@ -277,6 +283,13 @@
                 <label for="seconds_before_auto_logout" class="col-xs-8 control-label">Duration before auto-logout:</label>
                 <div class="col-xs-4">
                     <input id="seconds_before_auto_logout" name="seconds_before_auto_logout" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['seconds_before_auto_logout'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="check_for_new_surveys_frequency_seconds" class="col-xs-8 control-label">Check for new surveys frequency:</label>
+                <div class="col-xs-4">
+                    <input id="check_for_new_surveys_frequency_seconds" name="check_for_new_surveys_frequency_seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['check_for_new_surveys_frequency_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
         </div>

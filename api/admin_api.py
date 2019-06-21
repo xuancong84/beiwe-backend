@@ -83,16 +83,17 @@ def download_page():
     )
 
 
-@admin_api.route("/download")
+@admin_api.route("/download/beiwe.apk")
 @authenticate_admin_login
 def download_current():
-    return send_file(filename_or_fp="./files/beiwe.apk", as_attachment=True, attachment_filename="beiwe.apk")
+    # return send_file(filename_or_fp="./files/beiwe.apk", as_attachment=True, attachment_filename="beiwe.apk")
+    return send_file(filename_or_fp="./files/beiwe.apk", as_attachment=False)
 
-
-@admin_api.route("/download_debug")
+@admin_api.route("/download/beiwe-dev.apk")
 @authenticate_admin_login
 def download_current_debug():
-    return send_file(filename_or_fp="./files/beiwe-dev.apk", as_attachment=True, attachment_filename="beiwe-dev.apk")
+    # return send_file(filename_or_fp="./files/beiwe-dev.apk", as_attachment=True, attachment_filename="beiwe-dev.apk")
+    return send_file(filename_or_fp="./files/beiwe-dev.apk", as_attachment=False)
 
 
 @admin_api.route("/download_beta")

@@ -1,15 +1,15 @@
 
 if [ $# -lt 2 ]; then
-	echo "Usage: $0 input-folder output-folder [encryption-key]" >&2
+	echo "Usage: $0 input-folder output-folder [\"encryption-key-options\"]" >&2
 	exit 1
 fi
 
 IN_PATH="$1"
 OUT_PATH="$2"
 if [ ! "$3" ]; then
-	KEY='EIUYOOME3CJK9M2J50E27WZW2BTT5WJ7'
+	KEY_OPTION='EIUYOOME3CJK9M2J50E27WZW2BTT5WJ7'
 else
-	KEY="$3"
+	KEY_OPTION="$3"
 fi
 
 pycode="
@@ -65,5 +65,5 @@ find "$IN_PATH" -iname '*.csv' \
 			infn=$infn"/.dummys3_content"
 		fi
 		echo -e "$infn\t$outfn"
-	done | python2 -c "$pycode" EIUYOOME3CJK9M2J50E27WZW2BTT5WJ7 -key
+	done | ~/conda2/bin/python -c "$pycode" $KEY_OPTION
 
