@@ -249,7 +249,7 @@ def decrypt_device_line(patient_id, key, data):
         if key is None: len_key = "None"
         else: len_key = len(key)
         print("length iv: %s, length data: %s, length key: %s" % (len_iv, len_data, len_key))
-        print('%s %s %s' % (patient_id, key, data))
+        print('patient_id: %s' % patient_id)
         raise
     return remove_PKCS5_padding( decrypted )
 

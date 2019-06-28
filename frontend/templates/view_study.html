@@ -6,8 +6,23 @@
 
     <div class="container">
       <div class="span12">
-        <div class="row">
+        {% if qr_image %}
+        <script type="text/javascript">
+          function hasRegistered(){
+            $.get("/check_new_patient/{{study_id}}/{{check_id}}").done(function(data){
+              if(data=="yes")
+                document.location.replace("/view_study/{{study_id}}/{{check_id}}");
+              else
+                setTimeout(hasRegistered, 3000);
+            });
+          }
+          window.onload = hasRegistered;
+        </script>
+        <div class="row" align="center">
+          <img src="{{qr_image}}" alt="registration_QR.png" scale="0" align="middle">
         </div>
+        {% endif %}
+
         <div class="row">
           <h2>{{ study.name }}</h2>
           <p>ID: {{ study.object_id }}</p>

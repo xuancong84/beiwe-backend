@@ -1,4 +1,8 @@
+#!/usr/bin/env bash
+
+
 cd `dirname $0`
+
 ~/conda2/bin/python app.py 2>&1 | ~/conda2/bin/python -c "
 import os,sys
 while True:

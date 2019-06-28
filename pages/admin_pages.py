@@ -1,15 +1,11 @@
-import json
-
-from flask import Blueprint, flash, Markup, redirect, render_template, request,\
-    session
-
+from flask import *
 from libs import admin_authentication
 from libs.admin_authentication import authenticate_admin_login,\
     authenticate_admin_study_access, get_admins_allowed_studies, get_admins_allowed_studies_as_query_set,\
     admin_is_system_admin
 from libs.security import check_password_requirements
 
-from database.models import Researcher, Study
+from database.models import Researcher, Study, Participant
 
 
 admin_pages = Blueprint('admin_pages', __name__)
@@ -40,13 +36,28 @@ def choose_study():
     )
 
 
-@admin_pages.route('/view_study/<string:study_id>', methods=['GET'])
+@admin_pages.route('/view_study/<path:study_id>', methods=['GET'])
 @authenticate_admin_study_access
 def view_study(study_id=None):
+    if '/' in study_id:
+        its = study_id.split('/')
+        participant = its[1]
+        study_id = its[0]
+    else:
+        participant = False
     study = Study.objects.get(pk=study_id)
     tracking_survey_ids = study.get_survey_ids_and_object_ids_for_study('tracking_survey')
     audio_survey_ids = study.get_survey_ids_and_object_ids_for_study('audio_survey')
     participants = study.participants.all()
+
+    if participant != False:
+        try:
+            device_id = Participant.objects.get(patient_id=participant).device_id
+        except:
+            device_id = ''
+        response_string = 'Participant with patient_id=%s ' % participant
+        response_string += ('has been registered successfully!' if device_id != '' else 'has NOT been registered!')
+        flash(response_string, 'success')
 
     return render_template(
         'view_study.html',

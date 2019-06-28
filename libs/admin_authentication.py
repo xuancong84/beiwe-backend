@@ -72,6 +72,8 @@ def authenticate_admin_study_access(some_function):
         # Get values first from kwargs, then from the POST request
         survey_id = kwargs.get('survey_id', request.values.get('survey_id', None))
         study_id = kwargs.get('study_id', request.values.get('study_id', None))
+        if type(study_id) in [unicode, str] and '/' in study_id:
+            study_id = study_id.split('/')[0]
 
         # Check proper syntax usage.
         if not survey_id and not study_id:
@@ -122,8 +124,7 @@ def get_admins_allowed_studies(as_json=True):
     """
     researcher = Researcher.objects.get(username=session['admin_username'])
     study_set = [
-        study for study in
-        Study.get_all_studies_by_name().filter(researchers=researcher)
+        study for study in Study.get_all_studies_by_name().filter(researchers=researcher)
             .values("name", "object_id", "id", "is_test")
     ]
     if as_json:

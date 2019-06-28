@@ -13,6 +13,7 @@ python-dateutil==2.6.1
 raven[flask]==6.1.0
 supervisor==3.3.3
 Werkzeug==0.12.2
+qrcode==6.1
 
 # Keep this one up to date
 pytz

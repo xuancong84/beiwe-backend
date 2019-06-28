@@ -1,13 +1,15 @@
 from csv import writer
 from re import sub
 
-from flask import Blueprint, flash, redirect, request, Response
+from flask import *
 
-from libs.admin_authentication import authenticate_admin_study_access
+from libs.admin_authentication import *
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from database.models import Participant, Study
-
+from config.settings import DOMAIN_NAME
+import base64, qrcode
+from io import BytesIO
 
 participant_administration = Blueprint('participant_administration', __name__)
 
@@ -33,8 +35,7 @@ def reset_participant_password():
 @authenticate_admin_study_access
 def reset_device():
     """
-    Resets a participant's device. The participant will not be able to connect until they
-    register a new device.
+    Resets a participant's device. The participant will not be able to connect until they register a new device.
     """
 
     patient_id = request.values['patient_id']
@@ -54,9 +55,8 @@ def reset_device():
 @authenticate_admin_study_access
 def create_new_patient():
     """
-    Creates a new user, generates a password and keys, pushes data to s3 and user database, adds
-    user to the study they are supposed to be attached to and returns a string containing
-    password and patient id.
+    Creates a new user, generates a password and keys, pushes data to s3 and user database, adds user to
+    the study they are supposed to be attached to and returns a string containing password and patient id.
     """
 
     study_id = request.values['study_id']
@@ -66,11 +66,49 @@ def create_new_patient():
     study_object_id = Study.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
     s3_upload(patient_id, "", study_object_id)
     create_client_key_pair(patient_id, study_object_id)
+    # patient_id, password = 'hywvod27', 'abcd1234'
 
-    response_string = 'Created a new patient\npatient_id: {:s}\npassword: {:s}'.format(patient_id, password)
+    image = qrcode.make('{"url":"%s", "uid":"%s", "utp":"%s"}'%(DOMAIN_NAME, patient_id, password))
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue())
+    img_base64 = "data:image/jpeg;base64," + img_str
+
+    response_string = 'Created a new participant with patient_id: {:s} , password: {:s}'.format(patient_id, password)
     flash(response_string, 'success')
 
-    return redirect('/view_study/{:s}'.format(study_id))
+    study = Study.objects.get(pk=study_id)
+    tracking_survey_ids = study.get_survey_ids_and_object_ids_for_study('tracking_survey')
+    audio_survey_ids = study.get_survey_ids_and_object_ids_for_study('audio_survey')
+    participants = study.participants.all()
+
+    return render_template(
+        'view_study.html',
+        study=study,
+        qr_image=img_base64,
+        study_id=study_id,
+        check_id=patient_id,
+        patients=participants,
+        audio_survey_ids=audio_survey_ids,
+        tracking_survey_ids=tracking_survey_ids,
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
+
+
+@participant_administration.route('/check_new_patient/<string:study_id>/<string:patient_id>', methods=["GET"])
+@authenticate_admin_study_access
+def check_new_patient(study_id=None, patient_id=None):
+    """
+    Check whether a user with patient_id in study_id has registered, returns yes or no.
+    """
+    try:
+        participant = Participant.objects.get(patient_id=patient_id)
+        isReg = (participant.device_id!='' and str(participant.study_id)==study_id)
+    except:
+        isReg = False
+
+    return Response('yes' if isReg else 'no', mimetype='text/plain')
 
 
 @participant_administration.route('/create_many_patients/<string:study_id>', methods=["POST"])
@@ -78,8 +116,8 @@ def create_new_patient():
 def create_many_patients(study_id=None):
     """ Creates a number of new users at once for a study.  Generates a password and keys for
     each one, pushes data to S3 and the user database, adds users to the study they're supposed
-    to be attached to, and returns a CSV file for download with a mapping of Patient IDs and
-    passwords. """
+    to be attached to, and returns a CSV file for download with a mapping of Patient IDs and passwords. """
+
     number_of_new_patients = int(request.form.get('number_of_new_patients', 0))
     desired_filename = request.form.get('desired_filename', '')
     filename_spaces_to_underscores = sub(r'[\ =]', '_', desired_filename)
