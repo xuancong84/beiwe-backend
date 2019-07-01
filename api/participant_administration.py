@@ -28,6 +28,9 @@ def reset_participant_password():
     else:
         flash('Sorry, something went wrong when trying to reset the patient\'s password.', 'danger')
 
+    if not isPatientRegistered(study_id, patient_id):
+        return make_QR(study_id, patient_id, new_password)
+
     return redirect('/view_study/{:s}'.format(study_id))
 
 
@@ -66,49 +69,15 @@ def create_new_patient():
     study_object_id = Study.objects.filter(pk=study_id).values_list('object_id', flat=True).get()
     s3_upload(patient_id, "", study_object_id)
     create_client_key_pair(patient_id, study_object_id)
-    # patient_id, password = 'hywvod27', 'abcd1234'
 
-    image = qrcode.make('{"url":"%s", "uid":"%s", "utp":"%s"}'%(DOMAIN_NAME, patient_id, password))
-    buffered = BytesIO()
-    image.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue())
-    img_base64 = "data:image/jpeg;base64," + img_str
-
-    response_string = 'Created a new participant with patient_id: {:s} , password: {:s}'.format(patient_id, password)
-    flash(response_string, 'success')
-
-    study = Study.objects.get(pk=study_id)
-    tracking_survey_ids = study.get_survey_ids_and_object_ids_for_study('tracking_survey')
-    audio_survey_ids = study.get_survey_ids_and_object_ids_for_study('audio_survey')
-    participants = study.participants.all()
-
-    return render_template(
-        'view_study.html',
-        study=study,
-        qr_image=img_base64,
-        study_id=study_id,
-        check_id=patient_id,
-        patients=participants,
-        audio_survey_ids=audio_survey_ids,
-        tracking_survey_ids=tracking_survey_ids,
-        allowed_studies=get_admins_allowed_studies(),
-        system_admin=admin_is_system_admin()
-    )
+    flash('Created a new participant with patient_id: %s , password: %s'%(patient_id, password), 'success')
+    return make_QR(study_id, patient_id, password)
 
 
 @participant_administration.route('/check_new_patient/<string:study_id>/<string:patient_id>', methods=["GET"])
 @authenticate_admin_study_access
 def check_new_patient(study_id=None, patient_id=None):
-    """
-    Check whether a user with patient_id in study_id has registered, returns yes or no.
-    """
-    try:
-        participant = Participant.objects.get(patient_id=patient_id)
-        isReg = (participant.device_id!='' and str(participant.study_id)==study_id)
-    except:
-        isReg = False
-
-    return Response('yes' if isReg else 'no', mimetype='text/plain')
+    return Response('yes' if isPatientRegistered(study_id, patient_id) else 'no', mimetype='text/plain')
 
 
 @participant_administration.route('/create_many_patients/<string:study_id>', methods=["POST"])
@@ -142,3 +111,42 @@ def csv_generator(study_id, number_of_new_patients):
         filewriter.writerow([patient_id, password])
         yield si.getvalue()
         si.empty()
+
+
+def make_QR(study_id, patient_id, password):
+    image = qrcode.make('{"url":"%s", "uid":"%s", "utp":"%s"}'%(DOMAIN_NAME, patient_id, password))
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue())
+    img_base64 = "data:image/jpeg;base64," + img_str
+
+    study = Study.objects.get(pk=study_id)
+    tracking_survey_ids = study.get_survey_ids_and_object_ids_for_study('tracking_survey')
+    audio_survey_ids = study.get_survey_ids_and_object_ids_for_study('audio_survey')
+    participants = study.participants.all()
+
+    return render_template(
+        'view_study.html',
+        study=study,
+        qr_image=img_base64,
+        study_id=study_id,
+        check_id=patient_id,
+        patients=participants,
+        audio_survey_ids=audio_survey_ids,
+        tracking_survey_ids=tracking_survey_ids,
+        allowed_studies=get_admins_allowed_studies(),
+        system_admin=admin_is_system_admin()
+    )
+
+
+def isPatientRegistered(study_id, patient_id):
+    """
+    Check whether a user with patient_id in study_id has registered, returns yes or no.
+    """
+    try:
+        participant = Participant.objects.get(patient_id=patient_id)
+        isReg = (participant.device_id != '' and str(participant.study_id) == study_id)
+    except:
+        isReg = False
+    return isReg
+
