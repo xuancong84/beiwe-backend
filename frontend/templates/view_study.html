@@ -47,6 +47,8 @@
               <th>Phone registered</th>
               <th>Phone OS</th>
               <th>Reset password</th>
+              <th>Register Time</th>
+              <th>Last Upload</th>
             </tr>
           </thead>
           <tbody id="users-table-body">
@@ -62,7 +64,7 @@
                       <div class="form-inline">
                         <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
                         <input type="hidden" name="study_id" value="{{ study.id }}">
-                        <button type="submit" class="btn btn-warning btn-sm reset_device_button">Un-Register Smartphone</button>
+                        <button type="submit" class="btn btn-warning btn-sm reset_device_button">Un-register Phone</button>
                       </div>
                     </form>
                   {% else %}
@@ -70,7 +72,9 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if patient.os_type %}
+                  {% if patient.os_desc %}
+                    {{ patient.os_desc }}
+                  {% elif patient.os_type %}
                     {{ patient.os_type }}
                   {% else %}
                     <i>unknown</i>
@@ -84,6 +88,16 @@
                       <button type="submit" class="btn btn-warning btn-sm reset_password_button">Reset password</button>
                     </div>
                   </form>
+                </td>
+                <td>
+                  {% if patient.created_on %}
+                    {{ "%.19s" % patient.created_on }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if patient.last_updated %}
+                    {{ "%.19s" % patient.last_updated }}
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}

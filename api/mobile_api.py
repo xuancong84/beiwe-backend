@@ -242,6 +242,7 @@ def register_user(OS_API=""):
     # set up device.
     user.set_device(device_id)
     user.set_os_type(OS_API)
+    user.set_os_desc(OS_API + ' ' + os_version + ' ' + manufacturer + ' '+ model)
     user.set_password(request.values['new_password'])
     device_settings = user.study.device_settings.as_native_python()
     device_settings.pop('_id', None)

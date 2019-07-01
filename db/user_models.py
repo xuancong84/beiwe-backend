@@ -58,23 +58,28 @@ class User( DatabaseObject ):
     
     def set_device(self, device_id):
         """ Sets the device id to the new value"""
-        self['device_id'] =  device_id
+        self['device_id'] = device_id
         self.save()
 
     def set_os_type(self, os_type):
         """ Sets the os_type to the new value"""
-        self['os_type'] =  os_type
+        self['os_type'] = os_type
+        self.save()
+
+    def set_os_desc(self, os_desc):
+        """ Sets the os_type to the new value"""
+        self['os_desc'] = os_desc
         self.save()
 
     def clear_device(self):
         """ Clears the device entry."""
-        self['device_id'] =  None
+        self['device_id'] = None
         self.save()
     
     def set_password(self, password):
         """ Sets the instance's password hash to match the hash of the
             provided string."""
-        password, salt  = generate_user_hash_and_salt( password )
+        password, salt = generate_user_hash_and_salt( password )
         self['password'] = password
         self['salt'] = salt
         self.save()
