@@ -1,11 +1,12 @@
 import os, sys, psycopg2, boto3
 
-import jinja2
+import jinja2, datetime, dateutil.parser, time
 from flask import Flask, render_template, redirect
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 
 from config import load_django
+from config.settings import DATE_ELAPSE_COLOR as dec_list
 
 from api import (participant_administration, admin_api, copy_study_api, data_access_api,
     data_pipeline_api, mobile_api, survey_api)
@@ -64,6 +65,20 @@ def strip_dot_html(page):
 @app.context_processor
 def inject_dict_for_all_templates():
     return {"SENTRY_JAVASCRIPT_DSN": SENTRY_JAVASCRIPT_DSN}
+
+
+@app.template_filter('check_date_elapse')
+def check_date_elapse(s_date):
+    try:
+        t1 = time.mktime(s_date.timetuple())
+        t2 = time.mktime(datetime.datetime.now().timetuple())
+        dt = t2 - t1
+        for tms, color in dec_list:
+            if dt < tms:
+                return color
+    except:
+        pass
+    return 'black'
 
 
 # Extra Production settings

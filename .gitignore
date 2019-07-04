@@ -4,6 +4,8 @@
 .project
 .idea/
 .python-version
+*log.gz
+*.log
 
 # A place to stick your files
 private/*

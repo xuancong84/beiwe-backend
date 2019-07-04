@@ -45,7 +45,7 @@
             <tr>
               <th>Patient ID</th>
               <th>Phone registered</th>
-              <th>Phone OS</th>
+              <th>Phone OS Information</th>
               <th>Reset password</th>
               <th>Register Time</th>
               <th>Last Upload</th>
@@ -71,7 +71,7 @@
                     No smartphone registered
                   {% endif %}
                 </td>
-                <td>
+                <td style="max-width:150px; word-wrap: break-word;">
                   {% if patient.os_desc %}
                     {{ patient.os_desc }}
                   {% elif patient.os_type %}
@@ -94,7 +94,7 @@
                     {{ "%.19s" % patient.created_on }}
                   {% endif %}
                 </td>
-                <td>
+                <td bgcolor={{patient.last_updated | check_date_elapse}}>
                   {% if patient.last_updated %}
                     {{ "%.19s" % patient.last_updated }}
                   {% endif %}
@@ -111,7 +111,7 @@
             <button type="submit" class="btn btn-primary add_new_patient_button">Add new patient</button>
           </div>
         </form>
-
+        &nbsp;
         <button type="button" class="btn btn-warning add_many_patients_button" data-toggle="modal" data-target="#addManyPatientsModal" title="Enable a number of new patients to enroll in {{ study.name }}: download a file of new Patient IDs and registration passwords">Add many new patients</button>
         {% include 'create_many_patients_modal.html' %}
 

@@ -36,4 +36,7 @@ S3_ACCESS_CREDENTIALS_KEY = getenv("S3_ACCESS_CREDENTIALS_KEY")
 
 S3_REGION_NAME = getenv("S3_REGION_NAME", "us-east-1")
 
+# background color indicator for date elapse in seconds
+DATE_ELAPSE_COLOR = [[30*3600, 'lime'], [72*3600, 'orange'], [float('inf'), 'red']]
+
 SESSION_EXPIRE_IN_SECONDS = 9999
