@@ -387,7 +387,11 @@ class DeviceSettings(AbstractModel):
     type_map = {bool: 'Boolean', int: 'Integer', float: 'Float', str: 'Text'}
     for params in ALL_DEVICE_PARAMETERS:
         for key, value in params:
-            cmd = '%s = models.%sField(default=%s)' % (key, type_map[type(value)], value)
+            value_type = type_map[type(value)]
+            if value_type == 'Text':
+                cmd = '%s = models.%sField(default="%s", blank=True)' % (key, value_type, value)
+            else:
+                cmd = '%s = models.%sField(default=%s)' % (key, value_type, value)
             exec(cmd)
 
     # accelerometer = models.BooleanField(default=True)
