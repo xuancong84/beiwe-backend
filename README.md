@@ -56,3 +56,14 @@ How to add new features:
 1. ./config/constants.py
 2. ./frontend/templates/device_settings.html
 3. run pgadmin3 to add new field in the PostgreSQL table database_devicesettings
+
+PostgreSQL
+To backup all:
+pg_dumpall > postgres.sql
+
+To restore all:
+psql -f postgres.sql postgres
+
+Allow port 80/443 for non-root:
+setcap CAP_NET_BIND_SERVICE=+eip /path/to/python2.7
+
