@@ -54,7 +54,7 @@ ALL_DEVICE_PARAMETERS = [
     [["accessibility", False]],
     [["proximity", False]],
     [["reachability", True]],
-    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", False], ["phone_number_length", 8], ["primary_care", '']],
+    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", False], ["phone_number_length", 8], ["write_buffer_size", 0], ["primary_care", '']],
     [["calls", True], ["texts", True], ["check_for_new_surveys_frequency_seconds", 3600*6], ["create_new_data_files_frequency_seconds", 30*60],
      ["seconds_before_auto_logout", 600], ["upload_data_files_frequency_seconds", 3600], ["voice_recording_max_time_length_seconds", 240],
      ["wifi_log_frequency_seconds", 300], ["about_page_text", 'ABOUT_PAGE_TEXT'], ["call_clinician_button_text", 'CALL_BUTTON_TEXT'],

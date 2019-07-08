@@ -185,14 +185,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="primary_care" class="col-xs-8 control-label">Clinician phone number (optional):</label>
+                <label for="primary_care" class="col-xs-8 control-label">Clinician phone number <font color="red">(if not set, PhoneNumberEntryActivity page will pop up during device registration)</font>:</label>
                 <div class="col-xs-4">
                     <input id="primary_care" name="primary_care" class="form-control" value="{{ settings['primary_care'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
         </div>
 
-<!-- Second column/pane       -->
+<!-- the second column/pane       -->
 
         <div class="col-xs-6">
             <div class="form-group">
@@ -321,8 +321,17 @@
                     <input id="upload_data_files_frequency_seconds" name="upload_data_files_frequency_seconds" class="form-control" type="number" placeholder="Enter frequency here (seconds)" value="{{ settings['upload_data_files_frequency_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
+            <div class="form-group">
+                <label for="write_buffer_size" class="col-xs-8 control-label">Write buffer size:</label>
+                <div class="col-xs-4">
+                    <input id="write_buffer_size" name="write_buffer_size" class="form-control" type="number" placeholder="(in bytes)" value="{{ settings['write_buffer_size'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
         </div>
     </div>
+
+<!-- long text section -->
+
     <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
