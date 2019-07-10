@@ -13,8 +13,7 @@ from api import (participant_administration, admin_api, copy_study_api, data_acc
 from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN, SENTRY_JAVASCRIPT_DSN
 from libs.admin_authentication import is_logged_in
 from libs.security import set_secret_key
-from pages import (admin_pages, mobile_pages, survey_designer, system_admin_pages,
-    data_access_web_form)
+from pages import (admin_pages, mobile_pages, survey_designer, system_admin_pages, data_access_web_form)
 
 
 # # if running locally we want to use a sqlite database

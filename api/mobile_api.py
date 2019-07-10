@@ -113,12 +113,9 @@ def upload(OS_API=""):
     except OurBase64Error:
         if IS_STAGING:
             print "decryption problems" + "#"*200
-            print
-            print patient_id
-            print
-            print file_name
-            print uploaded_file
-            print
+            print 'patient_id=', patient_id
+            print 'file_name=', file_name
+            print 'uploaded_file=', uploaded_file
         raise
 # This is what the decryption failure mode SHOULD be, but we are still identifying the decryption bug
 #     except DecryptionKeyInvalidError:
@@ -128,13 +125,15 @@ def upload(OS_API=""):
     # if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension(file_name):
         s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
-        FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
-        UploadTracking.objects.create(
-            file_path=file_name.replace("_", "/"),
-            file_size=len(uploaded_file),
-            timestamp=timezone.now(),
-            participant=user,
-        )
+        user.update_upload_time()
+        # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
+        # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
+        # UploadTracking.objects.create(
+        #     file_path=file_name.replace("_", "/"),
+        #     file_size=len(uploaded_file),
+        #     timestamp=timezone.now(),
+        #     participant=user,
+        # )
         return render_template('blank.html'), 200
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "

@@ -40,6 +40,7 @@ FILE_TYPES = ['gps', 'accel', 'light', 'voiceRecording', 'powerState', 'callLog'
 
 ## All device parameters
 ALL_DEVICE_PARAMETERS = [
+    [["calls", True], ["texts", True]],
     [["accelerometer", True], ["accelerometer_off_duration_seconds", 10], ["accelerometer_on_duration_seconds", 10]],
     [["ambientlight", True], ["ambientlight_interval_seconds", 60]],
     [["gps", True], ["use_gps_fuzzing", False], ["gps_off_duration_seconds", 600], ["gps_on_duration_seconds", 60]],
@@ -55,10 +56,10 @@ ALL_DEVICE_PARAMETERS = [
     [["proximity", False]],
     [["reachability", True]],
     [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", False], ["phone_number_length", 8], ["write_buffer_size", 0], ["primary_care", '']],
-    [["calls", True], ["texts", True], ["check_for_new_surveys_frequency_seconds", 3600*6], ["create_new_data_files_frequency_seconds", 30*60],
-     ["seconds_before_auto_logout", 600], ["upload_data_files_frequency_seconds", 3600], ["voice_recording_max_time_length_seconds", 240],
-     ["wifi_log_frequency_seconds", 300], ["about_page_text", 'ABOUT_PAGE_TEXT'], ["call_clinician_button_text", 'CALL_BUTTON_TEXT'],
-     ["consent_form_text", 'CONSENT_FORM_TEXT'], ["survey_submit_success_toast_text", 'SURVEY_SUBMIT_SUCCESS_TOAST_TEXT']]
+    [["check_for_new_surveys_frequency_seconds", 3600*6], ["create_new_data_files_frequency_seconds", 30*60], ["seconds_before_auto_logout", 600],
+     ["upload_data_files_frequency_seconds", 3600], ["voice_recording_max_time_length_seconds", 240], ["wifi_log_frequency_seconds", 300]],
+    [["about_page_text", ABOUT_PAGE_TEXT], ["call_clinician_button_text", CALL_BUTTON_TEXT],
+     ["consent_form_text", CONSENT_FORM_TEXT], ["survey_submit_success_toast_text", SURVEY_SUBMIT_SUCCESS_TOAST_TEXT]]
 ]
 
 # The format that dates should be in throughout the codebase

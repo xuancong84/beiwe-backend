@@ -4,8 +4,12 @@ from os.path import dirname, join
 
 from config.settings import FLASK_SECRET_KEY
 
-DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
-TEST_DATABASE_PATH = join(dirname(dirname(__file__)), 'private/tests_db.sqlite')
+if 'LOCAL_DB_PATH' in os.environ:
+    DB_PATH = TEST_DATABASE_PATH = os.environ['LOCAL_DB_PATH']
+    os.environ['DJANGO_DB_ENV'] = 'local'
+else:
+    DB_PATH = join(dirname(dirname(__file__)), "private/beiwe_db.sqlite")
+    TEST_DATABASE_PATH = join(dirname(dirname(__file__)), 'private/tests_db.sqlite')
 
 # SECRET KEY is required by the django management commands, using the flask key is fine because
 # we are not actually using it in any server runtime capacity.
