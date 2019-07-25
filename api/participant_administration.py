@@ -29,7 +29,7 @@ def reset_participant_password():
         flash('Sorry, something went wrong when trying to reset the patient\'s password.', 'danger')
 
     if not isPatientRegistered(study_id, patient_id):
-        return make_QR(study_id, patient_id, new_password)
+        return make_QR(study_id, patient_id, new_password, session["timezone"])
 
     return redirect('/view_study/{:s}'.format(study_id))
 
@@ -71,7 +71,7 @@ def create_new_patient():
     create_client_key_pair(patient_id, study_object_id)
 
     flash('Created a new participant with patient_id: %s , password: %s'%(patient_id, password), 'success')
-    return make_QR(study_id, patient_id, password)
+    return make_QR(study_id, patient_id, password, timezone=session["timezone"])
 
 
 @participant_administration.route('/check_new_patient/<string:study_id>/<string:patient_id>', methods=["GET"])
@@ -113,7 +113,7 @@ def csv_generator(study_id, number_of_new_patients):
         si.empty()
 
 
-def make_QR(study_id, patient_id, password):
+def make_QR(study_id, patient_id, password, timezone=0):
     image = qrcode.make('{"url":"%s", "uid":"%s", "utp":"%s"}'%(DOMAIN_NAME, patient_id, password))
     buffered = BytesIO()
     image.save(buffered, format="PNG")
@@ -128,6 +128,7 @@ def make_QR(study_id, patient_id, password):
     return render_template(
         'view_study.html',
         study=study,
+        TZ=timezone,
         qr_image=img_base64,
         study_id=study_id,
         check_id=patient_id,

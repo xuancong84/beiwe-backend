@@ -47,7 +47,7 @@
               <th>Phone registered</th>
               <th>Phone OS Information</th>
               <th>Reset password</th>
-              <th>Register Time</th>
+              <th>Creation Time</th>
               <th>Last Upload</th>
             </tr>
           </thead>
@@ -91,12 +91,12 @@
                 </td>
                 <td>
                   {% if patient.created_on %}
-                    {{ "%.19s" % patient.created_on }}
+                    {{ patient.created_on|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
                 <td bgcolor={{patient.last_updated | check_date_elapse}}>
                   {% if patient.last_updated %}
-                    {{ "%.19s" % patient.last_updated }}
+                    {{ patient.last_updated|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
               </tr>

@@ -27,10 +27,11 @@ def authenticate_admin_login(some_function):
     return authenticate_and_call
 
 
-def log_in_admin(username):
+def log_in_admin(username, timezone):
     session['admin_uuid'] = generate_easy_alphanumeric_string()
     session['expiry'] = datetime.now() + timedelta(seconds=SESSION_EXPIRE_IN_SECONDS)
     session['admin_username'] = username
+    session['timezone'] = timezone
 
 
 def logout_loggedin_admin():

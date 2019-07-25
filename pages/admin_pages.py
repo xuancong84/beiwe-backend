@@ -61,6 +61,7 @@ def view_study(study_id=None):
 
     return render_template(
         'view_study.html',
+        TZ=session["timezone"],
         study=study,
         patients=participants,
         audio_survey_ids=audio_survey_ids,
@@ -105,8 +106,12 @@ def login():
     if request.method == 'POST':
         username = request.values["username"]
         password = request.values["password"]
+        try:
+            timezone = int(request.values["timezone"])
+        except:
+            timezone = 0
         if Researcher.check_password(username, password):
-            admin_authentication.log_in_admin(username)
+            admin_authentication.log_in_admin(username, timezone)
             return redirect("/downloads" if username=="moht" else "/choose_study")
         else:
             flash("Incorrect username & password combination; try again.", 'danger')

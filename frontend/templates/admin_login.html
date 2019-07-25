@@ -13,6 +13,7 @@
         <form method="POST" action="/validate_login">
           <input name="username" type="text" placeholder="Username" autofocus/>
           <input name="password" type="password"  placeholder="Password" />
+          <input name="timezone" id="timezone" type="hidden" />
           <input type="submit" name="submit" value="Log in" class="btn btn-large btn-success">
         </form>
       </div>
@@ -24,6 +25,12 @@
         <p>Progress in medical science has always been driven by high quality data. A longstanding barrier to progress, both in clinical settings and research trials, has been the fundamental difficulty of accurately measuring the human phenotype, including but not limited to physical mobility, gross motor activity, speech production, behavioral patterns, and social engagement. Smartphones are now ubiquitous and can be harnessed to offer medicine a wealth of data on the human phenotype. Subjects can be instrumented using dedicated scientific apps that generate continuous streams of behavioral data. This approach has enormous potential, but data alone are not enough: the data need to be coupled with appropriate statistical learning tools in order to fully leverage their potential. Only then can these data be transformed into clinically valid and useful information, the kind of information that can transform research and discovery and, ultimately, patient health.</p>
         <p>We have coined the term <b>digital phenotyping</b> to refer to the <i>moment-by-moment quantification of the individual-level human phenotype, in situ, using data from digital devices</i>. It is enabled by the combination of rich behavioral data from personal digital devices and appropriate statistical learning methods. Human behavior is also context specific, which is why we believe characterizing behavior <i>in situ</i>–life as lived and experienced by people in their everyday surroundings–is critical. Our understanding of the human genotype has been revolutionized in the past two decades, but there are at present many areas of medicine where some of the most important challenges lie in characterizing the associated human phenotype. This is where Digital Phenotyping comes in.</p>
       </div>#}
+<script language="javascript">
+window.onload = function(){
+  var d = new Date();
+  document.getElementById("timezone").value = d.getTimezoneOffset();
+}
+</script>
     </div>
 
 {% endblock %}

@@ -79,6 +79,17 @@ def check_date_elapse(s_date):
         pass
     return 'black'
 
+@app.template_filter('print_date_in_timezone')
+def print_date_in_timezone(s_date, TZ):
+    try:
+        dt = s_date-datetime.timedelta(minutes=TZ)
+        return '%.19s' % dt
+    except:
+        try:
+            return '%.19s' % s_date
+        except:
+            pass
+    return 'error'
 
 # Extra Production settings
 if not __name__ == '__main__':
