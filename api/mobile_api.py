@@ -1,12 +1,13 @@
-import calendar
-import time
+import calendar, time
+from collections import *
+from datetime import datetime
 
 from django.utils import timezone
 from flask import Blueprint, request, abort, render_template, json
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
 
-from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER
+from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER, CHECKABLE_FILES
 from config.settings import IS_STAGING
 from database.models import FileToProcess, Participant, UploadTracking
 from libs.android_error_reporting import send_android_error_report
@@ -16,26 +17,37 @@ from libs.logging import log_error
 from libs.s3 import s3_upload, get_client_public_key_string, get_client_private_key
 from libs.security import OurBase64Error
 from libs.sentry import make_sentry_client
-from libs.user_authentication import (authenticate_user, authenticate_user_registration,
-    authenticate_user_ignore_password)
+from libs.user_authentication import (authenticate_user, authenticate_user_registration, authenticate_user_ignore_password)
 
-################################################################################
 ############################# GLOBALS... #######################################
-################################################################################
 mobile_api = Blueprint('mobile_api', __name__)
+
 
 ################################################################################
 ################################ UPLOADS #######################################
 ################################################################################
 
-# @mobile_api.route('/loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb/')
-# def temp():
-#     from io import StringIO
-#     from flask import Response
-#     return Response(StringIO(u"loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb"),
-#                     mimetype="txt",
-#                     headers={'Content-Disposition':'attachment; filename="loaderio-8ed6e63e16e9e4d07d60a051c4ca6ecb.txt"'})
+line2date = lambda t:str(datetime.fromtimestamp(int(t.split(',')[0][:-3])))[:10]
+def update_upload_info(fname, info, data):
+    if len(data)==0:
+        return
 
+    d1 = line2date(data[0])
+    if len(data)<=3:
+        info[d1][fname] += 1
+        for L in data[1:]:
+            info[line2date(L)][fname] += 1
+        return
+
+    d2 = line2date(data[-1])
+
+    if d1==d2:
+        info[d1][fname] += len(data)
+        return
+
+    cnt = Counter([line2date(L) for L in data])
+    for d,n in cnt.iteritems():
+        info[d][fname] += n
 
 @mobile_api.route('/upload', methods=['POST'])
 @mobile_api.route('/upload/ios/', methods=['GET', 'POST'])
@@ -99,32 +111,39 @@ def upload(OS_API=""):
 
     if file_name[:6] == "rList-":
         return render_template('blank.html'), 200
-    
+
+    # test whether can decrypt successfully
+    # if cannot decrypt, save the raw file, return OK:200 to free up phone storage
+    # if cannot save to S3 bucket, return Error:500 to postpone upload & keep the file on the phone
     client_private_key = get_client_private_key(patient_id, user.study.object_id)
     try:
         uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
     except HandledError as e:
-        # when decrypting fails, regardless of why, we rely on the decryption code
-        # to log it correctly and return 200 OK to get the device to delete the file.
-        # We do not want emails on these types of errors, so we use log_error explicitly.
-        print("the following error was handled:")
+        canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+        print("The following upload error was handled:")
         log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message))
-        return render_template('blank.html'), 200
+        return render_template('blank.html'), 200 if canUpload else 500
     except OurBase64Error:
-        if IS_STAGING:
-            print "decryption problems" + "#"*200
-            print 'patient_id=', patient_id
-            print 'file_name=', file_name
-            print 'uploaded_file=', uploaded_file
-        raise
-# This is what the decryption failure mode SHOULD be, but we are still identifying the decryption bug
-#     except DecryptionKeyInvalidError:
-#         return render_template('blank.html'), 200
+        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+        print("### decryption error: patient_id=%s, file_name=%s, uploaded_file=%s"%(patient_id, file_name, uploaded_file))
+        return render_template('blank.html'), 200 if canUpload else 500
+    except:
+        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+        return render_template('blank.html'), 200 if canUpload else 500
 
-    # print "decryption success:", file_name
+    # set upload info
+    file_basename = file_name.split('_')[-2]
+    if file_basename in CHECKABLE_FILES:
+        try:
+            upload_info = user.get_upload_info()
+            update_upload_info(file_basename, upload_info, uploaded_file.strip().splitlines()[1:])
+            user.set_upload_info(upload_info)
+        except Exception as e:
+            log_error(e, "Failed to update upload info: patient_id=%s; file_name=%s; msg=%s" % (patient_id, file_name, e.message))
+
     # if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension(file_name):
-        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
+        canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
         user.update_upload_time()
         # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
         # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
@@ -134,7 +153,7 @@ def upload(OS_API=""):
         #     timestamp=timezone.now(),
         #     participant=user,
         # )
-        return render_template('blank.html'), 200
+        return render_template('blank.html'), 200 if canUpload else 500
     else:
         error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
         if not uploaded_file:
@@ -245,6 +264,8 @@ def register_user(OS_API=""):
     user.set_password(request.values['new_password'])
     device_settings = user.study.device_settings.as_native_python()
     device_settings.pop('_id', None)
+    for k,v in ALL_DEVICE_PARAMETERS[0]:
+        device_settings.pop(k, None)
     return_obj = {'client_public_key': get_client_public_key_string(patient_id, study_id),
                   'device_settings': device_settings}
     return json.dumps(return_obj), 200

@@ -33,13 +33,17 @@ CELERY_ERROR_REPORT_TIMEOUT_SECONDS = getenv("CELERY_ERROR_REPORT_TIMEOUT_SECOND
 ## Data streams and survey types ##
 ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
-# These don't appear to be used...
-MEDIA_EXTENSIONS = [".mp4", ".wav", ".jpg"]
-FILE_TYPES = ['gps', 'accel', 'light', 'voiceRecording', 'powerState', 'callLog', 'textLog', 'accessibilityLog',
-              'bluetoothLog', 'surveyAnswers', 'surveyTimings', 'imageSurvey']
+
+# File names that will be checked for data presence
+CHECKABLE_FILES = {'accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage'}
 
 ## All device parameters
 ALL_DEVICE_PARAMETERS = [
+    # Study settings (must be put at the beginning, these will NOT be sent to phone during registration)
+    [["study_cycle_days", 30], ["date_elapse_color", '"lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'],
+     ["daily_check_formula", '"green"']],
+
+    # APP settings
     [["calls", True], ["texts", True]],
     [["accelerometer", True], ["accelerometer_off_duration_seconds", 10], ["accelerometer_on_duration_seconds", 10]],
     [["ambientlight", True], ["ambientlight_interval_seconds", 60]],

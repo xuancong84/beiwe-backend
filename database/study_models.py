@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from collections import *
 
-import json
+import json, pickle
 
 from django.db import models
 from django.db.models import F, Func
 from django.utils import timezone
 from config.constants import ALL_DEVICE_PARAMETERS
+from django.contrib.postgres import fields
 
 from config.study_constants import *
 from libs.security import (
@@ -236,6 +238,8 @@ class Participant(AbstractPasswordUser):
                                help_text='The type of device the participant is using, if any.')
     os_desc = models.CharField(max_length=64, blank=True,
                                help_text='The desciption of device used by the participant, if any.')
+    upload_info = models.BinaryField(blank=True, help_text='JSON binary data describing the data completion status')
+    upload_info_json = fields.JSONField(blank=True, help_text='JSON object describing the data completion status (for view only)')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
 
@@ -288,6 +292,14 @@ class Participant(AbstractPasswordUser):
 
     def update_upload_time(self):
         self.save()
+
+    def set_upload_info(self, upload_info):
+        self.upload_info = pickle.dumps(upload_info)
+        self.upload_info_json = upload_info
+        self.save()
+
+    def get_upload_info(self):
+        return defaultdict(Counter) if self.upload_info==None else pickle.loads(self.upload_info)
 
     def clear_device(self):
         self.device_id = ''
@@ -392,7 +404,8 @@ class DeviceSettings(AbstractModel):
         for key, value in params:
             value_type = type_map[type(value)]
             if value_type == 'Text':
-                cmd = '%s = models.%sField(default="""%s""", blank=True)' % (key, value_type, value)
+                # add a space after %s to work around, otherwise %s cannot end with double quote
+                cmd = '%s = models.%sField(default="""%s """, blank=True)' % (key, value_type, value)
             else:
                 cmd = '%s = models.%sField(default=%s)' % (key, value_type, value)
             exec(cmd)

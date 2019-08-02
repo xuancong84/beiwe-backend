@@ -1,12 +1,13 @@
 import os, sys, psycopg2, boto3
 
-import jinja2, datetime, dateutil.parser, time
+from datetime import *
+import jinja2, time
 from flask import Flask, render_template, redirect
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 
 from config import load_django
-from config.settings import DATE_ELAPSE_COLOR as dec_list
+from config.constants import CHECKABLE_FILES
 
 from api import (participant_administration, admin_api, copy_study_api, data_access_api,
     data_pipeline_api, mobile_api, survey_api)
@@ -67,22 +68,21 @@ def inject_dict_for_all_templates():
 
 
 @app.template_filter('check_date_elapse')
-def check_date_elapse(s_date):
+def check_date_elapse(s_date, date_elapse_color):
     try:
         t1 = time.mktime(s_date.timetuple())
-        t2 = time.mktime(datetime.datetime.now().timetuple())
-        dt = t2 - t1
-        for tms, color in dec_list:
-            if dt < tms:
-                return color
+        t2 = time.mktime(datetime.now().timetuple())
+        elapse = t2 - t1
+        return eval(date_elapse_color, locals())
     except:
         pass
     return 'black'
 
+
 @app.template_filter('print_date_in_timezone')
 def print_date_in_timezone(s_date, TZ):
     try:
-        dt = s_date-datetime.timedelta(minutes=TZ)
+        dt = s_date-timedelta(minutes=TZ)
         return '%.19s' % dt
     except:
         try:
@@ -91,13 +91,23 @@ def print_date_in_timezone(s_date, TZ):
             pass
     return 'error'
 
-# Extra Production settings
-if not __name__ == '__main__':
-    # Points our custom 404 page (in /frontend/templates) to display on a 404 error
-    @app.errorhandler(404)
-    def e404(e):
-        return render_template("404.html", is_logged_in=is_logged_in()), 404
 
+daily_var = {i:0 for i in CHECKABLE_FILES}
+
+@app.template_filter('print_data_completion')
+def print_data_completion(patient, study):
+    upinfo = patient.get_upload_info()
+    cycle_days = study.device_settings.study_cycle_days
+    formula = study.device_settings.daily_check_formula
+    now_time = datetime.now()
+    ret = []
+    for dday in range(1, cycle_days+1):
+        day_key = '%.10s'%(now_time-timedelta(days=dday))
+        try:
+            ret += [eval(formula, daily_var, upinfo[day_key])]
+        except:
+            ret += ['X']
+    return ''.join(ret[::-1])
 
 
 # Extra Debugging settings
@@ -144,3 +154,8 @@ if __name__ == '__main__':
     else:
         app.run(host='0.0.0.0', port=int(os.getenv("PORT", "443")), ssl_context=('./ssl/ssl.crt', './ssl/ssl.key'), debug=False)
 
+else:
+    # Points our custom 404 page (in /frontend/templates) to display on a 404 error
+    @app.errorhandler(404)
+    def e404(e):
+        return render_template("404.html", is_logged_in=is_logged_in()), 404

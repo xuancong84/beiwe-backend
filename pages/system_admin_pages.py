@@ -161,8 +161,6 @@ def device_settings(study_id=None):
         
     settings = study.get_study_device_settings()
     params = {key: value for key, value in request.values.items()}
-    #params = checkbox_to_boolean(CHECKBOX_TOGGLES, params)
-    #params = string_to_int(TIMER_VALUES, params)
     for i in ALL_DEVICE_PARAMETERS:
         for k, v in i:
             if type(v) == int:

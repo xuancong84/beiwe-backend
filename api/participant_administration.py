@@ -130,7 +130,6 @@ def make_QR(study_id, patient_id, password, timezone=0):
         study=study,
         TZ=timezone,
         qr_image=img_base64,
-        study_id=study_id,
         check_id=patient_id,
         patients=participants,
         audio_survey_ids=audio_survey_ids,

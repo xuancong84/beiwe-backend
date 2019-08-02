@@ -7,27 +7,61 @@
         <a href="/view_study/{{ study.id }}">{{ study.name }}</a>
     </li>
     <li class="active">
-        App Settings
+        Study Settings
     </li>
 </ol>
 
-<div class="row">
-    {% if readonly %}
-        <h2>App settings for study</h2>
-    {% else %}
-        <h2>Edit app settings for study</h2>
-    {% endif %}
-</div>
-
-{% if readonly %}
-    <div>
-{% else %}
+{% set title1 = ('' if readonly else 'Edit ')+'Study Settings' %}
+{% set title2 = ('' if readonly else 'Edit ')+'Device Settings' %}
+{% if not readonly %}
     <form action="/device_settings/{{ study.id }}" method="POST">
 {% endif %}
+<!--  Study settings  -->
+    <div class="row col-xs-12">
+        <h3>{{ title1 }}</h3>
+    </div>
     <div class="row form-horizontal">
         <div class="col-xs-6">
             <div class="form-group">
-                <label for="accelerometer" class="col-xs-8 control-label">Accelerometer:</label>
+                <label for="study_cycle_days" class="col-xs-8 control-label">Study cycle period (days):</label>
+                <div class="col-xs-4">
+                    <input id="study_cycle_days" name="study_cycle_days" class="form-control" type="number"
+                           placeholder="Enter duration here (days)" value="{{ settings['study_cycle_days'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+        </div>
+<!--  The right pane  -->
+        <div class="col-xs-6">
+
+        </div>
+    </div>
+<!--  Dual pane items  -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label for="daily_check_formula">Formula for daily data check (Python code that writes raw HTML using feature names (in bracket italicized) as variables):</label>
+                <input id="daily_check_formula" name="daily_check_formula" class="form-control" type="text"
+                       placeholder='e.g., "<font color=green>Y</font>" if light >1 else "<font color=red>N</font>"'
+                       value="{{ settings['daily_check_formula'] }}" {{ "disabled" if readonly }}>
+            </div>
+            <div class="form-group">
+                <label for="date_elapse_color">Color scheme for elapse (in seconds) from last upload (Python code):</label>
+                <input id="date_elapse_color" name="date_elapse_color" class="form-control" type="text"
+                       placeholder='e.g., "lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'
+                       value="{{ settings['date_elapse_color'] }}" {{ "disabled" if readonly }}>
+            </div>
+        </div>
+    </div>
+
+
+<!--  APP settings  -->
+    <div class="row col-xs-12">
+        <h3>{{ title2 }}</h3>
+    </div>
+    <div class="row form-horizontal">
+        <div class="col-xs-6">
+            <div class="form-group">
+                <label for="accelerometer" class="col-xs-8 control-label">Accelerometer (<i>accel</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="accelerometer" id="accelerometer" type="checkbox" {{ "checked" if settings["accelerometer"] }} {{ "disabled" if readonly }}/>
@@ -35,7 +69,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="ambientlight" class="col-xs-8 control-label">AmbientLight:</label>
+                <label for="ambientlight" class="col-xs-8 control-label">AmbientLight (<i>light</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="ambientlight" id="ambientlight" type="checkbox" {{ "checked" if settings["ambientlight"] }} {{ "disabled" if readonly }}/>
@@ -43,7 +77,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="accessibility" class="col-xs-8 control-label">Accessibility:</label>
+                <label for="accessibility" class="col-xs-8 control-label">Accessibility (<i>accessibilityLog</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="accessibility" id="accessibility" type="checkbox" {{ "checked" if settings["accessibility"] }} {{ "disabled" if readonly }}/>
@@ -51,7 +85,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="gps" class="col-xs-8 control-label">GPS:</label>
+                <label for="gps" class="col-xs-8 control-label">GPS (<i>gps</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="gps" id="gps" type="checkbox" {{ "checked" if settings["gps"] }} {{ "disabled" if readonly }}/>
@@ -67,7 +101,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="calls" class="col-xs-8 control-label">Calls:</label>
+                <label for="calls" class="col-xs-8 control-label">Calls (<i>callLog</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="calls" id="calls" type="checkbox" {{ "checked" if settings["calls"] }} {{ "disabled" if readonly }}/>
@@ -75,7 +109,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="texts" class="col-xs-8 control-label">Texts:</label>
+                <label for="texts" class="col-xs-8 control-label">Texts (<i>textsLog</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="texts" id="texts" type="checkbox" {{ "checked" if settings["texts"] }} {{ "disabled" if readonly }}/>
@@ -83,7 +117,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="texts" class="col-xs-8 control-label">Taps:</label>
+                <label for="texts" class="col-xs-8 control-label">Taps (<i>tapsLog</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="taps" id="taps" type="checkbox" {{ "checked" if settings["taps"] }} {{ "disabled" if readonly }} />
@@ -91,7 +125,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="texts" class="col-xs-8 control-label">Usage:</label>
+                <label for="texts" class="col-xs-8 control-label">Usage (<i>usage</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="usage" id="usage" type="checkbox" {{ "checked" if settings["usage"] }} {{ "disabled" if readonly }} />
@@ -107,7 +141,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="gyro" class="col-xs-8 control-label">Gyro:</label>
+                <label for="gyro" class="col-xs-8 control-label">Gyro (<i>gyro</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="gyro" id="gyro" type="checkbox" {{ "checked" if settings["gyro"] }} {{ "disabled" if readonly }}/>
@@ -155,7 +189,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="power_state" class="col-xs-8 control-label">Power state:</label>
+                <label for="power_state" class="col-xs-8 control-label">Power state (<i>powerState</i>):</label>
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="power_state" id="power_state" type="checkbox" {{ "checked" if settings["power_state"] }} {{ "disabled" if readonly }}/>
@@ -366,9 +400,7 @@
     {% if not readonly %}
         <button class="btn btn-primary btn-block" type="submit">Submit</button>
     {% endif %}
-{% if readonly %}
-    </div>
-{% else %}
+{% if not readonly %}
     </form>
 {% endif %}
 {% endblock %}

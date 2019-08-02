@@ -14,15 +14,21 @@ conn = boto3.client('s3',
                     aws_access_key_id=S3_ACCESS_CREDENTIALS_USER,
                     aws_secret_access_key=S3_ACCESS_CREDENTIALS_KEY)
 
-def s3_upload(key_path, data_string, study_object_id, raw_path=False):
+def s3_upload(key_path, data_string, study_object_id, raw_path=False, encrypt=True):
     if not raw_path:
         key_path = study_object_id + "/" + key_path
-    data = encryption.encrypt_for_server(data_string, study_object_id)
+    if encrypt:
+        data = encryption.encrypt_for_server(data_string, study_object_id)
+    else:
+        data = data_string
+        key_path += '.raw'
+
     try:
         conn.put_object(Body=data, Bucket=S3_BUCKET, Key=key_path, ContentType='string')
+        return True
     except:
         print 'S3.put_object Failed!'
-        assert False
+        return False
 
 
 def s3_retrieve(key_path, study_object_id, raw_path=False, number_retries=DEFAULT_S3_RETRIES):

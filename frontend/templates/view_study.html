@@ -9,9 +9,9 @@
         {% if qr_image %}
         <script type="text/javascript">
           function hasRegistered(){
-            $.get("/check_new_patient/{{study_id}}/{{check_id}}").done(function(data){
+            $.get("/check_new_patient/{{study.id}}/{{check_id}}").done(function(data){
               if(data=="yes")
-                document.location.replace("/view_study/{{study_id}}/{{check_id}}");
+                document.location.replace("/view_study/{{study.id}}/{{check_id}}");
               else
                 setTimeout(hasRegistered, 3000);
             });
@@ -49,6 +49,7 @@
               <th>Reset password</th>
               <th>Creation Time</th>
               <th>Last Upload</th>
+              <th>Data Completion Status</th>
             </tr>
           </thead>
           <tbody id="users-table-body">
@@ -94,9 +95,14 @@
                     {{ patient.created_on|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
-                <td bgcolor={{patient.last_updated | check_date_elapse}}>
+                <td bgcolor={{patient.last_updated | check_date_elapse(study.device_settings.date_elapse_color)}}>
                   {% if patient.last_updated %}
                     {{ patient.last_updated|print_date_in_timezone(TZ) }}
+                  {% endif %}
+                </td>
+                <td style="max-width:200px; word-wrap: break-word;">
+                  {% if patient.last_updated %}
+                    {{ patient|print_data_completion(study)|safe }}
                   {% endif %}
                 </td>
               </tr>
