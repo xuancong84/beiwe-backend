@@ -6,6 +6,21 @@
 
     <div class="container">
       <div class="span12">
+        <script type="text/javascript">
+          function set_remarks(patient, curr_remarks){
+            var remarks = window.prompt("Edit remarks for the patient:", curr_remarks);
+            if(remarks!=null){
+              var form = $('<form action="/set_remarks" method="post">' +
+                '<input type="text" name="patient_id" value="' + patient + '" />' +
+                '<input type="text" name="study_id" value="' + {{study.id}} + '" />' +
+                '<input type="text" name="remarks" value="' + remarks + '" />' +
+                '</form>');
+              $('body').append(form);
+              $(form).submit();
+            }
+          }
+        </script>
+
         {% if qr_image %}
         <script type="text/javascript">
           function hasRegistered(){
@@ -47,9 +62,9 @@
               <th>Phone registered</th>
               <th>Phone OS Information</th>
               <th>Reset password</th>
-              <th>Creation Time</th>
-              <th>Last Upload</th>
-              <th>Data Completion Status</th>
+              <th>Registration Time</th>
+              <th>Last Upload Time</th>
+              <th style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word; table-layout: fixed">Data Completion Status</th>
             </tr>
           </thead>
           <tbody id="users-table-body">
@@ -58,6 +73,11 @@
               <tr>
                 <td>
                   <b>{{ patient.patient_id }}</b>
+                  {% if patient.remarks %}
+                    <br><a onclick="set_remarks('{{ patient.patient_id }}', '{{ patient.remarks }}')">({{ patient.remarks }})</a>
+                  {% else %}
+                    <br><a onclick="set_remarks('{{ patient.patient_id }}', '')">(add remark)</a>
+                  {% endif %}
                 </td>
                 <td>
                   {% if patient.device_id %}
@@ -95,12 +115,12 @@
                     {{ patient.created_on|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
-                <td bgcolor={{patient.last_updated | check_date_elapse(study.device_settings.date_elapse_color)}}>
+                <td bgcolor={{patient.last_upload_time | check_date_elapse(study.device_settings.date_elapse_color)}}>
                   {% if patient.last_updated %}
-                    {{ patient.last_updated|print_date_in_timezone(TZ) }}
+                    {{ patient.last_upload_time|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
-                <td style="max-width:200px; word-wrap: break-word;">
+                <td style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word; table-layout: fixed; word-break:break-all;">
                   {% if patient.last_updated %}
                     {{ patient|print_data_completion(study)|safe }}
                   {% endif %}
@@ -144,7 +164,6 @@
 
         <div class="row">
           <h3>Audio Surveys</h3>
-
           <div class="list-group">
             {# If there are surveys attached to this study, list them #}
             {% if audio_survey_ids %}

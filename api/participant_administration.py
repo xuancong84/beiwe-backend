@@ -40,7 +40,6 @@ def reset_device():
     """
     Resets a participant's device. The participant will not be able to connect until they register a new device.
     """
-
     patient_id = request.values['patient_id']
     study_id = request.values['study_id']
     participant_set = Participant.objects.filter(patient_id=patient_id)
@@ -52,6 +51,27 @@ def reset_device():
         flash('Sorry, something went wrong when trying to reset the patient\'s device.', 'danger')
 
     return redirect('/view_study/{:s}'.format(study_id))
+
+
+@participant_administration.route('/set_remarks', methods=["POST"])
+@authenticate_admin_study_access
+def set_remarks():
+    """
+    Resets a participant's device. The participant will not be able to connect until they register a new device.
+    """
+    study_id = request.values['study_id']
+    patient_id = request.values['patient_id']
+    remarks = request.values['remarks']
+    participant_set = Participant.objects.filter(patient_id=patient_id)
+    if participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id:
+        participant = participant_set.get()
+        participant.set_remarks(remarks)
+        flash('The remarks Patient %s is set successfully!'%patient_id, 'success')
+    else:
+        flash('Internal error: failed to set remarks for Patient %s'%patient_id, 'danger')
+
+    return redirect('/view_study/{:s}'.format(study_id))
+
 
 
 @participant_administration.route('/create_new_patient', methods=["POST"])

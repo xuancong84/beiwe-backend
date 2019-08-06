@@ -41,27 +41,27 @@ CHECKABLE_FILES = {'accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light
 ALL_DEVICE_PARAMETERS = [
     # Study settings (must be put at the beginning, these will NOT be sent to phone during registration)
     [["study_cycle_days", 30], ["date_elapse_color", '"lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'],
-     ["daily_check_formula", '"green"']],
+     ["daily_check_formula", '"<font color=green>Y</font>" if light >1 else "<font color=red>N</font>"']],
 
     # APP settings
     [["calls", True], ["texts", True]],
-    [["accelerometer", True], ["accelerometer_off_duration_seconds", 10], ["accelerometer_on_duration_seconds", 10]],
-    [["ambientlight", True], ["ambientlight_interval_seconds", 60]],
-    [["gps", True], ["use_gps_fuzzing", False], ["gps_off_duration_seconds", 600], ["gps_on_duration_seconds", 60]],
+    [["accelerometer", True], ["accelerometer_off_duration_seconds", 590], ["accelerometer_on_duration_seconds", 10]],
+    [["ambientlight", True], ["ambientlight_interval_seconds", 300]],
+    [["gps", True], ["use_gps_fuzzing", True], ["gps_off_duration_seconds", 870], ["gps_on_duration_seconds", 30]],
     [["bluetooth", False], ["bluetooth_on_duration_seconds", 60], ["bluetooth_total_duration_seconds", 300], ["bluetooth_global_offset_seconds", 0]],
     [["gyro", False], ["gyro_off_duration_seconds", 600], ["gyro_on_duration_seconds", 60]],
     [["magnetometer", False], ["magnetometer_off_duration_seconds", 600], ["magnetometer_on_duration_seconds", 60]],
     [["devicemotion", False], ["devicemotion_off_duration_seconds", 600], ["devicemotion_on_duration_seconds", 60]],
-    [["usage", False], ["usage_update_interval_seconds", 30*60]],
+    [["usage", False], ["usage_update_interval_seconds", 60*60]],
     [["wifi", True]],
     [["power_state", True]],
     [["taps", False]],
     [["accessibility", False]],
     [["proximity", False]],
     [["reachability", True]],
-    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", False], ["phone_number_length", 8], ["write_buffer_size", 0], ["primary_care", '']],
-    [["check_for_new_surveys_frequency_seconds", 3600*6], ["create_new_data_files_frequency_seconds", 30*60], ["seconds_before_auto_logout", 600],
-     ["upload_data_files_frequency_seconds", 3600], ["voice_recording_max_time_length_seconds", 240], ["wifi_log_frequency_seconds", 300]],
+    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", True], ["phone_number_length", 8], ["write_buffer_size", 512], ["primary_care", '']],
+    [["check_for_new_surveys_frequency_seconds", 3600*12], ["create_new_data_files_frequency_seconds", 60*60], ["seconds_before_auto_logout", 0],
+     ["upload_data_files_frequency_seconds", 3600*12], ["voice_recording_max_time_length_seconds", 240], ["wifi_log_frequency_seconds", 3600]],
     [["about_page_text", ABOUT_PAGE_TEXT], ["call_clinician_button_text", CALL_BUTTON_TEXT],
      ["consent_form_text", CONSENT_FORM_TEXT], ["survey_submit_success_toast_text", SURVEY_SUBMIT_SUCCESS_TOAST_TEXT]]
 ]

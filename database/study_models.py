@@ -20,7 +20,7 @@ from database.validators import (
 )
 
 from database.base_models import AbstractModel, JSONTextField
-
+from datetime import datetime
 
 class Study(AbstractModel):
     
@@ -238,6 +238,8 @@ class Participant(AbstractPasswordUser):
                                help_text='The type of device the participant is using, if any.')
     os_desc = models.CharField(max_length=64, blank=True,
                                help_text='The desciption of device used by the participant, if any.')
+    remarks = models.TextField(blank=True, help_text='Remarks for the patient.')
+    last_upload_time = models.DateTimeField(blank=True, help_text='Date/time of the last data upload.')
     upload_info = models.BinaryField(blank=True, help_text='JSON binary data describing the data completion status')
     upload_info_json = fields.JSONField(blank=True, help_text='JSON object describing the data completion status (for view only)')
 
@@ -290,7 +292,16 @@ class Participant(AbstractPasswordUser):
         self.os_desc = os_desc
         self.save()
 
-    def update_upload_time(self):
+    def set_upload_time(self):
+        self.last_upload_time = datetime.utcnow()
+        self.save()
+
+    def set_register_time(self):
+        self.created_on = datetime.utcnow()
+        self.save()
+
+    def set_remarks(self, remarks):
+        self.remarks = remarks
         self.save()
 
     def set_upload_info(self, upload_info):
@@ -299,7 +310,10 @@ class Participant(AbstractPasswordUser):
         self.save()
 
     def get_upload_info(self):
-        return defaultdict(Counter) if self.upload_info==None else pickle.loads(self.upload_info)
+        try:
+            return pickle.loads(self.upload_info)
+        except:
+            return defaultdict(Counter)
 
     def clear_device(self):
         self.device_id = ''

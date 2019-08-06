@@ -7,7 +7,7 @@ from flask import Blueprint, request, abort, render_template, json
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequestKeyError
 
-from config.constants import ALLOWED_EXTENSIONS, DEVICE_IDENTIFIERS_HEADER, CHECKABLE_FILES
+from config.constants import *
 from config.settings import IS_STAGING
 from database.models import FileToProcess, Participant, UploadTracking
 from libs.android_error_reporting import send_android_error_report
@@ -27,25 +27,25 @@ mobile_api = Blueprint('mobile_api', __name__)
 ################################ UPLOADS #######################################
 ################################################################################
 
-line2date = lambda t:str(datetime.fromtimestamp(int(t.split(',')[0][:-3])))[:10]
-def update_upload_info(fname, info, data):
+line2date = lambda t,n:str(datetime.fromtimestamp(int(t.split(',')[n][:-3])))[:10]
+def update_upload_info(fname, info, data, n=0):
     if len(data)==0:
         return
 
-    d1 = line2date(data[0])
+    d1 = line2date(data[0], n)
     if len(data)<=3:
         info[d1][fname] += 1
         for L in data[1:]:
-            info[line2date(L)][fname] += 1
+            info[line2date(L, n)][fname] += 1
         return
 
-    d2 = line2date(data[-1])
+    d2 = line2date(data[-1], n)
 
     if d1==d2:
         info[d1][fname] += len(data)
         return
 
-    cnt = Counter([line2date(L) for L in data])
+    cnt = Counter([line2date(L, n) for L in data])
     for d,n in cnt.iteritems():
         info[d][fname] += n
 
@@ -136,7 +136,8 @@ def upload(OS_API=""):
     if file_basename in CHECKABLE_FILES:
         try:
             upload_info = user.get_upload_info()
-            update_upload_info(file_basename, upload_info, uploaded_file.strip().splitlines()[1:])
+            update_upload_info(file_basename, upload_info, uploaded_file.strip().splitlines()[1:],
+               2 if file_basename=='callLog' else 0)
             user.set_upload_info(upload_info)
         except Exception as e:
             log_error(e, "Failed to update upload info: patient_id=%s; file_name=%s; msg=%s" % (patient_id, file_name, e.message))
@@ -144,7 +145,7 @@ def upload(OS_API=""):
     # if uploaded data a) actually exists, B) is validly named and typed...
     if uploaded_file and file_name and contains_valid_extension(file_name):
         canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
-        user.update_upload_time()
+        user.set_upload_time()
         # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
         # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
         # UploadTracking.objects.create(
@@ -258,6 +259,7 @@ def register_user(OS_API=""):
     FileToProcess.append_file_for_processing(file_name, user.study.object_id, participant=user)
 
     # set up device.
+    user.set_register_time()
     user.set_device(device_id)
     user.set_os_type(OS_API)
     user.set_os_desc(OS_API + ' ' + os_version + ' ' + manufacturer + ' '+ model)
