@@ -1,7 +1,7 @@
 import os, sys, psycopg2, boto3
 
 from datetime import *
-import jinja2, time
+import jinja2, time, re
 from flask import Flask, render_template, redirect
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
@@ -94,20 +94,37 @@ def print_date_in_timezone(s_date, TZ):
 
 daily_var = {i:0 for i in CHECKABLE_FILES}
 
+def print_data_completion_eval(upinfo, cycle_days, formula, now_time):
+    ret = []
+    for dday in range(1, cycle_days + 1):
+        day_key = '%.10s' % (now_time - timedelta(days=dday))
+        try:
+            ret += [str(eval(formula, daily_var, dict(upinfo[day_key])))]
+        except:
+            ret += ['X']
+    return ''.join(ret[::-1])
+
+def print_data_completion_exec(upinfo, cycle_days, formula, now_time):
+    ret = []
+    for dday in range(1, cycle_days + 1):
+        day_key = '%.10s' % (now_time - timedelta(days=dday))
+        try:
+            locals().update(daily_var)
+            locals().update(dict(upinfo[day_key]))
+            exec (formula, {}, locals())
+            ret += [str(output)]
+        except:
+            ret += ['X']
+    return ''.join(ret[::-1])
+
 @app.template_filter('print_data_completion')
 def print_data_completion(patient, study):
     upinfo = patient.get_upload_info()
     cycle_days = study.device_settings.study_cycle_days
     formula = study.device_settings.daily_check_formula
     now_time = datetime.now()
-    ret = []
-    for dday in range(1, cycle_days+1):
-        day_key = '%.10s'%(now_time-timedelta(days=dday))
-        try:
-            ret += [eval(formula, daily_var, upinfo[day_key])]
-        except:
-            ret += ['X']
-    return ''.join(ret[::-1])
+    return print_data_completion_exec(upinfo, cycle_days, formula, now_time) if re.search(r'output *=', formula) \
+        else print_data_completion_eval(upinfo, cycle_days, formula, now_time)
 
 
 # Extra Debugging settings

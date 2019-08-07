@@ -39,7 +39,7 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
-                <label for="daily_check_formula">Formula for daily data check (Python code that writes raw HTML using feature names (in bracket italicized) as variables):</label>
+                <label for="daily_check_formula">Formula for daily data check (Python code that evaluates to raw HTML or assign raw HTML to a variable named "output" using feature names as variables (see italicized variable names in bracket)):</label>
                 <input id="daily_check_formula" name="daily_check_formula" class="form-control" type="text"
                        placeholder='e.g., "<font color=green>Y</font>" if light >1 else "<font color=red>N</font>"'
                        value="{{ settings['daily_check_formula'] }}" {{ "disabled" if readonly }}>
