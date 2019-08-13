@@ -1,0 +1,27 @@
+<style>
+.popup_table, .popup_table th, .popup_table td { border: 1px solid black; padding: 2px; }
+</style>
+
+<table class="popup_table" id="upload_details" style="border: 1px solid black;">
+  <thead>
+    <tr>
+      <th>Date</th>
+      {% for feature in checkables %}
+      <th>{{ feature }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+
+  {% for date in dates %}
+    <tr>
+      <td>{{date}}</td>
+      {% set info = upinfo[date] %}
+      {% for feature in checkables %}
+        <td>
+          {{ info[feature] }}
+        </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+
+</table>

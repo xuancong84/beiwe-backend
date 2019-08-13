@@ -109,10 +109,9 @@ def print_data_completion_exec(upinfo, cycle_days, formula, now_time):
     for dday in range(1, cycle_days + 1):
         day_key = '%.10s' % (now_time - timedelta(days=dday))
         try:
-            locals().update(daily_var)
-            locals().update(dict(upinfo[day_key]))
-            exec (formula, {}, locals())
-            ret += [str(output)]
+            local = dict(upinfo[day_key])
+            exec (formula, daily_var, local)
+            ret += [str(local["output"])]
         except:
             ret += ['X']
     return ''.join(ret[::-1])
@@ -121,7 +120,7 @@ def print_data_completion_exec(upinfo, cycle_days, formula, now_time):
 def print_data_completion(patient, study):
     upinfo = patient.get_upload_info()
     cycle_days = study.device_settings.study_cycle_days
-    formula = study.device_settings.daily_check_formula
+    formula = study.device_settings.daily_check_formula or ""
     now_time = datetime.now()
     return print_data_completion_exec(upinfo, cycle_days, formula, now_time) if re.search(r'output *=', formula) \
         else print_data_completion_eval(upinfo, cycle_days, formula, now_time)

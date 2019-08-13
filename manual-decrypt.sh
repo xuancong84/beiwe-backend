@@ -66,4 +66,4 @@ find "$IN_PATH" -iname '*.csv' \
 		fi
 		echo -e "$infn\t$outfn"
 	done | ~/conda2/bin/python -c "$pycode" $KEY_OPTION
-
+echo

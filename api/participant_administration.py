@@ -1,6 +1,7 @@
 from csv import writer
 from re import sub
 
+from datetime import *
 from flask import *
 
 from libs.admin_authentication import *
@@ -8,7 +9,8 @@ from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from database.models import Participant, Study
 from config.settings import DOMAIN_NAME
-import base64, qrcode
+from config.constants import CHECKABLE_FILES
+import base64, qrcode, time
 from io import BytesIO
 
 participant_administration = Blueprint('participant_administration', __name__)
@@ -56,9 +58,7 @@ def reset_device():
 @participant_administration.route('/set_remarks', methods=["POST"])
 @authenticate_admin_study_access
 def set_remarks():
-    """
-    Resets a participant's device. The participant will not be able to connect until they register a new device.
-    """
+    """ Set remarks for a patient. """
     study_id = request.values['study_id']
     patient_id = request.values['patient_id']
     remarks = request.values['remarks']
@@ -72,6 +72,34 @@ def set_remarks():
 
     return redirect('/view_study/{:s}'.format(study_id))
 
+
+@participant_administration.route('/check_upload_details/<string:study_id>/<string:patient_id>', methods=["GET"])
+@authenticate_admin_study_access
+def check_upload_details(study_id=None, patient_id=None):
+    """ Get patient data upload details """
+    participant_set = Participant.objects.filter(patient_id=patient_id)
+    if not participant_set.exists() or str(participant_set.values_list('study', flat=True).get()) != study_id:
+        Response('Error: failed to get upload details for Patient %s'%patient_id, mimetype='text/plain')
+    user = participant_set.get()
+    upinfo = user.get_upload_info()
+    sorted_dates = sorted(upinfo.keys())
+    dates = [str(datetime.now())[:10]]
+    if sorted_dates:
+        first_date = datetime.strptime(sorted_dates[0], '%Y-%m-%d')
+        today_date = datetime.strptime(dates[0], '%Y-%m-%d')
+        day = first_date
+        dates = []
+        while day <= today_date:
+            dates += [str(day)[:10]]
+            day += timedelta(days=1)
+
+    return render_template(
+        'upload_details.html',
+        dates=dates,
+        upinfo=upinfo,
+        checkables=CHECKABLE_FILES,
+        patient=user
+    )
 
 
 @participant_administration.route('/create_new_patient', methods=["POST"])

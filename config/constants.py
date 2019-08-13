@@ -35,13 +35,13 @@ ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 
 # File names that will be checked for data presence
-CHECKABLE_FILES = {'accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage'}
+CHECKABLE_FILES = ['accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage']
 
 ## All device parameters
 ALL_DEVICE_PARAMETERS = [
     # Study settings (must be put at the beginning, these will NOT be sent to phone during registration)
     [["study_cycle_days", 30], ["date_elapse_color", '"lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'],
-     ["daily_check_formula", 'a=[light>24, accel>24, gps>0, accessibilityLog>5, callLog>0, tapsLog>5, usage>1, powerState>1].count(True);output="<font color=%s>%d</font>"%("lime" if a>6 else ("orange" if a>3 else "red"), a)']],
+     ["daily_check_formula", 'a=[light>24, accel>24, gps>0, accessibilityLog>5, textsLog>0, callLog>0, tapsLog>5, usage>1, powerState>1].count(True);output="<font color=%s>%d</font>"%("lime" if a>6 else ("orange" if a>3 else "red"), a)']],
 
     # APP settings
     [["calls", True], ["texts", True]],
