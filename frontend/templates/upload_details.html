@@ -6,7 +6,7 @@
   <thead>
     <tr>
       <th>Date</th>
-      {% for feature in checkables %}
+      {% for feature,color in checkables %}
       <th>{{ feature }}</th>
       {% endfor %}
     </tr>
@@ -16,9 +16,9 @@
     <tr>
       <td>{{date}}</td>
       {% set info = upinfo[date] %}
-      {% for feature in checkables %}
+      {% for feature,color in checkables %}
         <td>
-          {{ info[feature] }}
+          {{ (info[feature] if info[feature] else '<font color="%s">%s</font>'%(color, info[feature]))|safe }}
         </td>
       {% endfor %}
     </tr>

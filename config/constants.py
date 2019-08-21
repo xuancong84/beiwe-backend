@@ -36,6 +36,7 @@ PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 
 # File names that will be checked for data presence
 CHECKABLE_FILES = ['accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage']
+ALLOW_EMPTY_FILES = {'callLog', 'textsLog'}
 
 ## All device parameters
 ALL_DEVICE_PARAMETERS = [
@@ -140,7 +141,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "devicemotion": DEVICEMOTION,
     "gps": GPS,
     "gyro": GYRO,
-    "taps": TAPS,
+    "tapsLog": TAPS,
     "logFile": ANDROID_LOG_FILE,
     "magnetometer": MAGNETOMETER,
     "powerState": POWER_STATE,

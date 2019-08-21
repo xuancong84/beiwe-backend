@@ -12,7 +12,7 @@
           <b id="draggabletitle">Detailed Patient Data Upload Statistics</b>
           <a style="cursor:pointer; color:red" onclick="hide_details()">[Close]</a>
         </div>
-        <div style="min-height:100px; max-height:600px" id="draggablecontent">Please wait while retrieving data ...</div>
+        <div style="min-height:100px; max-height:600px" id="draggablecontent"></div>
       </div>
       <script type="text/javascript">
         function set_remarks(patient, curr_remarks){
@@ -33,10 +33,11 @@
         var draggable_title = document.getElementById("draggabletitle");
         var draggable_content = document.getElementById("draggablecontent");
 
-        function show_details(patient_id){
+        function show_details(patient_id, remarks){
           draggable.style.visibility = "visible";
           draggable.style.top = (document.documentElement.scrollTop+50)+"px";
-          draggable_title.innerText = "Upload Details for Patient "+patient_id+" ";
+          draggable_title.innerText = "Upload Details for Patient "+patient_id+(remarks?" ("+remarks+") ":" ");
+          draggable_content.innerHTML = "Please wait while retrieving data ...";
           $.get("/check_upload_details/{{study.id}}/"+patient_id)
           .done(function(data){
             draggable_content.innerHTML = data;
@@ -188,7 +189,7 @@
                 </td>
                 <td style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word; word-break:break-all;">
                   {% if patient.last_updated %}
-                  <a style="cursor:pointer" onclick="show_details('{{ patient.patient_id }}')"> {{ patient|print_data_completion(study)|safe }} </a>
+                  <a style="cursor:pointer" onclick="show_details('{{ patient.patient_id }}', '{{ patient.remarks }}')"> {{ patient|print_data_completion(study)|safe }} </a>
                   {% endif %}
                 </td>
               </tr>

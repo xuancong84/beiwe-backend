@@ -166,9 +166,10 @@ if __name__ == '__main__':
     # http_server = WSGIServer(('', 8080), app)
     # http_server.serve_forever()
     if os.getenv('USE_HTTP') == '1':
-        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "80")), debug=False)
+        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "80")), threaded=True, debug=False)
     else:
-        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "443")), ssl_context=('./ssl/ssl.crt', './ssl/ssl.key'), debug=False)
+        app.run(host='0.0.0.0', port=int(os.getenv("PORT", "443")), threaded=True, debug=False,
+                ssl_context=('./ssl/ssl.crt', './ssl/ssl.key'))
 
 else:
     # Points our custom 404 page (in /frontend/templates) to display on a 404 error

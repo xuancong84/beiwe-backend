@@ -1,16 +1,14 @@
 from csv import writer
 from re import sub
 
-from datetime import *
 from flask import *
 
 from libs.admin_authentication import *
 from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from database.models import Participant, Study
-from config.settings import DOMAIN_NAME
-from config.constants import CHECKABLE_FILES
-import base64, qrcode, time
+from config.constants import *
+import base64, qrcode
 from io import BytesIO
 
 participant_administration = Blueprint('participant_administration', __name__)
@@ -66,7 +64,7 @@ def set_remarks():
     if participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id:
         participant = participant_set.get()
         participant.set_remarks(remarks)
-        flash('The remarks Patient %s is set successfully!'%patient_id, 'success')
+        flash('The remarks on Patient %s is set successfully!'%patient_id, 'success')
     else:
         flash('Internal error: failed to set remarks for Patient %s'%patient_id, 'danger')
 
@@ -93,11 +91,15 @@ def check_upload_details(study_id=None, patient_id=None):
             dates += [str(day)[:10]]
             day += timedelta(days=1)
 
+    dev_settings = user.study.device_settings.as_dict()
+    checkable_states = [[f, ('black' if f in ALLOW_EMPTY_FILES else 'red') if dst else 'lightgray']
+                        for f in CHECKABLE_FILES for dst in [dev_settings.get(UPLOAD_FILE_TYPE_MAPPING[f], False)]]
+
     return render_template(
         'upload_details.html',
         dates=dates,
         upinfo=upinfo,
-        checkables=CHECKABLE_FILES,
+        checkables=checkable_states,
         patient=user
     )
 

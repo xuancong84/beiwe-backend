@@ -3,7 +3,7 @@
 
 cd `dirname $0`
 
-~/anaconda2/bin/python app.py 2>&1 | ~/anaconda2/bin/python -c "
+USE_HTTP=1 PORT=5000 ~/conda2/bin/python app.py 2>&1 | ~/conda2/bin/python -c "
 import os,sys
 while True:
 	L=sys.stdin.readline()
