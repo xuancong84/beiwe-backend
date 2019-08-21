@@ -7,10 +7,11 @@ fi
 IN_PATH="$1"
 OUT_PATH="$2"
 if [ ! "$3" ]; then
-	KEY_OPTION='EIUYOOME3CJK9M2J50E27WZW2BTT5WJ7'
+	KEY_OPTION="$1"
 else
 	KEY_OPTION="$3"
 fi
+
 
 pycode="
 import os, sys, argparse
@@ -22,20 +23,27 @@ from werkzeug.contrib.fixers import ProxyFix
 
 from config import load_django
 
-from api import (participant_administration, admin_api, copy_study_api, data_access_api,
-    data_pipeline_api, mobile_api, survey_api)
+from api import (participant_administration, admin_api, copy_study_api, data_access_api, data_pipeline_api, mobile_api, survey_api)
 from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN, SENTRY_JAVASCRIPT_DSN
 from libs.admin_authentication import is_logged_in
 from libs.security import set_secret_key
-from pages import (admin_pages, mobile_pages, survey_designer, system_admin_pages,
-    data_access_web_form)
+from pages import (admin_pages, mobile_pages, survey_designer, system_admin_pages, data_access_web_form)
 from libs import encryption
+
+from database.models import Study, DecryptionKeyError, EncryptionErrorMetadata, LineEncryptionError
 
 parser = argparse.ArgumentParser(usage='$0 study_id <encrypted-input 1>decrypted-output', description='perform master-key decryption')
 parser.add_argument('study_id', help='study_id')
 parser.add_argument('-key', help='use encryption key', action='store_true')
 opt = parser.parse_args()
 globals().update(vars(opt))
+
+if len(study_id)!=32:
+	for s in study_id.split('/')[::-1]:
+		if Study.objects.filter(object_id=s):
+			study_id=s
+			print >>sys.stderr, 'Auto-detected Study ID = '+study_id
+			break
 
 while True:
 	L = sys.stdin.readline()
@@ -67,3 +75,4 @@ find "$IN_PATH" -iname '*.csv' \
 		echo -e "$infn\t$outfn"
 	done | ~/conda2/bin/python -c "$pycode" $KEY_OPTION
 echo
+

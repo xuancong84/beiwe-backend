@@ -1,7 +1,7 @@
 import os, sys, psycopg2, boto3
 
 from datetime import *
-import jinja2, time, re
+import jinja2, time, re, HTMLParser
 from flask import Flask, render_template, redirect
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
@@ -124,6 +124,14 @@ def print_data_completion(patient, study):
     now_time = datetime.now()
     return print_data_completion_exec(upinfo, cycle_days, formula, now_time) if re.search(r'output *=', formula) \
         else print_data_completion_eval(upinfo, cycle_days, formula, now_time)
+
+@app.template_filter('escape_quote')
+def escape_quote(text):
+    return text.replace('"', "&quot;").replace("'", "&apos;") if text else ''
+
+@app.template_filter('unescape_quote')
+def unescape_quote(text):
+    return text.replace("&quot;", '"').replace("&apos;", "'") if text else ''
 
 
 # Extra Debugging settings

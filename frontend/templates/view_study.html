@@ -15,8 +15,11 @@
         <div style="min-height:100px; max-height:600px" id="draggablecontent"></div>
       </div>
       <script type="text/javascript">
+        function unescape_quote(s){
+          return s.replace("&quot;", '"').replace("&apos;", "'")
+        }
         function set_remarks(patient, curr_remarks){
-          var remarks = window.prompt("Edit remarks for the patient:", curr_remarks);
+          var remarks = window.prompt("Edit remarks for the patient:", unescape_quote(curr_remarks));
           if(remarks!=null){
             var form = $('<form action="/set_remarks" method="post">' +
               '<input type="text" name="patient_id" value="' + patient + '" />' +
@@ -36,7 +39,7 @@
         function show_details(patient_id, remarks){
           draggable.style.visibility = "visible";
           draggable.style.top = (document.documentElement.scrollTop+50)+"px";
-          draggable_title.innerText = "Upload Details for Patient "+patient_id+(remarks?" ("+remarks+") ":" ");
+          draggable_title.innerText = "Upload Details for Patient "+patient_id+(remarks?" ("+unescape_quote(remarks)+") ":" ");
           draggable_content.innerHTML = "Please wait while retrieving data ...";
           $.get("/check_upload_details/{{study.id}}/"+patient_id)
           .done(function(data){
@@ -141,7 +144,7 @@
                 <td>
                   <b>{{ patient.patient_id }}</b>
                   {% if patient.remarks %}
-                    <br><a style="cursor:pointer" onclick="set_remarks('{{ patient.patient_id }}', '{{ patient.remarks }}')">({{ patient.remarks }})</a>
+                    <br><a style="cursor:pointer" onclick="set_remarks('{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}')">({{ patient.remarks }})</a>
                   {% else %}
                     <br><a style="cursor:pointer" onclick="set_remarks('{{ patient.patient_id }}', '')">(add remark)</a>
                   {% endif %}
@@ -189,7 +192,7 @@
                 </td>
                 <td style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word; word-break:break-all;">
                   {% if patient.last_updated %}
-                  <a style="cursor:pointer" onclick="show_details('{{ patient.patient_id }}', '{{ patient.remarks }}')"> {{ patient|print_data_completion(study)|safe }} </a>
+                  <a style="cursor:pointer" onclick="show_details('{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}')"> {{ patient|print_data_completion(study)|safe }} </a>
                   {% endif %}
                 </td>
               </tr>
