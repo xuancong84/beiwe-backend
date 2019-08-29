@@ -42,13 +42,18 @@
                 <label for="daily_check_formula">Formula for daily data check (Python code that evaluates to raw HTML or assign raw HTML to a variable named "output" using feature names as variables (see italicized variable names in bracket)):</label>
                 <input id="daily_check_formula" name="daily_check_formula" class="form-control" type="text"
                        placeholder='e.g., "<font color=green>Y</font>" if light >1 else "<font color=red>N</font>"'
-                       value="{{ settings['daily_check_formula'] }}" {{ "disabled" if readonly }}>
+                       value="{{ settings['daily_check_formula'] }}" {{ "disabled" if readonly }} />
             </div>
             <div class="form-group">
                 <label for="date_elapse_color">Color scheme for elapse (in seconds) from last upload (Python code):</label>
                 <input id="date_elapse_color" name="date_elapse_color" class="form-control" type="text"
                        placeholder='e.g., "lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'
-                       value="{{ settings['date_elapse_color'] }}" {{ "disabled" if readonly }}>
+                       value="{{ settings['date_elapse_color'] }}" {{ "disabled" if readonly }} />
+            </div>
+            <div class="form-group">
+                <label for="external_dashboards">Link external dashboards (a Python dictionary mapping dashboard names to the respective backend communication commands): </label>
+                <input id="external_dashboards" name="external_dashboards" class="form-control" type="text"
+                       value="{{ settings['external_dashboards'] }}" {{ "disabled" if readonly }} />
             </div>
         </div>
     </div>
@@ -209,6 +214,14 @@
                 <div class="col-xs-4 checkbox checkbox-custom">
                     <label>
                         <input name="use_anonymized_hashing" id="use_anonymized_hashing" type="checkbox" {{ "checked" if settings["use_anonymized_hashing"] }} {{ "disabled" if readonly }}/>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="use_compression" class="col-xs-8 control-label">Compress all files for sending: </label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="use_compression" id="use_compression" type="checkbox" {{ "checked" if settings["use_compression"] }} {{ "disabled" if readonly }}/>
                     </label>
                 </div>
             </div>

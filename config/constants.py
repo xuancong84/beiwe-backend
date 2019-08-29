@@ -42,7 +42,8 @@ ALLOW_EMPTY_FILES = {'callLog', 'textsLog'}
 ALL_DEVICE_PARAMETERS = [
     # Study settings (must be put at the beginning, these will NOT be sent to phone during registration)
     [["study_cycle_days", 30], ["date_elapse_color", '"lime" if elapse<30*3600 else ("orange" if elapse<72*3600 else "red")'],
-     ["daily_check_formula", 'a=[light>24, accel>24, gps>0, accessibilityLog>5, textsLog>0, callLog>0, tapsLog>5, usage>1, powerState>1].count(True);output="<font color=%s>%d</font>"%("lime" if a>6 else ("orange" if a>3 else "red"), a)']],
+     ["daily_check_formula", 'a=[light>24, accel>24, gps>0, accessibilityLog>5, textsLog>0, callLog>0, tapsLog>5, usage>1, powerState>1].count(True);output="<font color=%s>%d</font>"%("lime" if a>6 else ("orange" if a>3 else "red"), a)'],
+     ['external_dashboards', '']],
 
     # APP settings
     [["calls", True], ["texts", True]],
@@ -60,7 +61,8 @@ ALL_DEVICE_PARAMETERS = [
     [["accessibility", False]],
     [["proximity", False]],
     [["reachability", True]],
-    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", True], ["phone_number_length", 8], ["write_buffer_size", 512], ["primary_care", '']],
+    [["allow_upload_over_cellular_data", False], ["use_anonymized_hashing", True], ["phone_number_length", 8],
+     ["write_buffer_size", 512], ["primary_care", ''], ['use_compression', True]],
     [["check_for_new_surveys_frequency_seconds", 3600*12], ["create_new_data_files_frequency_seconds", 60*60], ["seconds_before_auto_logout", 0],
      ["upload_data_files_frequency_seconds", 3600*12], ["voice_recording_max_time_length_seconds", 240], ["wifi_log_frequency_seconds", 3600]],
     [["about_page_text", ABOUT_PAGE_TEXT], ["call_clinician_button_text", CALL_BUTTON_TEXT],

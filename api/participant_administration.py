@@ -8,6 +8,7 @@ from libs.s3 import s3_upload, create_client_key_pair
 from libs.streaming_bytes_io import StreamingBytesIO
 from database.models import Participant, Study
 from config.constants import *
+from pages.admin_pages import parse_dashboards
 import base64, qrcode
 from io import BytesIO
 
@@ -61,12 +62,33 @@ def set_remarks():
     patient_id = request.values['patient_id']
     remarks = request.values['remarks']
     participant_set = Participant.objects.filter(patient_id=patient_id)
-    if participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id:
+    try:
+        assert participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id
         participant = participant_set.get()
         participant.set_remarks(remarks)
         flash('The remarks on Patient %s is set successfully!'%patient_id, 'success')
-    else:
-        flash('Internal error: failed to set remarks for Patient %s'%patient_id, 'danger')
+    except:
+        flash('Error: failed to set remarks for Patient %s'%patient_id, 'danger')
+
+    return redirect('/view_study/{:s}'.format(study_id))
+
+
+@participant_administration.route('/register_dashboard', methods=["POST"])
+@authenticate_admin_study_access
+def register_dashboard():
+    """ Set external dashboard registration info for a patient. """
+    study_id = request.values['study_id']
+    patient_id = request.values['patient_id']
+    dashboard = request.values['dashboard']
+    reg_id = request.values['reg_id']
+    participant_set = Participant.objects.filter(patient_id=patient_id)
+    try:
+        assert participant_set.exists() and str(participant_set.values_list('study', flat=True).get()) == study_id
+        participant = participant_set.get()
+        participant.set_dashboard_info(dashboard, reg_id)
+        flash('The %s dashboard registration info for Patient %s is set successfully!'%(dashboard, patient_id), 'success')
+    except:
+        flash('Error: failed to set %s dashboard for Patient %s'%(dashboard, patient_id), 'danger')
 
     return redirect('/view_study/{:s}'.format(study_id))
 
@@ -178,14 +200,15 @@ def make_QR(study_id, patient_id, password, timezone=0):
     return render_template(
         'view_study.html',
         study=study,
+        dashboards=parse_dashboards(study),
         TZ=timezone,
-        qr_image=img_base64,
-        check_id=patient_id,
         patients=participants,
         audio_survey_ids=audio_survey_ids,
         tracking_survey_ids=tracking_survey_ids,
         allowed_studies=get_admins_allowed_studies(),
-        system_admin=admin_is_system_admin()
+        system_admin=admin_is_system_admin(),
+        qr_image=img_base64,
+        check_id=patient_id,
     )
 
 

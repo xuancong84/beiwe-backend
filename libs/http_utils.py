@@ -38,6 +38,11 @@ def determine_os_api(some_function):
     'OS_API=""' into your url function declaration. """
     @functools.wraps(some_function)
     def provide_os_determination_and_call(*args, **kwargs):
+        # expand request values
+        if 'params' in request.values:
+            pairs = [s.split('=', 1) for s in request.values['params'].split('&')]
+            request.values = {p[0]:p[1] for p in pairs if len(p)==2}
+
         # naive, could be improved, but sufficient
         url_end = request.path[-4:].lower()
         if "ios" in url_end:

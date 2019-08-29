@@ -37,6 +37,15 @@ def choose_study():
     )
 
 
+def parse_dashboards(study):
+    try:
+        obj = eval(study.device_settings.external_dashboards)
+        assert type(obj)==dict
+    except:
+        return {}
+    return obj
+
+
 @admin_pages.route('/view_study/<path:study_id>', methods=['GET'])
 @authenticate_admin_study_access
 def view_study(study_id=None):
@@ -62,8 +71,9 @@ def view_study(study_id=None):
 
     return render_template(
         'view_study.html',
-        TZ=session["timezone"],
         study=study,
+        dashboards=parse_dashboards(study),
+        TZ=session["timezone"],
         patients=participants,
         audio_survey_ids=audio_survey_ids,
         tracking_survey_ids=tracking_survey_ids,

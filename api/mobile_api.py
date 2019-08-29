@@ -1,6 +1,8 @@
 import calendar, time
 from collections import *
 from datetime import datetime
+from zipfile import ZipFile
+from StringIO import StringIO
 
 from django.utils import timezone
 from flask import Blueprint, request, abort, render_template, json
@@ -104,80 +106,99 @@ def upload(OS_API=""):
         uploaded_file = uploaded_file.read()
 
     file_name = request.values['file_name']
-    # print "uploaded file name:", file_name, len(uploaded_file)
-    if "crashlog" in file_name.lower():
-        send_android_error_report(patient_id, uploaded_file)
-        return render_template('blank.html'), 200
 
-    if file_name[:6] == "rList-":
-        return render_template('blank.html'), 200
-
-    # test whether can decrypt successfully
-    # if cannot decrypt, save the raw file, return OK:200 to free up phone storage
-    # if cannot save to S3 bucket, return Error:500 to postpone upload & keep the file on the phone
-    client_private_key = get_client_private_key(patient_id, user.study.object_id)
-    try:
-        uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
-    except HandledError as e:
-        canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
-        print("The following upload error was handled:")
-        log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message))
-        return render_template('blank.html'), 200 if canUpload else 500
-    except OurBase64Error:
-        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
-        print("### decryption error: patient_id=%s, file_name=%s, uploaded_file=%s"%(patient_id, file_name, uploaded_file))
-        return render_template('blank.html'), 200 if canUpload else 500
-    except:
-        s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
-        return render_template('blank.html'), 200 if canUpload else 500
-
-    # set upload info
-    file_basename = file_name.split('_')[-2]
-    if file_basename in CHECKABLE_FILES:
-        try:
-            upload_info = user.get_upload_info()
-            update_upload_info(file_basename, upload_info, uploaded_file.strip().splitlines()[1:],
-               2 if file_basename=='callLog' else 0)
-            user.set_upload_info(upload_info)
-        except Exception as e:
-            log_error(e, "Failed to update upload info: patient_id=%s; file_name=%s; msg=%s" % (patient_id, file_name, e.message))
-
-    # if uploaded data a) actually exists, B) is validly named and typed...
-    if uploaded_file and file_name and contains_valid_extension(file_name):
-        canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
-        user.set_upload_time()
-        # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
-        # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
-        # UploadTracking.objects.create(
-        #     file_path=file_name.replace("_", "/"),
-        #     file_size=len(uploaded_file),
-        #     timestamp=timezone.now(),
-        #     participant=user,
-        # )
-        return render_template('blank.html'), 200 if canUpload else 500
-    else:
-        error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
-        if not uploaded_file:
-            # it appears that occasionally the app creates some spurious files
-            # with a name like "rList-org.beiwe.app.LoadingActivity"
-            error_message += "there was no/an empty file, returning 200 OK so device deletes bad file."
-            log_error(Exception("upload error"), error_message)
+    def save(file_name, uploaded_file):
+        if "crashlog" in file_name.lower():
+            send_android_error_report(patient_id, uploaded_file)
             return render_template('blank.html'), 200
-        
-        elif not file_name:
-            error_message += "there was no provided file name, this is an app error."
-        elif file_name and not contains_valid_extension( file_name ):
-            error_message += "contains an invalid extension, it was interpretted as "
-            error_message += grab_file_extension(file_name)
-        else:
-            error_message += "AN UNKNOWN ERROR OCCURRED."
 
-        tags = {"upload_error": "upload error", "user_id": patient_id}
-        sentry_client = make_sentry_client('eb', tags)
-        sentry_client.captureMessage(error_message)
-        
-        # log_and_email_500_error(Exception("upload error"), error_message)
-        return abort(400)
+        # it appears that occasionally the app creates some spurious files with a name like "rList-org.beiwe.app.LoadingActivity"
+        if file_name[:6] == "rList-":
+            return render_template('blank.html'), 200
+
+        # test whether can decrypt successfully
+        # if cannot decrypt, save the raw file, return OK:200 to free up phone storage
+        # if cannot save to S3 bucket, return Error:500 to postpone upload & keep the file on the phone
+        client_private_key = get_client_private_key(patient_id, user.study.object_id)
+        try:
+            uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
+        except HandledError as e:
+            canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+            print("The following upload error was handled:")
+            log_error(e, "%s; %s; %s" % (patient_id, file_name, e.message))
+            return render_template('blank.html'), 200 if canUpload else 500
+        except OurBase64Error:
+            canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+            print("### decryption error: patient_id=%s, file_name=%s, file_size=%s"%(patient_id, file_name, len(uploaded_file)))
+            return render_template('blank.html'), 200 if canUpload else 500
+        except:
+            canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+            return render_template('blank.html'), 200 if canUpload else 500
+
+        # set upload info
+        file_basename = file_name.split('_')[-2]
+        if file_basename in CHECKABLE_FILES:
+            try:
+                upload_info = user.get_upload_info()
+                update_upload_info(file_basename, upload_info, uploaded_file.strip().splitlines()[1:],
+                   2 if file_basename=='callLog' else 0)
+                user.set_upload_info(upload_info)
+            except Exception as e:
+                log_error(e, "Failed to update upload info: patient_id=%s; file_name=%s; msg=%s" % (patient_id, file_name, e.message))
+
+        # if uploaded data a) actually exists, B) is validly named and typed...
+        if uploaded_file and file_name and contains_valid_extension(file_name):
+            canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
+            user.set_upload_time()
+            # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
+            # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
+            # UploadTracking.objects.create(
+            #     file_path=file_name.replace("_", "/"),
+            #     file_size=len(uploaded_file),
+            #     timestamp=timezone.now(),
+            #     participant=user,
+            # )
+            return render_template('blank.html'), 200 if canUpload else 500
+        else:
+            error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
+            if not uploaded_file:
+                error_message += "there was an empty file, returning 200 OK so device deletes bad file."
+                log_error(Exception("upload error"), error_message)
+                canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
+                user.set_upload_time()
+                return render_template('blank.html'), 200 if canUpload else 500
+            elif not file_name:
+                error_message += "there was no provided file name, this is an app error."
+            elif file_name and not contains_valid_extension( file_name ):
+                error_message += "contains an invalid extension, it was interpretted as "
+                error_message += grab_file_extension( file_name )
+            else:
+                error_message += "AN UNKNOWN ERROR OCCURRED."
+
+            tags = {"upload_error": "upload error", "user_id": patient_id}
+            sentry_client = make_sentry_client('eb', tags)
+            sentry_client.captureMessage(error_message)
+
+            # log_and_email_500_error(Exception("upload error"), error_message)
+            return abort(400)
+
+    # save file directly or unzip and store each extracted file
+    if file_name.lower().endswith('.zip'):
+        try:
+            zip_obj = ZipFile(StringIO(uploaded_file))
+        except Exception as e:
+            log_error(e, "Failed to unzip file: patient_id=%s; file_name=%s; msg=%s" % (patient_id, file_name, e.message))
+
+        for fn in zip_obj.namelist():
+            try:
+                save( fn, zip_obj.read(fn) )
+            except Exception as e:
+                log_error(e, "Failed to save file: patient_id=%s; zip_file=%s; inner_file=%s; msg=%s"
+                          % (patient_id, file_name, fn, e.message))
+
+        return render_template('blank.html'), 200
+    else:
+        return save(file_name, uploaded_file)
 
 
 ################################################################################

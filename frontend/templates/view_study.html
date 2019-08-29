@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{% set dash_style='column-width:160px; min-width:160px; width:160px; max-width:160px; word-wrap: break-word; word-break:break-all' %}
+
     <div class="container">
        <!-- Draggable DIV -->
       <div id="draggable" style="visibility:hidden; position: absolute; z-index: 9; background-color: #f1f1f1; border: 1px solid #d3d3d3; text-align: center;">
@@ -12,7 +14,7 @@
           <b id="draggabletitle">Detailed Patient Data Upload Statistics</b>
           <a style="cursor:pointer; color:red" onclick="hide_details()">[Close]</a>
         </div>
-        <div style="min-height:100px; max-height:600px" id="draggablecontent"></div>
+        <div style="min-height:100px; max-height:600px; overflow: scroll;" id="draggablecontent"></div>
       </div>
       <script type="text/javascript">
         function unescape_quote(s){
@@ -22,13 +24,41 @@
           var remarks = window.prompt("Edit remarks for the patient:", unescape_quote(curr_remarks));
           if(remarks!=null){
             var form = $('<form action="/set_remarks" method="post">' +
-              '<input type="text" name="patient_id" value="' + patient + '" />' +
               '<input type="text" name="study_id" value="' + {{study.id}} + '" />' +
+              '<input type="text" name="patient_id" value="' + patient + '" />' +
               '<input type="text" name="remarks" value="' + remarks + '" />' +
               '</form>');
             $('body').append(form);
             $(form).submit();
           }
+        }
+
+        function register_dashboard(dashboard, patient, remarks, old_reg_id=''){
+          var reg_id = window.prompt("Please input the "+dashboard+" registration ID/Email for Patient "
+                        +patient+(remarks?" ("+unescape_quote(remarks)+"):":":"), old_reg_id);
+          if(reg_id!=null){
+            var form = $('<form action="/register_dashboard" method="post">' +
+              '<input type="text" name="study_id" value="' + {{study.id}} + '" />' +
+              '<input type="text" name="patient_id" value="' + patient + '" />' +
+              '<input type="text" name="dashboard" value="' + dashboard + '" />' +
+              '<input type="text" name="reg_id" value="' + reg_id + '" />' +
+              '</form>');
+            $('body').append(form);
+            $(form).submit();
+          }
+        }
+        function show_dashboard_details(dashboard, patient_id, remarks){
+          draggable.style.visibility = "visible";
+          draggable.style.top = (document.documentElement.scrollTop+50)+"px";
+          draggable_title.innerText = dashboard+" Dashboard Details for Patient "+patient_id+(remarks?" ("+unescape_quote(remarks)+") ":" ");
+          draggable_content.innerHTML = "Please wait while retrieving data ...";
+          $.get("/check_dashboard_details/{{dashboard}}/"+patient_id)
+          .done(function(data){
+            draggable_content.innerHTML = data;
+          })
+          .fail(function(status){
+            draggable_content.innerHTML = status;
+          })
         }
 
         var draggable = document.getElementById("draggable");
@@ -134,7 +164,10 @@
               <th>Reset password</th>
               <th>Registration Time</th>
               <th>Last Upload Time</th>
-              <th style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word">Data Completion Status</th>
+              <th style="{{ dash_style }}">Data Completion Status</th>
+              {% for dashboard in dashboards %}
+                <th style="{{ dash_style }}">{{dashboard}}</th>
+              {% endfor %}
             </tr>
           </thead>
           <tbody id="users-table-body">
@@ -180,21 +213,31 @@
                     </div>
                   </form>
                 </td>
-                <td>
+                <td style="min-width:110px">
                   {% if patient.created_on %}
                     {{ patient.created_on|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
-                <td bgcolor={{patient.last_upload_time | check_date_elapse(study.device_settings.date_elapse_color)}}>
+                <td style="min-width:110px" bgcolor={{patient.last_upload_time | check_date_elapse(study.device_settings.date_elapse_color)}}>
                   {% if patient.last_updated %}
                     {{ patient.last_upload_time|print_date_in_timezone(TZ) }}
                   {% endif %}
                 </td>
-                <td style="column-width:192px; min-width:192px; width:192px; max-width:192px; word-wrap: break-word; word-break:break-all;">
+                <td style="{{ dash_style }}">
                   {% if patient.last_updated %}
                   <a style="cursor:pointer" onclick="show_details('{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}')"> {{ patient|print_data_completion(study)|safe }} </a>
                   {% endif %}
                 </td>
+                {% for dashboard in dashboards %}
+                  <td style="{{ dash_style }}">
+                  {% if patient.ext_dashboards_json and dashboard in patient.ext_dashboards_json %}
+                    <a style="cursor:pointer" onclick="show_dashboard_details('{{ dashboard }}', '{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}')">{{ patient.ext_dashboards_json[dashboard] }}</a><br>
+                    <button type="submit" class="btn btn-warning btn-sm" onclick="register_dashboard('{{ dashboard }}', '{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}', '{{ patient.ext_dashboards_json[dashboard] }}')">Change</button>
+                  {% else %}
+                    <button type="submit" class="btn btn-warning btn-sm" onclick="register_dashboard('{{ dashboard }}', '{{ patient.patient_id }}', '{{ patient.remarks|escape_quote }}')">Register</button>
+                  {% endif %}
+                  </td>
+                {% endfor %}
               </tr>
             {% endfor %}
 

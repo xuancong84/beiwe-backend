@@ -240,8 +240,12 @@ class Participant(AbstractPasswordUser):
                                help_text='The desciption of device used by the participant, if any.')
     remarks = models.TextField(blank=True, help_text='Remarks for the patient.')
     last_upload_time = models.DateTimeField(blank=True, help_text='Date/time of the last data upload.')
+
+    # upload_info is a binarized defaultdict(Counter) object, upload_info_json contains the same info and is optional
     upload_info = models.BinaryField(blank=True, help_text='JSON binary data describing the data completion status')
     upload_info_json = fields.JSONField(blank=True, help_text='JSON object describing the data completion status (for view only)')
+
+    ext_dashboards_json = fields.JSONField(blank=True, help_text='JSON object containing user registration info for all external dashboards')
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
 
@@ -314,6 +318,13 @@ class Participant(AbstractPasswordUser):
             return pickle.loads(self.upload_info)
         except:
             return defaultdict(Counter)
+
+    def set_dashboard_info(self, dashboard, reg_info):
+        try:
+            self.ext_dashboards_json[dashboard] = reg_info
+        except:
+            self.ext_dashboards_json = {dashboard:reg_info}
+        self.save()
 
     def clear_device(self):
         self.device_id = ''
