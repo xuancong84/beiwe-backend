@@ -224,7 +224,7 @@ def decrypt_device_file(patient_id, original_data, private_key, user):
             error_types=json.dumps(error_types),
         )
         
-    return return_data
+    return return_data, error_count
 
 
 def decrypt_device_line(patient_id, key, data):

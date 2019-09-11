@@ -50,8 +50,15 @@ while True:
 	if L == '':
 		break
 	fn_in, fn_out = L.strip().split('\t')
+	try:
+		if os.stat(fn_out).st_size>0:
+			continue
+	except:
+		pass
+
 	with open(fn_in) as fp_in:
 		data = fp_in.read()
+
 	with open(fn_out, 'w') as fp_out:
 		if key:
 		    fp_out.write(encryption.decrypt_server_by_key(data, study_id))
