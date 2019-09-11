@@ -108,6 +108,9 @@ def upload(OS_API=""):
     file_name = request.values['file_name']
 
     def save(file_name, uploaded_file):
+        uploaded_file0 = uploaded_file
+        error_count = 0
+
         if "crashlog" in file_name.lower():
             send_android_error_report(patient_id, uploaded_file)
             return render_template('blank.html'), 200
@@ -121,7 +124,7 @@ def upload(OS_API=""):
         # if cannot save to S3 bucket, return Error:500 to postpone upload & keep the file on the phone
         client_private_key = get_client_private_key(patient_id, user.study.object_id)
         try:
-            uploaded_file = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
+            uploaded_file, error_count = decrypt_device_file(patient_id, uploaded_file, client_private_key, user)
         except HandledError as e:
             canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
             print("The following upload error was handled:")
@@ -150,26 +153,21 @@ def upload(OS_API=""):
         if uploaded_file and file_name and contains_valid_extension(file_name):
             canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
             user.set_upload_time()
-            # **You can simply list the directory and move files, there are lots of files, this is too slow and inefficient
-            # FileToProcess.append_file_for_processing(file_name.replace("_", "/"), user.study.object_id, participant=user)
-            # UploadTracking.objects.create(
-            #     file_path=file_name.replace("_", "/"),
-            #     file_size=len(uploaded_file),
-            #     timestamp=timezone.now(),
-            #     participant=user,
-            # )
+            # for files with non-fatal decryption errors, save another raw copy
+            if canUpload and error_count>0:
+                canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file0, user.study.object_id, encrypt=False)
             return render_template('blank.html'), 200 if canUpload else 500
         else:
             error_message ="an upload has failed " + patient_id + ", " + file_name + ", "
+            canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id, encrypt=False)
+            user.set_upload_time()
             if not uploaded_file:
                 error_message += "there was an empty file, returning 200 OK so device deletes bad file."
                 log_error(Exception("upload error"), error_message)
-                canUpload = s3_upload(file_name.replace("_", "/"), uploaded_file, user.study.object_id)
-                user.set_upload_time()
                 return render_template('blank.html'), 200 if canUpload else 500
             elif not file_name:
                 error_message += "there was no provided file name, this is an app error."
-            elif file_name and not contains_valid_extension( file_name ):
+            elif not contains_valid_extension( file_name ):
                 error_message += "contains an invalid extension, it was interpretted as "
                 error_message += grab_file_extension( file_name )
             else:
@@ -180,7 +178,7 @@ def upload(OS_API=""):
             sentry_client.captureMessage(error_message)
 
             # log_and_email_500_error(Exception("upload error"), error_message)
-            return abort(400)
+            return render_template('blank.html'), 200 if canUpload else 500
 
     # save file directly or unzip and store each extracted file
     if file_name.lower().endswith('.zip'):
