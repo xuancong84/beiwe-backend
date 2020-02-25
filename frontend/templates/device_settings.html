@@ -311,6 +311,19 @@
                     <input id="magnetometer_off_duration_seconds" name="magnetometer_off_duration_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['magnetometer_off_duration_seconds'] }}" {{ "disabled" if readonly }}>
                 </div>
             </div>
+			<div class="form-group">
+                <label for="steps_on_duration_seconds" class="col-xs-8 control-label">Pedometer <b>on</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="steps_on_duration_seconds" name="steps_on_duration_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['steps_on_duration_seconds'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="steps_off_duration_seconds" class="col-xs-8 control-label">Pedometer <b>off</b> duration:</label>
+                <div class="col-xs-4">
+                    <input id="steps_off_duration_seconds" name="steps_off_duration_seconds" class="form-control" type="number" placeholder="Enter duration here (seconds)" value="{{ settings['steps_off_duration_seconds'] }}" {{ "disabled" if readonly }}>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="devicemotion_on_duration_seconds" class="col-xs-8 control-label">DeviceMotion <b>on</b> duration:</label>
                 <div class="col-xs-4">

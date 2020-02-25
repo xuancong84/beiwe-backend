@@ -35,7 +35,7 @@ ALLOWED_EXTENSIONS = {'csv', 'json', 'mp4', "wav", 'txt', 'jpg'}
 PROCESSABLE_FILE_EXTENSIONS = [".csv", ".mp4", ".wav"]
 
 # File names that will be checked for data presence
-CHECKABLE_FILES = ['accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage']
+CHECKABLE_FILES = ['accel', 'accessibilityLog', 'callLog', 'gyro', 'gps', 'magnetometer', 'steps', 'light', 'powerState', 'tapsLog', 'textsLog', 'usage']
 ALLOW_EMPTY_FILES = {'callLog', 'textsLog'}
 
 ## All device parameters
