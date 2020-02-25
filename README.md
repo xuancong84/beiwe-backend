@@ -55,7 +55,7 @@ considered invalid  Additional documentation can be found in config/setting.pys.
 How to add new features:
 1. ./config/constants.py
 2. ./frontend/templates/device_settings.html
-3. run pgadmin3 to add new field in the PostgreSQL table database_devicesettings
+3. run pgadmin3 to add new field in the PostgreSQL table database_devicesettings (or postgres.sql)
 
 PostgreSQL
 To backup all:

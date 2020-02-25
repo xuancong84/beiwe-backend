@@ -161,6 +161,15 @@
                     </label>
                 </div>
             </div>
+			<div class="form-group">
+                <label for="steps" class="col-xs-8 control-label">Pedometer (steps):</label>
+                <div class="col-xs-4 checkbox checkbox-custom">
+                    <label>
+                        <input name="steps" id="steps" type="checkbox" {{ "checked" if settings["steps"] }} {{ "disabled" if readonly }}/>
+                    </label>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="devicemotion" class="col-xs-8 control-label">Device Motion:</label>
                 <div class="col-xs-4 checkbox checkbox-custom">

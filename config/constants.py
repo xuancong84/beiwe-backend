@@ -53,6 +53,7 @@ ALL_DEVICE_PARAMETERS = [
     [["bluetooth", False], ["bluetooth_on_duration_seconds", 60], ["bluetooth_total_duration_seconds", 300], ["bluetooth_global_offset_seconds", 0]],
     [["gyro", False], ["gyro_off_duration_seconds", 600], ["gyro_on_duration_seconds", 60]],
     [["magnetometer", False], ["magnetometer_off_duration_seconds", 600], ["magnetometer_on_duration_seconds", 60]],
+    [["steps", False], ["steps_off_duration_seconds", 0], ["steps_on_duration_seconds", 30*60]],
     [["devicemotion", False], ["devicemotion_off_duration_seconds", 600], ["devicemotion_on_duration_seconds", 60]],
     [["usage", False], ["usage_update_interval_seconds", 60*60]],
     [["wifi", True]],
@@ -89,6 +90,7 @@ BLUETOOTH = "bluetooth"
 CALL_LOG = "calls"
 GPS = "gps"
 TAPS = "taps"
+STEPS = "steps"
 IDENTIFIERS = "identifiers"
 ANDROID_LOG_FILE = "app_log"
 IOS_LOG_FILE = "ios_log"
@@ -127,6 +129,7 @@ ALL_DATA_STREAMS = [ACCELEROMETER,
                     PROXIMITY,
                     GYRO,
                     MAGNETOMETER,
+					STEPS,
                     DEVICEMOTION,
                     REACHABILITY,
                     IOS_LOG_FILE,
@@ -146,6 +149,7 @@ UPLOAD_FILE_TYPE_MAPPING = {
     "tapsLog": TAPS,
     "logFile": ANDROID_LOG_FILE,
     "magnetometer": MAGNETOMETER,
+    "steps": STEPS,
     "powerState": POWER_STATE,
     "reachability": REACHABILITY,
     "surveyAnswers": SURVEY_ANSWERS,
@@ -185,6 +189,7 @@ CHUNKABLE_FILES = {ACCELEROMETER,
                    WIFI,
                    PROXIMITY,
                    GYRO,
+				   STEPS,
                    MAGNETOMETER,
                    DEVICEMOTION,
                    REACHABILITY,

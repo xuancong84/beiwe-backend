@@ -191,6 +191,7 @@ CREATE TABLE public.database_devicesettings (
     proximity boolean NOT NULL,
     gyro boolean NOT NULL,
     magnetometer boolean NOT NULL,
+    steps boolean NOT NULL,
     devicemotion boolean NOT NULL,
     reachability boolean NOT NULL,
     allow_upload_over_cellular_data boolean NOT NULL,
@@ -211,6 +212,8 @@ CREATE TABLE public.database_devicesettings (
     gyro_on_duration_seconds integer NOT NULL,
     magnetometer_off_duration_seconds integer NOT NULL,
     magnetometer_on_duration_seconds integer NOT NULL,
+    steps_off_duration_seconds integer NOT NULL,
+    steps_on_duration_seconds integer NOT NULL,
     devicemotion_off_duration_seconds integer NOT NULL,
     devicemotion_on_duration_seconds integer NOT NULL,
     about_page_text text NOT NULL,
@@ -247,6 +250,8 @@ CREATE TABLE public.database_devicesettings (
     CONSTRAINT database_devicesettings_gyro_on_duration_seconds_check CHECK ((gyro_on_duration_seconds >= 0)),
     CONSTRAINT database_devicesettings_magnetometer_off_duration_seconds_check CHECK ((magnetometer_off_duration_seconds >= 0)),
     CONSTRAINT database_devicesettings_magnetometer_on_duration_seconds_check CHECK ((magnetometer_on_duration_seconds >= 0)),
+    CONSTRAINT database_devicesettings_steps_off_duration_seconds_check CHECK ((steps_off_duration_seconds >= 0)),
+    CONSTRAINT database_devicesettings_steps_on_duration_seconds_check CHECK ((steps_on_duration_seconds >= 0)),
     CONSTRAINT database_devicesettings_seconds_before_auto_logout_check CHECK ((seconds_before_auto_logout >= 0)),
     CONSTRAINT database_devicesettings_upload_data_files_frequency_secon_check CHECK ((upload_data_files_frequency_seconds >= 0)),
     CONSTRAINT database_devicesettings_voice_recording_max_time_length_s_check CHECK ((voice_recording_max_time_length_seconds >= 0)),
@@ -966,7 +971,7 @@ COPY public.database_decryptionkeyerror (id, deleted, file_path, contents, parti
 -- Data for Name: database_devicesettings; Type: TABLE DATA; Schema: public; Owner: beiweuser
 --
 
-COPY public.database_devicesettings (id, deleted, accelerometer, gps, calls, texts, wifi, bluetooth, power_state, proximity, gyro, magnetometer, devicemotion, reachability, allow_upload_over_cellular_data, accelerometer_off_duration_seconds, accelerometer_on_duration_seconds, bluetooth_on_duration_seconds, bluetooth_total_duration_seconds, bluetooth_global_offset_seconds, check_for_new_surveys_frequency_seconds, create_new_data_files_frequency_seconds, gps_off_duration_seconds, gps_on_duration_seconds, seconds_before_auto_logout, upload_data_files_frequency_seconds, voice_recording_max_time_length_seconds, wifi_log_frequency_seconds, gyro_off_duration_seconds, gyro_on_duration_seconds, magnetometer_off_duration_seconds, magnetometer_on_duration_seconds, devicemotion_off_duration_seconds, devicemotion_on_duration_seconds, about_page_text, call_clinician_button_text, consent_form_text, survey_submit_success_toast_text, consent_sections, study_id, created_on, last_updated, ambientlight, ambientlight_interval_seconds, taps, accessibility, usage, usage_update_interval_seconds, use_anonymized_hashing, phone_number_length, primary_care, use_gps_fuzzing, write_buffer_size) FROM stdin;
+COPY public.database_devicesettings (id, deleted, accelerometer, gps, calls, texts, wifi, bluetooth, power_state, proximity, gyro, magnetometer, steps, devicemotion, reachability, allow_upload_over_cellular_data, accelerometer_off_duration_seconds, accelerometer_on_duration_seconds, bluetooth_on_duration_seconds, bluetooth_total_duration_seconds, bluetooth_global_offset_seconds, check_for_new_surveys_frequency_seconds, create_new_data_files_frequency_seconds, gps_off_duration_seconds, gps_on_duration_seconds, seconds_before_auto_logout, upload_data_files_frequency_seconds, voice_recording_max_time_length_seconds, wifi_log_frequency_seconds, gyro_off_duration_seconds, gyro_on_duration_seconds, magnetometer_off_duration_seconds, magnetometer_on_duration_seconds, steps_off_duration_seconds, steps_on_duration_seconds, devicemotion_off_duration_seconds, devicemotion_on_duration_seconds, about_page_text, call_clinician_button_text, consent_form_text, survey_submit_success_toast_text, consent_sections, study_id, created_on, last_updated, ambientlight, ambientlight_interval_seconds, taps, accessibility, usage, usage_update_interval_seconds, use_anonymized_hashing, phone_number_length, primary_care, use_gps_fuzzing, write_buffer_size) FROM stdin;
 \.
 
 
